@@ -3,12 +3,12 @@ from family_tree.semester import Semester
 
 def test_comparisons():
 
-    a = Semester('min')
+    a = Semester('Fall 1900')
     b = Semester('Fall 1994')
     c = Semester('Spring 1995')
     d = Semester('Fall 1995')
     e = Semester('Fall 001995')
-    f = Semester('max')
+    f = Semester('Spring 3000')
     semesters = [a, b, c, d, e, f]
 
     # General
@@ -27,12 +27,24 @@ def test_comparisons():
 
 def test_incdec():
 
-    assert Semester('Fall 1995').decrement().increment() == Semester('Fall 1995')
-    assert Semester('Spring 1995').decrement().increment() == Semester('Spring 1995')
-    assert Semester('max').increment() == Semester('max')
-    assert Semester('max').decrement() == Semester('max')
-    assert Semester('min').increment() == Semester('min')
-    assert Semester('min').decrement() == Semester('min')
+    a = Semester('Fall 1995')
+    a += 1
+    a -= 1
+    assert a == Semester('Fall 1995')
 
+    b = Semester('Spring 1995')
+    b += 1
+    b -= 1
+    assert b == Semester('Spring 1995')
 
+def test_string():
+
+    assert str(Semester('Fall 0001933')) == 'Fall 1933'
+    assert str(Semester('Spring 323')) == 'Spring 323'
+
+def test_math():
+
+    assert isinstance(Semester('Fall 2001') + 8, Semester)
+    assert str(Semester('Fall 2001') + 8) == 'Fall 2005'
+    assert str(Semester('Fall 2001') + Semester('Spring 2001')) == 'Fall 4002'
 

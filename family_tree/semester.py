@@ -1,59 +1,30 @@
-from functools import total_ordering
 import re
 
-@total_ordering
-class Semester:
+class Semester(int):
 
     matcher = re.compile('(Spring|Fall) (\d+)')
 
-    def __init__(self, semester_string):
+    def __new__(cls, arg):
 
-        match = Semester.matcher.match(semester_string)
-        if match:
-            self.season = match.group(1)
-            self.year = int(match.group(2))
-        elif semester_string == 'max':
-            self.season = ''
-            self.year = float('inf')
-        elif semester_string == 'min':
-            self.season = ''
-            self.year = float('-inf')
+        if isinstance(arg, int):
+            value = arg
         else:
-            raise ValueError(
-                'Semester objects must be constructed from strings of the form "{}", but constructor received "{}".'
-                .format(Semester.matcher.pattern, semester_string))
+            match = Semester.matcher.match(arg)
+            if match:
+                season = 1 if match.group(1) == 'Fall' else 0
+                year = int(match.group(2))
+                value = 2 * year + season
+            else:
+                raise ValueError(
+                    'Semester objects must be constructed from strings of the form "{}", but constructor received "{}".'
+                    .format(Semester.matcher.pattern, semester_string))
 
-    def __eq__(self, other):
-        return (self.season, self.year) == (other.season, other.year)
-
-    def __lt__(self, other):
-        if self.year == other.year:
-            return self.season == 'Spring' and other.season == 'Fall'
-        else:
-            return self.year < other.year
+        return super(Semester, cls).__new__(cls, value)
 
     def __str__(self):
-        return '{} {}'.format(self.season, self.year)
+        year, season = divmod(self, 2)
+        return '{} {}'.format('Fall' if season == 1 else 'Spring', year)
 
-    def increment(self):
-        if self.season == 'Spring':
-            return Semester('Fall {}'.format(self.year))
-        elif self.season == 'Fall':
-            return Semester('Spring {}'.format(self.year + 1))
-        elif self.year == float('inf'):
-            return Semester('max')
-        else:
-            return Semester('min')
-
-    def decrement(self):
-        if self.season == 'Fall':
-            return Semester('Spring {}'.format(self.year))
-        elif self.season == 'Spring':
-            return Semester('Fall {}'.format(self.year - 1))
-        elif self.year == float('inf'):
-            return Semester('max')
-        else:
-            return Semester('min')
-
-
+    def __add__(self, other):
+        return Semester(super(Semester, self).__add__(other))
 
