@@ -46,5 +46,6 @@ def test_math():
 
     assert isinstance(Semester('Fall 2001') + 8, Semester)
     assert str(Semester('Fall 2001') + 8) == 'Fall 2005'
+    assert str(8 + Semester('Fall 2001')) == 'Fall 2005'
     assert str(Semester('Fall 2001') + Semester('Spring 2001')) == 'Fall 4002'
 

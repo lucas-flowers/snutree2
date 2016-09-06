@@ -28,3 +28,5 @@ class Semester(int):
     def __add__(self, other):
         return Semester(super(Semester, self).__add__(other))
 
+    __radd__ = __add__
+
