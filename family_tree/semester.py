@@ -16,8 +16,8 @@ class Semester(int):
                 value = 2 * year + season
             else:
                 raise ValueError(
-                    'Semester objects must be constructed from strings of the form "{}", but constructor received "{}".'
-                    .format(Semester.matcher.pattern, semester_string))
+                    'Semester names must match "{}" but "{}" was received'
+                    .format(Semester.matcher.pattern, arg))
 
         return super(Semester, cls).__new__(cls, value)
 
