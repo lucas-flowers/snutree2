@@ -27,13 +27,13 @@ def test_KnightRecord():
 
     # No big brother
     assert_equals(
-            KnightRecord('9999', 'John', 'Johnny', 'Smith', '', 'Fall 1900').big_badge,
+            KnightRecord('9999', 'John', 'Johnny', 'Smith', '', 'Fall 1900').parent_key,
             None
             )
 
     # Unfortunately, we do not know whether the semester is needed
     assert_equals(
-            KnightRecord('9999', 'John', 'Johnny', 'Smith', '8888', '').pledge_semester,
+            KnightRecord('9999', 'John', 'Johnny', 'Smith', '8888', '').semester,
             None
             )
 

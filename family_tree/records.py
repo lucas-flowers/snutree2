@@ -16,8 +16,8 @@ class Record:
 
         self.key = self.read_badge(badge)
         self.name = self.read_name(first_name, preferred_name, last_name)
-        self.big_badge = self.read_big_badge(big_badge)
-        self.pledge_semester = self.read_pledge_semester(pledge_semester)
+        self.parent_key = self.read_big_badge(big_badge)
+        self.semester = self.read_semester(pledge_semester)
 
     def read_badge(self, badge):
         try:
@@ -39,16 +39,15 @@ class Record:
         except ValueError:
             raise RecordError('Unexpected big badge number: "{}"'.format(big_badge))
 
-    def read_pledge_semester(self, pledge_semester):
+    def read_semester(self, semester):
         # Unfortunately, we will not know if we really needed the semester's
         # value until later
-        if not pledge_semester:
+        if not semester:
             return None
         try:
-            return Semester(pledge_semester)
+            return Semester(semester)
         except ValueError:
             return None
-
 
 class KnightRecord(Record):
 
