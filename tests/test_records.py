@@ -140,5 +140,5 @@ def test_ExpelledRecord():
 
 def test_ReaffiliateRecord():
 
-    assert_equal(ReaffiliateRecord(*(), **{}).key, None)
+    assert_equal(ReaffiliateRecord(*(), **{}), None)
 

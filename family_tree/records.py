@@ -153,10 +153,8 @@ class ExpelledRecord(MemberRecord):
         else:
             raise RecordError('Missing first or last name')
 
-class ReaffiliateRecord:
-
-    def __init__(self, *args, **kwargs):
-        self.key = None
+def ReaffiliateRecord(*args, **kwargs):
+    return None
 
 def choose_name(first_name, preferred_name, last_name, threshold=.5):
     '''
