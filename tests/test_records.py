@@ -14,6 +14,14 @@ def test_choose_name():
 
     assert_not_equal(choose_name('Jon', 'Snow', 'Snow'), 'Snow Snow')
 
+def test_ReorganizationRecord():
+
+    # No error
+    ReorganizationRecord('Fall 1922')
+
+    # TODO should reorganization require a semester name?
+    # ReorganizationRecord()
+
 def test_ChapterRecord():
 
     # No error

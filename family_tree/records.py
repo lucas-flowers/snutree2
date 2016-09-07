@@ -19,6 +19,31 @@ class Record:
         except ValueError:
             return None
 
+class ReorganizationRecord(Record):
+
+    def __init__(self,
+            semester=None,
+            **kwargs
+            ):
+
+        semester = self.read_semester(semester)
+        super().__init__(
+                '{} Reorganization'.format(semester),
+                'Reorganization',
+                None, # No parent
+                semester
+                )
+
+    # TODO should the semester be required?
+    def read_semester(self, semester):
+        try:
+            return Semester(semester)
+        except (TypeError, ValueError):
+            raise RecordError(
+                    'Invalid reorganization semester: {}'
+                    .format(semester)
+                    )
+
 class ChapterRecord(Record):
 
     def __init__(self,
