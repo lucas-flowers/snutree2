@@ -3,6 +3,24 @@ from family_tree.semester import Semester
 
 class Record:
 
+    def __init__(self, key, name, parent_key, semester):
+        self.key = key
+        self.name = name
+        self.parent_key = parent_key
+        self.semester = semester
+
+    def read_semester(self, semester):
+        # Unfortunately, we will not know if we really needed the semester's
+        # value until later
+        if not semester:
+            return None
+        try:
+            return Semester(semester)
+        except ValueError:
+            return None
+
+class MemberRecord(Record):
+
     badge_format = '{:04d}'
 
     def __init__(self,
@@ -14,14 +32,16 @@ class Record:
             pledge_semester=None,
             **kwargs):
 
-        self.key = self.read_badge(badge)
-        self.name = self.read_name(first_name, preferred_name, last_name)
-        self.parent_key = self.read_big_badge(big_badge)
-        self.semester = self.read_semester(pledge_semester)
+        super().__init__(
+                self.read_badge(badge),
+                self.read_name(first_name, preferred_name, last_name),
+                self.read_big_badge(big_badge),
+                self.read_semester(pledge_semester),
+                )
 
     def read_badge(self, badge):
         try:
-            return Record.badge_format.format(int(badge))
+            return MemberRecord.badge_format.format(int(badge))
         except ValueError:
             raise RecordError('Unexpected badge number: "{}"'.format(badge))
 
@@ -35,26 +55,16 @@ class Record:
         if not big_badge:
             return None
         try:
-            return Record.badge_format.format(int(big_badge))
+            return MemberRecord.badge_format.format(int(big_badge))
         except ValueError:
             raise RecordError('Unexpected big badge number: "{}"'.format(big_badge))
 
-    def read_semester(self, semester):
-        # Unfortunately, we will not know if we really needed the semester's
-        # value until later
-        if not semester:
-            return None
-        try:
-            return Semester(semester)
-        except ValueError:
-            return None
-
-class KnightRecord(Record):
+class KnightRecord(MemberRecord):
 
     pass
 
 
-class BrotherRecord(Record):
+class BrotherRecord(MemberRecord):
 
     brother_id = 0
 
@@ -71,7 +81,7 @@ class BrotherRecord(Record):
         else:
             raise RecordError('Missing last name')
 
-class CandidateRecord(Record):
+class CandidateRecord(MemberRecord):
 
     candidate_id = 0
 
@@ -82,7 +92,7 @@ class CandidateRecord(Record):
             CandidateRecord.candidate_id += 1
             return 'C{}'.format(CandidateRecord.candidate_id - 1)
 
-class ExpelledRecord(Record):
+class ExpelledRecord(MemberRecord):
 
     def read_name(self, first_name, preferred_name, last_name):
         # Name is not strictly necessary for this program, but I require it
