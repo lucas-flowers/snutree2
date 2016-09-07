@@ -14,6 +14,24 @@ def test_choose_name():
 
     assert_not_equal(choose_name('Jon', 'Snow', 'Snow'), 'Snow Snow')
 
+def test_ChapterRecord():
+
+    # No error
+    ChapterRecord('KΔ', 'Doo-Kez-Nee', 'Fall 1942')
+    ChapterRecord('KΔ', 'Doo-Kez-Nee')
+
+    # Missing designation
+    assert_raises(
+            RecordError,
+            ChapterRecord, '', 'Doo-Kez-Nee',
+            )
+
+    # Missing name
+    assert_raises(
+            RecordError,
+            ChapterRecord, 'KΔ',
+            )
+
 def test_KnightRecord():
 
     # No error

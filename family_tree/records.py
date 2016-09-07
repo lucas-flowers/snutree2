@@ -19,6 +19,33 @@ class Record:
         except ValueError:
             return None
 
+class ChapterRecord(Record):
+
+    def __init__(self,
+            chapter_designation=None,
+            chapter_name=None,
+            semester=None,
+            **kwargs):
+
+        super().__init__(
+                self.read_chapter_designation(chapter_designation),
+                self.read_chapter_name(chapter_name),
+                None, # No parent
+                self.read_semester(semester)
+                )
+
+    def read_chapter_designation(self, chapter_designation):
+        if chapter_designation:
+            return chapter_designation
+        else:
+            raise RecordError('Missing chapter designation')
+
+    def read_chapter_name(self, chapter_name):
+        if chapter_name:
+            return chapter_name
+        else:
+            raise RecordError('Missing chapter name')
+
 class MemberRecord(Record):
 
     badge_format = '{:04d}'
