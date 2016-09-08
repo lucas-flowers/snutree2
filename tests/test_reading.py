@@ -1,0 +1,23 @@
+from nose.tools import *
+from family_tree.reading import *
+
+def test_read_chapters():
+
+    chapters = read_chapters('chapters.csv')
+    assert_equal(chapters['Alpha'], 'Virginia Military Institute')
+    assert_equal(chapters['Delta Zeta'], 'Western Reserve University')
+
+def test_read_members():
+
+    records = read_members('directory.csv')
+    assert_equal(records['1352'].name, 'Lucas Flowers')
+
+    records = read_members('brothers_not_knights.csv')
+
+def test_read():
+
+    pass
+    # records = read('directory.csv', 'chapters.csv', 'brothers_not_knights.csv')
+
+
+
