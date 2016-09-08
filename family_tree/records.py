@@ -109,7 +109,9 @@ class MemberRecord(Record):
         try:
             return MemberRecord.badge_format.format(int(big_badge))
         except ValueError:
-            raise RecordError('Unexpected big badge number: "{}"'.format(big_badge))
+            # big_badge does not represent an integer
+            return big_badge
+
 
 class KnightRecord(MemberRecord):
 
