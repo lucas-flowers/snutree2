@@ -1,0 +1,281 @@
+chapter_designation,chapter_location,chapter_founding
+Alpha,"Virginia Military Institute",1869
+Beta,"University of Virginia",1871
+Gamma,"Duke University",1871
+Mu,"University of Georgia",1873
+Delta,"University of South Carolina",1874
+Theta,"The University of Alabama",1874
+Iota,"Samford University",1879
+Kappa,"North Georgia College & State University",1881
+Lambda,"Washington and Lee University",1882
+Epsilon,"Bethany College",1883
+Zeta,"Central College",1883
+Eta,"Mercer University",1884
+Nu,"University of Kansas",1884
+Omicron,"Bethel College",1884
+Xi,"Emory University",1884
+Pi,"Lehigh University",1885
+Rho,"University of Missouri",1886
+Sigma,"Vanderbilt University",1886
+Tau,"The Citadel",1886
+Upsilon,"University of Texas at Austin",1886
+Phi,"Louisiana State University",1887
+Beta Phi,"Tulane University",1888
+Chi,"Cornell College",1888
+Psi,"University of North Carolina at Chapel Hill",1888
+Beta Alpha,"Yale University",1889
+Beta Omicron,"Sewanee: The University of the South",1889
+Beta Beta,"DePauw University",1890
+Beta Theta,"Auburn University",1890
+Beta Chi,"Stanford University",1891
+Beta Delta,"Drake University",1891
+Beta Epsilon,"Coe College",1891
+Beta Gamma,"Missouri Valley College",1891
+Beta Nu,"The Ohio State University",1891
+Beta Zeta,"Purdue University",1891
+Delta Theta,"Knox College",1891
+Beta Eta,"Indiana University",1892
+Beta Iota,"University of Mount Union",1892
+Beta Kappa,"Kansas State University",1892
+Beta Lambda,"Central Methodist College",1892
+Beta Psi,"University of California, Berkeley",1892
+Beta Mu,"University of Iowa",1893
+Beta Rho,"University of Pennsylvania",1894
+Beta Xi,"William Jewell College",1894
+Beta Pi,"University of Chicago",1895
+Beta Tau,"North Carolina State University",1895
+Beta Upsilon,"Rose-Hulman Institute of Technology",1895
+Gamma Gamma,"Albion College",1895
+Gamma Alpha,"Georgia Institute of Technology",1896
+Gamma Chi,"University of Washington",1896
+Beta Sigma,"University of Vermont",1898
+Gamma Beta,"Northwestern University",1898
+Gamma Delta,"Stevens Institute of Technology",1900
+Gamma Epsilon,"Lafayette College",1900
+Gamma Zeta,"University of Oregon",1900
+Gamma Eta,"Colorado School of Mines",1901
+Gamma Theta,"Cornell University",1901
+Gamma Iota,"University of Kentucky",1902
+Gamma Kappa,"University of Colorado at Boulder",1902
+Gamma Lambda,"University of Wisconsin-Madison",1902
+Gamma Mu,"University of Illinois at Urbana-Champaign",1902
+Gamma Nu,"University of Michigan",1902
+Gamma Omicron,"Washington University in St. Louis",1903
+Gamma Xi,"Missouri University of Science and Technology",1903
+Gamma Pi,"West Virginia University",1904
+Gamma Rho,"University of Chicago",1904
+Gamma Sigma,"Iowa State University",1904
+Gamma Tau,"University of Minnesota",1904
+Gamma Upsilon,"University of Arkansas",1904
+Gamma Phi,"University of Montana",1905
+Gamma Psi,"Syracuse University",1906
+Delta Alpha,"Case Western Reserve University",1907
+Delta Beta,"Dartmouth College",1907
+Delta Gamma,"Columbia University in the City of New York",1908
+Delta Delta,"Pennsylvania State University",1909
+Delta Epsilon,"University of Oklahoma",1909
+Delta Eta,"University of Nebraska-Lincoln",1909
+Delta Zeta,"Western Reserve University",1909
+Delta Iota,"Washington State University",1910
+Delta Kappa,"University of Delaware",1911
+Delta Lambda,"Brown University",1912
+Delta Mu,"Stetson University",1913
+Delta Nu,"University of Maine",1913
+Delta Xi,"University of Nevada, Reno",1914
+Delta Omicron,"University of Idaho",1915
+Delta Pi,"The George Washington University",1915
+Delta Rho,"Colorado State University",1915
+Delta Sigma,"Carnegie Mellon University",1916
+Delta Phi,"University of Maryland",1917
+Delta Tau,"Oregon State University",1917
+Delta Upsilon,"Colgate University",1917
+Delta Chi,"Trinity College",1918
+Delta Psi,"Bowdoin College",1918
+Epsilon Alpha,"University of Arizona",1918
+Epsilon Beta,"Drury University",1919
+Epsilon Delta,"University of Wyoming",1920
+Epsilon Epsilon,"Oklahoma State University - Stillwater",1920
+Epsilon Gamma,"Wesleyan University",1920
+Epsilon Zeta,"University of Florida",1920
+Epsilon Eta,"University of Tennessee",1921
+Epsilon Iota,"College of William & Mary",1922
+Epsilon Theta,"Massachusetts Institute of Technology",1922
+Epsilon Kappa,"University of North Dakota",1923
+Epsilon Lambda,"University of Utah",1924
+Epsilon Mu,"Butler University",1926
+Epsilon Nu,"Miami University",1927
+Epsilon Xi,"University of Mississippi",1927
+Epsilon Omicron,"University of Southern California",1930
+Epsilon Pi,"University of California, Los Angeles",1930
+Epsilon Rho,"Michigan State University",1934
+Epsilon Sigma,"Rhodes College",1934
+Epsilon Tau,"Rollins College",1938
+Epsilon Upsilon,"Utah State University",1938
+Epsilon Phi,"University of Connecticut",1943
+Epsilon Chi,"Bowling Green State University",1946
+Epsilon Psi,"Westminster College",1947
+Zeta Alpha,"University of Puget Sound",1948
+Zeta Beta,"University of Miami",1948
+Zeta Delta,"University of Toronto",1949
+Zeta Epsilon,"Norwich University",1949
+Zeta Gamma,"Kent State University",1949
+Zeta Eta,"Tufts University",1950
+Zeta Zeta,"Florida State University",1950
+Zeta Iota,"San Jose State University",1951
+Zeta Kappa,"California State University, Fresno",1951
+Zeta Lambda,"University of Tulsa",1951
+Zeta Mu,"Ohio University",1951
+Zeta Theta,"Presbyterian College",1951
+Zeta Nu,"Montana State University-Bozeman",1952
+Zeta Omicron,"University of North Texas",1952
+Zeta Xi,"University of California, Davis",1952
+Zeta Pi,"Texas Tech University",1953
+Zeta Rho,"University of Rhode Island",1954
+Zeta Sigma,"Gettysburg College",1954
+Zeta Tau,"Ripon College",1954
+Zeta Phi,"Bradley University",1955
+Zeta Upsilon,"Arizona State University",1955
+Zeta Chi,"University of Houston",1956
+Zeta Psi,"Lamar University",1957
+Eta Alpha,"Davidson College",1958
+Eta Beta,"East Carolina University",1959
+Eta Delta,"West Texas A&M University",1959
+Eta Gamma,"Georgia State University",1959
+Eta Epsilon,"Kentucky Wesleyan College",1960
+Eta Eta,"Idaho State University",1961
+Eta Zeta,"Louisiana Tech University",1961
+Eta Iota,"Northern Arizona University",1962
+Eta Theta,"North Dakota State University",1962
+Eta Kappa,"San Diego State University",1963
+Eta Lambda,"University of Cincinnati",1963
+Eta Mu (A),"Kettering University",1963
+Eta Mu (B),"Kettering University",1963
+Eta Nu,"University of Louisiana at Lafayette",1963
+Eta Xi,"University of Arkansas at Little Rock",1963
+Eta Omicron,"Wofford College",1964
+Eta Pi,"Hampden-Sydney College",1965
+Eta Rho,"Western Kentucky University",1965
+Eta Phi,"California State University, Los Angeles",1966
+Eta Sigma,"Eastern New Mexico University",1966
+Eta Tau,"Texas State University",1966
+Eta Upsilon,"Midwestern State University",1966
+Eta Chi,"Old Dominion University",1967
+Eta Psi,"Ashland University",1967
+Theta Alpha,"University of South Florida",1967
+Theta Beta,"University of South Dakota",1968
+Theta Gamma,"University of Southern Mississippi",1968
+Theta Delta,"Murray State University",1969
+Theta Epsilon,"Johns Hopkins University",1969
+Theta Eta,"Northern Illinois University",1970
+Theta Iota,"Middle Tennessee State University",1970
+Theta Kappa,"Georgia Southern University",1970
+Theta Lambda,"Eastern Washington University",1970
+Theta Mu,"University of South Alabama",1970
+Theta Theta,"Eastern Kentucky University",1970
+Theta Zeta,"Clemson University",1970
+Theta Nu,"Ball State University",1971
+Theta Xi,"Virginia Polytechnic Institute & State University",1971
+Theta Omicron,"Weber State University",1972
+Theta Pi,"University of West Georgia",1972
+Theta Rho,"Illinois State University",1972
+Theta Sigma,"Missouri State University",1972
+Theta Chi,"East Tennessee State University",1973
+Theta Phi,"Lander University",1973
+Theta Psi,"Armstrong Atlantic State University",1973
+Theta Tau,"Morehead State University",1973
+Theta Upsilon,"New Mexico State University",1973
+Iota Alpha,"Indiana University of Pennsylvania",1974
+Iota Beta,"Virginia Wesleyan College",1974
+Iota Delta,"James Madison University",1974
+Iota Epsilon,"Missouri Southern State University",1974
+Iota Eta,"University of Nebraska-Omaha",1974
+Iota Gamma,"Mississippi State University",1974
+Iota Iota,"Valley City State University",1974
+Iota Theta,"Southern Methodist University",1974
+Iota Zeta,"Vincennes University",1974
+Iota Kappa,"California State University, Chico",1975
+Iota Lambda,"Jacksonville State University",1975
+Iota Mu,"University of Nevada, Las Vegas",1975
+Iota Nu,"University of Southern Maine",1975
+Iota Omicron,"University of Texas at Arlington",1976
+Iota Pi,"Kennesaw State University",1976
+Iota Rho,"College of Charleston",1976
+Iota Xi,"Salisbury University",1976
+Iota Sigma,"University of New Hampshire",1977
+Iota Tau,"Creighton University",1977
+Iota Upsilon,"California State University, Northridge",1978
+Iota Phi,"Wittenberg University",1980
+Iota Chi,"University of North Carolina at Charlotte",1982
+Iota Psi,"Indiana State University",1982
+Kappa Alpha,"Western Illinois University",1982
+Kappa Beta,"University of Western Ontario",1982
+Kappa Delta,"Duquesne University",1982
+Kappa Gamma,"California State Polytechnic University, Pomona",1982
+Kappa Epsilon,"Appalachian State University",1983
+Kappa Eta,"University of California, Santa Barbara",1983
+Kappa Zeta,"Villanova University",1983
+Kappa Iota,"University of Dayton",1984
+Kappa Kappa,"Radford University",1984
+Kappa Lambda,"University of Akron",1984
+Kappa Mu,"Austin Peay State University",1984
+Kappa Nu,"University of Central Missouri",1984
+Kappa Theta,"Jacksonville University",1984
+Kappa Omicron,"Marshall University",1985
+Kappa Phi,"Western Carolina University",1985
+Kappa Pi,"California Polytechnic State University, San Luis Obispo",1985
+Kappa Rho,"University of California, San Diego",1985
+Kappa Sigma,"Texas A&M University",1985
+Kappa Tau,"State University of New York - Binghamton",1985
+Kappa Upsilon,"University of North Carolina at Greensboro",1985
+Kappa Xi,"Winthrop University",1985
+Kappa Chi,"Furman University",1986
+Kappa Psi,"University of Louisiana at Monroe",1986
+Lambda Alpha,"Wake Forest University",1986
+Lambda Beta,"George Mason University",1986
+Lambda Delta,"Minnesota State University, Mankato",1986
+Lambda Gamma,"Eastern Illinois University",1986
+Lambda Epsilon,"Texas Christian University",1987
+Lambda Eta,"University of Rochester",1987
+Lambda Iota,"Southern Utah University",1987
+Lambda Kappa,"University at Albany, State University of New York",1987
+Lambda Lambda,"Nicholls State University",1987
+Lambda Theta,"Birmingham-Southern College",1987
+Lambda Zeta,"State University of New York at Geneseo",1987
+Lambda Mu,"Wichita State University",1988
+Lambda Nu,"Western Michigan University",1988
+Lambda Xi,"State University of New York, College at Oneonta",1988
+Lambda Omicron,"University of California, Irvine",1989
+Lambda Pi,"Eastern Michigan University",1989
+Lambda Rho,"Seton Hall University",1989
+Lambda Sigma,"University at Buffalo, The State University of New York",1989
+Lambda Tau,"Slippery Rock University",1989
+Lambda Upsilon,"California State University, Fullerton",1989
+Lambda Phi,"University of Central Arkansas",1990
+Lambda Chi,"California State University, San Bernardino",1991
+Lambda Psi,"University of Toledo",1991
+Mu Alpha,"Baylor University",1991
+Mu Beta,"The University of Alabama in Huntsville",1991
+Mu Delta,"Temple University",1992
+Mu Epsilon,"Coastal Carolina University",1992
+Mu Gamma,"University of North Carolina Wilmington",1992
+Mu Zeta,"Rochester Institute of Technology",1992
+Mu Eta,"University of North Carolina at Asheville",1993
+Mu Theta,"University of Texas at San Antonio",1993
+Mu Iota,"University of Hartford",1994
+Mu Kappa,"Southeast Missouri State University",1994
+Mu Lambda,"Southern Illinois University Carbondale",1995
+Mu Mu,"Sam Houston State University",1996
+Mu Nu,"Valdosta State University",1996
+Mu Omicron,"Pepperdine University",1996
+Mu Pi,"Philadelphia University",1996
+Mu Xi,"Columbus State University",1996
+Mu Rho,"Northwestern State University",1997
+Mu Sigma,"McKendree University",1999
+Mu Tau,"University of Central Oklahoma",2002
+Mu Chi,"Lynchburg College",2003
+Mu Phi,"Longwood University",2003
+Mu Upsilon,"Stephen F. Austin State University",2003
+Mu Psi,"University of Central Florida",2005
+Nu Alpha,"University of Arkansas at Fort Smith",2008
+Nu Beta,"Huntingdon College",2010
+Nu Gamma,"Pennsylvania College of Technology",2011
