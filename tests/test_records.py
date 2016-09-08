@@ -85,6 +85,9 @@ def test_KnightRecord():
 
 def test_BrotherRecord():
 
+    # In case other tests incremented the ID already
+    BrotherRecord.brother_id = 0
+
     # No error
     BrotherRecord(None, 'John', 'Johnny', 'Smith')
 
@@ -106,6 +109,9 @@ def test_BrotherRecord():
     assert_equal(BrotherRecord(None, 'John', '', 'Smith').key, 'B3')
 
 def test_CandidateRecord():
+
+    # In case other tests incremented the ID already
+    CandidateRecord.candidate_id = 0
 
     # No error
     CandidateRecord(None, 'John', 'Johnny', 'Smith')
