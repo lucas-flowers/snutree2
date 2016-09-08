@@ -48,13 +48,13 @@ class ChapterRecord(Record):
 
     def __init__(self,
             chapter_designation=None,
-            chapter_name=None,
+            chapter_location=None,
             semester=None,
             **kwargs):
 
         super().__init__(
                 self.read_chapter_designation(chapter_designation),
-                self.read_chapter_name(chapter_name),
+                self.read_chapter_location(chapter_location),
                 None, # No parent
                 self.read_semester(semester)
                 )
@@ -65,9 +65,9 @@ class ChapterRecord(Record):
         else:
             raise RecordError('Missing chapter designation')
 
-    def read_chapter_name(self, chapter_name):
-        if chapter_name:
-            return chapter_name
+    def read_chapter_location(self, chapter_location):
+        if chapter_location:
+            return chapter_location
         else:
             raise RecordError('Missing chapter name')
 
