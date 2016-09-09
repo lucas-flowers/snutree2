@@ -10,9 +10,8 @@ def tree_from_records(records):
     Returns
     =======
 
-
-    Set of root nodes, whose descendents are nodes containing all the records
-    in the argument.
+    A root node. Its descendents are nodes containing all the records in the
+    argument `records`.
 
     '''
 
