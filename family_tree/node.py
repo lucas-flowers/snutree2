@@ -1,3 +1,4 @@
+from collections import defaultdict
 
 def tree_from_records(records):
     '''
@@ -15,28 +16,26 @@ def tree_from_records(records):
 
     '''
 
-    # TODO use defaultdict for `nodes`
-    roots = [] # List of root nodes of the tree
-    nodes = {} # Dict of all nodes in the tree
+    # List of root nodes of the tree
+    roots = []
+
+    # Dict of all nodes in the tree. Empty empty nodes are initialized with the
+    # Node constructor (with default values for the its fields)
+    nodes = defaultdict(Node)
+
     for key, record in records.items():
 
-        # A record already found has this node as its parent
-        if key in nodes:
-            node = nodes[key]
-            node.record = record
+        # The node corresponding to this record. If the node has not been
+        # created yet, the defaultdict will create an empty one.
+        node = nodes[key]
+        node.record = record
 
-        # No record already found has made this node its parent
-        else:
-            node = Node(records[key])
-            nodes[key] = node
-
-        # This node has a parent, and the parent has already been found
-        if record.parent_key in nodes:
+        # If there is a parent key, add the node as a child to the record's
+        # parent (create the parent node if it doesn't exist)
+        if record.parent_key:
             nodes[record.parent_key].children.append(node)
-        # This node has a parent, but the parent has not been found yet
-        elif record.parent_key:
-            nodes[record.parent_key] = Node(children=[node])
-        # This node has no parent; it is a root node
+
+        # If there is no parent key, then this is a root node
         else:
             roots.append(node)
 
