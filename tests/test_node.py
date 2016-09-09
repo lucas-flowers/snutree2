@@ -37,4 +37,10 @@ def test_tree_from_records():
                 ['Aaron Magid', 'John Grezmak', 'Lucas Flowers', 'Tom Kan', 'Zach Palumbo'],
                 )
 
+def test_trim():
 
+    records = read('directory.csv', 'chapters.csv', 'brothers_not_knights.csv')
+    tree = tree_from_records(records)
+    tree.trim()
+    for child in tree.children:
+        print(child.record.name, file=sys.stderr)
