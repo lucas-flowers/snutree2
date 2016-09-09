@@ -19,6 +19,8 @@ class Record:
         except ValueError:
             return None
 
+# TODO semester-1 instead of purposefully putting the wrong semester in the
+# directory
 class ReorganizationRecord(Record):
 
     def __init__(self,
