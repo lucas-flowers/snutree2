@@ -41,8 +41,25 @@ class Node:
         self.record = record
         self.children = [] if children is None else children
 
+    def trim(self):
+        '''
+        Action
+        ======
+
+        Removes all nodes that have no children and whose parent is this node.
+        '''
+
+        trimmed_children = []
+        for child in self.children:
+            if len(child.children) > 0:
+                trimmed_children.append(child)
+
+        self.children = trimmed_children
+
     def __iter__(self):
         yield self
         for child in self.children:
             yield from child
+
+
 
