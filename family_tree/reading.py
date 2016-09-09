@@ -36,7 +36,7 @@ def read_chapters(path):
                 chapter_location = row['chapter_location']
                 if chapter_designation in chapters:
                     raise DirectoryError('Duplicate chapter detected: "{}"'.format(chapter_designation))
-                chapters[chapter_designation] = chapter_location
+                chapters[chapter_designation] = ChapterRecord(**row)
                 row_number += 1
         except:
             raise DirectoryError('Error in row {}'.format(row_number))
@@ -86,17 +86,26 @@ def read_members(path):
 
     return records
 
+def read_transfers(records, chapters):
+
+    chapter_records = {}
+    for record in records.values():
+        pkey = record.parent_key
+        if pkey in chapters and pkey not in chapter_records:
+            chapter_records[pkey] = chapters[pkey]
+
+    return chapter_records
+
 
 def read(directory_path, chapter_path, bnks_path):
 
-    raise NotImplementedError
-
     chapters = read_chapters(chapter_path)
 
-    records = read_members(directory_path)
-    brothers_not_knights = read_members(bnks_path)
-    records.update(brothers_not_knights)
+    records = read_members(directory_path) # Read all normal members
+    records.update(read_members(bnks_path)) # Add brothers not Knights
+    records.update(read_transfers(records, chapters)) # Add transfer chapters
 
+    return records
 
 
 class DirectoryError(Exception):
