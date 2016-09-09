@@ -84,7 +84,10 @@ class MemberRecord(Record):
             last_name=None,
             big_badge=None,
             pledge_semester=None,
+            refounder=None,
             **kwargs):
+
+        self.refounder = refounder
 
         super().__init__(
                 self.read_badge(badge),
