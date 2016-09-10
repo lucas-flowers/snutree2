@@ -92,6 +92,16 @@ def read_transfers(records, chapters):
 
     return chapter_records
 
+def read_reorganizations(records):
+
+    reorganizations = {}
+    for record in records.values():
+        if hasattr(record, 'refounder') and record.refounder not in reorganizations:
+            reorganization = ReorganizationRecord(record.refounder)
+            reorganizations[reorganization.key] = reorganization
+
+    return reorganizations
+
 
 def read(directory_path, chapter_path, bnks_path):
 
@@ -100,6 +110,7 @@ def read(directory_path, chapter_path, bnks_path):
     records = read_members(directory_path) # Read all normal members
     records.update(read_members(bnks_path)) # Add brothers not Knights
     records.update(read_transfers(records, chapters)) # Add transfer chapters
+    records.update(read_reorganizations(records)) # Add reorganizations
 
     return records
 

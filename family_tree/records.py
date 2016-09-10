@@ -108,6 +108,9 @@ class MemberRecord(Record):
             refounder=None,
             **kwargs):
 
+        if refounder:
+            self.refounder = refounder
+
         super().__init__(
                 self.read_badge(badge),
                 self.read_name(first_name, preferred_name, last_name),
