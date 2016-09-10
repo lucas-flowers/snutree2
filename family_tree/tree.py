@@ -1,27 +1,6 @@
 import networkx as nx
 from collections import defaultdict
 
-graph_defaults = {
-        'size' : 80,
-        'ratio' : 'compress',
-        'pad' : '.5, .5',
-        'ranksep' : .3,
-        }
-
-node_defaults = {
-        'style' : 'filled',
-        'shape' : 'box',
-        'penwidth' : 2,
-        'width' : 2,
-        'height' : .45,
-        'fontname' : 'dejavu sans',
-        }
-
-edge_defaults = {
-        'arrowhead' : 'none',
-        }
-
-
 def records_to_networkx(records):
     '''
     Arguments
@@ -53,10 +32,6 @@ def records_to_networkx(records):
     return tree
 
 def decorate_tree(tree, records):
-
-    tree.graph['node'] = node_defaults
-    tree.graph['edge'] = edge_defaults
-    tree.graph['graph'] = graph_defaults
 
     for key in tree:
         tree.node[key]['label'] = records[key].label()
