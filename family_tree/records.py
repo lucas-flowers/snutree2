@@ -30,7 +30,7 @@ class ReorganizationRecord(Record):
 
         semester = self.read_semester(semester)
         super().__init__(
-                '{} Reorganization'.format(semester),
+                'Reorganization {}'.format(semester),
                 'Reorganization',
                 [], # No parents
                 semester
