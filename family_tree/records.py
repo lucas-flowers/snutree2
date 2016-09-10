@@ -66,17 +66,38 @@ class ReorganizationRecord(Record):
 
 class ChapterRecord(Record):
 
+
     def __init__(self,
             chapter_designation=None,
             chapter_location=None,
             semester=None,
             **kwargs):
+        '''
+
+        Note
+        ====
+
+        There are a few possibilities:
+
+            1) One ChapterRecord per chapter. This is not ideal, since two
+            brothers multiple years apart under the same chapter would screw up
+            the tree.
+
+            2) One ChapterRecord per semester, which is what I've chosen.
+
+            3) One ChapterRecord per brother.
+
+        '''
+
+        self.designation = self.read_chapter_designation(chapter_designation)
+        location = self.read_chapter_location(chapter_location)
+        semester = self.read_semester(semester)
 
         super().__init__(
-                self.read_chapter_designation(chapter_designation),
-                self.read_chapter_location(chapter_location),
+                '{} ({})'.format(self.designation, semester),
+                location,
                 [], # No parent
-                self.read_semester(semester)
+                semester,
                 )
 
     def read_chapter_designation(self, chapter_designation):
@@ -92,7 +113,7 @@ class ChapterRecord(Record):
             raise RecordError('Missing chapter name')
 
     def label(self):
-        return '{} Chapter\n{}'.format(self.key, self.name)
+        return '{} Chapter\n{}'.format(self.designation, self.name)
 
 class MemberRecord(Record):
 

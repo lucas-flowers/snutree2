@@ -28,10 +28,28 @@ def test_ChapterRecord():
     ChapterRecord('KΔ', 'Doo-Kez-Nee', 'Fall 1942')
     ChapterRecord('KΔ', 'Doo-Kez-Nee')
 
+    # Key
+    assert_equals(
+            ChapterRecord('ΔZ', 'WRC', 'Fall 2333').key,
+            'ΔZ (Fall 2333)',
+            )
+
+    # Key, again (TODO I don't like how this is allowed)
+    assert_equals(
+            ChapterRecord('ΔZ', 'WRC').key,
+            'ΔZ (None)',
+            )
+
     # Label
     assert_equals(
             ChapterRecord('ΔZ', 'WRC').label(),
             'ΔZ Chapter\nWRC',
+            )
+
+    # Name
+    assert_equals(
+            ChapterRecord('ΔZ', 'WRC').name,
+            'WRC',
             )
 
     # Missing designation
