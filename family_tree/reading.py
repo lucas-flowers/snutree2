@@ -70,14 +70,10 @@ def read_members(path):
                 # Create record based on status column
                 record = member_record_types[row['status']](**row)
 
-                # Ignore the record if the constructor returned None (i.e., it
-                # was a Reaffiliate)
-                if record:
+                if record.key in records:
+                    raise DirectoryError('Duplicate key detected: "{}"'.format(record.key))
 
-                    if record.key in records:
-                        raise DirectoryError('Duplicate key detected: "{}"'.format(record.key))
-
-                    records[record.key] = record
+                records[record.key] = record
 
                 row_number += 1
 

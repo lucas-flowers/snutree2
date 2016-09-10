@@ -190,8 +190,18 @@ class ExpelledRecord(MemberRecord):
     def label(self):
         return 'Member Expelled\n{}'.format(self.key)
 
-def ReaffiliateRecord(*args, **kwargs):
-    return None
+# TODO:
+#
+# Use a constructor (inheriting from MemberRecord instead of KnightRecord) that
+# will make the key equal to the lower badge number and raise an exception if
+# no Delta Alpha badge number is in the list of affiliations.
+#
+class ReaffiliateRecord(KnightRecord):
+
+    def __init__(self, badge=None, **kwargs):
+        self.key = badge
+        self.name = NotImplemented
+        self.parent_keys = []
 
 def choose_name(first_name, preferred_name, last_name, threshold=.5):
     '''
