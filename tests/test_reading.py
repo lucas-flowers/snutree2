@@ -18,7 +18,7 @@ def test_read_transfers():
 
     records = read_members('directory.csv')
     chapters = read_chapters('chapters.csv')
-    assert_equal(read_transfers(records, chapters).popitem()[0], 'Kappa Delta')
+    assert_equal(read_transfers(records, chapters).popitem()[0], 'Kappa Delta (Spring 1983)')
 
 def test_read():
 

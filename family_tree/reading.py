@@ -86,9 +86,19 @@ def read_transfers(records, chapters):
 
     chapter_records = {}
     for record in records.values():
-        for pkey in record.parent_keys:
-            if pkey in chapters and pkey not in chapter_records:
-                chapter_records[pkey] = chapters[pkey]
+
+        for i in range(len(record.parent_keys)):
+            semester = record.semester
+            chapter_key = record.parent_keys[i]
+            pkey = '{} ({})'.format(record.parent_keys[i], semester)
+            if chapter_key in chapters and pkey not in chapter_records:
+                chapter_record = ChapterRecord(
+                        chapter_key,
+                        chapters[chapter_key],
+                        semester - 1,
+                        )
+                chapter_records[pkey] = chapter_record
+                record.parent_keys[i] = pkey
 
     return chapter_records
 
