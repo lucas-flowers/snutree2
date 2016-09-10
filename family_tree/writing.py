@@ -34,7 +34,7 @@ class Graph(DotCommon):
     def to_dot(self):
 
         lines = []
-        lines.append('{} {} {{'.format(self.graph_type, self.key))
+        lines.append('{} "{}" {{'.format(self.graph_type, self.key))
         lines.append(self.attributes_to_dot() + ';' )
         for child in self.children:
             lines.append(child.to_dot())
