@@ -22,21 +22,33 @@ class Record:
     def label(self):
         return self.name
 
-# TODO semester-1 instead of purposefully putting the wrong semester in the
-# directory
 class ReorganizationRecord(Record):
 
     def __init__(self,
             semester=None,
             **kwargs
             ):
+        '''
+
+        Note
+        ====
+
+        The parameter `semester` is the semester that the Reorganization
+        occurred (as found in the directory), i.e., the pledge semester for the
+        refounders that were not already in the chapter.
+
+        However, we do not want the reorganization node to occur at the same
+        level as the refounders. So, the semester passed to the Record
+        constructor is one semester earlier.
+
+        '''
 
         semester = self.read_semester(semester)
         super().__init__(
                 'Reorganization {}'.format(semester),
                 'Reorganization',
                 [], # No parents
-                semester
+                semester-1,
                 )
 
     # TODO should the semester be required?
