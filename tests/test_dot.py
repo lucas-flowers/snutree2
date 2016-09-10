@@ -47,7 +47,7 @@ def test_Graph():
             'something',
             'subgraph',
             [Node('S1', sorted_dict({'label' : 5})), Node('S2')],
-            sorted_dict({'fontname' : 'made in georgia'}),
+            None,
             default_edge_attributes=sorted_dict({'label' : 'this'}),
             )
 
@@ -69,7 +69,6 @@ def test_Graph():
         "Key One" -> "Key Two";
         "Key Two";
         subgraph "something" {
-        fontname="made in georgia";
         edge [label="this"];
         "S1" [label="5"];
         "S2";
