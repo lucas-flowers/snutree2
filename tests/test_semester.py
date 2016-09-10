@@ -53,7 +53,6 @@ def test_math():
 def test_subtract():
 
     assert_equals(str(Semester('Fall 2001') - 1), 'Spring 2001')
-    assert_raises(NotImplemented, 1 - Semester('Fall 2001'))
 
 def test_range():
 
