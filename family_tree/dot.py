@@ -39,7 +39,7 @@ class Graph(DotCommon):
         lines = []
         lines.append('{} "{}" {{'.format(self.graph_type, self.key))
         if self.attributes:
-            lines.append('{};'.format(dict_to_dot_attributes(self.attributes))
+            lines.append('{};'.format(dict_to_dot_attributes(self.attributes)))
         if self.default_node_attributes:
             lines.append('node [{}];'.format(dict_to_dot_attributes(self.default_node_attributes)))
         if self.default_edge_attributes:
