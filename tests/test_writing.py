@@ -1,6 +1,9 @@
 import sys
+from collections import OrderedDict
 from nose.tools import *
 from family_tree.writing import *
+from inspect import cleandoc as trim
+
 
 def test_Node():
 
@@ -28,7 +31,11 @@ def test_Rank():
 
 def test_Graph():
 
-    node1 = Node('Key One', {'label' : 'A Label'})
+    # Sorting is necessary to ensure consistent equality checks with the output
+    # string. The sorting key is the dict key.
+    sorted_dict = lambda d : OrderedDict(sorted(d.items(), key=lambda t : t[0]))
+
+    node1 = Node('Key One', sorted_dict({'label' : 'A Label', 'color' : 'piss yellow'}))
     node2 = Node('Key Two')
 
     edge = Edge(node1.key, node2.key)
@@ -36,14 +43,31 @@ def test_Graph():
 
     rank = Rank([node.key for node in (node1, node2)])
 
+    subgraph = Graph(
+            'something',
+            'subgraph',
+            [Node('S1', sorted_dict({'label' : 5})), Node('S2')],
+            sorted_dict({'fontname' : 'made in georgia'}),
+            )
+
     graph = Graph(
             'tree',
             'digraph',
-            [node1, edge, node2, rank],
-            {'size' : 5, 'width' : 'gold'},
+            [node1, edge, node2, subgraph, rank],
+            sorted_dict({'size' : 5, 'width' : 'gold'}),
             )
 
-    print(graph.to_dot(), file=sys.stderr)
-
-
+    assert_equals(graph.to_dot(), trim('''
+        digraph "tree" {
+        size="5",width="gold";
+        "Key One" [color="piss yellow",label="A Label"];
+        "Key One" -> "Key Two";
+        "Key Two";
+        subgraph "something" {
+        fontname="made in georgia";
+        "S1" [label="5"];
+        "S2";
+        }
+        {rank=same "Key One" "Key Two"};
+        }'''))
 
