@@ -19,6 +19,9 @@ class Record:
         except ValueError:
             return None
 
+    def label(self):
+        return self.name
+
 # TODO semester-1 instead of purposefully putting the wrong semester in the
 # directory
 class ReorganizationRecord(Record):
@@ -46,6 +49,9 @@ class ReorganizationRecord(Record):
                     .format(semester)
                     )
 
+    def label(self):
+        return 'Reorganization'
+
 class ChapterRecord(Record):
 
     def __init__(self,
@@ -72,6 +78,9 @@ class ChapterRecord(Record):
             return chapter_location
         else:
             raise RecordError('Missing chapter name')
+
+    def label(self):
+        return '{} Chapter\n{}'.format(self.key, self.name)
 
 class MemberRecord(Record):
 
@@ -126,7 +135,8 @@ class MemberRecord(Record):
 
 class KnightRecord(MemberRecord):
 
-    pass
+    def label(self):
+        return '{}\nΔA {}'.format(self.name, self.key)
 
 
 class BrotherRecord(MemberRecord):
@@ -146,6 +156,9 @@ class BrotherRecord(MemberRecord):
         else:
             raise RecordError('Missing last name')
 
+    def label(self):
+        return '{}\nΔA Brother'.format(self.name)
+
 class CandidateRecord(MemberRecord):
 
     candidate_id = 0
@@ -157,14 +170,13 @@ class CandidateRecord(MemberRecord):
             CandidateRecord.candidate_id += 1
             return 'C{}'.format(CandidateRecord.candidate_id - 1)
 
+    def label(self):
+        return '{}\nΔA Candidate'.format(self.name)
+
 class ExpelledRecord(MemberRecord):
 
-    def read_name(self, first_name, preferred_name, last_name):
-        # Name is not strictly necessary for this program, but I require it
-        if first_name and last_name:
-            return 'Member Expelled'
-        else:
-            raise RecordError('Missing first or last name')
+    def label(self):
+        return 'Member Expelled\n{}'.format(self.key)
 
 def ReaffiliateRecord(*args, **kwargs):
     return None

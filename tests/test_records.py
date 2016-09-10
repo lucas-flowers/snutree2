@@ -16,8 +16,8 @@ def test_choose_name():
 
 def test_ReorganizationRecord():
 
-    # No error
-    ReorganizationRecord('Fall 1922')
+    # Label
+    assert_equals(ReorganizationRecord('Fall 1922').label(), 'Reorganization')
 
     # TODO should reorganization require a semester name?
     # ReorganizationRecord()
@@ -27,6 +27,12 @@ def test_ChapterRecord():
     # No error
     ChapterRecord('KΔ', 'Doo-Kez-Nee', 'Fall 1942')
     ChapterRecord('KΔ', 'Doo-Kez-Nee')
+
+    # Label
+    assert_equals(
+            ChapterRecord('ΔZ', 'WRC').label(),
+            'ΔZ Chapter\nWRC',
+            )
 
     # Missing designation
     assert_raises(
@@ -46,6 +52,12 @@ def test_KnightRecord():
     KnightRecord('9999', 'John', 'Johnny', 'Smith', '8888', 'Fall 1900')
     KnightRecord('9999', 'John', '', 'Smith', '8888', 'Fall 1900')
     KnightRecord('9999', 'John', None, 'Smith')
+
+    # Label
+    assert_equals(
+            KnightRecord('9999', 'John', None, 'Smith').label(),
+            'John Smith\nΔA 9999',
+            )
 
     # Badge number padding
     assert_equal(KnightRecord('1', 'John', None, 'Smith').key, '0001')
@@ -91,6 +103,15 @@ def test_BrotherRecord():
     # No error
     BrotherRecord(None, 'John', 'Johnny', 'Smith')
 
+    # Label
+    assert_equals(
+            BrotherRecord(None, 'John', 'Johnny', 'Smith').label(),
+            'Smith\nΔA Brother',
+            )
+
+    # Brother ID
+    assert_equal(BrotherRecord(None, 'John', '', 'Smith').key, 'B2')
+
     # First and preferred names are optional
     BrotherRecord(None, '', 'Johnny', 'Smith')
     BrotherRecord(None, '', '', 'Smith')
@@ -105,9 +126,6 @@ def test_BrotherRecord():
             BrotherRecord, '1234', 'John', '', ''
             )
 
-    # Brother ID
-    assert_equal(BrotherRecord(None, 'John', '', 'Smith').key, 'B3')
-
 def test_CandidateRecord():
 
     # In case other tests incremented the ID already
@@ -115,6 +133,15 @@ def test_CandidateRecord():
 
     # No error
     CandidateRecord(None, 'John', 'Johnny', 'Smith')
+
+    # Candidate ID
+    assert_equal(CandidateRecord(None, 'John', '', 'Smith').key, 'C1')
+
+    # Label
+    assert_equals(
+            CandidateRecord(None, 'John', 'Johnny', 'Smith').label(),
+            'Johnny Smith\nΔA Candidate',
+            )
 
     # Has badge
     assert_raises(RecordError,
@@ -126,13 +153,16 @@ def test_CandidateRecord():
             CandidateRecord, '1234', 'John', '', ''
             )
 
-    # Candidate ID
-    assert_equal(CandidateRecord(None, 'John', '', 'Smith').key, 'C1')
-
 def test_ExpelledRecord():
 
     # No error
     ExpelledRecord('1234', 'John', 'Johnny', 'Smith')
+
+    # Label
+    assert_equals(
+            ExpelledRecord('1234', 'John', 'Johnny', 'Smith').label(),
+            'Member Expelled\n1234',
+            )
 
     # No first name
     assert_raises(RecordError,
