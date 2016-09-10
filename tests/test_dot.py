@@ -62,7 +62,8 @@ def test_Graph():
 
     assert_equals(graph.to_dot(), trim('''
         digraph "tree" {
-        size="5",width="gold";
+        size="5";
+        width="gold";
         node [penwidth="5",width="4"];
         edge [penwidth="4",width="5"];
         "Key One" [color="piss yellow",label="A Label"];

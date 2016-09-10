@@ -1,7 +1,7 @@
 from collections import namedtuple
 
-def dict_to_dot_attributes(attributes_dict):
-    return ','.join(
+def dict_to_dot_attributes(attributes_dict, sep=','):
+    return sep.join(
             ['{}="{}"'.format(key, value)
                 for key, value in attributes_dict.items()]
             )
@@ -39,7 +39,7 @@ class Graph(DotCommon):
         lines = []
         lines.append('{} "{}" {{'.format(self.graph_type, self.key))
         if self.attributes:
-            lines.append('{};'.format(dict_to_dot_attributes(self.attributes)))
+            lines.append('{};'.format(dict_to_dot_attributes(self.attributes, sep=';\n')))
         if self.default_node_attributes:
             lines.append('node [{}];'.format(dict_to_dot_attributes(self.default_node_attributes)))
         if self.default_edge_attributes:
