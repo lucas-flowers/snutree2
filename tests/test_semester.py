@@ -1,5 +1,6 @@
+from nose.tools import *
 from itertools import permutations
-from family_tree.semester import Semester
+from family_tree.semester import Semester, semester_range
 
 def test_comparisons():
 
@@ -48,4 +49,23 @@ def test_math():
     assert str(Semester('Fall 2001') + 8) == 'Fall 2005'
     assert str(8 + Semester('Fall 2001')) == 'Fall 2005'
     assert str(Semester('Fall 2001') + Semester('Spring 2001')) == 'Fall 4002'
+
+def test_range():
+
+    a = Semester('Fall 2000')
+    b = Semester('Spring 2002')
+
+    assert_equals(
+            [str(s) for s in semester_range(a, b)],
+            ['Fall 2000', 'Spring 2001', 'Fall 2001'],
+            )
+
+    assert_equals(
+            list(semester_range(a, b)),
+            [Semester(s) for s in ('Fall 2000', 'Spring 2001', 'Fall 2001')],
+            )
+
+
+
+
 

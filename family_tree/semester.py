@@ -1,5 +1,11 @@
 import re
 
+def semester_range(start, stop, step=1):
+    i = start
+    while i < stop:
+        yield i
+        i += step
+
 class Semester(int):
 
     matcher = re.compile('(Spring|Fall) (\d+)')
@@ -27,9 +33,12 @@ class Semester(int):
 
         return super(Semester, cls).__new__(cls, value)
 
-    def __str__(self):
+    def __repr__(self):
         year, season = divmod(self, 2)
         return '{} {}'.format('Fall' if season == 1 else 'Spring', year)
+
+    def __str__(self):
+        return repr(self)
 
     def __add__(self, other):
         return Semester(super(Semester, self).__add__(other))
