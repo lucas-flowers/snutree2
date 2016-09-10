@@ -14,41 +14,41 @@ def test_comparisons():
 
     # General
     for P in permutations(semesters):
-        assert sorted(P) == semesters
+        assert_equals(sorted(P), semesters)
 
     # Make sure total ordering worked
-    assert b != c
-    assert e > c
-    assert e >= c
-    assert e >= e
+    assert_not_equal(b, c)
+    assert_greater(e, c)
+    assert_greater_equal(e, c)
+    assert_greater_equal(e, e)
 
     # Min and max
-    assert max(a, b, c) == c
-    assert min(a, e, d) == a
+    assert_equals(max(a, b, c), c)
+    assert_equals(min(a, e, d), a)
 
 def test_incdec():
 
     a = Semester('Fall 1995')
     a += 1
     a -= 1
-    assert a == Semester('Fall 1995')
+    assert_equals(a, Semester('Fall 1995'))
 
     b = Semester('Spring 1995')
     b += 1
     b -= 1
-    assert b == Semester('Spring 1995')
+    assert_equals(b, Semester('Spring 1995'))
 
 def test_string():
 
-    assert str(Semester('Fall 0001933')) == 'Fall 1933'
-    assert str(Semester('Spring 323')) == 'Spring 323'
+    assert_equals(str(Semester('Fall 0001933')), 'Fall 1933')
+    assert_equals(str(Semester('Spring 323')), 'Spring 323')
 
 def test_math():
 
-    assert isinstance(Semester('Fall 2001') + 8, Semester)
-    assert str(Semester('Fall 2001') + 8) == 'Fall 2005'
-    assert str(8 + Semester('Fall 2001')) == 'Fall 2005'
-    assert str(Semester('Fall 2001') + Semester('Spring 2001')) == 'Fall 4002'
+    assert_is_instance(Semester('Fall 2001') + 8, Semester)
+    assert_equals(str(Semester('Fall 2001') + 8), 'Fall 2005')
+    assert_equals(str(8 + Semester('Fall 2001')), 'Fall 2005')
+    assert_equals(str(Semester('Fall 2001') + Semester('Spring 2001')), 'Fall 4002')
 
 def test_range():
 
@@ -64,8 +64,4 @@ def test_range():
             list(semester_range(a, b)),
             [Semester(s) for s in ('Fall 2000', 'Spring 2001', 'Fall 2001')],
             )
-
-
-
-
 
