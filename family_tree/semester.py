@@ -45,3 +45,9 @@ class Semester(int):
 
     __radd__ = __add__
 
+    def __sub__(self, other):
+        return Semester(super(Semester, self).__sub__(other))
+
+    def __rsub__(self, other):
+        return NotImplemented
+

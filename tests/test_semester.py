@@ -50,6 +50,11 @@ def test_math():
     assert_equals(str(8 + Semester('Fall 2001')), 'Fall 2005')
     assert_equals(str(Semester('Fall 2001') + Semester('Spring 2001')), 'Fall 4002')
 
+def test_subtract():
+
+    assert_equals(str(Semester('Fall 2001') - 1), 'Spring 2001')
+    assert_raises(NotImplemented, 1 - Semester('Fall 2001'))
+
 def test_range():
 
     a = Semester('Fall 2000')
