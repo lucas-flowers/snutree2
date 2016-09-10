@@ -26,17 +26,17 @@ def read_chapters(path):
 
     '''
 
+    chapters = {}
     with open(path, 'r') as f:
         reader = csv.DictReader(f) # TODO check headers
-        chapters = {}
         row_number = 2 # Starts at 2 because the header is Row 1
         try:
             for row in reader:
                 chapter_designation = row['chapter_designation']
                 chapter_location = row['chapter_location']
                 if chapter_designation in chapters:
-                    raise DirectoryError('Duplicate chapter detected: "{}"'.format(chapter_designation))
-                chapters[chapter_designation] = ChapterRecord(**row)
+                    raise DirectoryError('Duplicate chapter: "{}"'.format(chapter_designation))
+                chapters[chapter_designation] = chapter_location
                 row_number += 1
         except:
             raise DirectoryError('Error in row {}'.format(row_number))
