@@ -48,6 +48,7 @@ def test_Graph():
             'subgraph',
             [Node('S1', sorted_dict({'label' : 5})), Node('S2')],
             sorted_dict({'fontname' : 'made in georgia'}),
+            default_edge_attributes=sorted_dict({'label' : 'this'}),
             )
 
     graph = Graph(
@@ -55,16 +56,21 @@ def test_Graph():
             'digraph',
             [node1, edge, node2, subgraph, rank],
             sorted_dict({'size' : 5, 'width' : 'gold'}),
+            sorted_dict({'width' : 4, 'penwidth' : '5'}),
+            sorted_dict({'width' : 5, 'penwidth' : '4'}),
             )
 
     assert_equals(graph.to_dot(), trim('''
         digraph "tree" {
         size="5",width="gold";
+        node [penwidth="5",width="4"];
+        edge [penwidth="4",width="5"];
         "Key One" [color="piss yellow",label="A Label"];
         "Key One" -> "Key Two";
         "Key Two";
         subgraph "something" {
         fontname="made in georgia";
+        edge [label="this"];
         "S1" [label="5"];
         "S2";
         }
