@@ -1,7 +1,7 @@
 import sys
 from collections import OrderedDict
 from nose.tools import *
-from family_tree.writing import *
+from family_tree.dot import *
 from inspect import cleandoc as trim
 
 

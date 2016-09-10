@@ -86,5 +86,3 @@ class Rank:
                 ' '.join(['"{}"'.format(key) for key in self.keys])
                 )
 
-
-
