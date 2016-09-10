@@ -53,8 +53,8 @@ def test_KnightRecord():
 
     # No big brother
     assert_equals(
-            KnightRecord('9999', 'John', 'Johnny', 'Smith', '', 'Fall 1900').parent_key,
-            None
+            KnightRecord('9999', 'John', 'Johnny', 'Smith', '', 'Fall 1900').parent_keys,
+            []
             )
 
     # Unfortunately, we do not know whether the semester is needed

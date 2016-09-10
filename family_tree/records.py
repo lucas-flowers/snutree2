@@ -3,10 +3,10 @@ from family_tree.semester import Semester
 
 class Record:
 
-    def __init__(self, key, name, parent_key, semester):
+    def __init__(self, key, name, parent_keys, semester):
         self.key = key
         self.name = name
-        self.parent_key = parent_key
+        self.parent_keys = parent_keys
         self.semester = semester
 
     def read_semester(self, semester):
@@ -32,7 +32,7 @@ class ReorganizationRecord(Record):
         super().__init__(
                 '{} Reorganization'.format(semester),
                 'Reorganization',
-                None, # No parent
+                [], # No parents
                 semester
                 )
 
@@ -57,7 +57,7 @@ class ChapterRecord(Record):
         super().__init__(
                 self.read_chapter_designation(chapter_designation),
                 self.read_chapter_location(chapter_location),
-                None, # No parent
+                [], # No parent
                 self.read_semester(semester)
                 )
 
@@ -87,12 +87,13 @@ class MemberRecord(Record):
             refounder=None,
             **kwargs):
 
-        self.refounder = refounder
-
         super().__init__(
                 self.read_badge(badge),
                 self.read_name(first_name, preferred_name, last_name),
-                self.read_big_badge(big_badge),
+                [x for x in [
+                    self.read_big_badge(big_badge),
+                    self.read_refounder(refounder)
+                    ] if x is not None],
                 self.read_semester(pledge_semester),
                 )
 
@@ -117,6 +118,11 @@ class MemberRecord(Record):
             # big_badge does not represent an integer
             return big_badge
 
+    def read_refounder(self, refounder):
+        if refounder:
+            return 'Reorganization {}'.format(Semester(refounder))
+        else:
+            return None
 
 class KnightRecord(MemberRecord):
 

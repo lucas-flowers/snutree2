@@ -90,9 +90,9 @@ def read_transfers(records, chapters):
 
     chapter_records = {}
     for record in records.values():
-        pkey = record.parent_key
-        if pkey in chapters and pkey not in chapter_records:
-            chapter_records[pkey] = chapters[pkey]
+        for pkey in record.parent_keys:
+            if pkey in chapters and pkey not in chapter_records:
+                chapter_records[pkey] = chapters[pkey]
 
     return chapter_records
 
