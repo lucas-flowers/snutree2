@@ -79,7 +79,7 @@ class Edge(DotCommon):
 
 class Rank:
 
-    def __init__(self, keys):
+    def __init__(self, keys=None):
         self.keys = keys or []
 
     def to_dot(self):
