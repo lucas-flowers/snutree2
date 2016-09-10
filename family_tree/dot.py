@@ -29,7 +29,7 @@ class Graph(DotCommon):
                     )
 
         self.graph_type = graph_type
-        self.children = children or {}
+        self.children = children or []
         self.default_node_attributes = default_node_attributes or {}
         self.default_edge_attributes = default_edge_attributes or {}
         super().__init__(key, attributes)
