@@ -1,6 +1,6 @@
 import csv, sys
 from family_tree.records import *
-from family_tree.node import *
+from family_tree.tree import *
 
 member_record_types = {
         'Active' : KnightRecord,

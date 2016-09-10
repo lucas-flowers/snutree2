@@ -2,7 +2,7 @@ import sys
 import matplotlib.pyplot as plt
 from nose.tools import *
 from family_tree.reading import *
-from family_tree.node import *
+from family_tree.tree import *
 
 
 def test_tree_from_records():
