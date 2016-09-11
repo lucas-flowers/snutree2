@@ -134,7 +134,7 @@ class ChapterRecord(Record):
             raise RecordError('Missing chapter name')
 
     def label(self):
-        return '{} Chapter\n{}'.format(self.designation, self.name)
+        return '{} Chapter\\n{}'.format(self.designation, self.name)
 
     def dot_attributes(self):
         return {
@@ -203,7 +203,7 @@ class MemberRecord(Record):
 class KnightRecord(MemberRecord):
 
     def label(self):
-        return '{}\nΔA {}'.format(self.name, self.key)
+        return '{}\\nΔA {}'.format(self.name, self.key)
 
 
 class BrotherRecord(MemberRecord):
@@ -224,7 +224,7 @@ class BrotherRecord(MemberRecord):
             raise RecordError('Missing last name')
 
     def label(self):
-        return '{}\nΔA Brother'.format(self.name)
+        return '{}\\nΔA Brother'.format(self.name)
 
 class CandidateRecord(MemberRecord):
 
@@ -238,12 +238,12 @@ class CandidateRecord(MemberRecord):
             return 'C{}'.format(CandidateRecord.candidate_id - 1)
 
     def label(self):
-        return '{}\nΔA Candidate'.format(self.name)
+        return '{}\\nΔA Candidate'.format(self.name)
 
 class ExpelledRecord(MemberRecord):
 
     def label(self):
-        return 'Member Expelled\n{}'.format(self.key)
+        return 'Member Expelled\\n{}'.format(self.key)
 
 # TODO:
 #
