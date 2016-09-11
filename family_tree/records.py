@@ -22,6 +22,11 @@ class Record:
     def label(self):
         return self.name
 
+    def dot_attributes(self):
+        return {
+                'label' : self.label(),
+                }
+
 class ReorganizationRecord(Record):
 
     def __init__(self,
@@ -63,6 +68,13 @@ class ReorganizationRecord(Record):
 
     def label(self):
         return 'Reorganization'
+
+    def dot_attributes(self):
+
+        return {
+                'label' : self.label(),
+                'shape' : 'oval',
+                }
 
 class ChapterRecord(Record):
 
@@ -114,6 +126,13 @@ class ChapterRecord(Record):
 
     def label(self):
         return '{} Chapter\n{}'.format(self.designation, self.name)
+
+    def dot_attributes(self):
+        return {
+                'label' : self.label(),
+                'color' : 'none',
+                'fillcolor' : 'none',
+                }
 
 class MemberRecord(Record):
 
