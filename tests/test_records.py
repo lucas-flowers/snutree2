@@ -43,7 +43,7 @@ def test_ChapterRecord():
     # Label
     assert_equals(
             ChapterRecord('ΔZ', 'WRC').label(),
-            'ΔZ Chapter\nWRC',
+            'ΔZ Chapter\\nWRC',
             )
 
     # Name
@@ -74,7 +74,7 @@ def test_KnightRecord():
     # Label
     assert_equals(
             KnightRecord('9999', 'John', None, 'Smith').label(),
-            'John Smith\nΔA 9999',
+            'John Smith\\nΔA 9999',
             )
 
     # Badge number padding
@@ -124,7 +124,7 @@ def test_BrotherRecord():
     # Label
     assert_equals(
             BrotherRecord(None, 'John', 'Johnny', 'Smith').label(),
-            'Smith\nΔA Brother',
+            'Smith\\nΔA Brother',
             )
 
     # Brother ID
@@ -158,7 +158,7 @@ def test_CandidateRecord():
     # Label
     assert_equals(
             CandidateRecord(None, 'John', 'Johnny', 'Smith').label(),
-            'Johnny Smith\nΔA Candidate',
+            'Johnny Smith\\nΔA Candidate',
             )
 
     # Has badge
@@ -179,7 +179,7 @@ def test_ExpelledRecord():
     # Label
     assert_equals(
             ExpelledRecord('1234', 'John', 'Johnny', 'Smith').label(),
-            'Member Expelled\n1234',
+            'Member Expelled\\n1234',
             )
 
     # No first name
