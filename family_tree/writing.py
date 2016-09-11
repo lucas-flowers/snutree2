@@ -78,8 +78,8 @@ def create_tree_subgraph(key, graph, records):
 
     # TODO add nodes
     nodes = []
-    for key in graph.nodes():
-        nodes.append(dot.Node(key, records[key].dot_attributes()))
+    for key, attributes in graph.nodes_iter(data=True):
+        nodes.append(dot.Node(key, attributes))
 
     edges = []
     for parent_key, child_key in graph.edges(): # TODO also unpack with data=
