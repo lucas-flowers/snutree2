@@ -157,18 +157,18 @@ class MemberRecord(Record):
             last_name=None,
             big_badge=None,
             pledge_semester=None,
-            refounder=None,
+            refounder_class=None,
             **kwargs):
 
-        if refounder:
-            self.refounder = refounder
+        if refounder_class:
+            self.refounder_class = refounder_class
 
         super().__init__(
                 self.read_badge(badge),
                 self.read_name(first_name, preferred_name, last_name),
                 [x for x in [
                     self.read_big_badge(big_badge),
-                    self.read_refounder(refounder)
+                    self.read_refounder(refounder_class)
                     ] if x is not None],
                 self.read_semester(pledge_semester),
                 )
@@ -194,9 +194,9 @@ class MemberRecord(Record):
             # big_badge does not represent an integer
             return big_badge
 
-    def read_refounder(self, refounder):
-        if refounder:
-            return 'Reorganization {}'.format(Semester(refounder))
+    def read_refounder(self, refounder_class):
+        if refounder_class:
+            return 'Reorganization {}'.format(Semester(refounder_class))
         else:
             return None
 
