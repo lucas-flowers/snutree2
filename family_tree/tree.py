@@ -26,7 +26,11 @@ def records_to_networkx(records):
     tree = nx.DiGraph()
     for key, record in records.items():
         for parent_key in record.parent_keys:
-            tree.add_edge(parent_key, key)
+            tree.add_edge(
+                    parent_key,
+                    key,
+                    **records[parent_key].dot_out_edge_attributes(records[key])
+                    )
 
     # TODO combine this and the previous loop?
     for key, record in records.items():

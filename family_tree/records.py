@@ -27,6 +27,9 @@ class Record:
                 'label' : self.label(),
                 }
 
+    def dot_out_edge_attributes(self, child_record=None):
+        return {}
+
 class ReorganizationRecord(Record):
 
     def __init__(self,
@@ -75,6 +78,12 @@ class ReorganizationRecord(Record):
                 'label' : self.label(),
                 'shape' : 'oval',
                 }
+
+    def dot_out_edge_attributes(self, child_record=None):
+        if child_record and child_record.semester <= self.semester:
+            return {'style' : 'dashed'}
+        else:
+            return {}
 
 class ChapterRecord(Record):
 
@@ -133,6 +142,9 @@ class ChapterRecord(Record):
                 'color' : 'none',
                 'fillcolor' : 'none',
                 }
+
+    def dot_out_edge_attributes(self, child_record=None):
+        return {'style' : 'dashed'}
 
 class MemberRecord(Record):
 
