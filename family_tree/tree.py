@@ -23,25 +23,28 @@ def records_to_networkx(records):
 
     '''
 
-    tree = nx.DiGraph()
+def add_edges(graph, records):
+
     for key, record in records.items():
+        child_record = records[key]
         for parent_key in record.parent_keys:
-            tree.add_edge(
-                    parent_key,
-                    key,
-                    **records[parent_key].dot_out_edge_attributes(records[key])
-                    )
+            parent_record = records[parent_key]
+            graph.add_edge(parent_key, key,
+                    **parent_record.dot_out_edge_attributes(child_record))
 
-    # TODO combine this and the previous loop?
+def add_node_attributes(graph, records):
+
     for key, record in records.items():
-        if key in tree:
-            tree.add_node(key, **records[key].dot_attributes())
+        if key in graph:
+            graph.add_node(key, **records[key].dot_attributes())
 
-    return tree
+    return graph
 
 def records_to_tree(records):
 
-    graph = records_to_networkx(records)
+    graph = nx.DiGraph()
+    add_edges(graph, records)
+    add_node_attributes(graph, records)
 
     return graph
 
