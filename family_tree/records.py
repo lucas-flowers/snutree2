@@ -155,9 +155,6 @@ class ExpelledRecord(MemberRecord):
         else:
             raise RecordError('Missing first or last name')
 
-
-
-
 def combine_names(first_name, preferred_name, last_name, threshold=.5):
     '''
     Arguments

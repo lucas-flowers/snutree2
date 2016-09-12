@@ -113,85 +113,86 @@ def test_KnightRecord():
             KnightRecord.from_row, '9999', 'John', 'Johnny', '', '0x86', 'Fall 1900',
             )
 
-# def test_BrotherRecord():
-#
-#     # In case other tests incremented the ID already
-#     BrotherRecord.brother_id = 0
-#
-#     # No error
-#     BrotherRecord(None, 'John', 'Johnny', 'Smith')
-#
-#     # Label
-#     assert_equals(
-#             BrotherRecord(None, 'John', 'Johnny', 'Smith').label(),
-#             'Smith\\nΔA Brother',
-#             )
-#
-#     # Brother ID
-#     assert_equal(BrotherRecord(None, 'John', '', 'Smith').key, 'B2')
-#
-#     # First and preferred names are optional
-#     BrotherRecord(None, '', 'Johnny', 'Smith')
-#     BrotherRecord(None, '', '', 'Smith')
-#
-#     # Has badge
-#     assert_raises(RecordError,
-#             BrotherRecord, '1234', 'John', '', 'Smith'
-#             )
-#
-#     # No last name
-#     assert_raises(RecordError,
-#             BrotherRecord, '1234', 'John', '', ''
-#             )
-#
-# def test_CandidateRecord():
-#
-#     # In case other tests incremented the ID already
-#     CandidateRecord.candidate_id = 0
-#
-#     # No error
-#     CandidateRecord(None, 'John', 'Johnny', 'Smith')
-#
-#     # Candidate ID
-#     assert_equal(CandidateRecord(None, 'John', '', 'Smith').key, 'C1')
-#
-#     # Label
-#     assert_equals(
-#             CandidateRecord(None, 'John', 'Johnny', 'Smith').label(),
-#             'Johnny Smith\\nΔA Candidate',
-#             )
-#
-#     # Has badge
-#     assert_raises(RecordError,
-#             CandidateRecord, '1234', 'John', '', 'Smith'
-#             )
-#
-#     # No last name
-#     assert_raises(RecordError,
-#             CandidateRecord, '1234', 'John', '', ''
-#             )
-#
-# def test_ExpelledRecord():
-#
-#     # No error
-#     ExpelledRecord('1234', 'John', 'Johnny', 'Smith')
-#
-#     # Label
-#     assert_equals(
-#             ExpelledRecord('1234', 'John', 'Johnny', 'Smith').label(),
-#             'Member Expelled\\n1234',
-#             )
-#
-#     # No first name
-#     assert_raises(RecordError,
-#             ExpelledRecord, '9999', '', 'Johnny', 'Smith'
-#             )
-#
-#     # No last name
-#     assert_raises(RecordError,
-#             ExpelledRecord, '9999', 'John', 'Johnny', ''
-#             )
-#
+def test_BrotherRecord():
+
+    # In case other tests incremented the ID already
+    BrotherRecord.brother_id = 0
+
+    # No error
+    BrotherRecord.from_row(None, 'John', 'Johnny', 'Smith')
+
+    # # Label
+    # assert_equals(
+    #         BrotherRecord.from_row(None, 'John', 'Johnny', 'Smith').label(),
+    #         'Smith\\nΔA Brother',
+    #         )
+
+    # Brother ID
+    # TODO becomes Brother 2 when label test reenabled
+    assert_equal(BrotherRecord.from_row(None, 'John', '', 'Smith')[0], 'Brother 1')
+
+    # First and preferred names are optional
+    BrotherRecord.from_row(None, '', 'Johnny', 'Smith')
+    BrotherRecord.from_row(None, '', '', 'Smith')
+
+    # Has badge
+    assert_raises(RecordError,
+            BrotherRecord.from_row, '1234', 'John', '', 'Smith'
+            )
+
+    # No last name
+    assert_raises(RecordError,
+            BrotherRecord.from_row, '1234', 'John', '', ''
+            )
+
+def test_CandidateRecord():
+
+    # In case other tests incremented the ID already
+    CandidateRecord.candidate_id = 0
+
+    # No error
+    CandidateRecord.from_row(None, 'John', 'Johnny', 'Smith')
+
+    # Candidate ID
+    assert_equal(CandidateRecord.from_row(None, 'John', '', 'Smith')[0], 'Candidate 1')
+
+    # # Label
+    # assert_equals(
+    #         CandidateRecord.from_row(None, 'John', 'Johnny', 'Smith').label(),
+    #         'Johnny Smith\\nΔA Candidate',
+    #         )
+
+    # Has badge
+    assert_raises(RecordError,
+            CandidateRecord.from_row, '1234', 'John', '', 'Smith'
+            )
+
+    # No last name
+    assert_raises(RecordError,
+            CandidateRecord.from_row, '1234', 'John', '', ''
+            )
+
+def test_ExpelledRecord():
+
+    # No error
+    ExpelledRecord.from_row('1234', 'John', 'Johnny', 'Smith')
+
+    # # Label
+    # assert_equals(
+    #         ExpelledRecord.from_row('1234', 'John', 'Johnny', 'Smith').label(),
+    #         'Member Expelled\\n1234',
+    #         )
+
+    # No first name
+    assert_raises(RecordError,
+            ExpelledRecord.from_row, '9999', '', 'Johnny', 'Smith'
+            )
+
+    # No last name
+    assert_raises(RecordError,
+            ExpelledRecord.from_row, '9999', 'John', 'Johnny', ''
+            )
+
 # def test_ReaffiliateRecord():
 #
 #     assert_equal(ReaffiliateRecord(*(), **{}).name, NotImplemented)
