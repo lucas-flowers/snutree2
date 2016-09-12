@@ -3,36 +3,21 @@ from networkx.algorithms import dag
 from collections import defaultdict
 from family_tree.records import MemberRecord
 
-def records_to_networkx(records):
+def add_big_little_edges(graph):
     '''
-    Arguments
-    =========
-
-    records: Dict of records
-
-    Returns
-    =======
-
-    A networkx DiGraph representing the family tree. Each node in the DiGraph
-    is a key for some corresponding record.
-
-    Note
-    ====
-
-    A basic tree structure is not enough, because the existence of
-    Reorganization records allows for the potential that some nodes might have
-    more than one parent.
-
+    Add the big-little relationships (taken from the records in the nodes of
+    the graph) as edges to the graph.
     '''
 
-def add_edges(graph, records):
+    for key, node_dict in graph.nodes(data=True):
+        record = node_dict['record']
+        if record.parent:
+            graph.add_edge(node_dict['record'].parent, key)
 
-    for key, record in records.items():
-        child_record = records[key]
-        for parent_key in record.parent_keys:
-            parent_record = records[parent_key]
-            graph.add_edge(parent_key, key,
-                    **parent_record.dot_out_edge_attributes(child_record))
+def drop_orphans(graph):
+
+    graph.remove_nodes_from([key for key, degree in graph.degree_iter() if degree == 0])
+
 
 def add_node_attributes(graph, records):
 
@@ -63,12 +48,12 @@ def add_families(graph, records):
 
     print(graph.node['1031']['family'])
 
-def records_to_tree(records):
+def decorate_tree(graph):
 
-    graph = nx.DiGraph()
-    add_edges(graph, records)
-    add_node_attributes(graph, records)
-    add_families(graph, records)
+    add_big_little_edges(graph)
+    drop_orphans(graph)
+    # add_node_attributes(graph, records)
+    # add_families(graph, records)
 
     return graph
 

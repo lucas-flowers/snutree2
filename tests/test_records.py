@@ -14,14 +14,27 @@ def test_combine_names():
 
     assert_not_equal(combine_names('Jon', 'Snow', 'Snow'), 'Snow Snow')
 
-# def test_ReorganizationRecord():
-#
-#     # Label
-#     assert_equals(ReorganizationRecord('Fall 1922').label(), 'Reorganization')
-#
-#     # TODO should reorganization require a semester name?
-#     # ReorganizationRecord()
-#
+def test_ReorganizationRecord():
+
+    # # Label
+    # assert_equals(ReorganizationRecord('Fall 1922').label(), 'Reorganization')
+
+    member = MemberRecord('John Doe', Semester('Fall 1942'), 'ΔZ', Semester('Fall 1945'))
+
+    # The placement semester for Reorganization nodes is one semester before
+    # the refounder_class field...
+    assert_equals(
+            ReorganizationRecord.from_member_record(member).semester,
+            Semester('Spring 1945'),
+            )
+
+    # ... however, the actual key for the reorganization is of the true
+    # reorganization semester.
+    assert_equals(
+            ReorganizationRecord.key_from_member_record(member),
+            'Reorganization Fall 1945',
+            )
+
 def test_ChapterRecord():
 
     member1 = MemberRecord('John Doe', Semester('Fall 1942'), 'ΔZ')
@@ -38,7 +51,7 @@ def test_ChapterRecord():
 
     # Key
     assert_equals(
-            ChapterRecord.from_member_record(member1, chapter_locations)[0],
+            ChapterRecord.key_from_member_record(member1),
             'ΔZ Spring 1942',
             )
 
@@ -50,7 +63,7 @@ def test_ChapterRecord():
 
     # Name
     assert_equals(
-            ChapterRecord.from_member_record(member2, chapter_locations)[1].location,
+            ChapterRecord.from_member_record(member2, chapter_locations).location,
             'Doo-Kez-Nee',
             )
 

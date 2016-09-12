@@ -93,21 +93,27 @@ def read_transfers(graph, chapters):
     for key, node_dict in graph.nodes_iter(data=True):
         record = node_dict['record']
         if record.parent in chapters:
-            chapter_key, chapter_record = ChapterRecord.from_member_record(record, chapters)
-            record.parent = chapter_key # Update key to reflect chapter's actual node
-            chapter_records.add_node(chapter_key, record=chapter_record)
+            chapter_key = ChapterRecord.key_from_member_record(record)
+            if chapter_key not in chapter_records:
+                chapter_record = ChapterRecord.from_member_record(record, chapters)
+                chapter_records.add_node(chapter_key, record=chapter_record)
+            record.parent = chapter_key # Update key to reflect chapter's actual key
 
     return chapter_records
 
-def read_reorganizations(records):
+def read_reorganizations(graph):
 
-    reorganizations = {}
-    for record in records.values():
-        if hasattr(record, 'refounder') and record.refounder not in reorganizations:
-            reorganization = ReorganizationRecord(record.refounder)
-            reorganizations[reorganization.key] = reorganization
+    reorg_records = nx.DiGraph()
+    for key, node_dict in graph.nodes_iter(data=True):
+        record = node_dict['record']
+        if hasattr(record, 'refounder_class') and record.refounder_class:
+            reorg_key = ReorganizationRecord.key_from_member_record(record)
+            if reorg_key not in reorg_records:
+                reorg_record = ReorganizationRecord.from_member_record(record)
+                reorg_records.add_node(reorg_key, record=reorg_record)
+            record.parent = reorg_key # Update key to reflect reorg's actual key
 
-    return reorganizations
+    return reorg_records
 
 
 def read(directory_path, chapter_path, bnks_path):
@@ -117,7 +123,7 @@ def read(directory_path, chapter_path, bnks_path):
     graph = read_members(directory_path) # Read all normal members
     graph = union(graph, read_members(bnks_path)) # Add brothers not Knights
     graph = union(graph, read_transfers(graph, chapters)) # Add transfer chapters
-    # records.update(read_reorganizations(records)) # Add reorganizations
+    graph = union(graph, read_reorganizations(graph)) # Add reorganizations
 
     return graph
 

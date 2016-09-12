@@ -36,10 +36,16 @@ default_semester_node = {
         'fontname' : 'georgia',
         }
 
-def semester_bounds(graph, records):
-    # Note: Change this if it is too slow
-    return min([records[key].semester for key in graph]), \
-            max([records[key].semester for key in graph])
+def semester_bounds(graph):
+    min_sem = float('inf')
+    max_sem = float('-inf')
+    for _, node_dict in graph.nodes_iter(data=True):
+        semester = node_dict['record'].semester
+        if semester and min_sem > semester:
+            min_sem = semester
+        if semester and max_sem < semester:
+            max_sem = semester
+    return min_sem, max_sem
 
 def create_date_subgraph(key, min_semester, max_semester):
 
@@ -72,7 +78,7 @@ def create_date_subgraph(key, min_semester, max_semester):
 
     return subgraph
 
-def create_tree_subgraph(key, graph, records):
+def create_tree_subgraph(key, graph):
 
     dotgraph = dot.Graph(key, 'subgraph', default_node_attributes=member_node_defaults)
 
@@ -89,11 +95,11 @@ def create_tree_subgraph(key, graph, records):
 
     return dotgraph
 
-def create_ranks(graph, records):
+def create_ranks(graph):
 
     ranks = {}
-    for key in graph.nodes():
-        semester = records[key].semester
+    for key, node_dict in graph.nodes(data=True):
+        semester = node_dict['record'].semester
         if semester in ranks:
             ranks[semester].keys.append(key)
         else:
@@ -107,13 +113,13 @@ def create_ranks(graph, records):
 
 
 
-def create_graph(graph, records):
+def create_graph(graph):
 
-    min_semester, max_semester = semester_bounds(graph, records)
+    min_semester, max_semester = semester_bounds(graph)
     dates_left = create_date_subgraph('L', min_semester, max_semester)
     dates_right = create_date_subgraph('R', min_semester, max_semester)
-    tree = create_tree_subgraph('members', graph, records)
-    ranks = create_ranks(graph, records)
+    tree = create_tree_subgraph('members', graph)
+    ranks = create_ranks(graph)
 
     dotgraph = dot.Graph(
             'family_tree',
