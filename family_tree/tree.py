@@ -12,7 +12,17 @@ def add_big_little_edges(graph):
     for key, node_dict in graph.nodes(data=True):
         record = node_dict['record']
         if record.parent:
-            graph.add_edge(node_dict['record'].parent, key)
+            graph.add_edge(record.parent, key)
+
+def add_reorganization_edges(graph):
+    '''
+    Add all reorganizations to the graph.
+    '''
+
+    for key, node_dict in graph.nodes(data=True):
+        record = node_dict['record']
+        if hasattr(record, 'refounder_class') and record.refounder_class:
+            graph.add_edge(record.refounder_class, key)
 
 def drop_orphans(graph):
 
@@ -51,6 +61,7 @@ def add_families(graph, records):
 def decorate_tree(graph):
 
     add_big_little_edges(graph)
+    add_reorganization_edges(graph)
     drop_orphans(graph)
     # add_node_attributes(graph, records)
     # add_families(graph, records)

@@ -97,9 +97,9 @@ def read_transfers(graph, chapters):
     for key, node_dict in graph.nodes_iter(data=True):
         record = node_dict['record']
         if record.parent in chapters:
-            chapter_key = ChapterRecord.key_from_member_record(record)
+            chapter_record = ChapterRecord.from_member(record, chapters)
+            chapter_key = chapter_record.get_key()
             if chapter_key not in chapter_records:
-                chapter_record = ChapterRecord.from_member_record(record, chapters)
                 chapter_records.add_node(chapter_key, record=chapter_record)
             record.parent = chapter_key # Update key to reflect chapter's actual key
 
@@ -111,11 +111,11 @@ def read_reorganizations(graph):
     for key, node_dict in graph.nodes_iter(data=True):
         record = node_dict['record']
         if hasattr(record, 'refounder_class') and record.refounder_class:
-            reorg_key = ReorganizationRecord.key_from_member_record(record)
+            reorg_record = ReorganizationRecord.from_member(record)
+            reorg_key = reorg_record.get_key()
             if reorg_key not in reorg_records:
-                reorg_record = ReorganizationRecord.from_member_record(record)
                 reorg_records.add_node(reorg_key, record=reorg_record)
-            record.parent = reorg_key # Update key to reflect reorg's actual key
+            record.refounder_class = reorg_key # Update key to reflect reorg's actual key
 
     return reorg_records
 

@@ -24,15 +24,15 @@ def test_ReorganizationRecord():
     # The placement semester for Reorganization nodes is one semester before
     # the refounder_class field...
     assert_equals(
-            ReorganizationRecord.from_member_record(member).semester,
+            ReorganizationRecord.from_member(member).semester,
             Semester('Spring 1945'),
             )
 
     # ... however, the actual key for the reorganization is of the true
     # reorganization semester.
     assert_equals(
-            ReorganizationRecord.key_from_member_record(member),
-            'Reorganization Fall 1945',
+            ReorganizationRecord(member.refounder_class).get_key(),
+            'Reorganization Node Fall 1945',
             )
 
 def test_ChapterRecord():
@@ -47,11 +47,11 @@ def test_ChapterRecord():
 
 
     # No error
-    ChapterRecord.from_member_record(member1, chapter_locations)
+    ChapterRecord.from_member(member1, chapter_locations)
 
     # Key
     assert_equals(
-            ChapterRecord.key_from_member_record(member1),
+            ChapterRecord.from_member(member1, chapter_locations).get_key(),
             'ΔZ Spring 1942',
             )
 
@@ -63,7 +63,7 @@ def test_ChapterRecord():
 
     # Name
     assert_equals(
-            ChapterRecord.from_member_record(member2, chapter_locations).location,
+            ChapterRecord.from_member(member2, chapter_locations).location,
             'Doo-Kez-Nee',
             )
 

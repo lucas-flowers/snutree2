@@ -3,60 +3,48 @@ from family_tree.semester import Semester
 
 class ReorganizationRecord:
 
-    key_format = 'Reorganization {}'
-
     def __init__(self, semester):
 
         self.semester = semester
         self.parent = None
 
+    def get_key(self):
+
+        return 'Reorganization Node {}'.format(self.semester)
+
     ###########################################################################
-    #### Validation Functions                                              ####
+    #### Factory from Member Records                                       ####
     ###########################################################################
 
     @classmethod
-    def from_member_record(cls, member_record):
-
-        return cls(member_record.refounder_class - 1)
-
-    @classmethod
-    def key_from_member_record(cls, member_record):
-
-        return cls.key_format.format(member_record.refounder_class)
-
+    def from_member(cls, member):
+        # Minus one because the Reorganization node is placed a semester before
+        # the actual reorganization (so that it is above the new refounders).
+        return cls(member.refounder_class - 1)
 
 class ChapterRecord:
 
-    key_format = '{} {}'
+    def __init__(self, semester, designation, location):
 
-    def __init__(self, designation, location, semester):
-
+        self.semester = semester
         self.designation = designation
         self.location = location
-        self.semester = semester
         self.parent = None
 
+    def get_key(self):
+        return '{} {}'.format(self.designation, self.semester)
+
     ###########################################################################
-    #### Validation Functions                                              ####
+    #### Factory from Member Records                                       ####
     ###########################################################################
 
     @classmethod
-    def from_member_record(cls, member_record, chapter_locations):
-        '''
-        TODO make names consistent with other from_member_records
-        '''
-
-        designation = member_record.parent
-        location = chapter_locations[designation]
-        semester = member_record.semester - 1
-
-        return cls(designation, location, semester)
-
-    @classmethod
-    def key_from_member_record(cls, member_record):
-        designation = member_record.parent
-        semester = member_record.semester - 1
-        return cls.key_format.format(designation, semester)
+    def from_member(cls, member, chapter_locations):
+        return cls(
+                member.semester - 1,
+                member.parent,
+                chapter_locations[member.parent],
+                )
 
 class MemberRecord:
 
