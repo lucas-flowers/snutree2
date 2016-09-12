@@ -108,10 +108,10 @@ class MemberRecord:
 
         key = record.get_key_from_badge(badge)
 
-        record.input_row_name(first_name, preferred_name, last_name)
-        record.input_row_semester(pledge_semester)
-        record.input_row_parent(big_badge);
-        record.input_row_refounder_class(refounder_class)
+        record.name = record.input_row_name(first_name, preferred_name, last_name)
+        record.semester = record.input_row_semester(pledge_semester)
+        record.parent = record.input_row_parent(big_badge);
+        record.refounder_class = record.input_row_refounder_class(refounder_class)
 
         return key, record
 
@@ -123,36 +123,36 @@ class MemberRecord:
 
     def input_row_name(self, first_name, preferred_name, last_name):
         if first_name and last_name:
-            self.name = combine_names(first_name, preferred_name, last_name)
+            return combine_names(first_name, preferred_name, last_name)
         else:
             raise RecordError('Missing first or last name')
 
     def input_row_semester(self, semester_string):
         # We will not know if we really need the semester's value until later
         try:
-            self.semester = Semester(semester_string)
+            return Semester(semester_string)
         except (TypeError, ValueError):
-            self.semester = None
+            return None
 
     def input_row_parent(self, big_badge_string):
-        if not big_badge_string:
-            self.parent = None
-        else:
+        if big_badge_string:
             try:
-                self.parent = self.badge_format.format(int(big_badge_string))
+                return self.badge_format.format(int(big_badge_string))
             except ValueError:
                 # The big's badge is not an integer; it may be a chapter designation
-                self.parent = big_badge_string
+                return big_badge_string
+        else:
+            return None
 
     def input_row_refounder_class(self, refounder_class_string):
         if refounder_class_string:
             try:
-                self.refounder_class = Semester(refounder_class_string)
+                return Semester(refounder_class_string)
             except (TypeError, ValueError):
                 raise RecordError('Unexpected refounding semester: "{}"'
                         .format(refounder_class_string))
         else:
-            self.refounder_class = None
+            return None
 
 class KnightRecord(MemberRecord):
 
@@ -176,7 +176,7 @@ class BrotherRecord(MemberRecord):
 
     def input_row_name(self, first_name, preferred_name, last_name):
         if last_name:
-            self.name = last_name
+            return last_name
         else:
             return RecordError('Missing last name')
 
@@ -205,7 +205,7 @@ class ExpelledRecord(MemberRecord):
     def input_row_name(self, first_name, preferred_name, last_name):
         if first_name and last_name:
             # They *should* have a name, but it's not going to be displayed
-            self.name = 'Member Expelled'
+            return 'Member Expelled'
         else:
             raise RecordError('Missing first or last name')
 
