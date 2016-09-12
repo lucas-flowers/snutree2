@@ -4,15 +4,6 @@ from networkx.algorithms.operators.binary import union
 from family_tree.records import *
 from family_tree.tree import *
 
-member_record_types = {
-        'Active' : KnightRecord,
-        'Alumni' : KnightRecord,
-        'Brother' : BrotherRecord,
-        'Candidate' : CandidateRecord,
-        'Expelled' : ExpelledRecord,
-        'Reaffiliate' : ReaffiliateRecord, # Returns None
-        }
-
 def read_chapters(path):
     '''
     Arguments
@@ -59,6 +50,15 @@ def read_members(path):
     including reaffiliates).
 
     '''
+
+    member_record_types = {
+            'Active' : KnightRecord,
+            'Alumni' : KnightRecord,
+            'Brother' : BrotherRecord,
+            'Candidate' : CandidateRecord,
+            'Expelled' : ExpelledRecord,
+            'Reaffiliate' : ReaffiliateRecord, # Returns None
+            }
 
     with open(path, 'r') as f:
 
