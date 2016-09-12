@@ -106,7 +106,7 @@ class MemberRecord:
 
         record = cls()
 
-        key = record.get_key_from_badge(badge)
+        key = record.validate_row_badge(badge)
 
         record.name = cls.validate_row_name(first_name, preferred_name, last_name)
         record.semester = cls.validate_row_semester(pledge_semester)
@@ -116,7 +116,7 @@ class MemberRecord:
         return key, record
 
     @classmethod
-    def get_key_from_badge(cls, badge_string):
+    def validate_row_badge(cls, badge_string):
         try:
             return cls.badge_format.format(int(badge_string))
         except ValueError:
@@ -172,7 +172,7 @@ class BrotherRecord(MemberRecord):
     brother_id = 0
 
     @classmethod
-    def get_key_from_badge(cls, badge_string):
+    def validate_row_badge(cls, badge_string):
         if badge_string:
             raise RecordError('Unknighted brothers do not have badge numbers')
         else:
@@ -196,7 +196,7 @@ class CandidateRecord(MemberRecord):
     candidate_id = 0
 
     @classmethod
-    def get_key_from_badge(cls, badge_string):
+    def validate_row_badge(cls, badge_string):
         if badge_string:
             raise RecordError('Candidates do not have badge numbers')
         else:
