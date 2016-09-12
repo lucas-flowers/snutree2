@@ -67,11 +67,16 @@ class MemberRecord:
             pledge_semester=None,
             big_badge=None,
             refounder_class=None,
+            badge=None,
             ):
         self.name = name
         self.semester = pledge_semester
         self.parent = big_badge
         self.refounder_class = refounder_class
+        self.badge = badge
+
+    def generate_key(self):
+        raise NotImplementedError
 
     ###########################################################################
     #### Row Validation Functions                                          ####
@@ -97,23 +102,19 @@ class MemberRecord:
         Returns
         =======
 
-        A tuple, (key, record):
-
-        key: Key for the record
         record: The record
 
         '''
 
         record = cls()
 
-        key = record.validate_row_badge(badge)
-
+        record.badge = cls.validate_row_badge(badge)
         record.name = cls.validate_row_name(first_name, preferred_name, last_name)
         record.semester = cls.validate_row_semester(pledge_semester)
         record.parent = cls.validate_row_parent(big_badge);
         record.refounder_class = cls.validate_row_refounder_class(refounder_class)
 
-        return key, record
+        return record
 
     @classmethod
     def validate_row_badge(cls, badge_string):
@@ -161,24 +162,28 @@ class MemberRecord:
 
 class KnightRecord(MemberRecord):
 
-    pass
+    def generate_key(self):
+        return self.badge
 
 class BrotherRecord(MemberRecord):
+
+    brother_id = 0
+
+    def generate_key(self):
+        key = 'Brother {}'.format(BrotherRecord.brother_id)
+        BrotherRecord.brother_id += 1
+        return key
 
     ###########################################################################
     #### Row Validation Functions                                          ####
     ###########################################################################
-
-    brother_id = 0
 
     @classmethod
     def validate_row_badge(cls, badge_string):
         if badge_string:
             raise RecordError('Unknighted brothers do not have badge numbers')
         else:
-            key = 'Brother {}'.format(BrotherRecord.brother_id)
-            BrotherRecord.brother_id += 1
-            return key
+            return None
 
     @classmethod
     def validate_row_name(cls, first_name, preferred_name, last_name):
@@ -189,22 +194,25 @@ class BrotherRecord(MemberRecord):
 
 class CandidateRecord(MemberRecord):
 
+    candidate_id = 0
+
+    def generate_key(self):
+        key = 'Candidate {}'.format(CandidateRecord.candidate_id)
+        CandidateRecord.candidate_id += 1
+        return key
+
     ###########################################################################
     #### Row Validation Functions                                          ####
     ###########################################################################
-
-    candidate_id = 0
 
     @classmethod
     def validate_row_badge(cls, badge_string):
         if badge_string:
             raise RecordError('Candidates do not have badge numbers')
         else:
-            key = 'Candidate {}'.format(CandidateRecord.candidate_id)
-            CandidateRecord.candidate_id += 1
-            return key
+            return None
 
-class ExpelledRecord(MemberRecord):
+class ExpelledRecord(KnightRecord):
 
     ###########################################################################
     #### Row Validation Functions                                          ####
@@ -221,9 +229,12 @@ class ExpelledRecord(MemberRecord):
 # TODO use affiliate list to do stuff
 class ReaffiliateRecord(MemberRecord):
 
+    def generate_key(self):
+        return None
+
     @classmethod
     def from_row(cls, **kwargs):
-        return None, None
+        return ReaffiliateRecord()
 
 def combine_names(first_name, preferred_name, last_name, threshold=.5):
     '''
