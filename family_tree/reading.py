@@ -74,7 +74,7 @@ def read_members(path):
                 # record = record_type.from_row(**row)
 
                 record = member_record_types[row['status']].from_row(**row)
-                key = record.generate_key()
+                key = record.get_key()
 
                 if key in graph:
                     raise DirectoryError('Duplicate key detected: "{}"'.format(record.key))

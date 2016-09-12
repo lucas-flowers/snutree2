@@ -75,7 +75,7 @@ class MemberRecord:
         self.refounder_class = refounder_class
         self.badge = badge
 
-    def generate_key(self):
+    def get_key(self):
         raise NotImplementedError
 
     ###########################################################################
@@ -162,17 +162,20 @@ class MemberRecord:
 
 class KnightRecord(MemberRecord):
 
-    def generate_key(self):
+    def get_key(self):
         return self.badge
 
 class BrotherRecord(MemberRecord):
 
     brother_id = 0
 
-    def generate_key(self):
-        key = 'Brother {}'.format(BrotherRecord.brother_id)
+    def __init__(self, **kwargs):
+        self.key = 'Brother {}'.format(BrotherRecord.brother_id)
         BrotherRecord.brother_id += 1
-        return key
+        super().__init__(**kwargs)
+
+    def get_key(self):
+        return self.key
 
     ###########################################################################
     #### Row Validation Functions                                          ####
@@ -196,10 +199,13 @@ class CandidateRecord(MemberRecord):
 
     candidate_id = 0
 
-    def generate_key(self):
-        key = 'Candidate {}'.format(CandidateRecord.candidate_id)
+    def __init__(self, **kwargs):
+        self.key = 'Candidate {}'.format(CandidateRecord.candidate_id)
         CandidateRecord.candidate_id += 1
-        return key
+        super().__init__(**kwargs)
+
+    def get_key(self):
+        return self.key
 
     ###########################################################################
     #### Row Validation Functions                                          ####
@@ -229,7 +235,7 @@ class ExpelledRecord(KnightRecord):
 # TODO use affiliate list to do stuff
 class ReaffiliateRecord(MemberRecord):
 
-    def generate_key(self):
+    def get_key(self):
         return None
 
     @classmethod

@@ -81,8 +81,8 @@ def test_KnightRecord():
     #         )
 
     # Badge number padding
-    assert_equal(KnightRecord.from_row('1', 'John', None, 'Smith').generate_key(), '0001')
-    assert_equal(KnightRecord.from_row('-1', 'John', None, 'Smith').generate_key(), '-001') # Eh...
+    assert_equal(KnightRecord.from_row('1', 'John', None, 'Smith').get_key(), '0001')
+    assert_equal(KnightRecord.from_row('-1', 'John', None, 'Smith').get_key(), '-001') # Eh...
 
     # No big brother
     assert_equals(
@@ -122,7 +122,7 @@ def test_BrotherRecord():
     BrotherRecord.brother_id = 0
 
     # No error
-    BrotherRecord.from_row(None, 'John', 'Johnny', 'Smith').generate_key()
+    BrotherRecord.from_row(None, 'John', 'Johnny', 'Smith').get_key()
 
     # # Label
     # assert_equals(
@@ -132,7 +132,7 @@ def test_BrotherRecord():
 
     # Brother ID
     # TODO becomes Brother 2 when label test reenabled
-    assert_equal(BrotherRecord.from_row(None, 'John', '', 'Smith').generate_key(), 'Brother 1')
+    assert_equal(BrotherRecord.from_row(None, 'John', '', 'Smith').get_key(), 'Brother 1')
 
     # First and preferred names are optional
     BrotherRecord.from_row(None, '', 'Johnny', 'Smith')
@@ -154,10 +154,10 @@ def test_CandidateRecord():
     CandidateRecord.candidate_id = 0
 
     # No error
-    CandidateRecord.from_row(None, 'John', 'Johnny', 'Smith').generate_key()
+    CandidateRecord.from_row(None, 'John', 'Johnny', 'Smith').get_key()
 
     # Candidate ID
-    assert_equal(CandidateRecord.from_row(None, 'John', '', 'Smith').generate_key(), 'Candidate 1')
+    assert_equal(CandidateRecord.from_row(None, 'John', '', 'Smith').get_key(), 'Candidate 1')
 
     # # Label
     # assert_equals(
