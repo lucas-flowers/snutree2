@@ -1,6 +1,31 @@
 import difflib
 from family_tree.semester import Semester
 
+class ChapterRecord:
+
+    def __init__(self,
+            designation,
+            location,
+            semester
+            ):
+
+        self.designation = designation
+        self.location = location
+        self.semester = semester
+        self.parent = None
+
+    @classmethod
+    def from_member_record(cls, member_record, chapter_locations):
+
+        designation = member_record.parent
+        location = chapter_locations[designation]
+        semester = member_record.semester - 1
+
+        key = '{} {}'.format(designation, semester)
+
+        return key, ChapterRecord(designation, location, semester)
+
+
 class MemberRecord:
 
     badge_format = '{:04d}'
@@ -12,8 +37,8 @@ class MemberRecord:
             refounder_class=None,
             ):
         self.name = name
-        self.pledge_semester = pledge_semester
-        self.big_badge = big_badge
+        self.semester = pledge_semester
+        self.parent = big_badge
         self.refounder_class = refounder_class
 
     ###########################################################################
@@ -53,7 +78,7 @@ class MemberRecord:
 
         record.name_from_row(first_name, preferred_name, last_name)
         record.semester_from_row(pledge_semester)
-        record.big_badge_from_row(big_badge);
+        record.parent_from_row(big_badge);
         record.refounder_class_from_row(refounder_class)
 
         return key, record
@@ -77,15 +102,15 @@ class MemberRecord:
         except (TypeError, ValueError):
             self.semester = None
 
-    def big_badge_from_row(self, big_badge_string):
+    def parent_from_row(self, big_badge_string):
         if not big_badge_string:
-            self.big_badge = None
+            self.parent = None
         else:
             try:
-                self.big_badge = self.badge_format.format(int(big_badge_string))
+                self.parent = self.badge_format.format(int(big_badge_string))
             except ValueError:
                 # The big's badge is not an integer; it may be a chapter designation
-                self.big_badge = big_badge_string
+                self.parent = big_badge_string
 
     def refounder_class_from_row(self, refounder_class_string):
         if refounder_class_string:

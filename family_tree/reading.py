@@ -24,7 +24,7 @@ def read_chapters(path):
     =======
 
     A dict whose keys are chapter designations and whose values are chapter
-    names.
+    locations.
 
     '''
 
@@ -87,23 +87,15 @@ def read_members(path):
 
     return graph
 
-def read_transfers(records, chapters):
+def read_transfers(graph, chapters):
 
-    chapter_records = {}
-    for record in records.values():
-
-        for i in range(len(record.parent_keys)):
-            semester = record.semester
-            chapter_key = record.parent_keys[i]
-            pkey = '{} ({})'.format(record.parent_keys[i], semester)
-            if chapter_key in chapters and pkey not in chapter_records:
-                chapter_record = ChapterRecord(
-                        chapter_key,
-                        chapters[chapter_key],
-                        semester - 1,
-                        )
-                chapter_records[pkey] = chapter_record
-                record.parent_keys[i] = pkey
+    chapter_records = nx.DiGraph()
+    for key, node_dict in graph.nodes_iter(data=True):
+        record = node_dict['record']
+        if record.parent in chapters:
+            chapter_key, chapter_record = ChapterRecord.from_member_record(record, chapters)
+            record.parent = chapter_key # Update key to reflect chapter's actual node
+            chapter_records.add_node(chapter_key, record=chapter_record)
 
     return chapter_records
 
@@ -120,14 +112,14 @@ def read_reorganizations(records):
 
 def read(directory_path, chapter_path, bnks_path):
 
-    # chapters = read_chapters(chapter_path)
+    chapters = read_chapters(chapter_path)
 
-    records = read_members(directory_path) # Read all normal members
-    records = union(records, read_members(bnks_path)) # Add brothers not Knights
-    # records.update(read_transfers(records, chapters)) # Add transfer chapters
+    graph = read_members(directory_path) # Read all normal members
+    graph = union(graph, read_members(bnks_path)) # Add brothers not Knights
+    graph = union(graph, read_transfers(graph, chapters)) # Add transfer chapters
     # records.update(read_reorganizations(records)) # Add reorganizations
 
-    return records
+    return graph
 
 
 class DirectoryError(Exception):

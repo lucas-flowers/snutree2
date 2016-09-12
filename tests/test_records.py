@@ -22,47 +22,37 @@ def test_combine_names():
 #     # TODO should reorganization require a semester name?
 #     # ReorganizationRecord()
 #
-# def test_ChapterRecord():
-#
-#     # No error
-#     ChapterRecord('KΔ', 'Doo-Kez-Nee', 'Fall 1942')
-#     ChapterRecord('KΔ', 'Doo-Kez-Nee')
-#
-#     # Key
-#     assert_equals(
-#             ChapterRecord('ΔZ', 'WRC', 'Fall 2333').key,
-#             'ΔZ (Fall 2333)',
-#             )
-#
-#     # Key, again (TODO I don't like how this is allowed)
-#     assert_equals(
-#             ChapterRecord('ΔZ', 'WRC').key,
-#             'ΔZ (None)',
-#             )
-#
-#     # Label
-#     assert_equals(
-#             ChapterRecord('ΔZ', 'WRC').label(),
-#             'ΔZ Chapter\\nWRC',
-#             )
-#
-#     # Name
-#     assert_equals(
-#             ChapterRecord('ΔZ', 'WRC').name,
-#             'WRC',
-#             )
-#
-#     # Missing designation
-#     assert_raises(
-#             RecordError,
-#             ChapterRecord, '', 'Doo-Kez-Nee',
-#             )
-#
-#     # Missing name
-#     assert_raises(
-#             RecordError,
-#             ChapterRecord, 'KΔ',
-#             )
+def test_ChapterRecord():
+
+    member1 = MemberRecord('John Doe', Semester('Fall 1942'), 'ΔZ')
+    member2 = MemberRecord('John Smith', Semester('Fall 1945'), 'KΔ')
+
+    chapter_locations = {
+            'KΔ' : 'Doo-Kez-Nee',
+            'ΔZ' : 'WRC',
+            }
+
+
+    # No error
+    ChapterRecord.from_member_record(member1, chapter_locations)
+
+    # Key
+    assert_equals(
+            ChapterRecord.from_member_record(member1, chapter_locations)[0],
+            'ΔZ Spring 1942',
+            )
+
+    # # Label
+    # assert_equals(
+    #         ChapterRecord('ΔZ', 'WRC').label(),
+    #         'ΔZ Chapter\\nWRC',
+    #         )
+
+    # Name
+    assert_equals(
+            ChapterRecord.from_member_record(member2, chapter_locations)[1].location,
+            'Doo-Kez-Nee',
+            )
 
 def test_KnightRecord():
 
@@ -83,7 +73,7 @@ def test_KnightRecord():
 
     # No big brother
     assert_equals(
-            KnightRecord.from_row('9999', 'John', 'Johnny', 'Smith', '', 'Fall 1900')[1].big_badge,
+            KnightRecord.from_row('9999', 'John', 'Johnny', 'Smith', '', 'Fall 1900')[1].parent,
             None
             )
 
