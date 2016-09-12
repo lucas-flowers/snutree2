@@ -193,7 +193,7 @@ def test_ExpelledRecord():
             ExpelledRecord.from_row, '9999', 'John', 'Johnny', ''
             )
 
-# def test_ReaffiliateRecord():
-#
-#     assert_equal(ReaffiliateRecord(*(), **{}).name, NotImplemented)
-#
+def test_ReaffiliateRecord():
+
+    assert_equal(ReaffiliateRecord.from_row(*(), **{}), (None, None))
+

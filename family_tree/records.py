@@ -152,6 +152,13 @@ class ExpelledRecord(MemberRecord):
         else:
             raise RecordError('Missing first or last name')
 
+# TODO use affiliate list to do stuff
+class ReaffiliateRecord(MemberRecord):
+
+    @classmethod
+    def from_row(cls, **kwargs):
+        return None, None
+
 def combine_names(first_name, preferred_name, last_name, threshold=.5):
     '''
     Arguments
