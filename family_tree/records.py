@@ -72,13 +72,10 @@ class MemberRecord:
 
     def semester_from_row(self, semester_string):
         # We will not know if we really need the semester's value until later
-        if not semester_string:
+        try:
+            self.semester = Semester(semester_string)
+        except (TypeError, ValueError):
             self.semester = None
-        else:
-            try:
-                self.semester = Semester(semester_string)
-            except (TypeError, ValueError):
-                raise RecordError('Invalid semester: "{}"'.format(semester_string))
 
     def big_badge_from_row(self, big_badge_string):
         if not big_badge_string:
