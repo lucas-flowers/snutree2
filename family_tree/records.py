@@ -108,10 +108,10 @@ class MemberRecord:
 
         key = record.get_key_from_badge(badge)
 
-        record.name_from_row(first_name, preferred_name, last_name)
-        record.semester_from_row(pledge_semester)
-        record.parent_from_row(big_badge);
-        record.refounder_class_from_row(refounder_class)
+        record.input_row_name(first_name, preferred_name, last_name)
+        record.input_row_semester(pledge_semester)
+        record.input_row_parent(big_badge);
+        record.input_row_refounder_class(refounder_class)
 
         return key, record
 
@@ -121,20 +121,20 @@ class MemberRecord:
         except ValueError:
             raise RecordError('Unexpected badge number: "{}"'.format(badge_string))
 
-    def name_from_row(self, first_name, preferred_name, last_name):
+    def input_row_name(self, first_name, preferred_name, last_name):
         if first_name and last_name:
             self.name = combine_names(first_name, preferred_name, last_name)
         else:
             raise RecordError('Missing first or last name')
 
-    def semester_from_row(self, semester_string):
+    def input_row_semester(self, semester_string):
         # We will not know if we really need the semester's value until later
         try:
             self.semester = Semester(semester_string)
         except (TypeError, ValueError):
             self.semester = None
 
-    def parent_from_row(self, big_badge_string):
+    def input_row_parent(self, big_badge_string):
         if not big_badge_string:
             self.parent = None
         else:
@@ -144,7 +144,7 @@ class MemberRecord:
                 # The big's badge is not an integer; it may be a chapter designation
                 self.parent = big_badge_string
 
-    def refounder_class_from_row(self, refounder_class_string):
+    def input_row_refounder_class(self, refounder_class_string):
         if refounder_class_string:
             try:
                 self.refounder_class = Semester(refounder_class_string)
@@ -174,7 +174,7 @@ class BrotherRecord(MemberRecord):
             BrotherRecord.brother_id += 1
             return key
 
-    def name_from_row(self, first_name, preferred_name, last_name):
+    def input_row_name(self, first_name, preferred_name, last_name):
         if last_name:
             self.name = last_name
         else:
@@ -202,7 +202,7 @@ class ExpelledRecord(MemberRecord):
     #### Row Validation Functions                                          ####
     ###########################################################################
 
-    def name_from_row(self, first_name, preferred_name, last_name):
+    def input_row_name(self, first_name, preferred_name, last_name):
         if first_name and last_name:
             # They *should* have a name, but it's not going to be displayed
             self.name = 'Member Expelled'
