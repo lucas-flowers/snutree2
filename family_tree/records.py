@@ -108,43 +108,48 @@ class MemberRecord:
 
         key = record.get_key_from_badge(badge)
 
-        record.name = record.validate_row_name(first_name, preferred_name, last_name)
-        record.semester = record.validate_row_semester(pledge_semester)
-        record.parent = record.validate_row_parent(big_badge);
-        record.refounder_class = record.validate_row_refounder_class(refounder_class)
+        record.name = cls.validate_row_name(first_name, preferred_name, last_name)
+        record.semester = cls.validate_row_semester(pledge_semester)
+        record.parent = cls.validate_row_parent(big_badge);
+        record.refounder_class = cls.validate_row_refounder_class(refounder_class)
 
         return key, record
 
-    def get_key_from_badge(self, badge_string):
+    @classmethod
+    def get_key_from_badge(cls, badge_string):
         try:
-            return self.badge_format.format(int(badge_string))
+            return cls.badge_format.format(int(badge_string))
         except ValueError:
             raise RecordError('Unexpected badge number: "{}"'.format(badge_string))
 
-    def validate_row_name(self, first_name, preferred_name, last_name):
+    @classmethod
+    def validate_row_name(cls, first_name, preferred_name, last_name):
         if first_name and last_name:
             return combine_names(first_name, preferred_name, last_name)
         else:
             raise RecordError('Missing first or last name')
 
-    def validate_row_semester(self, semester_string):
+    @classmethod
+    def validate_row_semester(cls, semester_string):
         # We will not know if we really need the semester's value until later
         try:
             return Semester(semester_string)
         except (TypeError, ValueError):
             return None
 
-    def validate_row_parent(self, big_badge_string):
+    @classmethod
+    def validate_row_parent(cls, big_badge_string):
         if big_badge_string:
             try:
-                return self.badge_format.format(int(big_badge_string))
+                return cls.badge_format.format(int(big_badge_string))
             except ValueError:
                 # The big's badge is not an integer; it may be a chapter designation
                 return big_badge_string
         else:
             return None
 
-    def validate_row_refounder_class(self, refounder_class_string):
+    @classmethod
+    def validate_row_refounder_class(cls, refounder_class_string):
         if refounder_class_string:
             try:
                 return Semester(refounder_class_string)
@@ -166,7 +171,8 @@ class BrotherRecord(MemberRecord):
 
     brother_id = 0
 
-    def get_key_from_badge(self, badge_string):
+    @classmethod
+    def get_key_from_badge(cls, badge_string):
         if badge_string:
             raise RecordError('Unknighted brothers do not have badge numbers')
         else:
@@ -174,7 +180,8 @@ class BrotherRecord(MemberRecord):
             BrotherRecord.brother_id += 1
             return key
 
-    def validate_row_name(self, first_name, preferred_name, last_name):
+    @classmethod
+    def validate_row_name(cls, first_name, preferred_name, last_name):
         if last_name:
             return last_name
         else:
@@ -188,7 +195,8 @@ class CandidateRecord(MemberRecord):
 
     candidate_id = 0
 
-    def get_key_from_badge(self, badge_string):
+    @classmethod
+    def get_key_from_badge(cls, badge_string):
         if badge_string:
             raise RecordError('Candidates do not have badge numbers')
         else:
@@ -202,7 +210,8 @@ class ExpelledRecord(MemberRecord):
     #### Row Validation Functions                                          ####
     ###########################################################################
 
-    def validate_row_name(self, first_name, preferred_name, last_name):
+    @classmethod
+    def validate_row_name(cls, first_name, preferred_name, last_name):
         if first_name and last_name:
             # They *should* have a name, but it's not going to be displayed
             return 'Member Expelled'
