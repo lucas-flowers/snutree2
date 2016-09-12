@@ -1,156 +1,27 @@
 import difflib
 from family_tree.semester import Semester
 
-class Record:
-
-    def __init__(self, key, name, parent_keys, semester):
-        self.key = key
-        self.name = name
-        self.parent_keys = parent_keys
-        self.semester = semester
-
-    def read_semester(self, semester):
-        # Unfortunately, we will not know if we really needed the semester's
-        # value until later
-        if not semester:
-            return None
-        try:
-            return Semester(semester)
-        except ValueError:
-            return None
-
-    def label(self):
-        return self.name
-
-    def dot_attributes(self):
-        return {
-                'label' : self.label(),
-                }
-
-    def dot_out_edge_attributes(self, child_record=None):
-        return {}
-
-class ReorganizationRecord(Record):
-
-    def __init__(self,
-            semester=None,
-            **kwargs
-            ):
-        '''
-
-        Note
-        ====
-
-        The parameter `semester` is the semester that the Reorganization
-        occurred (as found in the directory), i.e., the pledge semester for the
-        refounders that were not already in the chapter.
-
-        However, we do not want the reorganization node to occur at the same
-        level as the refounders. So, the semester passed to the Record
-        constructor is one semester earlier.
-
-        '''
-
-        semester = self.read_semester(semester)
-        super().__init__(
-                'Reorganization {}'.format(semester),
-                'Reorganization',
-                [], # No parents
-                semester-1,
-                )
-
-    # TODO should the semester be required?
-    def read_semester(self, semester):
-        try:
-            return Semester(semester)
-        except (TypeError, ValueError):
-            raise RecordError(
-                    'Invalid reorganization semester: {}'
-                    .format(semester)
-                    )
-
-    def label(self):
-        return 'Reorganization'
-
-    def dot_attributes(self):
-
-        return {
-                'label' : self.label(),
-                'shape' : 'oval',
-                }
-
-    def dot_out_edge_attributes(self, child_record=None):
-        if child_record and child_record.semester <= self.semester:
-            return {'style' : 'dashed'}
-        else:
-            return {}
-
-class ChapterRecord(Record):
-
-
-    def __init__(self,
-            chapter_designation=None,
-            chapter_location=None,
-            semester=None,
-            **kwargs):
-        '''
-
-        Note
-        ====
-
-        There are a few possibilities:
-
-            1) One ChapterRecord per chapter. This is not ideal, since two
-            brothers multiple years apart under the same chapter would screw up
-            the tree.
-
-            2) One ChapterRecord per semester, which is what I've chosen.
-
-            3) One ChapterRecord per brother.
-
-        '''
-
-        self.designation = self.read_chapter_designation(chapter_designation)
-        location = self.read_chapter_location(chapter_location)
-        semester = self.read_semester(semester)
-
-        super().__init__(
-                '{} ({})'.format(self.designation, semester),
-                location,
-                [], # No parent
-                semester,
-                )
-
-    def read_chapter_designation(self, chapter_designation):
-        if chapter_designation:
-            return chapter_designation
-        else:
-            raise RecordError('Missing chapter designation')
-
-    def read_chapter_location(self, chapter_location):
-        if chapter_location:
-            return chapter_location
-        else:
-            raise RecordError('Missing chapter name')
-
-    def label(self):
-        return '{} Chapter\\n{}'.format(self.designation, self.name)
-
-    def dot_attributes(self):
-        return {
-                'label' : self.label(),
-                'color' : 'none',
-                'fillcolor' : 'none',
-                }
-
-    def dot_out_edge_attributes(self, child_record=None):
-        return {'style' : 'dashed'}
-
-class MemberRecord(Record):
+class MemberRecord:
 
     badge_format = '{:04d}'
 
     def __init__(self,
+            name=None,
+            pledge_semester=None,
+            big_badge=None,
+            refounder_class=None,
+            ):
+        self.name = name
+        self.pledge_semester = pledge_semester
+        self.big_badge = big_badge
+        self.refounder_class = refounder_class
+
+    ###########################################################################
+    #### Row Validation Functions                                          ####
+    ###########################################################################
+
+    @classmethod
+    def from_row(cls,
             badge=None,
             first_name=None,
             preferred_name=None,
@@ -158,107 +29,136 @@ class MemberRecord(Record):
             big_badge=None,
             pledge_semester=None,
             refounder_class=None,
-            **kwargs):
+            **rest):
+        '''
+        Arguments
+        =========
 
-        if refounder_class:
-            self.refounder_class = refounder_class
+        A **dict representing the fields in a row of the directory. All fields
+        are *strings* that have not yet been validated.
 
-        super().__init__(
-                self.read_badge(badge),
-                self.read_name(first_name, preferred_name, last_name),
-                [x for x in [
-                    self.read_big_badge(big_badge),
-                    self.read_refounder(refounder_class)
-                    ] if x is not None],
-                self.read_semester(pledge_semester),
-                )
+        Returns
+        =======
 
-    def read_badge(self, badge):
+        A tuple, (key, record):
+
+        key: Key for the record
+        record: The record
+
+        '''
+
+        record = cls()
+
+        key = record.get_key_from_badge(badge)
+
+        record.name_from_row(first_name, preferred_name, last_name)
+        record.semester_from_row(pledge_semester)
+        record.big_badge_from_row(big_badge);
+        record.refounder_class_from_row(refounder_class)
+
+        return key, record
+
+    def get_key_from_badge(self, badge_string):
         try:
-            return MemberRecord.badge_format.format(int(badge))
+            return self.badge_format.format(int(badge_string))
         except ValueError:
-            raise RecordError('Unexpected badge number: "{}"'.format(badge))
+            raise RecordError('Unexpected badge number: "{}"'.format(badge_string))
 
-    def read_name(self, first_name, preferred_name, last_name):
+    def name_from_row(self, first_name, preferred_name, last_name):
         if first_name and last_name:
-            return choose_name(first_name, preferred_name, last_name)
+            self.name = combine_names(first_name, preferred_name, last_name)
         else:
             raise RecordError('Missing first or last name')
 
-    def read_big_badge(self, big_badge):
-        if not big_badge:
-            return None
-        try:
-            return MemberRecord.badge_format.format(int(big_badge))
-        except ValueError:
-            # big_badge does not represent an integer
-            return big_badge
-
-    def read_refounder(self, refounder_class):
-        if refounder_class:
-            return 'Reorganization {}'.format(Semester(refounder_class))
+    def semester_from_row(self, semester_string):
+        # We will not know if we really need the semester's value until later
+        if not semester_string:
+            self.semester = None
         else:
-            return None
+            try:
+                self.semester = Semester(semester_string)
+            except (TypeError, ValueError):
+                raise RecordError('Invalid semester: "{}"'.format(semester_string))
+
+    def big_badge_from_row(self, big_badge_string):
+        if not big_badge_string:
+            self.big_badge = None
+        else:
+            try:
+                self.big_badge = self.badge_format.format(int(big_badge_string))
+            except ValueError:
+                # The big's badge is not an integer; it may be a chapter designation
+                self.big_badge = big_badge_string
+
+    def refounder_class_from_row(self, refounder_class_string):
+        if refounder_class_string:
+            try:
+                self.refounder_class = Semester(refounder_class_string)
+            except (TypeError, ValueError):
+                raise RecordError('Unexpected refounding semester: "{}"'
+                        .format(refounder_class_string))
+        else:
+            self.refounder_class = None
 
 class KnightRecord(MemberRecord):
 
-    def label(self):
-        return '{}\\nΔA {}'.format(self.name, self.key)
-
+    pass
 
 class BrotherRecord(MemberRecord):
 
+    ###########################################################################
+    #### Row Validation Functions                                          ####
+    ###########################################################################
+
     brother_id = 0
 
-    def read_badge(self, badge):
-        if badge:
+    def get_key_from_badge(self, badge_string):
+        if badge_string:
             raise RecordError('Unknighted brothers do not have badge numbers')
         else:
+            key = 'Brother {}'.format(BrotherRecord.brother_id)
             BrotherRecord.brother_id += 1
-            return 'B{}'.format(BrotherRecord.brother_id - 1)
+            return key
 
-    def read_name(self, first_name, preferred_name, last_name):
+    def name_from_row(self, first_name, preferred_name, last_name):
         if last_name:
-            return last_name
+            self.name = last_name
         else:
-            raise RecordError('Missing last name')
-
-    def label(self):
-        return '{}\\nΔA Brother'.format(self.name)
+            return RecordError('Missing last name')
 
 class CandidateRecord(MemberRecord):
 
+    ###########################################################################
+    #### Row Validation Functions                                          ####
+    ###########################################################################
+
     candidate_id = 0
 
-    def read_badge(self, badge):
-        if badge:
+    def get_key_from_badge(self, badge_string):
+        if badge_string:
             raise RecordError('Candidates do not have badge numbers')
         else:
+            key = 'Candidate {}'.format(CandidateRecord.candidate_id)
             CandidateRecord.candidate_id += 1
-            return 'C{}'.format(CandidateRecord.candidate_id - 1)
-
-    def label(self):
-        return '{}\\nΔA Candidate'.format(self.name)
+            return key
 
 class ExpelledRecord(MemberRecord):
 
-    def label(self):
-        return 'Member Expelled\\n{}'.format(self.key)
+    ###########################################################################
+    #### Row Validation Functions                                          ####
+    ###########################################################################
 
-# TODO:
-#
-# Use a constructor (inheriting from MemberRecord instead of KnightRecord) that
-# will make the key equal to the lower badge number and raise an exception if
-# no Delta Alpha badge number is in the list of affiliations.
-#
-class ReaffiliateRecord(KnightRecord):
+    def name_from_row(self, first_name, preferred_name, last_name):
+        if first_name and last_name:
+            # They *should* have a name, but it's not going to be displayed
+            self.name = 'Member Expelled'
+        else:
+            raise RecordError('Missing first or last name')
 
-    def __init__(self, badge=None, **kwargs):
-        self.key = badge
-        self.name = NotImplemented
-        self.parent_keys = []
 
-def choose_name(first_name, preferred_name, last_name, threshold=.5):
+
+
+def combine_names(first_name, preferred_name, last_name, threshold=.5):
     '''
     Arguments
     =========
@@ -301,4 +201,3 @@ def choose_name(first_name, preferred_name, last_name, threshold=.5):
 class RecordError(Exception):
 
     pass
-
