@@ -1,4 +1,5 @@
 import csv, sys
+import networkx as nx
 from family_tree.records import *
 from family_tree.tree import *
 
@@ -62,25 +63,28 @@ def read_members(path):
 
         # TODO check headers
         reader = csv.DictReader(f)
-        records = {}
+        graph = nx.DiGraph()
         row_number = 2 # Starts at 2 because the header row is Row 1
         try:
             for row in reader:
 
                 # Create record based on status column
-                record = member_record_types[row['status']](**row)
+                key, record = member_record_types[row['status']].from_row(**row)
 
-                if record.key in records:
+                if key in graph:
                     raise DirectoryError('Duplicate key detected: "{}"'.format(record.key))
 
-                records[record.key] = record
+                # Implicitly ignores Reaffiliates
+                # TODO: Find a way to handle this
+                if key:
+                    graph.add_node(key, record=record)
 
                 row_number += 1
 
         except:
             raise DirectoryError('Error in row {}'.format(row_number))
 
-    return records
+    return graph
 
 def read_transfers(records, chapters):
 
