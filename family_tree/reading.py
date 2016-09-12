@@ -1,5 +1,6 @@
 import csv, sys
 import networkx as nx
+from networkx.algorithms.operators.binary import union
 from family_tree.records import *
 from family_tree.tree import *
 
@@ -119,12 +120,12 @@ def read_reorganizations(records):
 
 def read(directory_path, chapter_path, bnks_path):
 
-    chapters = read_chapters(chapter_path)
+    # chapters = read_chapters(chapter_path)
 
     records = read_members(directory_path) # Read all normal members
-    records.update(read_members(bnks_path)) # Add brothers not Knights
-    records.update(read_transfers(records, chapters)) # Add transfer chapters
-    records.update(read_reorganizations(records)) # Add reorganizations
+    records = union(records, read_members(bnks_path)) # Add brothers not Knights
+    # records.update(read_transfers(records, chapters)) # Add transfer chapters
+    # records.update(read_reorganizations(records)) # Add reorganizations
 
     return records
 
