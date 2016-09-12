@@ -10,6 +10,10 @@ class ReorganizationRecord:
         self.semester = semester
         self.parent = None
 
+    ###########################################################################
+    #### Validation Functions                                              ####
+    ###########################################################################
+
     @classmethod
     def from_member_record(cls, member_record):
 
@@ -31,6 +35,10 @@ class ChapterRecord:
         self.location = location
         self.semester = semester
         self.parent = None
+
+    ###########################################################################
+    #### Validation Functions                                              ####
+    ###########################################################################
 
     @classmethod
     def from_member_record(cls, member_record, chapter_locations):
