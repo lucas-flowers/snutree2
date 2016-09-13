@@ -43,9 +43,9 @@ def add_families(graph):
 def decorate_tree(graph):
 
     drop_orphans(graph)
+    add_families(graph)
     add_node_attributes(graph)
     add_edge_attributes(graph)
-    add_families(graph)
 
     return graph
 

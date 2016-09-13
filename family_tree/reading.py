@@ -1,5 +1,6 @@
 import csv, sys
 import networkx as nx
+from family_tree import color
 from networkx.algorithms.operators.binary import union
 from networkx.algorithms.operators.all import compose_all
 from family_tree.records import *
@@ -9,6 +10,23 @@ def csv_to_list(path):
     with open(path, 'r') as f:
         dict_list = list(csv.DictReader(f))
     return dict_list
+
+def read_family_colors(color_list):
+
+    family_colors = {}
+    row_number = 2
+    try:
+        for row in color_list:
+            family = row['family']
+            color = row['color']
+            if family in family_colors:
+                raise DirectoryError('Duplicate family: "{}"'.format(family))
+            family_colors[family] = color
+            row_number += 1
+    except:
+        raise DirectoryError('Error in row {}'.format(row_number))
+
+    return family_colors
 
 def read_chapters(chapter_list):
 
@@ -76,8 +94,12 @@ def read_graph(member_list, chapter_locations):
 
     return graph
 
+def read(directory_path, chapter_path, bnks_path, color_path):
 
-def read(directory_path, chapter_path, bnks_path):
+    # TODO encapsulate
+    family_colors = read_family_colors(csv_to_list(color_path))
+    MemberRecord.family_colors.update(family_colors)
+    MemberRecord.color_chooser.use_colors(family_colors.values())
 
     chapter_locations = read_chapters(csv_to_list(chapter_path))
 

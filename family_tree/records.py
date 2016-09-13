@@ -1,4 +1,6 @@
 import difflib
+from collections import defaultdict
+from family_tree.color import ColorChooser
 from family_tree.semester import Semester
 
 class Record:
@@ -141,6 +143,8 @@ class ChapterRecord(Record):
 class MemberRecord(Record):
 
     badge_format = '{:04d}'
+    color_chooser = ColorChooser.from_graphviz_colors()
+    family_colors = defaultdict(color_chooser.next_color)
 
     def __init__(self,
             name=None,
@@ -228,6 +232,7 @@ class KnightRecord(MemberRecord):
     def dot_node_attributes(self):
         return {
                 'label' : '{}\\nΔA {}'.format(self.name, self.badge),
+                'color' : self.family_colors[self.family],
                 }
 
 class BrotherRecord(MemberRecord):
@@ -267,6 +272,7 @@ class BrotherRecord(MemberRecord):
     def dot_node_attributes(self):
         return {
                 'label' : '{}\\nΔA Brother'.format(self.name),
+                'color' : self.family_colors[self.family],
                 }
 
 class CandidateRecord(MemberRecord):
@@ -299,6 +305,7 @@ class CandidateRecord(MemberRecord):
     def dot_node_attributes(self):
         return {
                 'label' : '{}\\nΔA Candidate'.format(self.name),
+                'color' : self.family_colors[self.family],
                 }
 
 class ExpelledRecord(KnightRecord):
@@ -322,6 +329,7 @@ class ExpelledRecord(KnightRecord):
     def dot_node_attributes(self):
         return {
                 'label' : '{}\\n{}'.format(self.name, self.badge),
+                'color' : self.family_colors[self.family],
                 }
 
 # TODO use affiliate list to do stuff
