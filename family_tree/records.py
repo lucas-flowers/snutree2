@@ -220,6 +220,19 @@ class MemberRecord(Record):
                 pass
         return None
 
+    ###########################################################################
+    #### DOT Functions                                                     ####
+    ###########################################################################
+
+    def get_dot_label(self):
+        return ''
+
+    def dot_node_attributes(self):
+        return {
+                'label' : self.get_dot_label(),
+                'color' : self.family_colors[self.family],
+                }
+
 class KnightRecord(MemberRecord):
 
     def get_key(self):
@@ -229,11 +242,8 @@ class KnightRecord(MemberRecord):
     #### DOT Functions                                                     ####
     ###########################################################################
 
-    def dot_node_attributes(self):
-        return {
-                'label' : '{}\\nΔA {}'.format(self.name, self.badge),
-                'color' : self.family_colors[self.family],
-                }
+    def get_dot_label(self):
+        return '{}\\nΔA {}'.format(self.name, self.badge)
 
 class BrotherRecord(MemberRecord):
 
@@ -269,11 +279,8 @@ class BrotherRecord(MemberRecord):
     #### DOT Functions                                                     ####
     ###########################################################################
 
-    def dot_node_attributes(self):
-        return {
-                'label' : '{}\\nΔA Brother'.format(self.name),
-                'color' : self.family_colors[self.family],
-                }
+    def get_dot_label(self):
+        return '{}\\nΔA Brother'.format(self.name)
 
 class CandidateRecord(MemberRecord):
 
@@ -302,11 +309,8 @@ class CandidateRecord(MemberRecord):
     #### DOT Functions                                                     ####
     ###########################################################################
 
-    def dot_node_attributes(self):
-        return {
-                'label' : '{}\\nΔA Candidate'.format(self.name),
-                'color' : self.family_colors[self.family],
-                }
+    def get_dot_label(self):
+        return '{}\\nΔA Candidate'.format(self.name)
 
 class ExpelledRecord(KnightRecord):
 
@@ -326,11 +330,8 @@ class ExpelledRecord(KnightRecord):
     #### DOT Functions                                                     ####
     ###########################################################################
 
-    def dot_node_attributes(self):
-        return {
-                'label' : '{}\\n{}'.format(self.name, self.badge),
-                'color' : self.family_colors[self.family],
-                }
+    def get_dot_label(self):
+        return '{}\\n{}'.format(self.name, self.badge)
 
 # TODO use affiliate list to do stuff
 class ReaffiliateRecord(MemberRecord):
