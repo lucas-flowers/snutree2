@@ -1,52 +1,144 @@
 import difflib
 from family_tree.semester import Semester
 
-class ReorganizationRecord:
-
-    def __init__(self, semester):
-
-        self.semester = semester
-        self.parent = None
-
-    def get_key(self):
-
-        return 'Reorganization Node {}'.format(self.semester)
+class Record:
 
     ###########################################################################
-    #### Factory from Member Records                                       ####
+    #### Row Validation Functions                                          ####
     ###########################################################################
 
     @classmethod
-    def from_member(cls, member):
-        # Minus one because the Reorganization node is placed a semester before
-        # the actual reorganization (so that it is above the new refounders).
-        return cls(member.refounder_class - 1)
+    def validate_row_semester(cls, semester_string):
+        # We will not know if we really need the semester's value until later
+        try:
+            return Semester(semester_string)
+        except (TypeError, ValueError):
+            return None
 
-class ChapterRecord:
+    ###########################################################################
+    #### DOT Functions                                                     ####
+    ###########################################################################
 
-    def __init__(self, semester, designation, location):
+    def dot_node_attributes(self):
+        return {}
+
+    def dot_edge_attributes(self, other):
+        return {}
+
+class ReorganizationRecord(Record):
+
+    def __init__(self, semester=None):
+
+        self.semester = semester
+
+    def get_key(self):
+
+        # Plus one because self.semester is the placement semester, not the
+        # true semester
+        return 'Reorganization Node {}'.format(self.semester+1)
+
+    ###########################################################################
+    #### Row Validation Functions                                          ####
+    ###########################################################################
+
+    @classmethod
+    def from_row(cls,
+            refounder_class=None,
+            **rest):
+
+        if refounder_class:
+
+            record = cls()
+
+            # Minus one because the Reorganization node is placed a semester
+            # before the actual reorganization (so that it is above the new
+            # refounders).
+            record.semester = cls.validate_row_refounder_class(refounder_class) - 1
+
+            return record
+
+        else:
+
+            return None
+
+    @classmethod
+    def validate_row_refounder_class(cls, refounder_class_string):
+        try:
+            return Semester(refounder_class_string)
+        except (TypeError, ValueError):
+            raise RecordError('Unexpected refounding semester: "{}"'
+                    .format(refounder_class_string))
+
+    ###########################################################################
+    #### DOT Functions                                                     ####
+    ###########################################################################
+
+    def dot_node_attributes(self):
+        return {
+                'label' : 'Reorganization',
+                'shape' : 'oval'
+                }
+
+    def dot_edge_attributes(self, other):
+        if self.semester > other.semester:
+            return {'style' : 'dashed'}
+        else:
+            return {}
+
+class ChapterRecord(Record):
+
+    def __init__(self,
+            semester=None,
+            designation=None,
+            location=None
+            ):
 
         self.semester = semester
         self.designation = designation
         self.location = location
-        self.parent = None
 
     def get_key(self):
         return '{} {}'.format(self.designation, self.semester)
 
     ###########################################################################
-    #### Factory from Member Records                                       ####
+    #### Row Validation Functions                                          ####
     ###########################################################################
 
     @classmethod
-    def from_member(cls, member, chapter_locations):
-        return cls(
-                member.semester - 1,
-                member.parent,
-                chapter_locations[member.parent],
-                )
+    def from_row(cls, chapters,
+            pledge_semester=None,
+            big_badge=None,
+            **rest):
 
-class MemberRecord:
+        if big_badge and big_badge in chapters:
+
+            record = cls()
+
+            record.semester = cls.validate_row_semester(pledge_semester) - 1
+            record.designation = big_badge # No validation; assumed already checked
+            record.location = chapters[record.designation]
+
+            return record
+
+        else:
+
+            return None
+
+    ###########################################################################
+    #### DOT Functions                                                     ####
+    ###########################################################################
+
+    def dot_node_attributes(self):
+        return {
+                'label' : '{} Chapter\\n{}'.format(self.designation, self.location),
+                'color' : 'none',
+                'fillcolor' : 'none',
+                }
+
+    def dot_edge_attributes(self, other):
+        return {'style' : 'dashed'}
+
+class MemberRecord(Record):
 
     badge_format = '{:04d}'
 
@@ -54,13 +146,11 @@ class MemberRecord:
             name=None,
             pledge_semester=None,
             big_badge=None,
-            refounder_class=None,
             badge=None,
             ):
         self.name = name
         self.semester = pledge_semester
         self.parent = big_badge
-        self.refounder_class = refounder_class
         self.badge = badge
 
     def get_key(self):
@@ -78,7 +168,6 @@ class MemberRecord:
             last_name=None,
             big_badge=None,
             pledge_semester=None,
-            refounder_class=None,
             **rest):
         '''
         Arguments
@@ -100,7 +189,6 @@ class MemberRecord:
         record.name = cls.validate_row_name(first_name, preferred_name, last_name)
         record.semester = cls.validate_row_semester(pledge_semester)
         record.parent = cls.validate_row_parent(big_badge);
-        record.refounder_class = cls.validate_row_refounder_class(refounder_class)
 
         return record
 
@@ -119,39 +207,28 @@ class MemberRecord:
             raise RecordError('Missing first or last name')
 
     @classmethod
-    def validate_row_semester(cls, semester_string):
-        # We will not know if we really need the semester's value until later
-        try:
-            return Semester(semester_string)
-        except (TypeError, ValueError):
-            return None
-
-    @classmethod
     def validate_row_parent(cls, big_badge_string):
         if big_badge_string:
             try:
                 return cls.badge_format.format(int(big_badge_string))
             except ValueError:
                 # The big's badge is not an integer; it may be a chapter designation
-                return big_badge_string
-        else:
-            return None
-
-    @classmethod
-    def validate_row_refounder_class(cls, refounder_class_string):
-        if refounder_class_string:
-            try:
-                return Semester(refounder_class_string)
-            except (TypeError, ValueError):
-                raise RecordError('Unexpected refounding semester: "{}"'
-                        .format(refounder_class_string))
-        else:
-            return None
+                pass
+        return None
 
 class KnightRecord(MemberRecord):
 
     def get_key(self):
         return self.badge
+
+    ###########################################################################
+    #### DOT Functions                                                     ####
+    ###########################################################################
+
+    def dot_node_attributes(self):
+        return {
+                'label' : '{}\\nΔA {}'.format(self.name, self.badge),
+                }
 
 class BrotherRecord(MemberRecord):
 
@@ -183,6 +260,15 @@ class BrotherRecord(MemberRecord):
         else:
             return RecordError('Missing last name')
 
+    ###########################################################################
+    #### DOT Functions                                                     ####
+    ###########################################################################
+
+    def dot_node_attributes(self):
+        return {
+                'label' : '{}\\nΔA Brother'.format(self.name),
+                }
+
 class CandidateRecord(MemberRecord):
 
     candidate_id = 0
@@ -206,6 +292,15 @@ class CandidateRecord(MemberRecord):
         else:
             return None
 
+    ###########################################################################
+    #### DOT Functions                                                     ####
+    ###########################################################################
+
+    def dot_node_attributes(self):
+        return {
+                'label' : '{}\\nΔA Candidate'.format(self.name),
+                }
+
 class ExpelledRecord(KnightRecord):
 
     ###########################################################################
@@ -220,15 +315,28 @@ class ExpelledRecord(KnightRecord):
         else:
             raise RecordError('Missing first or last name')
 
+    ###########################################################################
+    #### DOT Functions                                                     ####
+    ###########################################################################
+
+    def dot_node_attributes(self):
+        return {
+                'label' : '{}\\n{}'.format(self.name, self.badge),
+                }
+
 # TODO use affiliate list to do stuff
 class ReaffiliateRecord(MemberRecord):
 
     def get_key(self):
         return None
 
+    ###########################################################################
+    #### Row Validation Functions                                          ####
+    ###########################################################################
+
     @classmethod
     def from_row(cls, **kwargs):
-        return ReaffiliateRecord()
+        return None
 
 def combine_names(first_name, preferred_name, last_name, threshold=.5):
     '''

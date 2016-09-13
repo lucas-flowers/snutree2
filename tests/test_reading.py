@@ -7,12 +7,12 @@ from family_tree.reading import *
 #     assert_equal(chapters['Alpha'], 'Virginia Military Institute')
 #     assert_equal(chapters['Delta Zeta'], 'Western Reserve University')
 
-def test_read_members():
-
-    graph = read_members('directory.csv')
-    assert_equal(graph.node['1352']['record'].name, 'Lucas Flowers')
-
-    records = read_members('brothers_not_knights.csv')
+# def test_read_members():
+#
+#     graph = read_members('directory.csv')
+#     assert_equal(graph.node['1352']['record'].name, 'Lucas Flowers')
+#
+#     records = read_members('brothers_not_knights.csv')
 
 # def test_read_transfers():
 #

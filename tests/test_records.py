@@ -19,26 +19,35 @@ def test_ReorganizationRecord():
     # # Label
     # assert_equals(ReorganizationRecord('Fall 1922').label(), 'Reorganization')
 
-    member = MemberRecord('John Doe', Semester('Fall 1942'), 'ΔZ', Semester('Fall 1945'))
+    row = {'refounder_class' : 'Fall 1945'}
 
     # The placement semester for Reorganization nodes is one semester before
     # the refounder_class field...
     assert_equals(
-            ReorganizationRecord.from_member(member).semester,
+            ReorganizationRecord.from_row(**row).semester,
             Semester('Spring 1945'),
             )
 
     # ... however, the actual key for the reorganization is of the true
     # reorganization semester.
     assert_equals(
-            ReorganizationRecord(member.refounder_class).get_key(),
+            ReorganizationRecord.from_row(**row).get_key(),
             'Reorganization Node Fall 1945',
             )
 
 def test_ChapterRecord():
 
-    member1 = MemberRecord('John Doe', Semester('Fall 1942'), 'ΔZ')
-    member2 = MemberRecord('John Smith', Semester('Fall 1945'), 'KΔ')
+    row1 = {
+            'name' : 'John Doe',
+            'pledge_semester' : 'Fall 1942',
+            'big_badge' : 'ΔZ',
+            }
+
+    row2 = {
+            'name' : 'John Smith',
+            'pledge_semester' : 'Fall 1945',
+            'big_badge' :'KΔ',
+            }
 
     chapter_locations = {
             'KΔ' : 'Doo-Kez-Nee',
@@ -47,11 +56,11 @@ def test_ChapterRecord():
 
 
     # No error
-    ChapterRecord.from_member(member1, chapter_locations)
+    ChapterRecord.from_row(chapter_locations, **row1)
 
     # Key
     assert_equals(
-            ChapterRecord.from_member(member1, chapter_locations).get_key(),
+            ChapterRecord.from_row(chapter_locations, **row1).get_key(),
             'ΔZ Spring 1942',
             )
 
@@ -63,7 +72,7 @@ def test_ChapterRecord():
 
     # Name
     assert_equals(
-            ChapterRecord.from_member(member2, chapter_locations).location,
+            ChapterRecord.from_row(chapter_locations, **row2).location,
             'Doo-Kez-Nee',
             )
 

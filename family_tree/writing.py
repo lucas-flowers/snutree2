@@ -84,12 +84,12 @@ def create_tree_subgraph(key, graph):
 
     # TODO add nodes
     nodes = []
-    for key, attributes in graph.nodes_iter(data=True):
-        nodes.append(dot.Node(key, attributes))
+    for key, node_dict in graph.nodes_iter(data=True):
+        nodes.append(dot.Node(key, node_dict['dot_node_attributes']))
 
     edges = []
-    for parent_key, child_key, attributes in graph.edges(data=True):
-        edges.append(dot.Edge(parent_key, child_key, attributes))
+    for parent_key, child_key, edge_dict in graph.edges(data=True):
+        edges.append(dot.Edge(parent_key, child_key, edge_dict['dot_edge_attributes']))
 
     dotgraph.children = nodes + edges
 
@@ -110,8 +110,6 @@ def create_ranks(graph):
                     ])
 
     return list(ranks.values())
-
-
 
 def create_graph(graph):
 
