@@ -5,6 +5,7 @@ from networkx.algorithms.operators.binary import union
 from networkx.algorithms.operators.all import compose_all
 from family_tree.records import *
 from family_tree.tree import *
+from family_tree.file import *
 
 def csv_to_list(path):
     with open(path, 'r') as f:
@@ -97,18 +98,18 @@ def read_graph(member_list, chapter_locations):
 def read(directory_path, chapter_path, bnks_path, color_path):
 
     # TODO encapsulate
-    family_colors = read_family_colors(csv_to_list(color_path))
+    family_colors = FamilyColorReader.from_path(color_path).read()
     MemberRecord.family_colors.update(family_colors)
     MemberRecord.color_chooser.use_colors(family_colors.values())
 
-    chapter_locations = read_chapters(csv_to_list(chapter_path))
+    chapter_locations = ChapterReader.from_path(chapter_path).read()
 
     # TODO be sure to provide error information errors correctly, or probably
     # split this into two calls---one for each file
-    member_list = csv_to_list(directory_path) + csv_to_list(bnks_path)
+    graph = DirectoryReader.from_paths(chapter_locations, directory_path, bnks_path).read()
 
     # TODO add options?
-    graph = read_graph(member_list, chapter_locations)
+    # graph = read_graph(member_list, chapter_locations)
 
     return graph
 
