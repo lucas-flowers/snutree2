@@ -64,6 +64,8 @@ class DirectoryReader(CsvReader):
     # TODO simplify by restructuring MemberRecord and subclasses. Stuff
     # like moving the record_types dict to teh records module. The goal
     # isto make it look as simple as the chapter/reorg from_row calls.
+    #
+    # i.e., create a MemberRecord.from_row factory method.
     member_record_types = {
             'Active' : KnightRecord,
             'Alumni' : KnightRecord,
