@@ -1,8 +1,7 @@
 import csv, sys
 import networkx as nx
 from family_tree import color
-from networkx.algorithms.operators.binary import union
-from networkx.algorithms.operators.all import compose_all
+from networkx.algorithms.operators.binary import union, compose
 from family_tree.records import *
 from family_tree.tree import *
 from family_tree.file import *
@@ -104,12 +103,24 @@ def read(directory_path, chapter_path, bnks_path, color_path):
 
     chapter_locations = ChapterReader.from_path(chapter_path).read()
 
-    # TODO be sure to provide error information errors correctly, or probably
-    # split this into two calls---one for each file
-    graph = DirectoryReader.from_paths(chapter_locations, directory_path, bnks_path).read()
+    main_graph = DirectoryReader.from_path(directory_path, chapter_locations).read()
+    bnks_graph = DirectoryReader.from_path(bnks_path, chapter_locations).read()
 
-    # TODO add options?
-    # graph = read_graph(member_list, chapter_locations)
+    # Second argument attributes overwrite first
+    graph = compose(bnks_graph, main_graph)
+
+    # TODO put somewhere
+    for key, node_dict in graph.nodes_iter(data=True):
+        if 'record' not in node_dict:
+
+            # This should only happen if, for some member record,
+            # member_record.parent was an invalid key (i.e., neither an
+            # existing badge number nor a valid chapter designation). Find
+            # the node's infringing parent and raise an appropriate error.
+
+            parent = next(graph.successors_iter(key))
+            raise DirectoryError('Brother with badge {} has unknown big brother: "{}"'.format(parent, key))
+
 
     return graph
 

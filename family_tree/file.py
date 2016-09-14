@@ -17,38 +17,39 @@ class CsvReader:
         row_number = 2
         try:
             for row in self.rows:
-                key, fields = self.fields_of(row)
-                self.accumulate(accumulator, key, fields)
+                self.accumulate(accumulator, row)
                 row_number += 1
         except:
             raise DirectoryError('Error in row {}'.format(row_number))
 
         return accumulator
 
-    def fields_of(self, row):
-        raise NotImplementedError
-
     def accumulate(self, accumulator, key, fields):
-        if key in accumulator:
-            raise DirectoryError('Duplicate {}:  "{}"'.format(self.key_name, key))
-        accumulator[key] = fields
+        raise NotImplementedError
 
     @classmethod
     def from_path(cls, path):
         return cls(list(csv.DictReader(open(path, 'r'))))
 
-    @classmethod
-    def from_paths(cls, *paths):
-        return cls(chain(*[list(csv.DictReader(open(path, 'r'))) for path in paths]))
+class NonDuplicateReader(CsvReader):
 
-class ChapterReader(CsvReader):
+    def fields_of(self, row):
+        raise NotImplementedError
+
+    def accumulate(self, accumulator, row):
+        key, fields = self.fields_of(row)
+        if key in accumulator:
+            raise DirectoryError('Duplicate {}:  "{}"'.format(self.key_name, key))
+        accumulator[key] = fields
+
+class ChapterReader(NonDuplicateReader):
 
     key_name = 'chapter'
 
     def fields_of(self, row):
         return row['chapter_designation'], row['chapter_location']
 
-class FamilyColorReader(CsvReader):
+class FamilyColorReader(NonDuplicateReader):
 
     key_name = 'family'
 
@@ -73,18 +74,14 @@ class DirectoryReader(CsvReader):
         self.chapter_locations = chapter_locations or {}
         super().__init__(rows)
 
-    def fields_of(self, row):
+    def accumulate(self, accumulator, row):
 
+        graph = accumulator
+
+        # TODO handle duplicate `badge` fields
         member_record = self.member_record_types[row['status']].from_row(**row)
         chapter_record = ChapterRecord.from_row(self.chapter_locations, **row)
         reorg_record = ReorganizationRecord.from_row(**row)
-
-        return member_record and member_record.get_key(), (member_record, chapter_record, reorg_record)
-
-    def accumulate(self, accumulator, key, records):
-
-        graph = accumulator
-        member_record, chapter_record, reorg_record = records
 
         if member_record:
             member_key = member_record.get_key()
@@ -104,9 +101,14 @@ class DirectoryReader(CsvReader):
                 graph.add_node(reorg_key, record=reorg_record)
             graph.add_edge(reorg_key, member_key)
 
+        # Invalid parent badge
+        if member_record and not member_record.parent and row['big_badge'] and not chapter_record:
+            raise DirectoryError('Invalid big brother badge or transfer chapter designation: "{}"'.format(row['big_badge']))
+
+
     @classmethod
-    def from_paths(cls, chapter_locations=None, *paths):
-        reader = super().from_paths(*paths)
+    def from_path(cls, directory_path, chapter_locations=None):
+        reader = super().from_path(directory_path)
         reader.chapter_locations = chapter_locations
         return reader
 
