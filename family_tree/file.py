@@ -6,7 +6,6 @@ from family_tree.records import *
 class CsvReader:
 
     accumulator = dict
-    key_name = 'key'
 
     def __init__(self, rows=None):
         self.rows = rows or []
@@ -59,7 +58,6 @@ class FamilyColorReader(SimpleReader):
 class DirectoryReader(CsvReader):
 
     accumulator = nx.DiGraph
-    key_name = 'badge'
 
     member_record_types = {
             'Active' : KnightRecord,
