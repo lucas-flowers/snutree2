@@ -2,13 +2,13 @@ import networkx as nx
 
 from family_tree.semester import *
 from family_tree.writing import *
-from family_tree import tree
+from family_tree.tree import FamilyTree
 
 # Initialization
 
-graph = tree.generate_graph('directory.csv', 'chapters.csv', 'brothers_not_knights.csv', 'family_colors.csv')
-tree.decorate_tree(graph)
-dotgraph = create_graph(graph)
+tree = FamilyTree.from_paths('directory.csv', 'chapters.csv', 'brothers_not_knights.csv', 'family_colors.csv')
+tree.decorate()
+dotgraph = tree.to_dot_graph()
 
 print(dotgraph.to_dot())
 
