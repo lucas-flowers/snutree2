@@ -31,7 +31,7 @@ class CsvReader:
     def from_path(cls, path):
         return cls(list(csv.DictReader(open(path, 'r'))))
 
-class NonDuplicateReader(CsvReader):
+class SimpleReader(CsvReader):
 
     def fields_of(self, row):
         raise NotImplementedError
@@ -42,14 +42,14 @@ class NonDuplicateReader(CsvReader):
             raise DirectoryError('Duplicate {}:  "{}"'.format(self.key_name, key))
         accumulator[key] = fields
 
-class ChapterReader(NonDuplicateReader):
+class ChapterReader(SimpleReader):
 
     key_name = 'chapter'
 
     def fields_of(self, row):
         return row['chapter_designation'], row['chapter_location']
 
-class FamilyColorReader(NonDuplicateReader):
+class FamilyColorReader(SimpleReader):
 
     key_name = 'family'
 
