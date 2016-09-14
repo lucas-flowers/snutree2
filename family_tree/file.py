@@ -32,6 +32,8 @@ class CsvReader:
 
 class SimpleReader(CsvReader):
 
+    key_name = NotImplemented
+
     def fields_of(self, row):
         raise NotImplementedError
 
