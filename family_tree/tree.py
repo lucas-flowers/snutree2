@@ -2,6 +2,8 @@ import networkx as nx
 from networkx.algorithms import dag
 from collections import defaultdict
 from family_tree.records import MemberRecord
+from networkx.algorithms.operators.binary import compose
+from family_tree.file import *
 
 def drop_orphans(graph):
 
@@ -49,4 +51,42 @@ def decorate_tree(graph):
 
     return graph
 
+# TODO remove when MemberRecord call is removed
+from family_tree.records import MemberRecord
+
+# TODO handle when variables paths are empty
+def generate_graph(
+        directory_path=None,
+        chapter_path=None,
+        bnks_path=None,
+        color_path=None
+        ):
+
+    # TODO encapsulate
+    family_colors = FamilyColorReader.from_path(color_path).read()
+    MemberRecord.family_colors.update(family_colors)
+    MemberRecord.color_chooser.use_colors(family_colors.values())
+
+    chapter_locations = ChapterReader.from_path(chapter_path).read()
+
+    main_graph = DirectoryReader.from_path(directory_path, chapter_locations).read()
+    bnks_graph = DirectoryReader.from_path(bnks_path, chapter_locations).read()
+
+    # Second argument attributes overwrite first
+    graph = compose(bnks_graph, main_graph)
+
+    # TODO put somewhere
+    for key, node_dict in graph.nodes_iter(data=True):
+        if 'record' not in node_dict:
+
+            # This should only happen if, for some member record,
+            # member_record.parent was an invalid key (i.e., neither an
+            # existing badge number nor a valid chapter designation). Find
+            # the node's infringing parent and raise an appropriate error.
+
+            parent = next(graph.successors_iter(key))
+            raise DirectoryError('Brother with badge {} has unknown big brother: "{}"'.format(parent, key))
+
+
+    return graph
 
