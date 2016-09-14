@@ -79,13 +79,13 @@ def generate_graph(
     for key, node_dict in graph.nodes_iter(data=True):
         if 'record' not in node_dict:
 
-            # This should only happen if, for some member record,
-            # member_record.parent was an invalid key (i.e., neither an
+            # This should only happen if, for some child member record,
+            # member_record.parent (this node) was an invalid key (i.e., neither an
             # existing badge number nor a valid chapter designation). Find
-            # the node's infringing parent and raise an appropriate error.
+            # this node's infringing child and raise an appropriate error.
 
-            parent = next(graph.successors_iter(key))
-            raise DirectoryError('Brother with badge {} has unknown big brother: "{}"'.format(parent, key))
+            child = next(graph.successors_iter(key))
+            raise DirectoryError('Brother with badge {} has unknown big brother: "{}"'.format(child, key))
 
 
     return graph
