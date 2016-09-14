@@ -78,13 +78,14 @@ class DirectoryReader(CsvReader):
 
         graph = accumulator
 
-        # TODO handle duplicate `badge` fields
         member_record = self.member_record_types[row['status']].from_row(**row)
         chapter_record = ChapterRecord.from_row(self.chapter_locations, **row)
         reorg_record = ReorganizationRecord.from_row(**row)
 
         if member_record:
             member_key = member_record.get_key()
+            if member_key in graph and 'record' in graph.node[member_key]:
+                raise DirectoryError('Duplicate badge: "{}"'.format(member_key))
             graph.add_node(member_key, record=member_record)
             if member_record.parent:
                 graph.add_edge(member_record.parent, member_key)
