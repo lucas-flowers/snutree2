@@ -61,12 +61,6 @@ class DirectoryReader(CsvReader):
 
     accumulator = nx.DiGraph
 
-    # TODO simplify by restructuring MemberRecord and subclasses. Stuff
-    # like moving the record_types dict to teh records module. The goal
-    # isto make it look as simple as the chapter/reorg from_row calls.
-    #
-    # i.e., create a MemberRecord.from_row factory method.
-
     def __init__(self, rows=None, chapter_locations=None):
         self.chapter_locations = chapter_locations or {}
         super().__init__(rows)
@@ -75,7 +69,7 @@ class DirectoryReader(CsvReader):
 
         graph = accumulator
 
-        member_record = member_record_from_row(row)
+        member_record = MemberRecord.from_row(**row)
         chapter_record = ChapterRecord.from_row(self.chapter_locations, **row)
         reorg_record = ReorganizationRecord.from_row(**row)
 

@@ -3,22 +3,6 @@ from collections import defaultdict
 from family_tree.color import ColorChooser
 from family_tree.semester import Semester
 
-def member_record_from_row(row):
-    '''
-    A factory.
-    '''
-
-    classes = {
-            'Active' : KnightRecord,
-            'Alumni' : KnightRecord,
-            'Brother' : BrotherRecord,
-            'Candidate' : CandidateRecord,
-            'Expelled' : ExpelledRecord,
-            'Reaffiliate' : ReaffiliateRecord, # Returns None
-            }
-
-    return classes[row['status']].from_row(**row)
-
 class Record:
 
     ###########################################################################
@@ -180,14 +164,15 @@ class MemberRecord(Record):
     #### Row Validation Functions                                          ####
     ###########################################################################
 
-    @classmethod
-    def from_row(cls,
+    @staticmethod
+    def from_row(
             badge=None,
             first_name=None,
             preferred_name=None,
             last_name=None,
             big_badge=None,
             pledge_semester=None,
+            status=None,
             **rest):
         '''
         Arguments
@@ -203,12 +188,27 @@ class MemberRecord(Record):
 
         '''
 
-        record = cls()
+        unique_record_types = {
+                'Active' : KnightRecord,
+                'Alumni' : KnightRecord,
+                'Brother' : BrotherRecord,
+                'Candidate' : CandidateRecord,
+                'Expelled' : ExpelledRecord,
+                }
 
-        record.badge = cls.validate_row_badge(badge)
-        record.name = cls.validate_row_name(first_name, preferred_name, last_name)
-        record.semester = cls.validate_row_semester(pledge_semester)
-        record.parent = cls.validate_row_parent(big_badge);
+        if status in unique_record_types:
+            subclass = unique_record_types[status]
+            record = subclass()
+            record.badge = subclass.validate_row_badge(badge)
+            record.name = subclass.validate_row_name(first_name, preferred_name, last_name)
+            record.semester = subclass.validate_row_semester(pledge_semester)
+            record.parent = subclass.validate_row_parent(big_badge);
+
+        elif status == 'Reaffiliate':
+            return None
+
+        else:
+            raise RecordError('Invalid member status: {}'.format(status))
 
         return record
 
@@ -349,7 +349,7 @@ class ExpelledRecord(KnightRecord):
     def get_dot_label(self):
         return '{}\\n{}'.format(self.name, self.badge)
 
-# TODO use affiliate list to do stuff
+# TODO use affiliate list to do stuff?
 class ReaffiliateRecord(MemberRecord):
 
     def get_key(self):
