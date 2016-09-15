@@ -66,14 +66,6 @@ class DirectoryReader(CsvReader):
     # isto make it look as simple as the chapter/reorg from_row calls.
     #
     # i.e., create a MemberRecord.from_row factory method.
-    member_record_types = {
-            'Active' : KnightRecord,
-            'Alumni' : KnightRecord,
-            'Brother' : BrotherRecord,
-            'Candidate' : CandidateRecord,
-            'Expelled' : ExpelledRecord,
-            'Reaffiliate' : ReaffiliateRecord, # Returns None
-            }
 
     def __init__(self, rows=None, chapter_locations=None):
         self.chapter_locations = chapter_locations or {}
@@ -83,7 +75,7 @@ class DirectoryReader(CsvReader):
 
         graph = accumulator
 
-        member_record = self.member_record_types[row['status']].from_row(**row)
+        member_record = member_record_from_row(row)
         chapter_record = ChapterRecord.from_row(self.chapter_locations, **row)
         reorg_record = ReorganizationRecord.from_row(**row)
 

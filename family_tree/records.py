@@ -3,6 +3,22 @@ from collections import defaultdict
 from family_tree.color import ColorChooser
 from family_tree.semester import Semester
 
+def member_record_from_row(row):
+    '''
+    A factory.
+    '''
+
+    classes = {
+            'Active' : KnightRecord,
+            'Alumni' : KnightRecord,
+            'Brother' : BrotherRecord,
+            'Candidate' : CandidateRecord,
+            'Expelled' : ExpelledRecord,
+            'Reaffiliate' : ReaffiliateRecord, # Returns None
+            }
+
+    return classes[row['status']].from_row(**row)
+
 class Record:
 
     ###########################################################################
