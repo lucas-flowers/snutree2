@@ -246,7 +246,6 @@ class MemberRecord(Record):
     def dot_node_attributes(self):
         return {
                 'label' : self.get_dot_label(),
-                'color' : self.family_colors[self.family],
                 }
 
 class KnightRecord(MemberRecord):

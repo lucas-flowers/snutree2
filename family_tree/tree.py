@@ -46,8 +46,9 @@ default_semester_node = {
 
 class FamilyTree:
 
-    def __init__(self, graph=None):
+    def __init__(self, graph=None, default_family_colors=None):
         self.graph = graph
+        self.default_family_colors = {} or default_family_colors
 
     ###########################################################################
     #### Generation                                                        ####
@@ -64,11 +65,6 @@ class FamilyTree:
 
         tree = cls()
 
-        # TODO encapsulate
-        family_colors = FamilyColorReader.from_path(color_path).read()
-        MemberRecord.family_colors.update(family_colors)
-        MemberRecord.color_chooser.use_colors(family_colors.values())
-
         chapter_locations = ChapterReader.from_path(chapter_path).read()
 
         main_graph = DirectoryReader.from_path(directory_path, chapter_locations).read()
@@ -76,6 +72,8 @@ class FamilyTree:
 
         # Second argument attributes overwrite first
         tree.graph = compose(bnks_graph, main_graph)
+
+        tree.default_family_colors = FamilyColorReader.from_path(color_path).read()
 
         tree.validate_node_existence()
 
@@ -116,6 +114,7 @@ class FamilyTree:
         self.kill_orphans()
         self.add_families()
         self.add_node_attributes()
+        self.add_colors()
         self.add_edge_attributes()
 
     def kill_orphans(self):
@@ -150,13 +149,25 @@ class FamilyTree:
 
         # Mark descendants of the heads
         for head_key in family_heads:
-            self.graph.node[head_key]['record'].family = head_key
+            self.graph.node[head_key]['family'] = head_key
             for descendant_key in dag.descendants(members_only, head_key):
-                self.graph.node[descendant_key]['record'].family = head_key
+                self.graph.node[descendant_key]['family'] = head_key
 
     ###########################################################################
     #### Convert to DOT                                                    ####
     ###########################################################################
+
+    def add_colors(self):
+
+        # TODO make these lines a factory(?) method in ColorChooser?
+        color_chooser = ColorChooser.from_graphviz_colors()
+        color_chooser.use_colors(self.default_family_colors.values())
+        family_colors = defaultdict(color_chooser.next_color, self.default_family_colors)
+
+        for key, node_dict in self.graph.nodes_iter(data=True):
+            if isinstance(node_dict['record'], MemberRecord):
+                node_dict['dot_node_attributes']['color'] = family_colors[node_dict['family']]
+
 
     def to_dot_graph(self):
 
@@ -223,7 +234,6 @@ class FamilyTree:
 
         dotgraph = dot.Graph(key, 'subgraph', default_node_attributes=member_node_defaults)
 
-        # TODO add nodes
         nodes = []
         for key, node_dict in self.graph.nodes_iter(data=True):
             nodes.append(dot.Node(key, node_dict['dot_node_attributes']))
