@@ -20,7 +20,7 @@ class Graph(DotCommon):
     graph_types = ('graph', 'digraph', 'subgraph')
 
     def __init__(self, key, graph_type, children=None, attributes=None,
-            default_node_attributes=None, default_edge_attributes=None):
+            node_defaults=None, edge_defaults=None):
 
         if graph_type not in Graph.graph_types:
             raise ValueError(
@@ -30,8 +30,8 @@ class Graph(DotCommon):
 
         self.graph_type = graph_type
         self.children = children or []
-        self.default_node_attributes = default_node_attributes or {}
-        self.default_edge_attributes = default_edge_attributes or {}
+        self.node_defaults = node_defaults or {}
+        self.edge_defaults = edge_defaults or {}
         super().__init__(key, attributes)
 
     def to_dot(self):
@@ -40,10 +40,10 @@ class Graph(DotCommon):
         lines.append('{} "{}" {{'.format(self.graph_type, self.key))
         if self.attributes:
             lines.append('{};'.format(dict_to_dot_attributes(self.attributes, sep=';\n')))
-        if self.default_node_attributes:
-            lines.append('node [{}];'.format(dict_to_dot_attributes(self.default_node_attributes)))
-        if self.default_edge_attributes:
-            lines.append('edge [{}];'.format(dict_to_dot_attributes(self.default_edge_attributes)))
+        if self.node_defaults:
+            lines.append('node [{}];'.format(dict_to_dot_attributes(self.node_defaults)))
+        if self.edge_defaults:
+            lines.append('edge [{}];'.format(dict_to_dot_attributes(self.edge_defaults)))
         for child in self.children:
             lines.append(child.to_dot())
         lines.append('}')

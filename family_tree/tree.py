@@ -33,11 +33,11 @@ member_node_defaults = {
         'fillcolor' : '0.11 .71 1.0',
         }
 
-default_semester_edge = {
+semester_edge_defaults = {
         'style' : 'invis',
         }
 
-default_semester_node = {
+semester_node_defaults = {
         'color' : 'none',
         'fontsize' : 20,
         'fontname' : 'georgia',
@@ -176,8 +176,8 @@ class FamilyTree:
                 'family_tree',
                 'digraph',
                 attributes=graph_defaults,
-                default_node_attributes=node_defaults,
-                default_edge_attributes=edge_defaults,
+                node_defaults=node_defaults,
+                edge_defaults=edge_defaults,
                 )
         dotgraph.children = [dates_left, tree, dates_right] + ranks
 
@@ -199,8 +199,8 @@ class FamilyTree:
         subgraph = dot.Graph(
                 'dates{}'.format(key),
                 'subgraph',
-                default_node_attributes=default_semester_node,
-                default_edge_attributes=default_semester_edge,
+                node_defaults=semester_node_defaults,
+                edge_defaults=semester_edge_defaults,
                 )
 
         nodes = []
@@ -227,7 +227,7 @@ class FamilyTree:
 
     def create_tree_subgraph(self, key):
 
-        dotgraph = dot.Graph(key, 'subgraph', default_node_attributes=member_node_defaults)
+        dotgraph = dot.Graph(key, 'subgraph', node_defaults=member_node_defaults)
 
         nodes = []
         for key, node_dict in self.graph.nodes_iter(data=True):
