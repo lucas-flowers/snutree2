@@ -142,7 +142,6 @@ class ChapterRecord(Record):
 
 class MemberRecord(Record):
 
-    badge_format = '{:04d}'
     color_chooser = ColorChooser.from_graphviz_colors()
     family_colors = defaultdict(color_chooser.next_color)
 
@@ -215,7 +214,7 @@ class MemberRecord(Record):
     @classmethod
     def validate_row_badge(cls, badge_string):
         try:
-            return cls.badge_format.format(int(badge_string))
+            return int(badge_string)
         except ValueError:
             raise RecordError('Unexpected badge number: "{}"'.format(badge_string))
 
@@ -230,7 +229,7 @@ class MemberRecord(Record):
     def validate_row_parent(cls, big_badge_string):
         if big_badge_string:
             try:
-                return cls.badge_format.format(int(big_badge_string))
+                return int(big_badge_string)
             except ValueError:
                 # The big's badge is not an integer; it may be a chapter designation
                 pass
