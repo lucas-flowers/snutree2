@@ -1,3 +1,4 @@
+from collections import defaultdict
 from orderedset import OrderedSet
 
 graphviz_colors = OrderedSet([
@@ -371,6 +372,14 @@ graphviz_colors = OrderedSet([
     'mediumturquoise',
     'palegreen2',
     ])
+
+def graphviz_color_map(initial_mappings=None):
+
+    initial_mappings = {} or initial_mappings
+    color_chooser = ColorChooser.from_graphviz_colors()
+    color_chooser.use_colors(initial_mappings.values())
+
+    return defaultdict(color_chooser.next_color, initial_mappings)
 
 class ColorChooser:
 

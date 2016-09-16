@@ -1,11 +1,10 @@
 import networkx as nx
 from networkx.algorithms import dag
-from collections import defaultdict
-from family_tree.records import MemberRecord
 from networkx.algorithms.operators.binary import compose
 from family_tree.file import *
 from family_tree import dot
 from family_tree.semester import semester_range
+from family_tree.color import graphviz_color_map
 
 # TODO remove when MemberRecord call is removed
 from family_tree.records import MemberRecord
@@ -159,14 +158,10 @@ class FamilyTree:
 
     def add_colors(self):
 
-        # TODO make these lines a factory(?) method in ColorChooser?
-        color_chooser = ColorChooser.from_graphviz_colors()
-        color_chooser.use_colors(self.default_family_colors.values())
-        family_colors = defaultdict(color_chooser.next_color, self.default_family_colors)
-
+        family_color_map = graphviz_color_map(initial_mappings=self.default_family_colors)
         for key, node_dict in self.graph.nodes_iter(data=True):
             if isinstance(node_dict['record'], MemberRecord):
-                node_dict['dot_node_attributes']['color'] = family_colors[node_dict['family']]
+                node_dict['dot_node_attributes']['color'] = family_color_map[node_dict['family']]
 
 
     def to_dot_graph(self):
