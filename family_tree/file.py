@@ -13,7 +13,8 @@ class SettingsReader:
 
     @classmethod
     def from_path(cls, path):
-        return cls(open(path, 'r').read())
+        with open(path, 'r') as f:
+            return cls(f.read())
 
 class CsvReader:
 
@@ -40,8 +41,8 @@ class CsvReader:
 
     @classmethod
     def from_path(cls, path):
-        # TODO pretty sure the file isn't closed
-        return cls(list(csv.DictReader(open(path, 'r'))))
+        with open(path, 'r') as f:
+            return cls(list(csv.DictReader(f)))
 
 class SimpleReader(CsvReader):
 
