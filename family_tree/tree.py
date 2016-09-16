@@ -13,14 +13,13 @@ class FamilyTree:
 
     def __init__(self, graph=None, family_colors=None, settings=None):
         self.graph = graph
-        self.family_colors = {} or family_colors
         self.settings = {} or settings # TODO handle empty settings
 
     ###########################################################################
     #### Generation                                                        ####
     ###########################################################################
 
-    # TODO handle when variables paths are empty
+    # TODO handle when variable paths are empty
     @classmethod
     def from_paths(cls,
         directory_path=None,
@@ -39,8 +38,6 @@ class FamilyTree:
 
         # Second argument attributes overwrite first
         tree.graph = compose(bnks_graph, main_graph)
-
-        tree.family_colors = FamilyColorReader.from_path(color_path).read()
 
         tree.validate_node_existence()
 
@@ -128,7 +125,7 @@ class FamilyTree:
 
     def add_colors(self):
 
-        family_color_map = graphviz_color_map(initial_mappings=self.family_colors)
+        family_color_map = graphviz_color_map(initial_mappings=self.settings['graphviz']['family_colors'])
         for key, node_dict in self.graph.nodes_iter(data=True):
             if isinstance(node_dict['record'], MemberRecord):
                 node_dict['dot_node_attributes']['color'] = family_color_map[node_dict['family']]

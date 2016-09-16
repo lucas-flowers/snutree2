@@ -32,3 +32,27 @@ graphviz:
     semester:
       style: invis
 
+  # TODO make badges integers
+  # Colors for specific families; each badge is the badge of family's head
+  family_colors:
+    "0663": deeppink
+    "0760": brown1
+    "0722": red4
+    "0726": lightsteelblue
+    "0673": midnightblue
+    "0716": purple
+    "0702": indianred4
+    "0735": limegreen
+    "0757": darkgreen
+    "0740": royalblue4
+    "0986": yellow
+    "1043": slategrey
+    "1044": orangered4
+    "1045": crimson
+    "1046": chartreuse4
+    "1047": cyan2
+    "1048": sienna2
+    "1049": salmon2
+    "1050": cadetblue
+    "1051": dodgerblue
+

@@ -63,13 +63,6 @@ class ChapterReader(SimpleReader):
     def fields_of(self, row):
         return row['chapter_designation'], row['chapter_location']
 
-class FamilyColorReader(SimpleReader):
-
-    key_name = 'family'
-
-    def fields_of(self, row):
-        return row['family'], row['color']
-
 class DirectoryReader(CsvReader):
 
     accumulator = nx.DiGraph
