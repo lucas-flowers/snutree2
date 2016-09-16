@@ -231,7 +231,11 @@ class MemberRecord(Record):
             try:
                 return int(big_badge_string)
             except ValueError:
-                # The big's badge is not an integer; it may be a chapter designation
+                # The big's badge is not an integer; it may be a chapter
+                # designation
+                #
+                # TODO this should not be dependent on expecting that the badge
+                # might be a chapter designation
                 pass
         return None
 
