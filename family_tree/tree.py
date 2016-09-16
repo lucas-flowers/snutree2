@@ -45,9 +45,9 @@ default_semester_node = {
 
 class FamilyTree:
 
-    def __init__(self, graph=None, default_family_colors=None):
+    def __init__(self, graph=None, family_colors=None):
         self.graph = graph
-        self.default_family_colors = {} or default_family_colors
+        self.family_colors = {} or family_colors
 
     ###########################################################################
     #### Generation                                                        ####
@@ -72,7 +72,7 @@ class FamilyTree:
         # Second argument attributes overwrite first
         tree.graph = compose(bnks_graph, main_graph)
 
-        tree.default_family_colors = FamilyColorReader.from_path(color_path).read()
+        tree.family_colors = FamilyColorReader.from_path(color_path).read()
 
         tree.validate_node_existence()
 
@@ -158,7 +158,7 @@ class FamilyTree:
 
     def add_colors(self):
 
-        family_color_map = graphviz_color_map(initial_mappings=self.default_family_colors)
+        family_color_map = graphviz_color_map(initial_mappings=self.family_colors)
         for key, node_dict in self.graph.nodes_iter(data=True):
             if isinstance(node_dict['record'], MemberRecord):
                 node_dict['dot_node_attributes']['color'] = family_color_map[node_dict['family']]
