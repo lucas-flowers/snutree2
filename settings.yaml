@@ -1,0 +1,34 @@
+
+graphviz:
+
+  # Defaults style for Graphviz graphs and subgraphs
+  graph_defaults:
+    all:
+      size: 80
+      ratio: compress
+      pad: .5, .5
+      ranksep: .3
+
+  # Default style for Graphviz nodes
+  node_defaults:
+    all:
+      style: filled
+      shape: box
+      penwidth: 2
+      width: 2
+      height: .45
+      fontname: dejavu sans
+    member:
+      fillcolor: .11 .71 1. # A goldish color
+    semester:
+      color: none
+      fontsize: 20
+      fontname: georgia
+
+  # Default style for Graphviz edges
+  edge_defaults:
+    all:
+      arrowhead: none
+    semester:
+      style: invis
+

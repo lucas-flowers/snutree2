@@ -1,7 +1,19 @@
-import csv
+import csv, yaml
 import networkx as nx
 from itertools import chain
 from family_tree.records import *
+
+class SettingsReader:
+
+    def __init__(self, settings=None):
+        self.settings = settings or ''
+
+    def read(self):
+        return yaml.load(self.settings)
+
+    @classmethod
+    def from_path(cls, path):
+        return cls(open(path, 'r').read())
 
 class CsvReader:
 
@@ -28,6 +40,7 @@ class CsvReader:
 
     @classmethod
     def from_path(cls, path):
+        # TODO pretty sure the file isn't closed
         return cls(list(csv.DictReader(open(path, 'r'))))
 
 class SimpleReader(CsvReader):

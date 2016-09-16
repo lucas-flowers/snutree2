@@ -9,45 +9,12 @@ from family_tree.color import graphviz_color_map
 # TODO remove when MemberRecord call is removed
 from family_tree.records import MemberRecord
 
-graph_defaults = {
-        'size' : 80,
-        'ratio' : 'compress',
-        'pad' : '.5, .5',
-        'ranksep' : .3,
-        }
-
-node_defaults = {
-        'style' : 'filled',
-        'shape' : 'box',
-        'penwidth' : 2,
-        'width' : 2,
-        'height' : .45,
-        'fontname' : 'dejavu sans',
-        }
-
-edge_defaults = {
-        'arrowhead' : 'none',
-        }
-
-member_node_defaults = {
-        'fillcolor' : '0.11 .71 1.0',
-        }
-
-semester_edge_defaults = {
-        'style' : 'invis',
-        }
-
-semester_node_defaults = {
-        'color' : 'none',
-        'fontsize' : 20,
-        'fontname' : 'georgia',
-        }
-
 class FamilyTree:
 
-    def __init__(self, graph=None, family_colors=None):
+    def __init__(self, graph=None, family_colors=None, settings=None):
         self.graph = graph
         self.family_colors = {} or family_colors
+        self.settings = {} or settings # TODO handle empty settings
 
     ###########################################################################
     #### Generation                                                        ####
@@ -59,7 +26,8 @@ class FamilyTree:
         directory_path=None,
         chapter_path=None,
         bnks_path=None,
-        color_path=None
+        color_path=None,
+        settings_path=None,
         ):
 
         tree = cls()
@@ -75,6 +43,8 @@ class FamilyTree:
         tree.family_colors = FamilyColorReader.from_path(color_path).read()
 
         tree.validate_node_existence()
+
+        tree.settings = SettingsReader.from_path(settings_path).read()
 
         return tree
 
@@ -175,9 +145,9 @@ class FamilyTree:
         dotgraph = dot.Graph(
                 'family_tree',
                 'digraph',
-                attributes=graph_defaults,
-                node_defaults=node_defaults,
-                edge_defaults=edge_defaults,
+                attributes=self.settings['graphviz']['graph_defaults']['all'],
+                node_defaults=self.settings['graphviz']['node_defaults']['all'],
+                edge_defaults=self.settings['graphviz']['edge_defaults']['all'],
                 )
         dotgraph.children = [dates_left, tree, dates_right] + ranks
 
@@ -199,8 +169,8 @@ class FamilyTree:
         subgraph = dot.Graph(
                 'dates{}'.format(key),
                 'subgraph',
-                node_defaults=semester_node_defaults,
-                edge_defaults=semester_edge_defaults,
+                node_defaults=self.settings['graphviz']['node_defaults']['semester'],
+                edge_defaults=self.settings['graphviz']['edge_defaults']['semester'],
                 )
 
         nodes = []
@@ -227,7 +197,11 @@ class FamilyTree:
 
     def create_tree_subgraph(self, key):
 
-        dotgraph = dot.Graph(key, 'subgraph', node_defaults=member_node_defaults)
+        dotgraph = dot.Graph(
+                key,
+                'subgraph',
+                node_defaults=self.settings['graphviz']['node_defaults']['member']
+                )
 
         nodes = []
         for key, node_dict in self.graph.nodes_iter(data=True):
