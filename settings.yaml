@@ -55,3 +55,6 @@ graphviz:
     1050: cadetblue
     1051: dodgerblue
 
+  # Random seed for ordering family placement
+  seed: 1337
+

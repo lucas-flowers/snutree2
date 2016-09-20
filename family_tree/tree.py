@@ -1,8 +1,8 @@
+import random
 import networkx as nx
 from networkx.algorithms import dag
 from networkx.algorithms.operators.binary import compose
 from networkx.algorithms.components import weakly_connected_components
-from random import shuffle
 from family_tree.file import *
 from family_tree import dot
 from family_tree.semester import semester_range
@@ -220,7 +220,8 @@ class FamilyTree:
         #
         nodes = []
         components = [c for c in weakly_connected_components(self.graph)]
-        shuffle(components)
+        random.seed(self.settings['graphviz']['seed'])
+        random.shuffle(components)
         for component in components:
             for key in component:
                 node_dict = self.graph.node[key]
