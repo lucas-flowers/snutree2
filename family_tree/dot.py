@@ -3,7 +3,7 @@ from collections import namedtuple
 def dict_to_dot_attributes(attributes_dict, sep=','):
     return sep.join(
             ['{}="{}"'.format(key, value)
-                for key, value in attributes_dict.items()]
+                for key, value in sorted(attributes_dict.items())]
             )
 
 class DotCommon:
@@ -84,6 +84,6 @@ class Rank:
 
     def to_dot(self):
         return '{{rank=same {}}};'.format(
-                ' '.join(['"{}"'.format(key) for key in self.keys])
+                ' '.join(['"{}"'.format(key) for key in sorted(self.keys, key=str)])
                 )
 
