@@ -269,6 +269,6 @@ class FamilyTree:
         they should be printed.
         '''
 
-        edges = sorted(list(self.graph.edges(data=True)), key=lambda x : tuple(map(str, x)))
-        yield from edges
+        # In this case, the order is the same as the normal iterator
+        yield from self.graph.edges_iter(data=True)
 
