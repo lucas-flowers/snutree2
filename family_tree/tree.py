@@ -202,6 +202,8 @@ class FamilyTree:
                 node_defaults=self.settings['graphviz']['node_defaults']['member']
                 )
 
+        # TODO move this comment
+        #
         # Find the different connected components of the graph (i.e., each
         # component is a different family, unless it includes a reorganization
         # or chapter node which can connect unrelated families).
@@ -219,16 +221,11 @@ class FamilyTree:
         # change DOT source code or fiddle with DOT attributes.
         #
         nodes = []
-        components = list(weakly_connected_components(self.graph))
-        random.seed(self.settings['graphviz']['seed'])
-        random.shuffle(components)
-        for component in components:
-            for key in component:
-                node_dict = self.graph.node[key]
-                nodes.append(dot.Node(key, node_dict['dot_node_attributes']))
+        for key, node_dict in self.ordered_nodes():
+            nodes.append(dot.Node(key, node_dict['dot_node_attributes']))
 
         edges = []
-        for parent_key, child_key, edge_dict in self.graph.edges(data=True):
+        for parent_key, child_key, edge_dict in self.ordered_edges():
             edges.append(dot.Edge(parent_key, child_key, edge_dict['dot_edge_attributes']))
 
         dotgraph.children = nodes + edges
@@ -250,4 +247,28 @@ class FamilyTree:
                         ])
 
         return list(ranks.values())
+
+    ###########################################################################
+    #### Ordering                                                          ####
+    ###########################################################################
+
+    def ordered_nodes(self):
+        '''
+        An iterator over this graph's nodes and node dictionaries, in the order
+        they should be printed.
+        '''
+
+        components = sorted(list(weakly_connected_components(self.graph)), key=lambda x : min(map(str, x)))
+        for component in components:
+            for key in sorted(component, key=str):
+                yield key, self.graph.node[key]
+
+    def ordered_edges(self):
+        '''
+        An iterator over this graph's edges and edge dictionaries, in the order
+        they should be printed.
+        '''
+
+        edges = sorted(list(self.graph.edges(data=True)), key=lambda x : tuple(map(str, x)))
+        yield from edges
 
