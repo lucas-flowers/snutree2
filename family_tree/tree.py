@@ -1,6 +1,8 @@
 import networkx as nx
 from networkx.algorithms import dag
 from networkx.algorithms.operators.binary import compose
+from networkx.algorithms.components import weakly_connected_components
+from random import shuffle
 from family_tree.file import *
 from family_tree import dot
 from family_tree.semester import semester_range
@@ -200,9 +202,29 @@ class FamilyTree:
                 node_defaults=self.settings['graphviz']['node_defaults']['member']
                 )
 
+        # Find the different connected components of the graph (i.e., each
+        # component is a different family, unless it includes a reorganization
+        # or chapter node which can connect unrelated families).
+        #
+        # Add the nodes from each component to the DOT graph, in the order of
+        # component. The order of components is randomized to help prevent
+        # strange behavior (e.g., excessively long nodes) and allow the user to
+        # change the graph by choosing a different random seed if the graph is
+        # not aesthetic. (The previous method placed nodes in the source code
+        # by the order found, but that consistently produced ugly results.)
+        #
+        # There might be a specific order that would be satisfactory, but
+        # randomizing is easier for now. A user could of course manually adjust
+        # nodes, but I want to avoid having the potentially unskilled user
+        # change DOT source code or fiddle with DOT attributes.
+        #
         nodes = []
-        for key, node_dict in self.graph.nodes_iter(data=True):
-            nodes.append(dot.Node(key, node_dict['dot_node_attributes']))
+        components = [c for c in weakly_connected_components(self.graph)]
+        shuffle(components)
+        for component in components:
+            for key in component:
+                node_dict = self.graph.node[key]
+                nodes.append(dot.Node(key, node_dict['dot_node_attributes']))
 
         edges = []
         for parent_key, child_key, edge_dict in self.graph.edges(data=True):
