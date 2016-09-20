@@ -202,24 +202,6 @@ class FamilyTree:
                 node_defaults=self.settings['graphviz']['node_defaults']['member']
                 )
 
-        # TODO move this comment
-        #
-        # Find the different connected components of the graph (i.e., each
-        # component is a different family, unless it includes a reorganization
-        # or chapter node which can connect unrelated families).
-        #
-        # Add the nodes from each component to the DOT graph, in the order of
-        # component. The order of components is randomized to help prevent
-        # strange behavior (e.g., excessively long nodes) and allow the user to
-        # change the graph by choosing a different random seed if the graph is
-        # not aesthetic. (The previous method placed nodes in the source code
-        # by the order found, but that consistently produced ugly results.)
-        #
-        # There might be a specific order that would be satisfactory, but
-        # randomizing is easier for now. A user could of course manually adjust
-        # nodes, but I want to avoid having the potentially unskilled user
-        # change DOT source code or fiddle with DOT attributes.
-        #
         nodes = []
         for key, node_dict in self.ordered_nodes():
             nodes.append(dot.Node(key, node_dict['dot_node_attributes']))
@@ -258,7 +240,24 @@ class FamilyTree:
         they should be printed.
         '''
 
-
+        # Find the different connected components of the graph (i.e., each
+        # component is a different family, unless it includes a reorganization
+        # or chapter node which can connect unrelated families).
+        #
+        # Add the nodes from each component to the DOT graph, in the order of
+        # component. The order of components is randomized to help prevent
+        # strange behavior (e.g., excessively long nodes) and allow the user to
+        # change the graph by choosing a different random seed if the graph is
+        # not aesthetic. (The previous method placed nodes in the source code
+        # by the order found, but that consistently produced ugly results.)
+        #
+        # There might be a specific order that would be satisfactory, but
+        # randomizing is easier for now. A user could of course manually adjust
+        # nodes, but I want to avoid having the potentially unskilled user
+        # change DOT source code or fiddle with DOT attributes.
+        #
+        # (The components themselves and their members' edges (see
+        # self.ordered_edges() are not randomized)
         components = sorted(list(weakly_connected_components(self.graph)), key=lambda x : min(map(str, x)))
         rng = random.Random(self.settings['graphviz']['seed'])
         rng.shuffle(components)
