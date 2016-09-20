@@ -258,7 +258,10 @@ class FamilyTree:
         they should be printed.
         '''
 
+
         components = sorted(list(weakly_connected_components(self.graph)), key=lambda x : min(map(str, x)))
+        rng = random.Random(self.settings['graphviz']['seed'])
+        rng.shuffle(components)
         for component in components:
             for key in sorted(component, key=str):
                 yield key, self.graph.node[key]
