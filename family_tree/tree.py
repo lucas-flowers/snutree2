@@ -219,7 +219,7 @@ class FamilyTree:
         # change DOT source code or fiddle with DOT attributes.
         #
         nodes = []
-        components = [c for c in weakly_connected_components(self.graph)]
+        components = list(weakly_connected_components(self.graph))
         random.seed(self.settings['graphviz']['seed'])
         random.shuffle(components)
         for component in components:
