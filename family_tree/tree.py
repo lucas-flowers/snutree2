@@ -269,6 +269,10 @@ class FamilyTree:
         they should be printed.
         '''
 
-        edges = sorted(list(self.graph.edges(data=True)), key=lambda x : tuple(map(str, x)))
+        # Sort the list of edges by parent then child key (the `t` in lambda is
+        # a 3-tuple of the form (parent, child, edge_dict)). Ensures the order
+        # of edges printed to source is the identical for the same input data.
+        edges = sorted(self.graph.edges(data=True), key=lambda t : tuple(map(str, t[:-1])))
+
         yield from edges
 
