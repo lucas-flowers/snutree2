@@ -27,6 +27,39 @@ class Record:
     def dot_edge_attributes(self, other):
         return {}
 
+class OrphanParentRecord(Record):
+
+    def __init__(self, orphan_key=None, semester=None):
+
+        self.orphan_key = orphan_key
+        self.semester = semester
+
+    def get_key(self):
+        return '{} Parent'.format(self.orphan_key)
+
+    ###########################################################################
+    #### Validation Functions                                              ####
+    ###########################################################################
+
+    @classmethod
+    def from_orphan(cls, orphan_record):
+        record = cls()
+        record.orphan_key = orphan_record.get_key()
+        record.semester = orphan_record.semester - 1
+        return record
+
+    ###########################################################################
+    #### DOT Functions                                                     ####
+    ###########################################################################
+
+    # TODO move as much as possible to settings
+    def dot_node_attributes(self):
+        return {'style' : 'invis', 'width' : 0, 'height' : 0}
+
+    # TODO move as much as possible to settings
+    def dot_edge_attributes(self, other):
+        return {'style' : 'dotted'}
+
 class ReorganizationRecord(Record):
 
     def __init__(self, semester=None):
@@ -75,12 +108,14 @@ class ReorganizationRecord(Record):
     #### DOT Functions                                                     ####
     ###########################################################################
 
+    # TODO move as much as possible to settings
     def dot_node_attributes(self):
         return {
                 'label' : 'Reorganization',
                 'shape' : 'oval'
                 }
 
+    # TODO move as much as possible to settings
     def dot_edge_attributes(self, other):
         if self.semester > other.semester:
             return {'style' : 'dashed'}
@@ -130,6 +165,7 @@ class ChapterRecord(Record):
     #### DOT Functions                                                     ####
     ###########################################################################
 
+    # TODO move as much as possible to settings
     def dot_node_attributes(self):
         return {
                 'label' : '{} Chapter\\n{}'.format(self.designation, self.location),
@@ -137,6 +173,7 @@ class ChapterRecord(Record):
                 'fillcolor' : 'none',
                 }
 
+    # TODO move as much as possible to settings
     def dot_edge_attributes(self, other):
         return {'style' : 'dashed'}
 

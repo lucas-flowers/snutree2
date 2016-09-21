@@ -9,7 +9,7 @@ from family_tree.semester import semester_range
 from family_tree.color import graphviz_color_map
 
 # TODO remove when MemberRecord call is removed
-from family_tree.records import MemberRecord
+from family_tree.records import MemberRecord, OrphanParentRecord
 
 class FamilyTree:
 
@@ -79,13 +79,14 @@ class FamilyTree:
 
     def decorate(self):
 
-        self.kill_orphans()
+        self.remove_singletons()
         self.add_families()
+        self.add_orphan_parents()
         self.add_node_attributes()
         self.add_colors()
         self.add_edge_attributes()
 
-    def kill_orphans(self):
+    def remove_singletons(self):
 
         self.graph.remove_nodes_from([key for key, degree in self.graph.degree_iter() if degree == 0])
 
@@ -120,6 +121,20 @@ class FamilyTree:
             self.graph.node[head_key]['family'] = head_key
             for descendant_key in dag.descendants(members_only, head_key):
                 self.graph.node[descendant_key]['family'] = head_key
+
+    def add_orphan_parents(self):
+
+        # Find members that had big brothers whose identities are unknown
+        orphan_keys = [
+                key for key, in_degree in self.graph.in_degree().items()
+                if in_degree == 0 and isinstance(self.graph.node[key]['record'], MemberRecord)
+                ]
+
+        for orphan_key in orphan_keys:
+            parent_record = OrphanParentRecord.from_orphan(self.graph.node[orphan_key]['record'])
+            parent_key = parent_record.get_key()
+            self.graph.add_node(parent_key, record=parent_record)
+            self.graph.add_edge(parent_key, orphan_key)
 
     ###########################################################################
     #### Convert to DOT                                                    ####
