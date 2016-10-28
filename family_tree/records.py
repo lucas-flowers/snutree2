@@ -54,11 +54,11 @@ class OrphanParentRecord(Record):
 
     # TODO move as much as possible to settings
     def dot_node_attributes(self):
-        return {'style' : 'invis', 'width' : 0, 'height' : 0}
+        return {}
 
     # TODO move as much as possible to settings
     def dot_edge_attributes(self, other):
-        return {'style' : 'dotted'}
+        return {}
 
 class ReorganizationRecord(Record):
 

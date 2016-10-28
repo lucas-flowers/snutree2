@@ -94,15 +94,18 @@ class FamilyTree:
 
         for key, node_dict in self.graph.nodes_iter(data=True):
             record = node_dict['record']
-            node_dict['dot_node_attributes'] = record.dot_node_attributes()
+            attributes = node_dict.get('dot_node_attributes', {})
+            attributes.update(record.dot_node_attributes())
+            node_dict['dot_node_attributes'] = attributes
 
     def add_edge_attributes(self):
 
         for parent_key, child_key, edge_dict in self.graph.edges_iter(data=True):
             parent_record = self.graph.node[parent_key]['record']
             child_record = self.graph.node[child_key]['record']
-            edge_dict['dot_edge_attributes'] = \
-                    parent_record.dot_edge_attributes(child_record)
+            attributes = edge_dict.get('dot_edge_attributes', {})
+            attributes.update(parent_record.dot_edge_attributes(child_record))
+            edge_dict['dot_edge_attributes'] = attributes
 
     def add_families(self):
 
@@ -133,8 +136,8 @@ class FamilyTree:
         for orphan_key in orphan_keys:
             parent_record = OrphanParentRecord.from_orphan(self.graph.node[orphan_key]['record'])
             parent_key = parent_record.get_key()
-            self.graph.add_node(parent_key, record=parent_record)
-            self.graph.add_edge(parent_key, orphan_key)
+            self.graph.add_node(parent_key, record=parent_record, dot_node_attributes=self.settings['graphviz']['node_defaults']['unknown'])
+            self.graph.add_edge(parent_key, orphan_key, dot_edge_attributes=self.settings['graphviz']['edge_defaults']['unknown'])
 
     ###########################################################################
     #### Convert to DOT                                                    ####
