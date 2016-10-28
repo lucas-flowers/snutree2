@@ -52,13 +52,7 @@ class OrphanParentRecord(Record):
     #### DOT Functions                                                     ####
     ###########################################################################
 
-    # TODO move as much as possible to settings
-    def dot_node_attributes(self):
-        return {}
-
-    # TODO move as much as possible to settings
-    def dot_edge_attributes(self, other):
-        return {}
+    # empty
 
 class ReorganizationRecord(Record):
 
