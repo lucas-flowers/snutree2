@@ -73,6 +73,8 @@ class DirectoryReader(CsvReader):
         super().__init__(rows)
 
     def accumulate(self, accumulator, row):
+        # TODO move member/chapter/reorg functions into separate classes, with
+        # a general abstract class over all of them
 
         graph = accumulator
 
@@ -101,6 +103,8 @@ class DirectoryReader(CsvReader):
             graph.add_edge(reorg_key, member_key)
 
         # Invalid parent badge
+        # TODO move to inside or beside the loop in tree.FamilyTree.validate_node_existence?
+        # (potentially helping with the other TODO for this accumulate function)
         if member_record and not member_record.parent and row['big_badge'] and not chapter_record:
             raise DirectoryError('Invalid big brother badge or transfer chapter designation: "{}"'.format(row['big_badge']))
 

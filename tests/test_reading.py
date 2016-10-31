@@ -1,5 +1,5 @@
 from nose.tools import *
-from family_tree.reading import *
+# from family_tree.reading import *
 
 # def test_read_chapters():
 #
