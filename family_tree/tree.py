@@ -2,7 +2,7 @@ import random
 from networkx.algorithms import dag
 from networkx.algorithms.operators.binary import compose
 from networkx.algorithms.components import weakly_connected_components
-from family_tree.file import *
+import family_tree.file as rdr
 from family_tree import dot
 from family_tree.semester import semester_range
 from family_tree.color import graphviz_color_map
@@ -33,18 +33,18 @@ class FamilyTree:
 
         tree = cls()
 
-        chapter_locations = ChapterReader.from_path(chapter_path).read()
-        affiliations = AffiliationsReader.from_path(affiliations_path).read()
+        chapter_locations = rdr.ChapterReader.from_path(chapter_path).read()
+        affiliations = rdr.AffiliationsReader.from_path(affiliations_path).read()
 
-        main_graph = DirectoryReader.from_path(directory_path, chapter_locations, affiliations).read()
-        bnks_graph = DirectoryReader.from_path(bnks_path, chapter_locations).read()
+        main_graph = rdr.DirectoryReader.from_path(directory_path, chapter_locations, affiliations).read()
+        bnks_graph = rdr.DirectoryReader.from_path(bnks_path, chapter_locations).read()
 
         # Second argument attributes overwrite first
         tree.graph = compose(bnks_graph, main_graph)
 
         tree.validate_node_existence()
 
-        tree.settings = SettingsReader.from_path(settings_path).read()
+        tree.settings = rdr.SettingsReader.from_path(settings_path).read()
 
         return tree
 
@@ -72,7 +72,7 @@ class FamilyTree:
         for key, node_dict in self.graph.nodes_iter(data=True):
             if 'record' not in node_dict:
                 child = next(self.graph.successors_iter(key))
-                raise DirectoryError('Brother with badge {} has unknown big brother: "{}"'.format(child, key))
+                raise rdr.DirectoryError('Brother with badge {} has unknown big brother: "{}"'.format(child, key))
 
     ###########################################################################
     #### Decoration                                                        ####

@@ -1,8 +1,7 @@
 import csv, yaml
 import networkx as nx
-from itertools import chain
 from collections import defaultdict
-from family_tree.records import *
+import family_tree.records as rc
 
 class SettingsReader:
 
@@ -130,9 +129,9 @@ class DirectoryReader(CsvReader):
 
         graph = accumulator
 
-        member_record = MemberRecord.from_row(self.affiliations, **row)
-        chapter_record = ChapterRecord.from_row(self.chapter_locations, **row)
-        reorg_record = ReorganizationRecord.from_row(**row)
+        member_record = rc.MemberRecord.from_row(self.affiliations, **row)
+        chapter_record = rc.ChapterRecord.from_row(self.chapter_locations, **row)
+        reorg_record = rc.ReorganizationRecord.from_row(**row)
 
         if member_record:
             member_key = member_record.get_key()
