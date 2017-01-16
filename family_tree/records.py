@@ -181,11 +181,13 @@ class MemberRecord(Record):
             pledge_semester=None,
             big_badge=None,
             badge=None,
+            affiliations=None
             ):
         self.name = name
         self.semester = pledge_semester
         self.parent = big_badge
         self.badge = badge
+        self.affiliations = affiliations or []
 
     def get_key(self):
         raise NotImplementedError
@@ -195,7 +197,7 @@ class MemberRecord(Record):
     ###########################################################################
 
     @staticmethod
-    def from_row(
+    def from_row(affiliations,
             badge=None,
             first_name=None,
             preferred_name=None,
@@ -233,6 +235,10 @@ class MemberRecord(Record):
             record.name = subclass.validate_row_name(first_name, preferred_name, last_name)
             record.semester = subclass.validate_row_semester(pledge_semester)
             record.parent = subclass.validate_row_parent(big_badge);
+
+            # TODO move affiliations field entirely to KnightRecord
+            if badge:
+                record.affiliations = affiliations[badge]
 
         elif status == 'Reaffiliate':
             return None
@@ -292,7 +298,8 @@ class KnightRecord(MemberRecord):
     ###########################################################################
 
     def get_dot_label(self):
-        return '{}\\nΔA {}'.format(self.name, self.badge)
+        affiliations = ['ΔA {}'.format(self.badge)] + self.affiliations
+        return '{}\\n{}'.format(self.name, ', '.join(affiliations))
 
 class BrotherRecord(MemberRecord):
 

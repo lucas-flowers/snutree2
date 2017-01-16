@@ -1,6 +1,7 @@
 import csv, yaml
 import networkx as nx
 from itertools import chain
+from collections import defaultdict
 from family_tree.records import *
 
 class SettingsReader:
@@ -64,11 +65,62 @@ class ChapterReader(SimpleReader):
     def fields_of(self, row):
         return row['chapter_designation'], row['chapter_location']
 
+class AffiliationsReader(CsvReader):
+
+    accumulator = lambda _ : defaultdict(list)
+
+    greek_mapping = {
+            'Alpha' : 'A',
+            'Beta' : 'B',
+            'Gamma' : 'Γ',
+            'Delta' : 'Δ',
+            'Epsilon' : 'E',
+            'Zeta' : 'Z',
+            'Eta' : 'H',
+            'Theta' : 'Θ',
+            'Iota' : 'I',
+            'Kappa' : 'K',
+            'Lambda' : 'Λ',
+            'Mu' : 'M',
+            'Nu' : 'N',
+            'Xi' : 'Ξ',
+            'Omicron' : 'O',
+            'Pi' : 'Π',
+            'Rho' : 'P',
+            'Sigma' : 'Σ',
+            'Tau' : 'T',
+            'Upsilon' : 'Y',
+            'Phi' : 'Φ',
+            'Chi' : 'X',
+            'Psi' : 'Ψ',
+            'Omega' : 'Ω',
+            '(A)' : '(A)',
+            '(B)' : '(B)',
+            }
+
+    def fields_of(self, row):
+        return row['badge'], '{} {}'.format(
+                AffiliationsReader.to_greek_name(row['chapter_name']),
+                row['other_badge']
+                )
+
+    def accumulate(self, accumulator, row):
+        key, fields = self.fields_of(row)
+        accumulator[key].append(fields)
+
+    @staticmethod
+    def to_greek_name(english_name):
+        '''
+        Convert spelled-out English names of chapters to Greek abbreviations.
+        '''
+        return ''.join([AffiliationsReader.greek_mapping[w] for w in english_name.split(' ')])
+
 class DirectoryReader(CsvReader):
 
     accumulator = nx.DiGraph
 
-    def __init__(self, rows=None, chapter_locations=None):
+    def __init__(self, rows=None, chapter_locations=None, affiliations=None):
+        self.affiliations = affiliations or {}
         self.chapter_locations = chapter_locations or {}
         super().__init__(rows)
 
@@ -78,7 +130,7 @@ class DirectoryReader(CsvReader):
 
         graph = accumulator
 
-        member_record = MemberRecord.from_row(**row)
+        member_record = MemberRecord.from_row(self.affiliations, **row)
         chapter_record = ChapterRecord.from_row(self.chapter_locations, **row)
         reorg_record = ReorganizationRecord.from_row(**row)
 
@@ -110,9 +162,10 @@ class DirectoryReader(CsvReader):
 
 
     @classmethod
-    def from_path(cls, directory_path, chapter_locations=None):
+    def from_path(cls, directory_path, chapter_locations=None, affiliations=None):
         reader = super().from_path(directory_path)
         reader.chapter_locations = chapter_locations
+        reader.affiliations = affiliations or {}
         return reader
 
 

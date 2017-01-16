@@ -1,5 +1,4 @@
 import random
-import networkx as nx
 from networkx.algorithms import dag
 from networkx.algorithms.operators.binary import compose
 from networkx.algorithms.components import weakly_connected_components
@@ -27,6 +26,7 @@ class FamilyTree:
         directory_path=None,
         chapter_path=None,
         bnks_path=None,
+        affiliations_path=None,
         color_path=None,
         settings_path=None,
         ):
@@ -34,8 +34,9 @@ class FamilyTree:
         tree = cls()
 
         chapter_locations = ChapterReader.from_path(chapter_path).read()
+        affiliations = AffiliationsReader.from_path(affiliations_path).read()
 
-        main_graph = DirectoryReader.from_path(directory_path, chapter_locations).read()
+        main_graph = DirectoryReader.from_path(directory_path, chapter_locations, affiliations).read()
         bnks_graph = DirectoryReader.from_path(bnks_path, chapter_locations).read()
 
         # Second argument attributes overwrite first
