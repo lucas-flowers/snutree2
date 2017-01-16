@@ -1,4 +1,3 @@
-import networkx as nx
 from family_tree.tree import FamilyTree
 
 # Initialization
