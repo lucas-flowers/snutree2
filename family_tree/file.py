@@ -116,13 +116,15 @@ class DirectoryReader(CsvReader):
         super().__init__(rows)
 
     def accumulate(self, accumulator, row):
-        # TODO move member/reorg functions into separate classes, with
+        # TODO move member functions into separate classes, with
         # a general abstract class over all of them
+        #
+        # TODO reevaluate this comment now that chapter nodes and
+        # reorganization nodes have been removed
 
         graph = accumulator
 
         member_record = rc.MemberRecord.from_row(self.affiliations, **row)
-        reorg_record = rc.ReorganizationRecord.from_row(**row)
 
         if member_record:
             member_key = member_record.get_key()
@@ -131,12 +133,6 @@ class DirectoryReader(CsvReader):
             graph.add_node(member_key, record=member_record)
             if member_record.parent:
                 graph.add_edge(member_record.parent, member_key)
-
-        if reorg_record:
-            reorg_key = reorg_record.get_key()
-            if reorg_key not in graph:
-                graph.add_node(reorg_key, record=reorg_record)
-            graph.add_edge(reorg_key, member_key)
 
         # Invalid parent badge
         # TODO move to inside or beside the loop in tree.FamilyTree.validate_node_existence?

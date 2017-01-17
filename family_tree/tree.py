@@ -58,8 +58,6 @@ class FamilyTree:
         This is only possible when the `big_badge` field in the directory is a
         badge number with no corresponding member record, because:
 
-            + Reorganization nodes are added *only* when they exist
-
             + All valid entries corresponding to the key in the `badge` column
             are guaranteed to be added as records
 
@@ -261,7 +259,8 @@ class FamilyTree:
 
         # Find the different connected components of the graph (i.e., each
         # component is a different family, unless it includes a reorganization
-        # node which can connect unrelated families).
+        # node which can connect unrelated families). (TODO remove reference to
+        # reorganization in this comment.)
         #
         # Add the nodes from each component to the DOT graph, in the order of
         # component. The order of components is randomized to help prevent

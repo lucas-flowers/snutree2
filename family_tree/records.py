@@ -54,68 +54,6 @@ class OrphanParentRecord(Record):
 
     # empty
 
-class ReorganizationRecord(Record):
-
-    def __init__(self, semester=None):
-
-        self.semester = semester
-
-    def get_key(self):
-
-        # Plus one because self.semester is the placement semester, not the
-        # true semester
-        return 'Reorganization Node {}'.format(self.semester+1)
-
-    ###########################################################################
-    #### Row Validation Functions                                          ####
-    ###########################################################################
-
-    @classmethod
-    def from_row(cls,
-            refounder_class=None,
-            **rest):
-
-        if refounder_class:
-
-            record = cls()
-
-            # Minus one because the Reorganization node is placed a semester
-            # before the actual reorganization (so that it is above the new
-            # refounders).
-            record.semester = cls.validate_row_refounder_class(refounder_class) - 1
-
-            return record
-
-        else:
-
-            return None
-
-    @classmethod
-    def validate_row_refounder_class(cls, refounder_class_string):
-        try:
-            return Semester(refounder_class_string)
-        except (TypeError, ValueError):
-            raise RecordError('Unexpected refounding semester: "{}"'
-                    .format(refounder_class_string))
-
-    ###########################################################################
-    #### DOT Functions                                                     ####
-    ###########################################################################
-
-    # TODO move as much as possible to settings
-    def dot_node_attributes(self):
-        return {
-                'label' : 'Reorganization',
-                'shape' : 'oval'
-                }
-
-    # TODO move as much as possible to settings
-    def dot_edge_attributes(self, other):
-        if self.semester > other.semester:
-            return {'style' : 'dashed'}
-        else:
-            return {}
-
 class MemberRecord(Record):
 
     color_chooser = ColorChooser.from_graphviz_colors()
