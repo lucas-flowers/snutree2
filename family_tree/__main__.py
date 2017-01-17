@@ -6,7 +6,6 @@ tree = FamilyTree.from_paths(
         'directory.csv',
         'brothers_not_knights.csv',
         'affiliations.csv',
-        'family_colors.csv',
         'settings.yaml',
         )
 tree.decorate()

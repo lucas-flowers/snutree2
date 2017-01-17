@@ -12,7 +12,7 @@ from family_tree.records import MemberRecord, OrphanParentRecord
 
 class FamilyTree:
 
-    def __init__(self, graph=None, family_colors=None, settings=None):
+    def __init__(self, graph=None, settings=None):
         self.graph = graph
         self.settings = {} or settings # TODO handle empty settings
 
@@ -26,7 +26,6 @@ class FamilyTree:
         directory_path=None,
         bnks_path=None,
         affiliations_path=None,
-        color_path=None,
         settings_path=None,
         ):
 
