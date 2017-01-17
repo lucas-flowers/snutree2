@@ -4,7 +4,6 @@ from family_tree.tree import FamilyTree
 
 tree = FamilyTree.from_paths(
         'directory.csv',
-        'chapters.csv',
         'brothers_not_knights.csv',
         'affiliations.csv',
         'family_colors.csv',

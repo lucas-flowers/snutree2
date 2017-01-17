@@ -57,13 +57,6 @@ class SimpleReader(CsvReader):
             raise DirectoryError('Duplicate {}:  "{}"'.format(self.key_name, key))
         accumulator[key] = fields
 
-class ChapterReader(SimpleReader):
-
-    key_name = 'chapter'
-
-    def fields_of(self, row):
-        return row['chapter_designation'], row['chapter_location']
-
 class AffiliationsReader(CsvReader):
 
     accumulator = lambda _ : defaultdict(list)
@@ -118,19 +111,17 @@ class DirectoryReader(CsvReader):
 
     accumulator = nx.DiGraph
 
-    def __init__(self, rows=None, chapter_locations=None, affiliations=None):
+    def __init__(self, rows=None, affiliations=None):
         self.affiliations = affiliations or {}
-        self.chapter_locations = chapter_locations or {}
         super().__init__(rows)
 
     def accumulate(self, accumulator, row):
-        # TODO move member/chapter/reorg functions into separate classes, with
+        # TODO move member/reorg functions into separate classes, with
         # a general abstract class over all of them
 
         graph = accumulator
 
         member_record = rc.MemberRecord.from_row(self.affiliations, **row)
-        chapter_record = rc.ChapterRecord.from_row(self.chapter_locations, **row)
         reorg_record = rc.ReorganizationRecord.from_row(**row)
 
         if member_record:
@@ -141,12 +132,6 @@ class DirectoryReader(CsvReader):
             if member_record.parent:
                 graph.add_edge(member_record.parent, member_key)
 
-        if chapter_record:
-            chapter_key = chapter_record.get_key()
-            if chapter_key not in graph:
-                graph.add_node(chapter_key, record=chapter_record)
-            graph.add_edge(chapter_key, member_key)
-
         if reorg_record:
             reorg_key = reorg_record.get_key()
             if reorg_key not in graph:
@@ -156,14 +141,13 @@ class DirectoryReader(CsvReader):
         # Invalid parent badge
         # TODO move to inside or beside the loop in tree.FamilyTree.validate_node_existence?
         # (potentially helping with the other TODO for this accumulate function)
-        if member_record and not member_record.parent and row['big_badge'] and not chapter_record:
-            raise DirectoryError('Invalid big brother badge or transfer chapter designation: "{}"'.format(row['big_badge']))
+        if member_record and not member_record.parent and row['big_badge']:
+            raise DirectoryError('Invalid big brother badge: "{}"'.format(row['big_badge']))
 
 
     @classmethod
-    def from_path(cls, directory_path, chapter_locations=None, affiliations=None):
+    def from_path(cls, directory_path, affiliations=None):
         reader = super().from_path(directory_path)
-        reader.chapter_locations = chapter_locations
         reader.affiliations = affiliations or {}
         return reader
 

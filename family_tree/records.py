@@ -116,61 +116,6 @@ class ReorganizationRecord(Record):
         else:
             return {}
 
-class ChapterRecord(Record):
-
-    def __init__(self,
-            semester=None,
-            designation=None,
-            location=None
-            ):
-
-        self.semester = semester
-        self.designation = designation
-        self.location = location
-
-    def get_key(self):
-        return '{} {}'.format(self.designation, self.semester)
-
-    ###########################################################################
-    #### Row Validation Functions                                          ####
-    ###########################################################################
-
-    @classmethod
-    def from_row(cls, chapters,
-            pledge_semester=None,
-            big_badge=None,
-            **rest):
-
-        if big_badge and big_badge in chapters:
-
-            record = cls()
-
-            record.semester = cls.validate_row_semester(pledge_semester) - 1
-            record.designation = big_badge # No validation; assumed already checked
-            record.location = chapters[record.designation]
-
-            return record
-
-        else:
-
-            return None
-
-    ###########################################################################
-    #### DOT Functions                                                     ####
-    ###########################################################################
-
-    # TODO move as much as possible to settings
-    def dot_node_attributes(self):
-        return {
-                'label' : '{} Chapter\\n{}'.format(self.designation, self.location),
-                'color' : 'none',
-                'fillcolor' : 'none',
-                }
-
-    # TODO move as much as possible to settings
-    def dot_edge_attributes(self, other):
-        return {'style' : 'dashed'}
-
 class MemberRecord(Record):
 
     color_chooser = ColorChooser.from_graphviz_colors()
@@ -273,6 +218,9 @@ class MemberRecord(Record):
                 #
                 # TODO this should not be dependent on expecting that the badge
                 # might be a chapter designation
+                #
+                # TODO removed chapter designations from this program entirely;
+                # figure out what this error means
                 pass
         return None
 

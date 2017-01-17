@@ -24,7 +24,6 @@ class FamilyTree:
     @classmethod
     def from_paths(cls,
         directory_path=None,
-        chapter_path=None,
         bnks_path=None,
         affiliations_path=None,
         color_path=None,
@@ -33,11 +32,10 @@ class FamilyTree:
 
         tree = cls()
 
-        chapter_locations = rdr.ChapterReader.from_path(chapter_path).read()
         affiliations = rdr.AffiliationsReader.from_path(affiliations_path).read()
 
-        main_graph = rdr.DirectoryReader.from_path(directory_path, chapter_locations, affiliations).read()
-        bnks_graph = rdr.DirectoryReader.from_path(bnks_path, chapter_locations).read()
+        main_graph = rdr.DirectoryReader.from_path(directory_path, affiliations).read()
+        bnks_graph = rdr.DirectoryReader.from_path(bnks_path).read()
 
         # Second argument attributes overwrite first
         tree.graph = compose(bnks_graph, main_graph)
@@ -60,13 +58,15 @@ class FamilyTree:
         This is only possible when the `big_badge` field in the directory is a
         badge number with no corresponding member record, because:
 
-            + Reorganization and Chapter nodes are added *only* when they exist
+            + Reorganization nodes are added *only* when they exist
 
             + All valid entries corresponding to the key in the `badge` column
             are guaranteed to be added as records
 
             + Invalid values for `big_badge` that cannot be interpreted as
-            integers are already caught when reading chapter nodes
+            integers are already caught when reading chapter nodes (TODO figure
+            out what this means because chapter nodes have been removed from
+            this program)
         '''
 
         for key, node_dict in self.graph.nodes_iter(data=True):
@@ -261,7 +261,7 @@ class FamilyTree:
 
         # Find the different connected components of the graph (i.e., each
         # component is a different family, unless it includes a reorganization
-        # or chapter node which can connect unrelated families).
+        # node which can connect unrelated families).
         #
         # Add the nodes from each component to the DOT graph, in the order of
         # component. The order of components is randomized to help prevent
