@@ -1,13 +1,17 @@
-from family_tree.tree import FamilyTree
+from family_tree.directory import Directory
 
 # Initialization
 
-tree = FamilyTree.from_paths(
+
+# CSV -> intermediate
+directory = Directory.from_paths(
         'directory.csv',
         'brothers_not_knights.csv',
         'affiliations.csv',
-        'settings.yaml',
+        'settings.yaml'
         )
+
+tree = directory.to_tree()
 tree.decorate()
 dotgraph = tree.to_dot_graph()
 

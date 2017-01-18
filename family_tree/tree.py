@@ -1,8 +1,7 @@
 import random
+import networkx as nx
 from networkx.algorithms import dag
-from networkx.algorithms.operators.binary import compose
 from networkx.algorithms.components import weakly_connected_components
-import family_tree.file as rdr
 from family_tree import dot
 from family_tree.semester import semester_range
 from family_tree.color import graphviz_color_map
@@ -12,38 +11,13 @@ from family_tree import entity
 
 class FamilyTree:
 
-    def __init__(self, graph=None, settings=None):
-        self.graph = graph
-        self.settings = {} or settings # TODO handle empty settings
+    def __init__(self):
+        self.graph = nx.DiGraph()
+        self.settings = {}
 
     ###########################################################################
     #### Generation                                                        ####
     ###########################################################################
-
-    # TODO handle when variable paths are empty
-    @classmethod
-    def from_paths(cls,
-        directory_path=None,
-        bnks_path=None,
-        affiliations_path=None,
-        settings_path=None,
-        ):
-
-        tree = cls()
-
-        affiliations = rdr.AffiliationsReader.from_path(affiliations_path).read()
-
-        main_graph = rdr.DirectoryReader.from_path(directory_path, affiliations).read()
-        bnks_graph = rdr.DirectoryReader.from_path(bnks_path).read()
-
-        # Second argument attributes overwrite first
-        tree.graph = compose(bnks_graph, main_graph)
-
-        tree.validate_node_existence()
-
-        tree.settings = rdr.SettingsReader.from_path(settings_path).read()
-
-        return tree
 
     def validate_node_existence(self):
         '''
@@ -69,7 +43,8 @@ class FamilyTree:
         for key, node_dict in self.graph.nodes_iter(data=True):
             if 'record' not in node_dict:
                 child = next(self.graph.successors_iter(key))
-                raise rdr.DirectoryError('Brother with badge {} has unknown big brother: "{}"'.format(child, key))
+                # TODO more specific exception
+                raise Exception('Brother with badge {} has unknown big brother: "{}"'.format(child, key))
 
     ###########################################################################
     #### Decoration                                                        ####
