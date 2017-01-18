@@ -1,7 +1,7 @@
 import csv, yaml
 import networkx as nx
 from collections import defaultdict
-import family_tree.records as rc
+from family_tree import entity
 
 class SettingsReader:
 
@@ -124,7 +124,7 @@ class DirectoryReader(CsvReader):
 
         graph = accumulator
 
-        member_record = rc.MemberRecord.from_row(self.affiliations, **row)
+        member_record = entity.Member.from_row(**row)
 
         if member_record:
             member_key = member_record.get_key()

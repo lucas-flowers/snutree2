@@ -7,8 +7,8 @@ from family_tree import dot
 from family_tree.semester import semester_range
 from family_tree.color import graphviz_color_map
 
-# TODO remove when MemberRecord call is removed
-from family_tree.records import MemberRecord, UnknownBigRecord
+# TODO remove when Member call is removed
+from family_tree import entity
 
 class FamilyTree:
 
@@ -110,7 +110,7 @@ class FamilyTree:
         # Members-only graph
         members_only = self.graph.subgraph(
                 [key for key, node_dict in self.graph.nodes_iter(data=True)
-                    if isinstance(node_dict['record'], MemberRecord)]
+                    if isinstance(node_dict['record'], entity.Member)]
                 )
 
         # Find heads of members-only graph
@@ -128,11 +128,11 @@ class FamilyTree:
         # Find members that had big brothers whose identities are unknown
         orphan_keys = [
                 key for key, in_degree in self.graph.in_degree().items()
-                if in_degree == 0 and isinstance(self.graph.node[key]['record'], MemberRecord)
+                if in_degree == 0 and isinstance(self.graph.node[key]['record'], entity.Member)
                 ]
 
         for orphan_key in orphan_keys:
-            parent_record = UnknownBigRecord.from_orphan(self.graph.node[orphan_key]['record'])
+            parent_record = entity.UnidentifiedKnight.from_member(self.graph.node[orphan_key]['record'])
             parent_key = parent_record.get_key()
             self.graph.add_node(parent_key, record=parent_record, dot_node_attributes=self.settings['graphviz']['node_defaults']['unknown'])
             self.graph.add_edge(parent_key, orphan_key, dot_edge_attributes=self.settings['graphviz']['edge_defaults']['unknown'])
@@ -145,7 +145,7 @@ class FamilyTree:
 
         family_color_map = graphviz_color_map(initial_mappings=self.settings['graphviz']['family_colors'])
         for key, node_dict in self.graph.nodes_iter(data=True):
-            if isinstance(node_dict['record'], MemberRecord):
+            if isinstance(node_dict['record'], entity.Member):
                 node_dict['dot_node_attributes']['color'] = family_color_map[node_dict['family']]
 
 
