@@ -99,7 +99,7 @@ class Member(TreeEntity):
     ###########################################################################
 
     @classmethod
-    def from_row(cls,
+    def from_dict(cls,
             badge=None,
             first_name=None,
             preferred_name=None,

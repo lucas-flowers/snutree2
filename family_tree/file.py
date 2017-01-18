@@ -124,7 +124,7 @@ class DirectoryReader(CsvReader):
 
         graph = accumulator
 
-        member_record = entity.Member.from_row(**row)
+        member_record = entity.Member.from_dict(**row)
 
         if member_record:
             member_key = member_record.get_key()
