@@ -27,15 +27,15 @@ class Record:
     def dot_edge_attributes(self, other):
         return {}
 
-class OrphanParentRecord(Record):
+class UnknownBigRecord(Record):
 
-    def __init__(self, orphan_key=None, semester=None):
+    def __init__(self, unknown_key=None, semester=None):
 
-        self.orphan_key = orphan_key
+        self.unknown_key = unknown_key
         self.semester = semester
 
     def get_key(self):
-        return '{} Parent'.format(self.orphan_key)
+        return '{} Parent'.format(self.unknown_key)
 
     ###########################################################################
     #### Validation Functions                                              ####
@@ -44,7 +44,7 @@ class OrphanParentRecord(Record):
     @classmethod
     def from_orphan(cls, orphan_record):
         record = cls()
-        record.orphan_key = orphan_record.get_key()
+        record.unknown_key = orphan_record.get_key()
         record.semester = orphan_record.semester - 1
         return record
 

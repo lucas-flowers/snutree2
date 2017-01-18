@@ -8,7 +8,7 @@ from family_tree.semester import semester_range
 from family_tree.color import graphviz_color_map
 
 # TODO remove when MemberRecord call is removed
-from family_tree.records import MemberRecord, OrphanParentRecord
+from family_tree.records import MemberRecord, UnknownBigRecord
 
 class FamilyTree:
 
@@ -132,7 +132,7 @@ class FamilyTree:
                 ]
 
         for orphan_key in orphan_keys:
-            parent_record = OrphanParentRecord.from_orphan(self.graph.node[orphan_key]['record'])
+            parent_record = UnknownBigRecord.from_orphan(self.graph.node[orphan_key]['record'])
             parent_key = parent_record.get_key()
             self.graph.add_node(parent_key, record=parent_record, dot_node_attributes=self.settings['graphviz']['node_defaults']['unknown'])
             self.graph.add_edge(parent_key, orphan_key, dot_edge_attributes=self.settings['graphviz']['edge_defaults']['unknown'])
