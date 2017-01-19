@@ -6,7 +6,8 @@ from family_tree import dot
 from family_tree.semester import semester_range
 from family_tree.color import graphviz_color_map
 
-# TODO remove when Member call is removed
+# TODO remove when Member call is removed (calls to Member should be removed if
+# possible)
 from family_tree import entity
 
 class FamilyTree:
