@@ -72,7 +72,6 @@ class Directory:
 
         tree = FamilyTree()
         tree.graph = members_graph
-        tree.validate_node_existence() # TODO does this belong here?
         tree.settings = self.settings
 
         return tree
