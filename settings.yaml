@@ -1,4 +1,5 @@
 
+# TODO add schema validation
 graphviz:
 
   # Defaults style for Graphviz graphs and subgraphs
@@ -42,26 +43,63 @@ graphviz:
   # Colors for specific families; each badge is the badge of family's head
   # TODO print warnings when family badges do not coincide with data
   family_colors:
-    663: deeppink
-    760: brown1
-    722: red4
-    726: lightsteelblue
-    673: midnightblue
-    716: purple
-    702: indianred4
-    735: limegreen
-    757: darkgreen
-    740: royalblue4
-    986: yellow
-    1043: slategrey
-    1044: orangered4
-    1045: crimson
-    1046: chartreuse4
-    1047: cyan2
-    1048: sienna2
-    1049: salmon2
-    1050: cadetblue
-    1051: dodgerblue
+    '663': deeppink
+    '760': brown1
+    '722': red4
+    '726': lightsteelblue
+    '673': midnightblue
+    '716': purple
+    '702': indianred4
+    '735': limegreen
+    '757': darkgreen
+    '740': royalblue4
+    '986': yellow
+    '1043': slategrey
+    '1044': orangered4
+    '1045': crimson
+    '1046': chartreuse4
+    '1047': cyan2
+    '1048': sienna2
+    '1049': salmon2
+    '1050': cadetblue
+    '1051': dodgerblue
+
+  # Custom nodes
+  nodes:
+    'Reorganization':
+      semester: 'Spring 1989'
+      attributes: {label: 'Reorganization', shape: oval}
+    'Kappa Delta':
+      semester: 'Fall 1982'
+      attributes: {label: 'Kappa Delta Chapter \nDuquesne University', color: none, fillcolor: none}
+
+  # Custom edges
+  edges:
+    - nodes: ['Kappa Delta', '986']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1031']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1034']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1035']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1036']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1038']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1039']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1041']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1043']
+    - nodes: ['Reorganization', '1044']
+    - nodes: ['Reorganization', '1045']
+    - nodes: ['Reorganization', '1046']
+    - nodes: ['Reorganization', '1047']
+    - nodes: ['Reorganization', '1048']
+    - nodes: ['Reorganization', '1049']
+    - nodes: ['Reorganization', '1050']
+    - nodes: ['Reorganization', '1051']
 
   # Random seed for ordering family placement
   seed: 54

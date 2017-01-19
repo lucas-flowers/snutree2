@@ -2,7 +2,6 @@ from family_tree.directory import Directory
 
 # Initialization
 
-
 # CSV -> intermediate
 directory = Directory.from_paths(
         'directory.csv',

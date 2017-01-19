@@ -5,6 +5,7 @@ from networkx.algorithms.components import weakly_connected_components
 from family_tree import dot
 from family_tree.semester import semester_range
 from family_tree.color import graphviz_color_map
+from family_tree.semester import Semester
 
 # TODO remove when Member call is removed (calls to Member should be removed if
 # possible)
@@ -22,7 +23,11 @@ class FamilyTree:
 
     def decorate(self):
 
+        # TODO added as options to settings. use special decorators to mark
+        # the options?
         self.add_edges()
+        self.add_custom_nodes()
+        self.add_custom_edges()
         self.remove_singletons()
         self.add_families()
         self.add_orphan_parents()
@@ -93,6 +98,30 @@ class FamilyTree:
             parent_key = parent_record.get_key()
             self.graph.add_node(parent_key, record=parent_record, dot_node_attributes=self.settings['graphviz']['node_defaults']['unknown'])
             self.graph.add_edge(parent_key, orphan_key, dot_edge_attributes=self.settings['graphviz']['edge_defaults']['unknown'])
+
+    def add_custom_nodes(self):
+
+        for key, value in self.settings['graphviz']['nodes'].items():
+
+            record = entity.Custom()
+            record.semester = Semester(value['semester'])
+            record.key = key
+            record.node_attributes = value['attributes']
+
+            self.graph.add_node(key, record=record)
+
+    def add_custom_edges(self):
+        for path in self.settings['graphviz']['edges']:
+
+            nodes = path['nodes']
+            attributes = path['attributes'] if 'attributes' in path else {}
+
+            # if nodes[1] == '1043':
+            #     # TODO problem caused by singletone refounders
+            #     pass
+
+            for u, v in zip(nodes[:-1], nodes[1:]):
+                self.graph.add_edge(u, v, dot_edge_attributes=attributes)
 
     ###########################################################################
     #### Convert to DOT                                                    ####

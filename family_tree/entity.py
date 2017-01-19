@@ -53,6 +53,33 @@ class TreeEntity:
 
     # empty
 
+class Custom(TreeEntity):
+
+    def __init__(self):
+        self.semester = None
+        self.key = None
+        self.node_attributes = {}
+        self.edge_attributes = {}
+
+    def get_key(self):
+        return self.key
+
+    ###########################################################################
+    #### DOT Functions                                                     ####
+    ###########################################################################
+
+    def dot_node_attributes(self):
+        return self.node_attributes
+
+    def dot_edge_attributes(self, other):
+        return self.edge_attributes
+
+    ###########################################################################
+    #### Validation Functions                                              ####
+    ###########################################################################
+
+    # empty
+
 class UnidentifiedKnight(TreeEntity):
     '''
     All members are assumed to have big brothers. If a member does not have a
