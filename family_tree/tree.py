@@ -118,12 +118,10 @@ class FamilyTree:
             nodes = path['nodes']
             attributes = path['attributes'] if 'attributes' in path else {}
 
-            # if nodes[1] == '1043':
-            #     # TODO problem caused by singletone refounders
-            #     pass
-
-            for u, v in zip(nodes[:-1], nodes[1:]):
-                self.graph.add_edge(u, v, dot_edge_attributes=attributes)
+            self.graph.add_edges_from(
+                    [(u, v) for u, v in zip(nodes[:-1], nodes[1:])],
+                    dot_edge_attributes=attributes
+                    )
 
     ###########################################################################
     #### Convert to DOT                                                    ####
