@@ -3,7 +3,6 @@ import networkx as nx
 from networkx.algorithms.operators.binary import compose
 from family_tree.tree import FamilyTree
 from family_tree import entity
-from family_tree import processor
 
 class Directory:
     '''
@@ -74,7 +73,37 @@ def read_directory_row(row, graph):
         if member.parent:
             graph.add_edge(member.parent, member_key)
 
-read_directory = processor.iterate(read_directory_row, nx.DiGraph, start_index=2)
+def table_reader(read_row, container_type, first_row=1):
+    '''
+    Returns a function `read_all` that uses `read_row` to read each "row" in an
+    iterable (`table` below). The function `read_row` should store each row in
+    `container`, which is of type `container_type`.
+
+    The `read_all` function keeps track of the row number and provides the row
+    number when an exception is raised. The starting row number defaults to 1,
+    but can be changed (i.e., for CSVs with headers).
+    '''
+
+    def read_all(table):
+
+        container = container_type()
+        row_number = first_row
+        try:
+            for row in table:
+                read_row(row, container)
+                row_number += 1
+        except:
+            # TODO use a real error, replace "row" with something more
+            # appropriate
+            raise Exception('Error in row {}'.format(row_number))
+
+        return container
+
+    return read_all
+
+read_directory = table_reader(read_directory_row, nx.DiGraph, first_row=2)
+
+
 
 
 #
