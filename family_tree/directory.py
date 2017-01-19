@@ -3,6 +3,7 @@ import networkx as nx
 from collections import defaultdict
 from family_tree.tree import FamilyTree
 from family_tree import entity
+from family_tree import settings_schema
 import family_tree.utilities as util
 
 
@@ -88,5 +89,7 @@ def read_csv(path):
 
 def read_settings(path):
     with open(path, 'r') as f:
-        return yaml.load(f.read())
+        settings = yaml.load(f)
+    settings_schema.validate(settings)
+    return settings
 

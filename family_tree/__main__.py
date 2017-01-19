@@ -1,13 +1,16 @@
 from family_tree.directory import Directory
 
-# Initialization
+directory_path = 'directory.csv'
+bnks_path = 'brothers_not_knights.csv'
+affiliations_path = 'affiliations.csv'
+settings_path = 'settings.yaml'
 
 # CSV -> intermediate
 directory = Directory.from_paths(
-        'directory.csv',
-        'brothers_not_knights.csv',
-        'affiliations.csv',
-        'settings.yaml'
+        directory_path,
+        bnks_path,
+        affiliations_path,
+        settings_path,
         )
 
 tree = directory.to_tree()

@@ -98,12 +98,12 @@ class FamilyTree:
         for orphan_key in orphan_keys:
             parent_record = entity.UnidentifiedKnight.from_member(self.graph.node[orphan_key]['record'])
             parent_key = parent_record.get_key()
-            self.graph.add_node(parent_key, record=parent_record, dot_node_attributes=self.settings['graphviz']['node_defaults']['unknown'])
-            self.graph.add_edge(parent_key, orphan_key, dot_edge_attributes=self.settings['graphviz']['edge_defaults']['unknown'])
+            self.graph.add_node(parent_key, record=parent_record, dot_node_attributes=self.settings['node_defaults']['unknown'])
+            self.graph.add_edge(parent_key, orphan_key, dot_edge_attributes=self.settings['edge_defaults']['unknown'])
 
     def add_custom_nodes(self):
 
-        for key, value in self.settings['graphviz']['nodes'].items():
+        for key, value in self.settings['nodes'].items():
 
             record = entity.Custom()
             record.semester = Semester(value['semester'])
@@ -113,7 +113,7 @@ class FamilyTree:
             self.graph.add_node(key, record=record)
 
     def add_custom_edges(self):
-        for path in self.settings['graphviz']['edges']:
+        for path in self.settings['edges']:
 
             nodes = path['nodes']
             attributes = path['attributes'] if 'attributes' in path else {}
@@ -129,7 +129,7 @@ class FamilyTree:
 
     def add_colors(self):
 
-        family_color_map = graphviz_color_map(initial_mappings=self.settings['graphviz']['family_colors'])
+        family_color_map = graphviz_color_map(initial_mappings=self.settings['family_colors'])
         for key, node_dict in self.graph.nodes_iter(data=True):
             if isinstance(node_dict['record'], entity.Member):
                 node_dict['dot_node_attributes']['color'] = family_color_map[node_dict['family']]
@@ -146,9 +146,9 @@ class FamilyTree:
         dotgraph = dot.Graph(
                 'family_tree',
                 'digraph',
-                attributes=self.settings['graphviz']['graph_defaults']['all'],
-                node_defaults=self.settings['graphviz']['node_defaults']['all'],
-                edge_defaults=self.settings['graphviz']['edge_defaults']['all'],
+                attributes=self.settings['graph_defaults']['all'],
+                node_defaults=self.settings['node_defaults']['all'],
+                edge_defaults=self.settings['edge_defaults']['all'],
                 )
         dotgraph.children = [dates_left, tree, dates_right] + ranks
 
@@ -170,8 +170,8 @@ class FamilyTree:
         subgraph = dot.Graph(
                 'dates{}'.format(key),
                 'subgraph',
-                node_defaults=self.settings['graphviz']['node_defaults']['semester'],
-                edge_defaults=self.settings['graphviz']['edge_defaults']['semester'],
+                node_defaults=self.settings['node_defaults']['semester'],
+                edge_defaults=self.settings['edge_defaults']['semester'],
                 )
 
         nodes = []
@@ -201,7 +201,7 @@ class FamilyTree:
         dotgraph = dot.Graph(
                 key,
                 'subgraph',
-                node_defaults=self.settings['graphviz']['node_defaults']['member']
+                node_defaults=self.settings['node_defaults']['member']
                 )
 
         nodes = []
@@ -262,7 +262,7 @@ class FamilyTree:
         # (The components themselves and their members' edges (see
         # self.ordered_edges() are not randomized)
         components = sorted(list(weakly_connected_components(self.graph)), key=lambda x : min(map(str, x)))
-        rng = random.Random(self.settings['graphviz']['seed'])
+        rng = random.Random(self.settings['seed'])
         rng.shuffle(components)
         for component in components:
             for key in sorted(component, key=str):
