@@ -3,35 +3,8 @@ import networkx as nx
 from collections import defaultdict
 from family_tree.tree import FamilyTree
 from family_tree import entity
+import family_tree.utilities as util
 
-greek_mapping = {
-        'Alpha' : 'A',
-        'Beta' : 'B',
-        'Gamma' : 'Γ',
-        'Delta' : 'Δ',
-        'Epsilon' : 'E',
-        'Zeta' : 'Z',
-        'Eta' : 'H',
-        'Theta' : 'Θ',
-        'Iota' : 'I',
-        'Kappa' : 'K',
-        'Lambda' : 'Λ',
-        'Mu' : 'M',
-        'Nu' : 'N',
-        'Xi' : 'Ξ',
-        'Omicron' : 'O',
-        'Pi' : 'Π',
-        'Rho' : 'P',
-        'Sigma' : 'Σ',
-        'Tau' : 'T',
-        'Upsilon' : 'Y',
-        'Phi' : 'Φ',
-        'Chi' : 'X',
-        'Psi' : 'Ψ',
-        'Omega' : 'Ω',
-        '(A)' : '(A)',
-        '(B)' : '(B)',
-        }
 
 class Directory:
     '''
@@ -76,35 +49,6 @@ class Directory:
 
         return tree
 
-def table_reader(read_row, container_type, first_row=1):
-    '''
-    Returns a function `read_all` that uses `read_row` to read each "row" in an
-    iterable (`table` below). The function `read_row` should store each row in
-    `container`, which is of type `container_type`.
-
-    The `read_all` function keeps track of the row number and provides the row
-    number when an exception is raised. The starting row number defaults to 1,
-    but can be changed (i.e., for CSVs with headers).
-    '''
-
-    def read_all(table):
-
-        container = container_type()
-        row_number = first_row
-        try:
-            for row in table:
-                read_row(row, container)
-                row_number += 1
-        except:
-            # TODO use a real error, replace "row" with something more
-            # appropriate
-            raise Exception('Error in row {}'.format(row_number))
-
-        return container
-
-    return read_all
-
-
 def read_directory_row(row, graph):
 
     # TODO move to `tree`????
@@ -117,7 +61,7 @@ def read_directory_row(row, graph):
             raise Exception('Duplicate badge: "{}"'.format(member_key))
         graph.add_node(member_key, record=member)
 
-read_directory = table_reader(
+read_directory = util.TableReaderFunction(
         read_directory_row,
         nx.DiGraph,
         first_row=2
@@ -127,12 +71,12 @@ def read_affiliations_row(row, affiliations_dict):
 
     badge = row['badge']
     other_badge = '{} {}'.format(
-            to_greek_name(row['chapter_name']),
+            util.to_greek_name(row['chapter_name']),
             row['other_badge']
             )
     affiliations_dict[badge].append(other_badge)
 
-read_affiliations = table_reader(
+read_affiliations = util.TableReaderFunction(
         read_affiliations_row,
         lambda : defaultdict(list),
         first_row=2
@@ -145,9 +89,4 @@ def read_csv(path):
 def read_settings(path):
     with open(path, 'r') as f:
         return yaml.load(f.read())
-
-def to_greek_name(english_name):
-    return ''.join([greek_mapping[w] for w in english_name.split(' ')])
-
-
 
