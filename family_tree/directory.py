@@ -125,7 +125,7 @@ read_directory = table_reader(
 
 def read_affiliations_row(row, affiliations_dict):
 
-    badge = int(row['badge'])
+    badge = row['badge']
     other_badge = '{} {}'.format(
             to_greek_name(row['chapter_name']),
             row['other_badge']

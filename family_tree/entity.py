@@ -138,13 +138,19 @@ class Member(TreeEntity):
     @classmethod
     def validate_row_badge(cls, badge_string):
         '''
-        By default, badge numbers should be integers.
+        By default, badge numbers should be interpretable as integers. However,
+        the actual key used should be a string (because Graphviz treats all
+        node keys as strings).
+
         '''
 
         try:
-            return int(badge_string)
+            int(badge_string)
         except ValueError:
+            # TODO better error message reflecting integer requirement
             raise EntityError('Unexpected badge number: "{}"'.format(badge_string))
+
+        return badge_string
 
     @classmethod
     def validate_row_name(cls, first_name, preferred_name, last_name):
@@ -161,15 +167,20 @@ class Member(TreeEntity):
     @classmethod
     def validate_row_parent(cls, big_badge_string):
         '''
-        If the big's badge is known, then it should be an integer.
+        If the big's badge is known, then it should be interpretable as an
+        integer.
         '''
 
         if big_badge_string:
             try:
-                return int(big_badge_string)
+                int(big_badge_string)
             except ValueError:
+                # TODO reflect integer requirement
                 raise EntityError('Unexpected big badge number: "{}"'.format(big_badge_string))
-        return None
+            # TODO is there a simpler way for all of this?
+            return big_badge_string
+        else:
+            return None
 
     @classmethod
     def validate_row_semester(cls, semester_string):
