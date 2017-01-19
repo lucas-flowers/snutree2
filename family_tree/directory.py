@@ -1,7 +1,6 @@
 import csv, yaml
 import networkx as nx
 from collections import defaultdict
-from networkx.algorithms.operators.binary import compose
 from family_tree.tree import FamilyTree
 from family_tree import entity
 
@@ -36,8 +35,6 @@ greek_mapping = {
 
 class Directory:
     '''
-    TODO merge bnks with directory?
-
     This class is used to store data from either a CSV file or a SQL query. It
     is an intermediate form before the data is turned into a tree. It stores
     Stores a list of brothers from the directory, a list for brothers not made
@@ -46,7 +43,6 @@ class Directory:
 
     def __init__(self):
         self.members = []
-        self.bnks = []
         self.affiliations = []
         self.settings = {}
 
@@ -54,36 +50,28 @@ class Directory:
     @classmethod
     def from_paths(cls,
             members_path,
-            bnks_path=None,
+            extra_members_path=None, # Intended for brothers not made knights
             affiliations_path=None,
             settings_path=None,
             ):
 
         directory = cls()
-        directory.members = read_csv(members_path)
-        directory.bnks = read_csv(bnks_path) if bnks_path else []
+        directory.members = read_csv(members_path) + (read_csv(extra_members_path) if extra_members_path else [])
         directory.affiliations = read_csv(affiliations_path) if affiliations_path else []
         directory.settings = read_settings(settings_path) if settings_path else {}
 
         return directory
 
-    def members_to_tree(self):
-        return read_directory(self.members)
-
-    def bnks_to_tree(self):
-        return read_directory(self.bnks)
-
     def to_tree(self):
 
         members_graph = read_directory(self.members)
-        bnks_graph = read_directory(self.bnks)
         affiliations_dict = read_affiliations(self.affiliations)
 
         for badge, affiliations in affiliations_dict.items():
             members_graph.node[badge]['record'].affiliations = affiliations
 
         tree = FamilyTree()
-        tree.graph = compose(bnks_graph, members_graph) # Second argument attributes overwrite first
+        tree.graph = members_graph
         tree.validate_node_existence() # TODO does this belong here?
         tree.settings = self.settings
 
