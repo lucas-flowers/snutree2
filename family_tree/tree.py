@@ -48,6 +48,8 @@ class FamilyTree:
 
     def remove_singletons(self):
 
+        # TODO protect singletons (e.g., refounders without littles) after a
+        # certain date so they don't disappear without at least a warning?
         self.graph.remove_nodes_from([key for key, degree in self.graph.degree_iter() if degree == 0])
 
     def add_node_attributes(self):
