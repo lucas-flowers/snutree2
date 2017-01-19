@@ -91,8 +91,7 @@ class Member(TreeEntity):
         self.name = None
         self.semester = None
         self.parent = None
-        # TODO add back affiliations
-        # self.affiliations = []
+        self.affiliations = []
 
     ###########################################################################
     #### Validation Functions                                              ####
@@ -209,10 +208,9 @@ class Knight(Member):
     ###########################################################################
 
     def get_dot_label(self):
-        # TODO add back affiliations
-        # affiliations = ['ΔA {}'.format(self.badge)] + self.affiliations
-        # return '{}\\n{}'.format(self.name, ', '.join(affiliations))
-        return '{}\\nΔA {}'.format(self.name, self.badge)
+        # TODO handle reaffiliates
+        affiliations = ['ΔA {}'.format(self.badge)] + self.affiliations
+        return '{}\\n{}'.format(self.name, ', '.join(affiliations))
 
 class Brother(Member):
 

@@ -1,8 +1,38 @@
 import csv, yaml
 import networkx as nx
+from collections import defaultdict
 from networkx.algorithms.operators.binary import compose
 from family_tree.tree import FamilyTree
 from family_tree import entity
+
+greek_mapping = {
+        'Alpha' : 'A',
+        'Beta' : 'B',
+        'Gamma' : 'Γ',
+        'Delta' : 'Δ',
+        'Epsilon' : 'E',
+        'Zeta' : 'Z',
+        'Eta' : 'H',
+        'Theta' : 'Θ',
+        'Iota' : 'I',
+        'Kappa' : 'K',
+        'Lambda' : 'Λ',
+        'Mu' : 'M',
+        'Nu' : 'N',
+        'Xi' : 'Ξ',
+        'Omicron' : 'O',
+        'Pi' : 'Π',
+        'Rho' : 'P',
+        'Sigma' : 'Σ',
+        'Tau' : 'T',
+        'Upsilon' : 'Y',
+        'Phi' : 'Φ',
+        'Chi' : 'X',
+        'Psi' : 'Ψ',
+        'Omega' : 'Ω',
+        '(A)' : '(A)',
+        '(B)' : '(B)',
+        }
 
 class Directory:
     '''
@@ -17,6 +47,7 @@ class Directory:
     def __init__(self):
         self.members = []
         self.bnks = []
+        self.affiliations = []
         self.settings = {}
 
     # TODO move to separate file so that there is no "from_*" methods (maybe?)
@@ -31,13 +62,8 @@ class Directory:
         directory = cls()
         directory.members = read_csv(members_path)
         directory.bnks = read_csv(bnks_path) if bnks_path else []
+        directory.affiliations = read_csv(affiliations_path) if affiliations_path else []
         directory.settings = read_settings(settings_path) if settings_path else {}
-
-        # affiliations = read_csv(affiliations_path) if affiliations_path else []
-
-
-
-        # TODO handle affiliations
 
         return directory
 
@@ -49,10 +75,12 @@ class Directory:
 
     def to_tree(self):
 
-        members_graph = self.members_to_tree()
-        bnks_graph = self.bnks_to_tree()
+        members_graph = read_directory(self.members)
+        bnks_graph = read_directory(self.bnks)
+        affiliations_dict = read_affiliations(self.affiliations)
 
-        # TODO add affiliations
+        for badge, affiliations in affiliations_dict.items():
+            members_graph.node[badge]['record'].affiliations = affiliations
 
         tree = FamilyTree()
         tree.graph = compose(bnks_graph, members_graph) # Second argument attributes overwrite first
@@ -60,18 +88,6 @@ class Directory:
         tree.settings = self.settings
 
         return tree
-
-def read_directory_row(row, graph):
-
-    member = entity.Member.from_dict(**row)
-    if member:
-        member_key = member.get_key()
-        if member_key in graph and 'record' in graph.node[member_key]:
-            # TODO better exception type
-            raise Exception('Duplicate badge: "{}"'.format(member_key))
-        graph.add_node(member_key, record=member)
-        if member.parent:
-            graph.add_edge(member.parent, member_key)
 
 def table_reader(read_row, container_type, first_row=1):
     '''
@@ -101,56 +117,40 @@ def table_reader(read_row, container_type, first_row=1):
 
     return read_all
 
-read_directory = table_reader(read_directory_row, nx.DiGraph, first_row=2)
 
+def read_directory_row(row, graph):
 
+    member = entity.Member.from_dict(**row)
+    if member:
+        member_key = member.get_key()
+        if member_key in graph and 'record' in graph.node[member_key]:
+            # TODO better exception type
+            raise Exception('Duplicate badge: "{}"'.format(member_key))
+        graph.add_node(member_key, record=member)
+        if member.parent:
+            graph.add_edge(member.parent, member_key)
 
+read_directory = table_reader(
+        read_directory_row,
+        nx.DiGraph,
+        first_row=2
+        )
 
-#
-# greek_mapping = {
-#         'Alpha' : 'A',
-#         'Beta' : 'B',
-#         'Gamma' : 'Γ',
-#         'Delta' : 'Δ',
-#         'Epsilon' : 'E',
-#         'Zeta' : 'Z',
-#         'Eta' : 'H',
-#         'Theta' : 'Θ',
-#         'Iota' : 'I',
-#         'Kappa' : 'K',
-#         'Lambda' : 'Λ',
-#         'Mu' : 'M',
-#         'Nu' : 'N',
-#         'Xi' : 'Ξ',
-#         'Omicron' : 'O',
-#         'Pi' : 'Π',
-#         'Rho' : 'P',
-#         'Sigma' : 'Σ',
-#         'Tau' : 'T',
-#         'Upsilon' : 'Y',
-#         'Phi' : 'Φ',
-#         'Chi' : 'X',
-#         'Psi' : 'Ψ',
-#         'Omega' : 'Ω',
-#         '(A)' : '(A)',
-#         '(B)' : '(B)',
-#         }
-#
-# # intermediate += affiliations
-# def process_affiliation(row, affiliations):
-#     badge = row['badge']
-#     other_badge = '{}  {}'.format(
-#             to_greek_name(row['chapter_name']),
-#             row['other_badge'])
-#     affiliations[badge].append(other_badge)
-# def to_greek_name(english_name):
-#     return ''.join([greek_mapping[w] for w in english_name.split(' ')])
-# process_affiliations = processor.iterate(
-#         process_affiliation,
-#         lambda : defaultdict(list),
-#         2)
-# affiliations = process_affiliations(affiliations)
-#
+def read_affiliations_row(row, affiliations_dict):
+
+    badge = int(row['badge'])
+    other_badge = '{} {}'.format(
+            to_greek_name(row['chapter_name']),
+            row['other_badge']
+            )
+    affiliations_dict[badge].append(other_badge)
+
+read_affiliations = table_reader(
+        read_affiliations_row,
+        lambda : defaultdict(list),
+        first_row=2
+        )
+
 def read_csv(path):
     with open(path, 'r') as f:
         return list(csv.DictReader(f))
@@ -159,7 +159,8 @@ def read_settings(path):
     with open(path, 'r') as f:
         return yaml.load(f.read())
 
-
+def to_greek_name(english_name):
+    return ''.join([greek_mapping[w] for w in english_name.split(' ')])
 
 
 
