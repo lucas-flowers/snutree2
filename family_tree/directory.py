@@ -108,6 +108,8 @@ def table_reader(read_row, container_type, first_row=1):
 
 def read_directory_row(row, graph):
 
+    # TODO move to `tree`????
+
     member = entity.Member.from_dict(**row)
     if member:
         member_key = member.get_key()
@@ -115,8 +117,6 @@ def read_directory_row(row, graph):
             # TODO better exception type
             raise Exception('Duplicate badge: "{}"'.format(member_key))
         graph.add_node(member_key, record=member)
-        if member.parent:
-            graph.add_edge(member.parent, member_key)
 
 read_directory = table_reader(
         read_directory_row,

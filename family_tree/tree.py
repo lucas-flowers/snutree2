@@ -16,51 +16,29 @@ class FamilyTree:
         self.settings = {}
 
     ###########################################################################
-    #### Generation                                                        ####
-    ###########################################################################
-
-    def validate_node_existence(self):
-        '''
-        Action
-        ======
-
-        Checks for uninitialized nodes in the graph: If a node key not have a
-        record associated with it, then the key only ever appeared as part of
-        an edge when reading the graph into memory.
-
-        This is only possible when the `big_badge` field in the directory is a
-        badge number with no corresponding member record, because:
-
-            + All valid entries corresponding to the key in the `badge` column
-            are guaranteed to be added as records
-
-            + Invalid values for `big_badge` that cannot be interpreted as
-            integers are already caught when reading chapter nodes (TODO figure
-            out what this means because chapter nodes have been removed from
-            this program)
-
-        # TODO delete this function, then separate edge creation from node
-        # creation in directory.read_directory_row?
-        '''
-
-        for key, node_dict in self.graph.nodes_iter(data=True):
-            if 'record' not in node_dict:
-                child = next(self.graph.successors_iter(key))
-                # TODO more specific exception
-                raise Exception('Brother with badge {} has unknown big brother: "{}"'.format(child, key))
-
-    ###########################################################################
     #### Decoration                                                        ####
     ###########################################################################
 
     def decorate(self):
 
+        self.add_edges()
         self.remove_singletons()
         self.add_families()
         self.add_orphan_parents()
         self.add_node_attributes()
         self.add_colors()
         self.add_edge_attributes()
+
+    def add_edges(self):
+
+        for member_key, node_dict in self.graph.nodes_iter(data=True):
+            member = node_dict['record']
+            if member.parent:
+                if member.parent not in self.graph:
+                    # TODO candidates and BNKs don't have badges...
+                    raise Exception('Brother with badge {} has unknown big brother: "{}"'.format(member_key, member.parent))
+                else:
+                    self.graph.add_edge(member.parent, member_key)
 
     def remove_singletons(self):
 
