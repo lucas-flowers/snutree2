@@ -38,6 +38,9 @@ class FamilyTree:
             integers are already caught when reading chapter nodes (TODO figure
             out what this means because chapter nodes have been removed from
             this program)
+
+        # TODO delete this function, then separate edge creation from node
+        # creation in directory.read_directory_row?
         '''
 
         for key, node_dict in self.graph.nodes_iter(data=True):
