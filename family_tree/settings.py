@@ -19,6 +19,24 @@ def read_settings(path):
     validate(settings)
     return settings
 
+def validate(settings):
+    try:
+        jsch.validate(settings, schema)
+    except jsch.exceptions.ValidationError as e:
+        raise SettingsException('Error in settings file, in "{}": {}'.format(
+            '" -> "'.join(e.path),
+            e.message)
+            )
+
+class SettingsException(Exception):
+    pass
+
+###############################################################################
+###############################################################################
+#### Settings File Schema                                                  ####
+###############################################################################
+###############################################################################
+
 # Represents a Graphviz list of attributes
 attributes = {
         'type' : 'object',
@@ -109,17 +127,4 @@ schema = {
             },
         'additionalProperties' : False,
         }
-
-def validate(settings):
-    try:
-        jsch.validate(settings, schema)
-    except jsch.exceptions.ValidationError as e:
-        raise SettingsException('Error in settings file, in "{}": {}'.format(
-            '" -> "'.join(e.path),
-            e.message)
-            )
-
-class SettingsException(Exception):
-    pass
-
 
