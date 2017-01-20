@@ -11,6 +11,7 @@ class Semester(int):
     matcher = re.compile('(Spring|Fall) (\d+)')
 
     def __new__(cls, arg):
+        # TODO make Semester(year, season) a valid call
 
         if isinstance(arg, int):
             value = arg

@@ -37,6 +37,20 @@ class SettingsException(Exception):
 ###############################################################################
 ###############################################################################
 
+# TODO use default files instead of including the password in YAML file?
+mysql = {
+        'type' : 'object',
+        'properties' : {
+            'host' : { 'type' : 'string' },
+            'user' : { 'type' : 'string' },
+            'passwd' : { 'type' : 'string' },
+            'port' : { 'type' : 'integer' },
+            'db' : { 'type' : 'string' },
+            },
+        'required' : ['host', 'user', 'passwd', 'port', 'db'],
+        'additionalProperties' : False
+        }
+
 # Represents a Graphviz list of attributes
 attributes = {
         'type' : 'object',
@@ -117,6 +131,7 @@ seed = {
 schema = {
         'type' : 'object',
         'properties' : {
+            'mysql' : mysql,
             'nodes' : nodes,
             'edges' : edges,
             'seed' : seed,

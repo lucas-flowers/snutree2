@@ -203,7 +203,7 @@ class Member(TreeEntity):
                 int(big_badge_string)
             except ValueError:
                 # TODO reflect integer requirement
-                raise EntityError('Unexpected big badge number: "{}"'.format(big_badge_string))
+                raise EntityError('Unexpected big badge number: {}'.format(repr(big_badge_string)))
             # TODO is there a simpler way for all of this?
             return big_badge_string
         else:

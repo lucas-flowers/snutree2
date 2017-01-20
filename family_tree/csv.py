@@ -6,6 +6,7 @@ def read_csv(path):
     with open(path, 'r') as f:
         return list(csv.DictReader(f))
 
+# TODO move paths into settings
 def to_directory(
         members_path,
         extra_members_path=None, # Intended for brothers not made knights
