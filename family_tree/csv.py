@@ -1,5 +1,5 @@
 import csv
-from family_tree.utilities import read_settings
+from family_tree.settings import read_settings
 from family_tree.directory import Directory
 
 def read_csv(path):
