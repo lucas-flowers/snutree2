@@ -41,7 +41,8 @@ class FamilyTree:
             member = node_dict['record']
             if member.parent:
                 if member.parent not in self.graph:
-                    # TODO candidates and BNKs don't have badges...
+                    # TODO candidates and BNKs don't have badges... Maybe use a
+                    # field in Entities that gives the appropriate message?
                     raise Exception('Brother with badge {} has unknown big brother: "{}"'.format(member_key, member.parent))
                 else:
                     self.graph.add_edge(member.parent, member_key)
