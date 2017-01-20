@@ -3,9 +3,8 @@ import networkx as nx
 from networkx.algorithms import dag
 from networkx.algorithms.components import weakly_connected_components
 from family_tree import dot
-from family_tree.semester import semester_range
+from family_tree.semester import Semester, semester_range
 from family_tree.color import graphviz_color_map
-from family_tree.semester import Semester
 
 # TODO remove when Member call is removed (calls to Member should be removed if
 # possible)
