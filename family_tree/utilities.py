@@ -1,3 +1,5 @@
+import json, yaml
+from family_tree import settings_schema
 
 greek_mapping = {
         'Alpha' : 'A',
@@ -60,4 +62,21 @@ class TableReaderFunction:
 
 def to_greek_name(english_name):
     return ''.join([greek_mapping[w] for w in english_name.split(' ')])
+
+def read_settings(path):
+    with open(path, 'r') as f:
+
+        # Load into YAML first, then dump into a JSON string, then load again
+        # using the json library. This is done because YAML accepts nonstring
+        # (i.e., integer) keys, but JSON and Graphviz do not. So if a key in
+        # the settings file were an integer, the program's internal
+        # representation could end up having two different versions of a node:
+        # One with an integer key and another with a string key.
+        #
+        # This could easily be avoided by just not writing integers in the YAML
+        # file, but that could be expecting too much of someone editing it.
+        settings = json.loads(json.dumps(yaml.load(f)))
+
+    settings_schema.validate(settings)
+    return settings
 

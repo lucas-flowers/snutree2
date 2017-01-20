@@ -1,9 +1,7 @@
-import csv, yaml, json
 import networkx as nx
 from collections import defaultdict
 from family_tree.tree import FamilyTree
 from family_tree import entity
-from family_tree import settings_schema
 import family_tree.utilities as util
 
 
@@ -19,22 +17,6 @@ class Directory:
         self.members = []
         self.affiliations = []
         self.settings = {}
-
-    # TODO move to separate file so that there is no "from_*" methods (maybe?)
-    @classmethod
-    def from_paths(cls,
-            members_path,
-            extra_members_path=None, # Intended for brothers not made knights
-            affiliations_path=None,
-            settings_path=None,
-            ):
-
-        directory = cls()
-        directory.members = read_csv(members_path) + (read_csv(extra_members_path) if extra_members_path else [])
-        directory.affiliations = read_csv(affiliations_path) if affiliations_path else []
-        directory.settings = read_settings(settings_path) if settings_path else {}
-
-        return directory
 
     def to_tree(self):
 
@@ -82,25 +64,4 @@ read_affiliations = util.TableReaderFunction(
         lambda : defaultdict(list),
         first_row=2
         )
-
-def read_csv(path):
-    with open(path, 'r') as f:
-        return list(csv.DictReader(f))
-
-def read_settings(path):
-    with open(path, 'r') as f:
-
-        # Load into YAML first, then dump into a JSON string, then load again
-        # using the json library. This is done because YAML accepts nonstring
-        # (i.e., integer) keys, but JSON and Graphviz do not. So if a key in
-        # the settings file were an integer, the program's internal
-        # representation could end up having two different versions of a node:
-        # One with an integer key and another with a string key.
-        #
-        # This could easily be avoided by just not writing integers in the YAML
-        # file, but that could be expecting too much of someone editing it.
-        settings = json.loads(json.dumps(yaml.load(f)))
-
-    settings_schema.validate(settings)
-    return settings
 
