@@ -1,7 +1,8 @@
 import MySQLdb, MySQLdb.cursors
 from family_tree.settings import read_settings
-from family_tree.csv import read_csv
+# from family_tree.csv import read_csv
 from family_tree.directory import Directory
+from family_tree.semester import Semester
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 # TODO sort affiliations
@@ -19,10 +20,13 @@ def to_directory(
     directory = Directory()
     directory.settings = settings
     directory.affiliations = retrieve_affiliations(cxn)
-    directory.members = retrieve_members(cxn)
     # TODO you know, this `extra_members_path` could be the full local
     # directory, in addition to BNKs...
-    directory.members += read_csv(extra_members_path) if extra_members_path else []
+    directory.set_members(retrieve_members(cxn)
+            # TODO add line back when read_csv produces valid Directory entries
+            # + (read_csv(extra_members_path) if extra_members_path else [])
+            )
+
 
     return directory
 
@@ -34,14 +38,21 @@ def retrieve_members(mysql_connection):
 
     for member in members:
 
-        # TODO make a simpler Semester call(?)
-        season = member.pop('pledge_semester_season')
-        year = member.pop('pledge_semester_year')
-        member['pledge_semester'] = '{} {}'.format(season, year) \
-                if season and year != None else None
+        # Delete all keys with null or empty values (fuck that noise)
+        for key, field in list(member.items()):
+            if not field:
+                del member[key]
 
-        member['badge'] = str(member['badge']) if member['badge'] else None
-        member['big_badge'] = str(member['big_badge']) if member['big_badge'] else None
+        # TODO make a simpler Semester call(?)
+        # Convert pledge_semester to a Semester object
+        season = member.pop('pledge_semester_season', None)
+        year = member.pop('pledge_semester_year', None)
+        if season and year != None:
+            member['pledge_semester'] = Semester('{} {}'.format(season, year))
+
+        # Collapse status categories that indicate types of Knights
+        if member['status'] in ('Active', 'Alumni', 'Left School'):
+            member['status'] = 'Knight'
 
     return members
 

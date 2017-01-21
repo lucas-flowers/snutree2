@@ -141,18 +141,12 @@ class Member(TreeEntity):
         reaffiliate).
         '''
 
-        if status in ('Active', 'Alumni'):
-            MemberType = Knight
-        elif status == 'Brother':
-            MemberType = Brother
-        elif status == 'Candidate':
-            MemberType = Candidate
-        elif status == 'Expelled':
-            MemberType = Expelled
-        elif status == 'Reaffiliate':
-            return None
-        else:
-            raise EntityError('Invalid member status: {}'.format(status))
+        MemberType = dict(
+                Knight=Knight,
+                Brother=Brother,
+                Candidate=Candidate,
+                Expelled=Expelled,
+                )[status]
 
         member = MemberType()
         member.badge = MemberType.validate_row_badge(badge)

@@ -2,6 +2,8 @@ import csv
 from family_tree.settings import read_settings
 from family_tree.directory import Directory
 
+# TODO replace with "retrieve_members(path)" to have the same form as
+# sql.retrieve_members
 def read_csv(path):
     with open(path, 'r') as f:
         return list(csv.DictReader(f))
@@ -15,7 +17,8 @@ def to_directory(
         ):
 
     directory = Directory()
-    directory.members = read_csv(members_path) + (read_csv(extra_members_path) if extra_members_path else [])
+    directory.set_members(read_csv(members_path) +
+            (read_csv(extra_members_path) if extra_members_path else []))
     directory.affiliations = read_csv(affiliations_path) if affiliations_path else []
     directory.settings = read_settings(settings_path) if settings_path else {}
 

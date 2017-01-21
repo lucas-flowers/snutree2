@@ -1,6 +1,9 @@
 import networkx as nx
+from voluptuous import Schema, Any, All, Length, Optional
+from voluptuous.humanize import validate_with_humanized_errors
 from collections import defaultdict
 from family_tree.tree import FamilyTree
+from family_tree.semester import Semester
 from family_tree import entity
 import family_tree.utilities as util
 
@@ -14,13 +17,13 @@ class Directory:
     '''
 
     def __init__(self):
-        self.members = []
+        self._members = []
         self.affiliations = []
         self.settings = {}
 
     def to_tree(self):
 
-        members_graph = read_directory(self.members)
+        members_graph = read_directory(self._members)
         affiliations_dict = read_affiliations(self.affiliations)
 
         for badge, affiliations in affiliations_dict.items():
@@ -40,6 +43,28 @@ class Directory:
         tree.settings = self.settings
 
         return tree
+
+    def set_members(self, members):
+
+
+        # TODO Reaffiliates cause errors in CSV version
+        # Recommend handling reaffiliates in csv.py, since the SQL query will
+        # not return any empty reaffiliates
+        self._members = [validate_with_humanized_errors(m, self.member_validator)
+                for m in members]
+
+    member_validator = Schema({
+        'status' : Any('Knight', 'Brother', 'Candidate', 'Expelled'),
+        Optional('badge') : str,
+        Optional('first_name') : All(str, Length(min=1)),
+        Optional('preferred_name') : All(str, Length(min=1)),
+        'last_name' : All(str, Length(min=1)),
+        Optional('big_badge') : str, # TODO Coerce(int) for /badges/ and str for /keys/
+        Optional('pledge_semester') : Semester,
+        }, required=True)
+
+
+
 
 def read_directory_row(row, graph):
 
