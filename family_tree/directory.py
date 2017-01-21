@@ -18,7 +18,7 @@ class Directory:
 
     def __init__(self):
         self._members = []
-        self.affiliations = []
+        self._affiliations = []
         self.settings = {}
 
     def to_tree(self):
@@ -55,14 +55,25 @@ class Directory:
 
     member_validator = Schema({
         'status' : Any('Knight', 'Brother', 'Candidate', 'Expelled'),
-        Optional('badge') : str,
+        Optional('badge') : All(str, Length(min=1)),
         Optional('first_name') : All(str, Length(min=1)),
         Optional('preferred_name') : All(str, Length(min=1)),
         'last_name' : All(str, Length(min=1)),
-        Optional('big_badge') : str, # TODO Coerce(int) for /badges/ and str for /keys/
+        Optional('big_badge') : All(str, Length(min=1)), # TODO int for /badges/ and str for /keys/
         Optional('pledge_semester') : Semester,
         }, required=True)
 
+
+    def set_affiliations(self, affiliations):
+
+        self._affiliations = [validate_with_humanized_errors(a, self.affiliations_validator)
+            for a in affiliations]
+
+    affiliations_validator = Schema({
+        'badge' : All(str, Length(min=1)),
+        'chapter_name' : All(str, Length(min=1)),
+        'other_badge' : All(str, Length(min=1)),
+        })
 
 
 

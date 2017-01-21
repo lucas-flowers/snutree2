@@ -71,19 +71,20 @@ def retrieve_affiliations(mysql_connection):
 
     for aff in raw_affiliations:
 
-        # TODO the string conversion is necessary, right?
-        badge = str(aff['badge'])
+        badge = str(aff['badge']) # TODO use integers instead
         other_badge = str(aff['other_badge'])
         chapter_name = aff['chapter_name']
+        aff = dict(badge=badge, other_badge=other_badge, chapter_name=chapter_name)
+
+        # Delete all keys with null or empty values (fuck that noise)
+        for key, field in list(aff.items()):
+            if not field:
+                del aff[key]
 
         # TODO is there a better way than looking for all primary DA badges and
         # removing them from the affiliations list?
         if badge != other_badge or chapter_name != 'Delta Alpha':
-            affiliations.append({
-                'badge' : badge,
-                'other_badge' : other_badge,
-                'chapter_name' : chapter_name,
-                })
+            affiliations.append(aff)
 
     return affiliations
 
