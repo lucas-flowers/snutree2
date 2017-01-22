@@ -1,11 +1,13 @@
 import networkx as nx
-from voluptuous import Schema, Any, All, Length, Optional, Unique
+from voluptuous import Schema, All, Any, Length, Optional, Unique
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.tree import FamilyTree
 from family_tree.semester import Semester
 from family_tree import entity
 import family_tree.utilities as util
+
+NonEmptyString = All(str, Length(min=1))
 
 class Directory:
     '''
@@ -22,20 +24,52 @@ class Directory:
     # unique (as determined by their badge), and that all
     # chapter_name/other_badge pairs in the affiliations list are unique.
 
-    member_schema = Schema({
-        'status' : Any('Knight', 'Brother', 'Candidate', 'Expelled'),
-        Optional('badge') : All(str, Length(min=1)),
-        Optional('first_name') : All(str, Length(min=1)),
-        Optional('preferred_name') : All(str, Length(min=1)),
-        'last_name' : All(str, Length(min=1)),
-        Optional('big_badge') : All(str, Length(min=1)),
-        Optional('pledge_semester') : Semester,
-        }, required=True)
+    member_schema = Schema(Any(
+
+        {
+            'status' : 'Knight',
+            'badge' : NonEmptyString,
+            'first_name' : NonEmptyString,
+            Optional('preferred_name') : NonEmptyString,
+            'last_name' : NonEmptyString,
+            Optional('big_badge') : NonEmptyString,
+            Optional('pledge_semester') : Semester,
+            },
+
+        {
+            'status' : 'Brother',
+            Optional('first_name') : NonEmptyString,
+            Optional('preferred_name') : NonEmptyString,
+            'last_name' : NonEmptyString,
+            Optional('big_badge') : NonEmptyString,
+            Optional('pledge_semester') : Semester,
+            },
+
+        {
+            'status' : 'Candidate',
+            'first_name' : NonEmptyString,
+            Optional('preferred_name') : NonEmptyString,
+            'last_name' : NonEmptyString,
+            Optional('big_badge') : NonEmptyString,
+            Optional('pledge_semester') : Semester,
+            },
+
+        {
+            'status' : 'Expelled',
+            'badge' : NonEmptyString,
+            Optional('first_name') : NonEmptyString,
+            Optional('preferred_name') : NonEmptyString,
+            Optional('last_name') : NonEmptyString,
+            Optional('big_badge') : NonEmptyString,
+            Optional('pledge_semester') : Semester,
+            },
+
+        ), required=True, extra=False)
 
     affiliations_schema = Schema({
-        'badge' : All(str, Length(min=1)),
-        'chapter_name' : All(str, Length(min=1)),
-        'other_badge' : All(str, Length(min=1)),
+        'badge' : NonEmptyString,
+        'chapter_name' : NonEmptyString,
+        'other_badge' : NonEmptyString,
         })
 
     def __init__(self):
@@ -70,7 +104,7 @@ def read_directory_row(row, graph):
 
     # TODO move to `tree`????
 
-    member = entity.Member.from_dict(**row)
+    member = entity.Member.from_dict(row)
     if member:
         graph.add_node(member.get_key(), record=member)
 
