@@ -1,7 +1,6 @@
 import MySQLdb, MySQLdb.cursors
 import family_tree.csv
-from family_tree.settings import read_settings
-from family_tree.directory import Directory
+from family_tree.directory import Directory, read_settings
 from family_tree.semester import Semester
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
@@ -24,7 +23,7 @@ def to_directory(
     cxn = MySQLdb.Connection(**mysql_cnf)
 
     directory = Directory()
-    directory.settings = settings
+    directory.set_settings(settings)
     directory.set_affiliations(retrieve_affiliations(cxn))
     # TODO you know, this `extra_members_path` could be the full local
     # directory, in addition to BNKs...

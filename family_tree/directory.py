@@ -1,5 +1,6 @@
+import json, yaml
 import networkx as nx
-from voluptuous import Schema, All, Any, Length, Optional, Unique
+from voluptuous import Schema, All, Any, Coerce, Extra, Length, Optional, Unique
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.tree import FamilyTree
@@ -14,6 +15,10 @@ member_status_mapping = {
         'Expelled' : Expelled
         }
 
+NonEmptyString = All(str, Length(min=1))
+
+Attributes = {Extra: Any(str, int, float, bool)}
+
 def MemberType(status):
     member_type = member_status_mapping.get(status, None)
     if member_type:
@@ -21,7 +26,8 @@ def MemberType(status):
     else:
         raise ValueError('Status must be one of {}'.format(member_status_mapping.keys()))
 
-NonEmptyString = All(str, Length(min=1))
+def Defaults(*categories):
+    return { Optional(category) : Attributes for category in categories }
 
 class Directory:
     '''
@@ -86,6 +92,29 @@ class Directory:
         'other_badge' : NonEmptyString,
         })
 
+    settings_schema = Schema({
+        'mysql' : { # TODO use default files instead of having a password in the YAML file?
+            'host' : NonEmptyString,
+            'user' : NonEmptyString,
+            Optional('passwd'): NonEmptyString,
+            'port' : int,
+            'db' : NonEmptyString,
+            },
+        'nodes' : { Extra : {
+            'semester' : All(str, Coerce(Semester)), # Semester can coerce int, but we don't want that in settings
+            Optional('attributes') : Attributes,
+            } },
+        'edges' : [{
+            'nodes' : All([NonEmptyString], Length(min=2)),
+            Optional('attributes') : Attributes,
+            }],
+        'seed' : int,
+        'family_colors' : { Extra : NonEmptyString },
+        'edge_defaults' : Defaults('all', 'semester', 'unknown'),
+        'node_defaults' : Defaults('all', 'semester', 'unknown', 'member'),
+        'graph_defaults' : Defaults('all'),
+        }, required=True, extra=False)
+
     def __init__(self):
         self._members = []
         self._affiliations = []
@@ -114,6 +143,9 @@ class Directory:
         validate([(a['chapter_name'], a['other_badge']) for a in affiliations], Schema(Unique()))
         self._affiliations = [validate(a, self.affiliations_schema) for a in affiliations]
 
+    def set_settings(self, settings_dict):
+        self.settings = validate(settings_dict, self.settings_schema)
+
 def read_directory_row(row, graph):
 
     MemberType = row['status']
@@ -140,4 +172,21 @@ read_affiliations = util.TableReaderFunction(
         lambda : defaultdict(list),
         first_row=2
         )
+
+# TODO rename to distinguish from read_directory and read_affiliations, which
+# move members/affiliations into the tree (whereas this function reads settings
+# from a path into the Directory)
+def read_settings(path):
+    with open(path, 'r') as f:
+
+        # Load into YAML first, then dump into a JSON string, then load again
+        # using the json library. This is done because YAML accepts nonstring
+        # (i.e., integer) keys, but JSON and Graphviz do not. So if a key in
+        # the settings file were an integer, the program's internal
+        # representation could end up having two different versions of a node:
+        # One with an integer key and another with a string key.
+        #
+        # This could easily be avoided by just not writing integers in the YAML
+        # file, but that could be expecting too much of someone editing it.
+        return json.loads(json.dumps(yaml.load(f)))
 

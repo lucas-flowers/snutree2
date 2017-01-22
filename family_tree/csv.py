@@ -1,8 +1,7 @@
 import csv
 from voluptuous import Schema, Optional
 from voluptuous.humanize import validate_with_humanized_errors as validate
-from family_tree.settings import read_settings
-from family_tree.directory import Directory
+from family_tree.directory import Directory, read_settings
 from family_tree.semester import Semester
 
 # Required headers in a CSV members file
@@ -32,7 +31,7 @@ def to_directory(
         ):
 
     directory = Directory()
-    directory.settings = read_settings(settings_path) if settings_path else {}
+    directory.set_settings(read_settings(settings_path) if settings_path else {})
     directory.set_affiliations(retrieve_affiliations(affiliations_path)
             if affiliations_path else [])
     directory.set_members(retrieve_members(members_path) +
