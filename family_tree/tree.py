@@ -3,7 +3,7 @@ import networkx as nx
 from networkx.algorithms import dag
 from networkx.algorithms.components import weakly_connected_components
 from family_tree import dot
-from family_tree.semester import Semester, semester_range
+from family_tree.semester import semester_range
 from family_tree.color import graphviz_color_map
 
 # TODO remove when Member call is removed (calls to Member should be removed if
@@ -54,11 +54,6 @@ class FamilyTree:
     def add_custom_nodes(self):
 
         for key, value in self.settings['nodes'].items():
-
-            # TODO move Semester call by replacing json vaidation in
-            # settings.py with voluptuous validation and use voluptuous to
-            # create a Semester object in its validation function
-            value['semester'] = Semester(value['semester'])
             record = entity.Custom(key, **value)
             self.graph.add_node(key, record=record)
 
