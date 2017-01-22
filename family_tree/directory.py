@@ -24,7 +24,7 @@ class Directory:
     def to_tree(self):
 
         members_graph = read_directory(self._members)
-        affiliations_dict = read_affiliations(self.affiliations)
+        affiliations_dict = read_affiliations(self._affiliations)
 
         for badge, affiliations in affiliations_dict.items():
 

@@ -25,8 +25,7 @@ def to_directory(
 
     directory = Directory()
     directory.settings = settings
-    # TODO use affiliations setter
-    directory.affiliations = retrieve_affiliations(cxn)
+    directory.set_affiliations(retrieve_affiliations(cxn))
     # TODO you know, this `extra_members_path` could be the full local
     # directory, in addition to BNKs...
     directory.set_members(retrieve_members(cxn) +

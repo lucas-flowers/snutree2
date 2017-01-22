@@ -33,8 +33,8 @@ def to_directory(
 
     directory = Directory()
     directory.settings = read_settings(settings_path) if settings_path else {}
-    # TODO use affiliations setter
-    directory.affiliations = retrieve_affiliations(affiliations_path) if affiliations_path else []
+    directory.set_affiliations(retrieve_affiliations(affiliations_path)
+            if affiliations_path else [])
     directory.set_members(retrieve_members(members_path) +
             (retrieve_members(extra_members_path) if extra_members_path else []))
 
