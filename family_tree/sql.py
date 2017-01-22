@@ -1,6 +1,6 @@
 import MySQLdb, MySQLdb.cursors
+import family_tree.csv
 from family_tree.settings import read_settings
-# from family_tree.csv import read_csv
 from family_tree.directory import Directory
 from family_tree.semester import Semester
 
@@ -23,8 +23,7 @@ def to_directory(
     # TODO you know, this `extra_members_path` could be the full local
     # directory, in addition to BNKs...
     directory.set_members(retrieve_members(cxn)
-            # TODO add line back when read_csv produces valid Directory entries
-            # + (read_csv(extra_members_path) if extra_members_path else [])
+            + (family_tree.csv.retrieve_members(extra_members_path) if extra_members_path else [])
             )
 
 

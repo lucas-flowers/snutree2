@@ -1,6 +1,6 @@
 import networkx as nx
 from voluptuous import Schema, Any, All, Length, Optional
-from voluptuous.humanize import validate_with_humanized_errors
+from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.tree import FamilyTree
 from family_tree.semester import Semester
@@ -50,7 +50,7 @@ class Directory:
         # TODO Reaffiliates cause errors in CSV version
         # Recommend handling reaffiliates in csv.py, since the SQL query will
         # not return any empty reaffiliates
-        self._members = [validate_with_humanized_errors(m, self.member_validator)
+        self._members = [validate(m, self.member_validator)
                 for m in members]
 
     member_validator = Schema({
@@ -66,7 +66,7 @@ class Directory:
 
     def set_affiliations(self, affiliations):
 
-        self._affiliations = [validate_with_humanized_errors(a, self.affiliations_validator)
+        self._affiliations = [validate(a, self.affiliations_validator)
             for a in affiliations]
 
     affiliations_validator = Schema({
