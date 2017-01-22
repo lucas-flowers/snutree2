@@ -123,7 +123,7 @@ def read_directory_row(row, graph):
 read_directory = util.TableReaderFunction(
         read_directory_row,
         nx.DiGraph,
-        first_row=2
+        first_row=2 # TODO this assumes a CSV; maybe replace TableReaderFunction?
         )
 
 def read_affiliations_row(row, affiliations_dict):
