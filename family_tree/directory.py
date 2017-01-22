@@ -105,11 +105,11 @@ class Directory:
             },
         'nodes' : { Extra : {
             'semester' : All(str, Coerce(Semester)), # Semester can coerce int, but we don't want that in settings
-            Required('attributes', default={}) : Attributes,
+            Optional('attributes', default={}) : Attributes,
             } },
         'edges' : [{
             'nodes' : All([NonEmptyString], Length(min=2)),
-            Required('attributes', default={}) : Attributes,
+            Optional('attributes', default={}) : Attributes,
             }],
         'seed' : int,
         'family_colors' : { Extra : NonEmptyString },
