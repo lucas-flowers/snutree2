@@ -2,6 +2,9 @@
 import json, yaml
 import jsonschema as jsch
 
+# TODO move all to directory.py, since it has a similar form to read_directory
+# and read_affiliations
+
 def read_settings(path):
     with open(path, 'r') as f:
 
