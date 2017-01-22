@@ -38,11 +38,15 @@ class TreeEntity(metaclass=ABCMeta):
 
 class Custom(TreeEntity):
 
-    # TODO make input an exploded dictionary(?)
-    def __init__(self):
-        self.semester = None
-        self.key = None
-        self.node_attributes = {}
+    def __init__(self,
+            key,
+            semester=None,
+            attributes=None,
+            ):
+
+        self.key = key
+        self.semester = semester
+        self.node_attributes = attributes
         self.edge_attributes = {}
 
     def get_key(self):

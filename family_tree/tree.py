@@ -17,6 +17,23 @@ class FamilyTree:
         self.settings = {}
 
     ###########################################################################
+    #### Iterator Wrappers                                                 ####
+    ###########################################################################
+
+    def nodes_iter(self, *fields):
+        '''
+        Iterates over the nodes in the graph by yielding a tuple with the key
+        first, followed by the fields asked for in the *fields arguments in
+        the same order asked.
+        '''
+
+        for key in list(self.graph.nodes_iter()):
+            try:
+                yield (key, *(self.graph.node[key][field] for field in fields))
+            except:
+                import pdb; pdb.post_mortem()
+
+    ###########################################################################
     #### Decoration                                                        ####
     ###########################################################################
 
@@ -34,17 +51,41 @@ class FamilyTree:
         self.add_colors()
         self.add_edge_attributes()
 
+    def add_custom_nodes(self):
+
+        for key, value in self.settings['nodes'].items():
+
+            # TODO move Semester call by replacing json vaidation in
+            # settings.py with voluptuous validation and use voluptuous to
+            # create a Semester object in its validation function
+            value['semester'] = Semester(value['semester'])
+            record = entity.Custom(key, **value)
+            self.graph.add_node(key, record=record)
+
+    # TODO stopped refactoring here
+    def add_custom_edges(self):
+        for path in self.settings['edges']:
+
+            # TODO remove the if X in Y by having settings be validated
+            # correctly
+            nodes = path['nodes']
+            attributes = path['attributes'] if 'attributes' in path else {}
+
+            self.graph.add_edges_from(
+                    [(u, v) for u, v in zip(nodes[:-1], nodes[1:])],
+                    dot_edge_attributes=attributes
+                    )
+
     def add_edges(self):
 
-        for member_key, node_dict in self.graph.nodes_iter(data=True):
-            member = node_dict['record']
+        for key, member in self.nodes_iter('record'):
             if member.parent:
-                if member.parent not in self.graph:
+                if member.parent in self.graph:
+                    self.graph.add_edge(member.parent, key)
+                else:
                     # TODO candidates and BNKs don't have badges... Maybe use a
                     # field in Entities that gives the appropriate message?
-                    raise Exception('Brother with badge {} has unknown big brother: "{}"'.format(member_key, member.parent))
-                else:
-                    self.graph.add_edge(member.parent, member_key)
+                    raise Exception('Brother with badge {} has unknown big brother: "{}"'.format(key, member.parent))
 
     def remove_singletons(self):
 
@@ -54,6 +95,7 @@ class FamilyTree:
 
     def add_node_attributes(self):
 
+        # TODO simplify
         for key, node_dict in self.graph.nodes_iter(data=True):
             record = node_dict['record']
             attributes = node_dict.get('dot_node_attributes', {})
@@ -73,8 +115,8 @@ class FamilyTree:
 
         # Members-only graph
         members_only = self.graph.subgraph(
-                [key for key, node_dict in self.graph.nodes_iter(data=True)
-                    if isinstance(node_dict['record'], entity.Member)]
+                [key for key, member in self.nodes_iter('record')
+                    if isinstance(member, entity.Member)]
                 )
 
         # Find heads of members-only graph
@@ -100,28 +142,6 @@ class FamilyTree:
             parent_key = parent_record.get_key()
             self.graph.add_node(parent_key, record=parent_record, dot_node_attributes=self.settings['node_defaults']['unknown'])
             self.graph.add_edge(parent_key, orphan_key, dot_edge_attributes=self.settings['edge_defaults']['unknown'])
-
-    def add_custom_nodes(self):
-
-        for key, value in self.settings['nodes'].items():
-
-            record = entity.Custom()
-            record.semester = Semester(value['semester'])
-            record.key = key
-            record.node_attributes = value['attributes']
-
-            self.graph.add_node(key, record=record)
-
-    def add_custom_edges(self):
-        for path in self.settings['edges']:
-
-            nodes = path['nodes']
-            attributes = path['attributes'] if 'attributes' in path else {}
-
-            self.graph.add_edges_from(
-                    [(u, v) for u, v in zip(nodes[:-1], nodes[1:])],
-                    dot_edge_attributes=attributes
-                    )
 
     ###########################################################################
     #### Convert to DOT                                                    ####
