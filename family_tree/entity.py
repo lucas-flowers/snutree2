@@ -43,6 +43,7 @@ class TreeEntity(metaclass=ABCMeta):
 
 class Custom(TreeEntity):
 
+    # TODO make input an exploded dictionary(?)
     def __init__(self):
         self.semester = None
         self.key = None
@@ -102,13 +103,12 @@ class Member(TreeEntity, metaclass=ABCMeta):
 
         return member
 
+    @abstractmethod
     def get_dot_label(self):
-        return ''
+        pass
 
     def dot_node_attributes(self):
-        return {
-                'label' : self.get_dot_label(),
-                }
+        return {'label' : self.get_dot_label()}
 
 class Knight(Member):
 
