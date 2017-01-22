@@ -38,12 +38,7 @@ class Directory:
 
     def set_members(self, members):
 
-
-        # TODO Reaffiliates cause errors in CSV version
-        # Recommend handling reaffiliates in csv.py, since the SQL query will
-        # not return any empty reaffiliates
-        self._members = [validate(m, self.member_validator)
-                for m in members]
+        self._members = [validate(m, self.member_validator) for m in members]
 
     member_validator = Schema({
         'status' : Any('Knight', 'Brother', 'Candidate', 'Expelled'),
