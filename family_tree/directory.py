@@ -10,9 +10,9 @@ import family_tree.utilities as util
 class Directory:
     '''
     This class is used to store data from either a CSV file or a SQL query. It
-    is an intermediate form before the data is turned into a tree. It stores
-    Stores a list of brothers from the directory, a list for brothers not made
-    knights, a dictionary of affiliations, and a dictionary of YAML settings.
+    is an intermediate form before the data is turned into a tree. It stores a
+    list of brothers from the directory, a list for brothers not made knights,
+    a dictionary of affiliations, and a dictionary of YAML settings.
     '''
 
     # The Directory class guarantees that entries in its members and
