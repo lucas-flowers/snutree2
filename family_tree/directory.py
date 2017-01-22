@@ -28,15 +28,7 @@ class Directory:
 
         for badge, affiliations in affiliations_dict.items():
 
-            # TODO remove this try-catch block; it is here to temporarily
-            # handle reaffiliates(?), who only have one of their badge numbers
-            # actually in the directory
-            #
-            # TODO apparently this also prevents DZs from entering or something
-            try:
-                members_graph.node[badge]['record'].affiliations = affiliations
-            except KeyError as e:
-                pass
+            members_graph.node[badge]['record'].affiliations = affiliations
 
         tree = FamilyTree()
         tree.graph = members_graph

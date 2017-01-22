@@ -9,21 +9,21 @@ settings_path = 'settings.yaml'
 ############################
                            #
 
-# # CSV -> intermediate
-# directory = family_tree.csv.to_directory(
-#         directory_path,
-#         bnks_path,
-#         affiliations_path,
-#         settings_path,
-#         )
+# CSV -> intermediate
+directory = family_tree.csv.to_directory(
+        directory_path,
+        bnks_path,
+        affiliations_path,
+        settings_path,
+        )
 
 ############ OR ############
 
-# SQL -> intermediate
-directory = family_tree.sql.to_directory(
-        settings_path,
-        bnks_path,
-        )
+# # SQL -> intermediate
+# directory = family_tree.sql.to_directory(
+#         settings_path,
+#         bnks_path,
+#         )
 
                            #
 ############################

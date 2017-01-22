@@ -70,7 +70,14 @@ def retrieve_affiliations(mysql_connection):
 
     for aff in raw_affiliations:
 
+        # TODO clean this mess up. it basically keeps only integer keys, since
+        # DZs in the directory have "DZ____" as external IDs
         badge = str(aff['badge']) # TODO use integers instead
+        try:
+            int(badge)
+        except:
+            continue
+
         other_badge = str(aff['other_badge'])
         chapter_name = aff['chapter_name']
         aff = dict(badge=badge, other_badge=other_badge, chapter_name=chapter_name)
