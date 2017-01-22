@@ -10,7 +10,7 @@ class TreeEntity(metaclass=ABCMeta):
     been combined appropriately (i.e., first/preferred/last names combined into
     one field, or semester strings converted to Semester objects).
 
-    Entities are assumed to implement these functions:
+    Entities implement these functions:
 
         + get_key(self): Returns the key to be used in DOT
 
@@ -19,15 +19,10 @@ class TreeEntity(metaclass=ABCMeta):
         + dot_edge_attributes(self, other): Returns the edge attributes to be
         used in DOT, for all outgoing edges
 
+    Entities should also have these fields:
+
         + semester: A field storing a Semester object, used to determine the
         entity's rank in DOT
-
-    Generally, TreeEntity subclasses should also implement:
-
-        + Factory methods that generate new TreeEntities from rows
-
-        + Validation functions that catch invalid values for fields used to
-        create them
 
     '''
 
@@ -131,7 +126,6 @@ class Knight(Member):
         return self.badge
 
     def get_dot_label(self):
-        # TODO handle reaffiliates
         affiliations = ['ΔA {}'.format(self.badge)] + self.affiliations
         return '{}\\n{}'.format(self.name, ', '.join(affiliations))
 
