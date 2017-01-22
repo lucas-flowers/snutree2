@@ -7,7 +7,6 @@ from family_tree.semester import Semester
 from family_tree import entity
 import family_tree.utilities as util
 
-
 class Directory:
     '''
     This class is used to store data from either a CSV file or a SQL query. It
@@ -15,6 +14,25 @@ class Directory:
     Stores a list of brothers from the directory, a list for brothers not made
     knights, a dictionary of affiliations, and a dictionary of YAML settings.
     '''
+
+    # The Directory class guarantees that entries in its members and
+    # affiliations lists will be dictionaries that follow the following schema.
+
+    member_schema = Schema({
+        'status' : Any('Knight', 'Brother', 'Candidate', 'Expelled'),
+        Optional('badge') : All(str, Length(min=1)),
+        Optional('first_name') : All(str, Length(min=1)),
+        Optional('preferred_name') : All(str, Length(min=1)),
+        'last_name' : All(str, Length(min=1)),
+        Optional('big_badge') : All(str, Length(min=1)), # TODO int for /badges/ and str for /keys/
+        Optional('pledge_semester') : Semester,
+        }, required=True)
+
+    affiliations_schema = Schema({
+        'badge' : All(str, Length(min=1)),
+        'chapter_name' : All(str, Length(min=1)),
+        'other_badge' : All(str, Length(min=1)),
+        })
 
     def __init__(self):
         self._members = []
@@ -38,31 +56,12 @@ class Directory:
 
     def set_members(self, members):
 
-        self._members = [validate(m, self.member_validator) for m in members]
-
-    member_validator = Schema({
-        'status' : Any('Knight', 'Brother', 'Candidate', 'Expelled'),
-        Optional('badge') : All(str, Length(min=1)),
-        Optional('first_name') : All(str, Length(min=1)),
-        Optional('preferred_name') : All(str, Length(min=1)),
-        'last_name' : All(str, Length(min=1)),
-        Optional('big_badge') : All(str, Length(min=1)), # TODO int for /badges/ and str for /keys/
-        Optional('pledge_semester') : Semester,
-        }, required=True)
-
+        self._members = [validate(m, self.member_schema) for m in members]
 
     def set_affiliations(self, affiliations):
 
-        self._affiliations = [validate(a, self.affiliations_validator)
+        self._affiliations = [validate(a, self.affiliations_schema)
             for a in affiliations]
-
-    affiliations_validator = Schema({
-        'badge' : All(str, Length(min=1)),
-        'chapter_name' : All(str, Length(min=1)),
-        'other_badge' : All(str, Length(min=1)),
-        })
-
-
 
 def read_directory_row(row, graph):
 
