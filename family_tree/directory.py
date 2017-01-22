@@ -1,5 +1,5 @@
 import networkx as nx
-from voluptuous import Schema, Any, All, Length, Optional
+from voluptuous import Schema, Any, All, Length, Optional, Unique
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.tree import FamilyTree
@@ -17,6 +17,10 @@ class Directory:
 
     # The Directory class guarantees that entries in its members and
     # affiliations lists will be dictionaries that follow the following schema.
+    #
+    # Furthermore, the class guarantees that all members in the member list are
+    # unique (as determined by their badge), and that all
+    # chapter_name/other_badge pairs in the affiliations list are unique.
 
     member_schema = Schema({
         'status' : Any('Knight', 'Brother', 'Candidate', 'Expelled'),
@@ -55,9 +59,11 @@ class Directory:
         return tree
 
     def set_members(self, members):
+        validate([m['badge'] for m in members if 'badge' in m], Schema(Unique()))
         self._members = [validate(m, self.member_schema) for m in members]
 
     def set_affiliations(self, affiliations):
+        validate([(a['chapter_name'], a['other_badge']) for a in affiliations], Schema(Unique()))
         self._affiliations = [validate(a, self.affiliations_schema) for a in affiliations]
 
 def read_directory_row(row, graph):
@@ -66,11 +72,7 @@ def read_directory_row(row, graph):
 
     member = entity.Member.from_dict(**row)
     if member:
-        member_key = member.get_key()
-        if member_key in graph and 'record' in graph.node[member_key]:
-            # TODO better exception type
-            raise Exception('Duplicate badge: "{}"'.format(member_key))
-        graph.add_node(member_key, record=member)
+        graph.add_node(member.get_key(), record=member)
 
 read_directory = util.TableReaderFunction(
         read_directory_row,
