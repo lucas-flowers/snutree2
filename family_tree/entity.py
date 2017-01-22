@@ -1,8 +1,9 @@
+from abc import ABCMeta, abstractmethod
 import difflib
 from collections import defaultdict
 from family_tree.color import ColorChooser
 
-class TreeEntity:
+class TreeEntity(metaclass=ABCMeta):
     '''
 
     Analogous to a single row in the directory, except that the fields have
@@ -30,27 +31,15 @@ class TreeEntity:
 
     '''
 
-    def __init__(self):
-        self.semester = None
-
+    @abstractmethod
     def get_key(self):
-        raise NotImplementedError
-
-    ###########################################################################
-    #### DOT Functions                                                     ####
-    ###########################################################################
+        pass
 
     def dot_node_attributes(self):
         return {}
 
     def dot_edge_attributes(self, other):
         return {}
-
-    ###########################################################################
-    #### Validation Functions                                              ####
-    ###########################################################################
-
-    # empty
 
 class Custom(TreeEntity):
 
@@ -63,21 +52,11 @@ class Custom(TreeEntity):
     def get_key(self):
         return self.key
 
-    ###########################################################################
-    #### DOT Functions                                                     ####
-    ###########################################################################
-
     def dot_node_attributes(self):
         return self.node_attributes
 
     def dot_edge_attributes(self, other):
         return self.edge_attributes
-
-    ###########################################################################
-    #### Validation Functions                                              ####
-    ###########################################################################
-
-    # empty
 
 class UnidentifiedKnight(TreeEntity):
     '''
@@ -93,28 +72,14 @@ class UnidentifiedKnight(TreeEntity):
     def get_key(self):
         return '{} Parent'.format(self.key)
 
-    ###########################################################################
-    #### Validation Functions                                              ####
-    ###########################################################################
-
     @classmethod
     def from_member(cls, member):
         return cls(member.semester - 1, member.get_key())
 
-    ###########################################################################
-    #### DOT Functions                                                     ####
-    ###########################################################################
-
-    # inherit
-
-class Member(TreeEntity):
+class Member(TreeEntity, metaclass=ABCMeta):
 
     color_chooser = ColorChooser.from_graphviz_colors()
     family_colors = defaultdict(color_chooser.next_color)
-
-    ###########################################################################
-    #### Validation Functions                                              ####
-    ###########################################################################
 
     @classmethod
     def from_dict(cls, member_dict):
@@ -136,10 +101,6 @@ class Member(TreeEntity):
         member = MemberType(**member_dict)
 
         return member
-
-    ###########################################################################
-    #### DOT Functions                                                     ####
-    ###########################################################################
 
     def get_dot_label(self):
         return ''
@@ -168,10 +129,6 @@ class Knight(Member):
 
     def get_key(self):
         return self.badge
-
-    ###########################################################################
-    #### DOT Functions                                                     ####
-    ###########################################################################
 
     def get_dot_label(self):
         # TODO handle reaffiliates
@@ -203,10 +160,6 @@ class Brother(Member):
     def get_key(self):
         return self.key
 
-    ###########################################################################
-    #### DOT Functions                                                     ####
-    ###########################################################################
-
     def get_dot_label(self):
         return '{}\\nΔA Brother'.format(self.name)
 
@@ -235,10 +188,6 @@ class Candidate(Member):
     def get_key(self):
         return self.key
 
-    ###########################################################################
-    #### DOT Functions                                                     ####
-    ###########################################################################
-
     def get_dot_label(self):
         return '{}\\nΔA Candidate'.format(self.name)
 
@@ -258,10 +207,6 @@ class Expelled(Knight):
         self.parent = big_badge
         self.semester = pledge_semester
         self.affiliations = []
-
-    ###########################################################################
-    #### DOT Functions                                                     ####
-    ###########################################################################
 
     def get_dot_label(self):
         return '{}\\n{}'.format(self.name, self.badge)
