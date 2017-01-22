@@ -43,26 +43,29 @@ def retrieve_members(mysql_connection):
 
     cursor = mysql_connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(directory_query)
-    members = list(cursor.fetchall())
+    rows = cursor.fetchall()
 
-    for member in members:
+    members = []
+    for row in rows:
 
         # Remove the keys pointing to falsy values from each member. This
         # simplifies code in the Directory class (e.g., Directory does not have
         # to worry about handling values of None or empty strings).
-        for key, field in list(member.items()):
+        for key, field in list(row.items()):
             if not field:
-                del member[key]
+                del row[key]
 
         # Convert pledge semester to a Semester object
-        season = member.pop('pledge_semester_season', None)
-        year = member.pop('pledge_semester_year', None)
+        season = row.pop('pledge_semester_season', None)
+        year = row.pop('pledge_semester_year', None)
         if season and year != None:
-            member['pledge_semester'] = Semester('{} {}'.format(season, year))
+            row['pledge_semester'] = Semester('{} {}'.format(season, year))
 
         # Collapse status categories that indicate types of Knights
-        if member['status'] in ('Active', 'Alumni', 'Left School'):
-            member['status'] = 'Knight'
+        if row.get('status', None) in ('Active', 'Alumni', 'Left School'):
+            row['status'] = 'Knight'
+
+        members.append(row)
 
     return members
 
@@ -82,17 +85,20 @@ def retrieve_affiliations(mysql_connection):
         badge = str(row['badge']) # TODO use integers instead
         other_badge = str(row['other_badge'])
         chapter_name = row['chapter_name']
-        affiliation = dict(badge=badge, other_badge=other_badge, chapter_name=chapter_name)
-
-        # Delete all keys pointing to falsy values
-        for key, field in list(affiliation.items()):
-            if not field:
-                del affiliation[key]
 
         # The Delta Alpha badges used as external IDs in CiviCRM are already
         # handled separately; don't include the duplicates.
         if not (chapter_name == 'Delta Alpha' and badge == other_badge):
-            affiliations.append(affiliation)
+
+            # Update row with the new values set above
+            row.update(dict(badge=badge, other_badge=other_badge, chapter_name=chapter_name))
+
+            # Delete all keys pointing to falsy values
+            for key, field in list(row.items()):
+                if not field:
+                    del row[key]
+
+            affiliations.append(row)
 
     return affiliations
 
