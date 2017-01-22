@@ -1,3 +1,4 @@
+from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 
 def dict_to_dot_attributes(attributes_dict, sep=','):
@@ -6,15 +7,15 @@ def dict_to_dot_attributes(attributes_dict, sep=','):
                 for key, value in sorted(attributes_dict.items())]
             )
 
-# TODO make abstract class
-class DotCommon:
+class DotCommon(metaclass=ABCMeta):
 
     def __init__(self, key, attributes=None):
         self.key = key
         self.attributes = attributes or {}
 
+    @abstractmethod
     def to_dot(self):
-        raise NotImplementedError
+        pass
 
 class Graph(DotCommon):
 
