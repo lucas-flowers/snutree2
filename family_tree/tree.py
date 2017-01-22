@@ -61,10 +61,8 @@ class FamilyTree:
     def add_custom_edges(self):
         for path in self.settings['edges']:
 
-            # TODO remove the if X in Y by having settings be validated
-            # correctly
             nodes = path['nodes']
-            attributes = path['attributes'] if 'attributes' in path else {}
+            attributes = path['attributes']
 
             self.graph.add_edges_from(
                     [(u, v) for u, v in zip(nodes[:-1], nodes[1:])],

@@ -1,6 +1,6 @@
 import json, yaml
 import networkx as nx
-from voluptuous import Schema, All, Any, Coerce, Extra, Length, Optional, Unique
+from voluptuous import Schema, All, Any, Coerce, DefaultTo, Extra, Required, Length, Optional, Unique
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.tree import FamilyTree
@@ -17,7 +17,9 @@ member_status_mapping = {
 
 NonEmptyString = All(str, Length(min=1))
 
-Attributes = {Extra: Any(str, int, float, bool)}
+# Attribute dicts are arbitrary dicts of Graphviz values. If "None" is provided
+# as the attribute dict, then it is turned into an empty dict.
+Attributes = Any({Extra: Any(str, int, float, bool)}, DefaultTo({}))
 
 def MemberType(status):
     member_type = member_status_mapping.get(status, None)
@@ -103,11 +105,11 @@ class Directory:
             },
         'nodes' : { Extra : {
             'semester' : All(str, Coerce(Semester)), # Semester can coerce int, but we don't want that in settings
-            Optional('attributes') : Attributes,
+            Required('attributes', default={}) : Attributes,
             } },
         'edges' : [{
             'nodes' : All([NonEmptyString], Length(min=2)),
-            Optional('attributes') : Attributes,
+            Required('attributes', default={}) : Attributes,
             }],
         'seed' : int,
         'family_colors' : { Extra : NonEmptyString },
