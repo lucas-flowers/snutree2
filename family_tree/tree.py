@@ -28,10 +28,7 @@ class FamilyTree:
         '''
 
         for key in list(self.graph.nodes_iter()):
-            try:
-                yield (key, *(self.graph.node[key][field] for field in fields))
-            except:
-                import pdb; pdb.post_mortem()
+            yield (key, *(self.graph.node[key][field] for field in fields))
 
     ###########################################################################
     #### Decoration                                                        ####
