@@ -57,7 +57,7 @@ def retrieve_members(mysql_connection):
         season = row.pop('pledge_semester_season', None)
         year = row.pop('pledge_semester_year', None)
         if season and year != None:
-            row['pledge_semester'] = Semester('{} {}'.format(season, year))
+            row['pledge_semester'] = Semester(season, year)
 
         # Collapse status categories that indicate types of Knights
         if row.get('status', None) in ('Active', 'Alumni', 'Left School'):

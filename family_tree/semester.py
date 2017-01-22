@@ -10,25 +10,46 @@ class Semester(int):
 
     matcher = re.compile('(Spring|Fall) (\d+)')
 
-    def __new__(cls, arg):
-        # TODO make Semester(year, season) a valid call
+    def __new__(cls, *arg):
 
-        if isinstance(arg, int):
-            value = arg
-        elif isinstance(arg, str):
-            match = Semester.matcher.match(arg)
-            if match:
-                season = 1 if match.group(1) == 'Fall' else 0
-                year = int(match.group(2))
-                value = 2 * year + season
+        if len(arg) == 1:
+
+            arg = arg[0]
+            if isinstance(arg, int):
+                value = arg
+
+            elif isinstance(arg, str):
+
+                match = Semester.matcher.match(arg)
+                if match:
+                    season = 1 if match.group(1) == 'Fall' else 0
+                    year = int(match.group(2))
+                    value = 2 * year + season
+                else:
+                    raise ValueError(
+                            'Semester names must match "{}" but "{}" was received'
+                            .format(Semester.matcher.pattern, arg)
+                            )
+
+        elif len(arg) == 2 and isinstance(arg[0], str) and isinstance(arg[1], int):
+
+            season, year = arg
+
+            if season == 'Spring':
+                season = 0
+            elif season == 'Fall':
+                season = 1
             else:
                 raise ValueError(
-                        'Semester names must match "{}" but "{}" was received'
-                        .format(Semester.matcher.pattern, arg)
+                        'Semester seasons must match "Spring" or "Fall", but "{}" was received'
+                        .format(season)
                         )
+
+            value = 2 * year + season
+
         else:
             raise TypeError(
-                    'Expected int or str but received {}'
+                    'Expected int, str, or *(str, int) but received {}'
                     .format(type(arg))
                     )
 
