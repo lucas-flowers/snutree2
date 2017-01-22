@@ -6,6 +6,7 @@ def dict_to_dot_attributes(attributes_dict, sep=','):
                 for key, value in sorted(attributes_dict.items())]
             )
 
+# TODO make abstract class
 class DotCommon:
 
     def __init__(self, key, attributes=None):
