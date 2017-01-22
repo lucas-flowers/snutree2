@@ -92,8 +92,9 @@ class Directory:
         'other_badge' : NonEmptyString,
         })
 
+    # TODO determine what to do when there are missing options
     settings_schema = Schema({
-        'mysql' : { # TODO use default files instead of having a password in the YAML file?
+        'mysql' : {
             'host' : NonEmptyString,
             'user' : NonEmptyString,
             Optional('passwd'): NonEmptyString,
@@ -110,7 +111,6 @@ class Directory:
             }],
         'seed' : int,
         'family_colors' : { Extra : NonEmptyString },
-        # TODO fill in defaults if settings file does not provide them?
         'edge_defaults' : Defaults('all', 'semester', 'unknown'),
         'node_defaults' : Defaults('all', 'semester', 'unknown', 'member'),
         'graph_defaults' : Defaults('all'),
