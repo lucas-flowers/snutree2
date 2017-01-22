@@ -94,8 +94,8 @@ def retrieve_affiliations(path):
         # Make sure all required fields exist
         validate(row, csv_affiliation_schema)
 
-        badge = row['badge'] # TODO this is a string; make it an integer
-        other_badge = row['other_badge'] # TODO this is a string; make it an integer
+        badge = row['badge']
+        other_badge = row['other_badge']
         chapter_name = row['chapter_name']
 
         # Primary Delta Alpha badges are already handled separately; don't

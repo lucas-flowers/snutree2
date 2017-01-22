@@ -81,7 +81,7 @@ def retrieve_affiliations(mysql_connection):
     affiliations = []
     for row in rows:
 
-        badge = str(row['badge']) # TODO use integers instead
+        badge = str(row['badge'])
         other_badge = str(row['other_badge'])
         chapter_name = row['chapter_name']
 

@@ -24,7 +24,7 @@ class Directory:
         Optional('first_name') : All(str, Length(min=1)),
         Optional('preferred_name') : All(str, Length(min=1)),
         'last_name' : All(str, Length(min=1)),
-        Optional('big_badge') : All(str, Length(min=1)), # TODO int for /badges/ and str for /keys/
+        Optional('big_badge') : All(str, Length(min=1)),
         Optional('pledge_semester') : Semester,
         }, required=True)
 
