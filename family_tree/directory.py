@@ -55,13 +55,10 @@ class Directory:
         return tree
 
     def set_members(self, members):
-
         self._members = [validate(m, self.member_schema) for m in members]
 
     def set_affiliations(self, affiliations):
-
-        self._affiliations = [validate(a, self.affiliations_schema)
-            for a in affiliations]
+        self._affiliations = [validate(a, self.affiliations_schema) for a in affiliations]
 
 def read_directory_row(row, graph):
 
