@@ -5,7 +5,13 @@ from family_tree.directory import Directory
 from family_tree.semester import Semester
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
-# TODO sort affiliations
+# TODO sort affiliations in each member
+
+# Query of affiliations in CiviCRM directory
+affiliations_query = "***REMOVED***"
+
+# Query of members and big/littles in CiviCRM directory
+directory_query = "***REMOVED***"
 
 # TODO move paths into settings
 def to_directory(
@@ -19,31 +25,36 @@ def to_directory(
 
     directory = Directory()
     directory.settings = settings
+    # TODO use affiliations setter
     directory.affiliations = retrieve_affiliations(cxn)
     # TODO you know, this `extra_members_path` could be the full local
     # directory, in addition to BNKs...
-    directory.set_members(retrieve_members(cxn)
-            + (family_tree.csv.retrieve_members(extra_members_path) if extra_members_path else [])
-            )
-
+    directory.set_members(retrieve_members(cxn) +
+            (family_tree.csv.retrieve_members(extra_members_path)
+                if extra_members_path else []))
 
     return directory
 
 def retrieve_members(mysql_connection):
+    '''
+    Get the table of members from the SQL database. Adjust the values for
+    compatibility with the Directory class.
+    '''
 
     cursor = mysql_connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(directory_query)
-    members = list(cursor.fetchall()) # fetchall returns a friggin tuple and this is the simplest solution if I want to append later
+    members = list(cursor.fetchall())
 
     for member in members:
 
-        # Delete all keys with null or empty values (fuck that noise)
+        # Remove the keys pointing to falsy values from each member. This
+        # simplifies code in the Directory class (e.g., Directory does not have
+        # to worry about handling values of None or empty strings).
         for key, field in list(member.items()):
             if not field:
                 del member[key]
 
-        # TODO make a simpler Semester call(?)
-        # Convert pledge_semester to a Semester object
+        # Convert pledge semester to a Semester object
         season = member.pop('pledge_semester_season', None)
         year = member.pop('pledge_semester_year', None)
         if season and year != None:
@@ -56,54 +67,32 @@ def retrieve_members(mysql_connection):
     return members
 
 def retrieve_affiliations(mysql_connection):
+    '''
+    Get the table of affiliations from the SQL database. Adjust the values for
+    compatibility with the Directory class.
+    '''
 
     cursor = mysql_connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute(affiliations_query)
+    rows = cursor.fetchall()
 
-    # The fetchall() function returns a tuple, so we have to make the list from
-    # scratch if we intend to remove elements.
-    #
-    # TODO do we need to remove elements now? (see TODO below). if we don't,
-    # then the loop below can probably be removed
-    raw_affiliations = cursor.fetchall()
     affiliations = []
+    for row in rows:
 
-    for aff in raw_affiliations:
+        badge = str(row['badge']) # TODO use integers instead
+        other_badge = str(row['other_badge'])
+        chapter_name = row['chapter_name']
+        affiliation = dict(badge=badge, other_badge=other_badge, chapter_name=chapter_name)
 
-        # TODO clean this mess up. it basically keeps only integer keys, since
-        # DZs in the directory have "DZ____" as external IDs
-        badge = str(aff['badge']) # TODO use integers instead
-        try:
-            int(badge)
-        except:
-            continue
-
-        other_badge = str(aff['other_badge'])
-        chapter_name = aff['chapter_name']
-        aff = dict(badge=badge, other_badge=other_badge, chapter_name=chapter_name)
-
-        # Delete all keys with null or empty values (fuck that noise)
-        for key, field in list(aff.items()):
+        # Delete all keys pointing to falsy values
+        for key, field in list(affiliation.items()):
             if not field:
-                del aff[key]
+                del affiliation[key]
 
-        # TODO is there a better way than looking for all primary DA badges and
-        # removing them from the affiliations list?
-        if badge != other_badge or chapter_name != 'Delta Alpha':
-            affiliations.append(aff)
+        # The Delta Alpha badges used as external IDs in CiviCRM are already
+        # handled separately; don't include the duplicates.
+        if not (chapter_name == 'Delta Alpha' and badge == other_badge):
+            affiliations.append(affiliation)
 
     return affiliations
-
-
-###############################################################################
-###############################################################################
-#### Queries                                                               ####
-###############################################################################
-###############################################################################
-
-
-
-affiliations_query = "***REMOVED***"
-
-directory_query = "***REMOVED***"
 
