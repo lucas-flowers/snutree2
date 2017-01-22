@@ -4,8 +4,22 @@ from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.tree import FamilyTree
 from family_tree.semester import Semester
-from family_tree import entity
+from family_tree.entity import Knight, Brother, Candidate, Expelled
 import family_tree.utilities as util
+
+member_status_mapping = {
+        'Knight' : Knight,
+        'Brother' : Brother,
+        'Candidate' : Candidate,
+        'Expelled' : Expelled
+        }
+
+def MemberType(status):
+    member_type = member_status_mapping.get(status, None)
+    if member_type:
+        return member_type
+    else:
+        raise ValueError('Status must be one of {}'.format(member_status_mapping.keys()))
 
 NonEmptyString = All(str, Length(min=1))
 
@@ -27,7 +41,7 @@ class Directory:
     member_schema = Schema(Any(
 
         {
-            'status' : 'Knight',
+            'status' : MemberType,
             'badge' : NonEmptyString,
             'first_name' : NonEmptyString,
             Optional('preferred_name') : NonEmptyString,
@@ -37,7 +51,7 @@ class Directory:
             },
 
         {
-            'status' : 'Brother',
+            'status' : MemberType,
             Optional('first_name') : NonEmptyString,
             Optional('preferred_name') : NonEmptyString,
             'last_name' : NonEmptyString,
@@ -46,7 +60,7 @@ class Directory:
             },
 
         {
-            'status' : 'Candidate',
+            'status' : MemberType,
             'first_name' : NonEmptyString,
             Optional('preferred_name') : NonEmptyString,
             'last_name' : NonEmptyString,
@@ -55,7 +69,7 @@ class Directory:
             },
 
         {
-            'status' : 'Expelled',
+            'status' : MemberType,
             'badge' : NonEmptyString,
             Optional('first_name') : NonEmptyString,
             Optional('preferred_name') : NonEmptyString,
@@ -102,11 +116,9 @@ class Directory:
 
 def read_directory_row(row, graph):
 
-    # TODO move to `tree`????
-
-    member = entity.Member.from_dict(row)
-    if member:
-        graph.add_node(member.get_key(), record=member)
+    MemberType = row['status']
+    member = MemberType(**row)
+    graph.add_node(member.get_key(), record=member)
 
 read_directory = util.TableReaderFunction(
         read_directory_row,
