@@ -1,6 +1,6 @@
 import json, yaml
 import networkx as nx
-from voluptuous import Schema, All, Any, Coerce, DefaultTo, Extra, Required, Length, Optional, Unique
+from voluptuous import Schema, All, Any, Coerce, DefaultTo, Extra, Length, Optional, Unique
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.tree import FamilyTree
@@ -17,9 +17,12 @@ member_status_mapping = {
 
 NonEmptyString = All(str, Length(min=1))
 
-# Attribute dicts are arbitrary dicts of Graphviz values. If "None" is provided
-# as the attribute dict, then it is turned into an empty dict.
-Attributes = Any({Extra: Any(str, int, float, bool)}, DefaultTo({}))
+# Matches the schema or None. If it matches None, it uses the constructor of
+# schema's class to create a new, presumably empty, object of the right type.
+Nullable = lambda schema : Any(schema, DefaultTo(type(schema)()))
+
+# Attribute dicts are arbitrary dicts of Graphviz values.
+Attributes = {Extra: Any(str, int, float, bool)}
 
 def MemberType(status):
     member_type = member_status_mapping.get(status, None)
@@ -103,16 +106,18 @@ class Directory:
             'port' : int,
             'db' : NonEmptyString,
             },
-        'nodes' : { Extra : {
-            'semester' : All(str, Coerce(Semester)), # Semester can coerce int, but we don't want that in settings
-            Optional('attributes', default={}) : Attributes,
-            } },
-        'edges' : [{
+        Optional('nodes', default={}) : Nullable({
+            Extra : {
+                'semester' : All(str, Coerce(Semester)), # Semester can coerce int, but we don't want that in settings
+                Optional('attributes', default={}) : Nullable(Attributes),
+                }
+            }),
+        Optional('edges', default=[]) : Nullable([{
             'nodes' : All([NonEmptyString], Length(min=2)),
-            Optional('attributes', default={}) : Attributes,
-            }],
+            Optional('attributes', default={}) : Nullable(Attributes)
+            }]),
         'seed' : int,
-        'family_colors' : { Extra : NonEmptyString },
+        Optional('family_colors', default={}) : Nullable({ Extra : NonEmptyString }),
         'edge_defaults' : Defaults('all', 'semester', 'unknown'),
         'node_defaults' : Defaults('all', 'semester', 'unknown', 'member'),
         'graph_defaults' : Defaults('all'),
