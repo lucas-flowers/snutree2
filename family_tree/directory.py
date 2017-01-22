@@ -110,6 +110,7 @@ class Directory:
             }],
         'seed' : int,
         'family_colors' : { Extra : NonEmptyString },
+        # TODO fill in defaults if settings file does not provide them?
         'edge_defaults' : Defaults('all', 'semester', 'unknown'),
         'node_defaults' : Defaults('all', 'semester', 'unknown', 'member'),
         'graph_defaults' : Defaults('all'),
