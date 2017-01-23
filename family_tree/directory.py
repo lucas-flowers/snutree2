@@ -125,10 +125,10 @@ class Directory:
 
     # TODO determine what to do when there are missing options
     settings_schema = Schema({
-        'mysql' : {
+        Optional('mysql', None) : {
             'host' : NonEmptyString,
             'user' : NonEmptyString,
-            Optional('passwd'): NonEmptyString,
+            'passwd' : NonEmptyString,
             'port' : int,
             'db' : NonEmptyString,
             },
