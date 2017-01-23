@@ -1,5 +1,5 @@
 import json, yaml
-from voluptuous import Schema, All, Exclusive, Any, Coerce, DefaultTo, Extra, Length, Optional, Unique, IsFile
+from voluptuous import Schema, All, PathExists, Exclusive, Any, Coerce, DefaultTo, Extra, Length, Optional, Unique, IsFile
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.semester import Semester
@@ -127,6 +127,10 @@ class Directory:
 
     # TODO determine what to do when there are missing options
     settings_schema = Schema({
+        'output' : {
+            'directory' : PathExists,
+            'name' : NonEmptyString,
+            },
         Exclusive('file', 'sources') : {
             'members' : IsFile,
             'affiliations' : IsFile,

@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 
-# TODO add indents to final file
+# TODO add indents to final DOT file
 
 def dict_to_dot_attributes(attributes_dict, sep=','):
     return sep.join(
