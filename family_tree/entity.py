@@ -12,10 +12,7 @@ class TreeEntity(metaclass=ABCMeta):
 
         + get_key(self): Returns the key to be used in DOT
 
-        + dot_node_attributes(self): Returns the node attributes to be used in DOT
-
-        + dot_edge_attributes(self, other): Returns the edge attributes to be
-        used in DOT, for all outgoing edges
+        + dot_attributes(self): Returns the node attributes to be used in DOT
 
     Entities should also have these fields:
 
@@ -28,10 +25,7 @@ class TreeEntity(metaclass=ABCMeta):
     def get_key(self):
         pass
 
-    def dot_node_attributes(self):
-        return {}
-
-    def dot_edge_attributes(self, other):
+    def dot_attributes(self):
         return {}
 
 class Custom(TreeEntity):
@@ -39,17 +33,13 @@ class Custom(TreeEntity):
     def __init__(self, key, semester=None, attributes=None):
         self.key = key
         self.semester = semester
-        self.node_attributes = attributes
-        self.edge_attributes = {}
+        self.attributes = attributes or {}
 
     def get_key(self):
         return self.key
 
-    def dot_node_attributes(self):
-        return self.node_attributes
-
-    def dot_edge_attributes(self, other):
-        return self.edge_attributes
+    def dot_attributes(self):
+        return self.attributes
 
 class UnidentifiedKnight(Custom):
     '''
@@ -58,11 +48,10 @@ class UnidentifiedKnight(Custom):
     are given pledge semesters a semester before the members they are bigs to.
     '''
 
-    def __init__(self, member, dot_node_attributes, dot_edge_attributes):
+    def __init__(self, member, attributes=None):
         self.key = member.get_key()
         self.semester = member.semester - 1
-        self.node_attributes = dot_node_attributes
-        self.edge_attributes = dot_edge_attributes
+        self.attributes = attributes or {}
 
     def get_key(self):
         return '{} Parent'.format(self.key)
@@ -73,7 +62,7 @@ class Member(TreeEntity, metaclass=ABCMeta):
     def get_dot_label(self):
         pass
 
-    def dot_node_attributes(self):
+    def dot_attributes(self):
         return {'label' : self.get_dot_label()}
 
 class Knight(Member):

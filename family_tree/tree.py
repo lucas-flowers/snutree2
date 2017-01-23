@@ -22,19 +22,17 @@ class FamilyTree:
         # TODO add the following as options to settings. use special decorators
         # to mark the options?
 
-        self.add_edges()
+        self.add_relationships()
         self.add_custom_nodes()
         self.add_custom_edges()
         self.remove_singleton_members() # ^ add_member, add_edges, add_custom_edges
-        self.add_affiliations(directory.get_affiliations())
-        self.add_families()
+        self.mark_affiliations(directory.get_affiliations())
+        self.mark_families()
         self.add_orphan_parents()
-        self.add_node_attributes()
         self.add_colors()
-        self.add_edge_attributes()
 
     ###########################################################################
-    #### Iterator Wrappers                                                 ####
+    #### Utilities                                                         ####
     ###########################################################################
 
     def nodes_iter(self, *attributes, node_dict=False):
@@ -51,6 +49,14 @@ class FamilyTree:
                     *(self.graph.node[key][attr] for attr in attributes)) + \
                     ((self.graph.node[key],) if node_dict else ())
 
+    def add_entity(self, entity):
+        self.graph.add_node(entity.get_key(), record=entity,
+                dot_node_attributes=entity.dot_attributes())
+
+    def add_relationship(self, parent_key, child_key, dot_edge_attributes=None):
+        self.graph.add_edge(parent_key, child_key,
+                dot_edge_attributes = dot_edge_attributes or {})
+
     ###########################################################################
     #### Decoration                                                        ####
     ###########################################################################
@@ -61,16 +67,19 @@ class FamilyTree:
         '''
 
         for member in member_list:
-            self.graph.add_node(member.get_key(), record=member)
+            self.add_entity(member)
 
-    def add_affiliations(self, affiliations_dict):
+    def mark_affiliations(self, affiliations_dict):
         '''
         Look up and add affiliations for each member in the graph, using the
         provided dictionary of affiliations.
         '''
 
-        for key, member in self.nodes_iter('record'):
-            member.affiliations = affiliations_dict[key]
+        # TODO DOT attributes already added; affiliations won't be shown
+        # for key, member in self.nodes_iter('record'):
+        #     member.affiliations = affiliations_dict[key]
+
+        pass
 
     def add_custom_nodes(self):
         '''
@@ -78,8 +87,7 @@ class FamilyTree:
         '''
 
         for key, value in self.settings['nodes'].items():
-            record = entity.Custom(key, **value)
-            self.graph.add_node(key, record=record)
+            self.add_entity(entity.Custom(key, **value))
 
     def add_custom_edges(self):
         '''
@@ -92,7 +100,7 @@ class FamilyTree:
             edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
             self.graph.add_edges_from(edges, dot_edge_attributes=attributes)
 
-    def add_edges(self):
+    def add_relationships(self):
         '''
         Connect all entities in the tree by finding each entity's parent and
         adding the edge (parent, entity).
@@ -101,7 +109,7 @@ class FamilyTree:
         for key, member in self.nodes_iter('record'):
             if member.parent:
                 if member.parent in self.graph:
-                    self.graph.add_edge(member.parent, key)
+                    self.add_relationship(member.parent, key)
                 else:
                     # TODO candidates and BNKs don't have badges... Maybe use a
                     # field in Entities that gives the appropriate message?
@@ -121,27 +129,7 @@ class FamilyTree:
 
         self.graph.remove_nodes_from(singletons)
 
-    def add_node_attributes(self):
-        '''
-        Calculate the DOT node attributes for each entity in the graph, and
-        store the attributes in the entity's networkx attribute dictionary.
-        '''
-
-        for key, record, node_dict in self.nodes_iter('record', node_dict=True):
-            node_dict['dot_node_attributes'] = record.dot_node_attributes()
-
-    def add_edge_attributes(self):
-
-        for pkey, ckey, edge_dict in self.graph.edges_iter(data=True):
-
-            parent = self.graph.node[pkey]['record']
-            child = self.graph.node[ckey]['record']
-
-            attributes = edge_dict.get('dot_edge_attributes', {})
-            attributes.update(parent.dot_edge_attributes(child))
-            edge_dict['dot_edge_attributes'] = attributes
-
-    def add_families(self):
+    def mark_families(self):
 
         # Members-only graph
         members_only = self.graph.subgraph(
@@ -186,20 +174,15 @@ class FamilyTree:
             orphan = self.graph.node[orphan_key]['record']
 
             parent = entity.UnidentifiedKnight(orphan,
-                    self.settings['node_defaults']['unknown'],
-                    self.settings['edge_defaults']['unknown'])
+                    self.settings['node_defaults']['unknown'])
             parent_key = parent.get_key()
 
             # Set orphan parent
-            orphan.parent = parent_key
+            orphan.parent = parent.get_key()
 
-            self.graph.add_node(parent_key,
-                    record=parent,
-                    dot_node_attributes=parent.dot_node_attributes())
-
-            self.graph.add_edge(parent_key, orphan_key,
-                    dot_edge_attributes=parent.dot_edge_attributes(orphan))
-
+            self.add_entity(parent)
+            self.add_relationship(parent_key, orphan_key,
+                    dot_edge_attributes=self.settings['edge_defaults']['unknown'])
 
     ###########################################################################
     #### Convert to DOT                                                    ####
