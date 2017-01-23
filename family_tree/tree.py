@@ -49,24 +49,30 @@ class FamilyTree:
         self.add_edge_attributes()
 
     def add_custom_nodes(self):
+        '''
+        Add all custom nodes loaded from settings.
+        '''
 
         for key, value in self.settings['nodes'].items():
             record = entity.Custom(key, **value)
             self.graph.add_node(key, record=record)
 
-    # TODO stopped refactoring here
     def add_custom_edges(self):
-        for path in self.settings['edges']:
+        '''
+        Add all custom edges loaded from settings.
+        '''
 
+        for path in self.settings['edges']:
             nodes = path['nodes']
             attributes = path['attributes']
-
-            self.graph.add_edges_from(
-                    [(u, v) for u, v in zip(nodes[:-1], nodes[1:])],
-                    dot_edge_attributes=attributes
-                    )
+            edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
+            self.graph.add_edges_from(edges, dot_edge_attributes=attributes)
 
     def add_edges(self):
+        '''
+        Connect all entities in the tree by finding each entity's parent and
+        adding the edge (parent, entity).
+        '''
 
         for key, member in self.nodes_iter('record'):
             if member.parent:
@@ -78,12 +84,21 @@ class FamilyTree:
                     raise Exception('Brother with badge {} has unknown big brother: "{}"'.format(key, member.parent))
 
     def remove_singletons(self):
+        '''
+        Remove all nodes in the tree that do not have parents, as determined by
+        the node's degree (including both in-edges and out-edges).
+        '''
 
         # TODO protect singletons (e.g., refounders without littles) after a
         # certain date so they don't disappear without at least a warning?
-        self.graph.remove_nodes_from([key for key, degree in self.graph.degree_iter() if degree == 0])
+        singletons = [key for key, deg in self.graph.degree_iter() if deg == 0]
+        self.graph.remove_nodes_from(singletons)
 
     def add_node_attributes(self):
+        '''
+        Calculate the DOT node attributes for each entity in the graph, and
+        store the attributes in the entity's networkx node dictionary.
+        '''
 
         # TODO simplify
         for key, node_dict in self.graph.nodes_iter(data=True):
