@@ -58,17 +58,19 @@ class FamilyTree:
         '''
 
         for member in member_list:
-            self.graph.add_node(member.get_key(),
-                    record = member,
-                    dot_node_attributes = {},
-                    edge_node_attributes = {},
-                    )
+
+            attribute_dict = {
+                    'record' : member,
+                    'dot_node_attributes' : {},
+                    'dot_edge_attributes' : {},
+                    }
+
+            self.graph.add_node(member.get_key(), **attribute_dict)
 
     def add_affiliations(self, affiliations_dict):
 
         for badge, affiliations in affiliations_dict.items():
             self.graph.node[badge]['record'].affiliations = affiliations
-
 
     def add_custom_nodes(self):
         '''
