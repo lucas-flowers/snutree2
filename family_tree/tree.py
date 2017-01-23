@@ -49,7 +49,7 @@ class FamilyTree:
                     ((self.graph.node[key],) if node_dict else ())
 
     def add_entity(self, entity):
-        self.graph.add_node(entity.get_key(), record=entity,
+        self.graph.add_node(entity.get_key(), entity=entity,
                 dot_node_attributes=entity.dot_attributes())
 
     def add_relationship(self, parent_key, child_key, dot_edge_attributes=None):
@@ -93,7 +93,7 @@ class FamilyTree:
         adding the edge (parent, entity).
         '''
 
-        for key, member in self.nodes_iter('record'):
+        for key, member in self.nodes_iter('entity'):
             if member.parent:
                 if member.parent in self.graph:
                     self.add_relationship(member.parent, key)
@@ -110,7 +110,7 @@ class FamilyTree:
         # TODO protect singletons (e.g., refounders without littles) after a
         # certain date so they don't disappear without at least a warning?
         singletons = [key for key, degree in self.graph.degree_iter() if degree == 0
-                and isinstance(self.graph.node[key]['record'], entity.Member)]
+                and isinstance(self.graph.node[key]['entity'], entity.Member)]
 
         self.graph.remove_nodes_from(singletons)
 
@@ -118,7 +118,7 @@ class FamilyTree:
 
         # Members-only graph
         members_only = self.graph.subgraph(
-                [key for key, member in self.nodes_iter('record')
+                [key for key, member in self.nodes_iter('entity')
                     if isinstance(member, entity.Member)]
                 )
 
@@ -151,12 +151,12 @@ class FamilyTree:
                 for key, in_degree
                 in self.graph.in_degree().items()
                 if in_degree == 0
-                and isinstance(self.graph.node[key]['record'], entity.Member)
+                and isinstance(self.graph.node[key]['entity'], entity.Member)
                 ]
 
         for orphan_key in orphan_keys:
 
-            orphan = self.graph.node[orphan_key]['record']
+            orphan = self.graph.node[orphan_key]['entity']
 
             parent = entity.UnidentifiedKnight(orphan,
                     self.settings['node_defaults']['unknown'])
@@ -184,7 +184,7 @@ class FamilyTree:
         # The nodes are sorted first, to ensure that the same colors are used
         # for the same input data.
         for key, node_dict in sorted(self.graph.nodes_iter(data=True)):
-            if isinstance(node_dict['record'], entity.Member):
+            if isinstance(node_dict['entity'], entity.Member):
                 node_dict['dot_node_attributes']['color'] = family_color_map[node_dict['family']]
 
     def to_dot_graph(self):
@@ -210,7 +210,7 @@ class FamilyTree:
         min_sem = float('inf')
         max_sem = float('-inf')
         for _, node_dict in self.graph.nodes_iter(data=True):
-            semester = node_dict['record'].semester
+            semester = node_dict['entity'].semester
             if semester and min_sem > semester:
                 min_sem = semester
             if semester and max_sem < semester:
@@ -272,7 +272,7 @@ class FamilyTree:
 
         ranks = {}
         for key, node_dict in self.graph.nodes(data=True):
-            semester = node_dict['record'].semester
+            semester = node_dict['entity'].semester
             if semester in ranks:
                 ranks[semester].keys.append(key)
             else:
