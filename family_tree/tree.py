@@ -176,12 +176,18 @@ class FamilyTree:
     ###########################################################################
 
     def add_colors(self):
+        '''
+        Add colors to member nodes, based on their family. Uses settings
+        dictionary to provide initial colors, and generates the rest as need.
+        '''
 
         family_color_map = graphviz_color_map(initial_mappings=self.settings['family_colors'])
-        for key, node_dict in self.graph.nodes_iter(data=True):
+
+        # The nodes are sorted first, to ensure that the same colors are used
+        # for the same input data.
+        for key, node_dict in sorted(self.graph.nodes_iter(data=True)):
             if isinstance(node_dict['record'], entity.Member):
                 node_dict['dot_node_attributes']['color'] = family_color_map[node_dict['family']]
-
 
     def to_dot_graph(self):
 
