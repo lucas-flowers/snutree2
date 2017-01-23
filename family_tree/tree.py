@@ -37,15 +37,19 @@ class FamilyTree:
     #### Iterator Wrappers                                                 ####
     ###########################################################################
 
-    def nodes_iter(self, *fields):
+    def nodes_iter(self, *attributes, node_dict=False):
         '''
         Iterates over the nodes in the graph by yielding a tuple with the key
         first, followed by the fields asked for in the *fields arguments in
         the same order asked.
-        '''
 
+        If node_dict=True, then a the entire attribute dictionary is also
+        provided at the end of the tuple.
+        '''
         for key in list(self.graph.nodes_iter()):
-            yield (key, *(self.graph.node[key][field] for field in fields))
+            yield (key,
+                    *(self.graph.node[key][attr] for attr in attributes)) + \
+                    ((self.graph.node[key],) if node_dict else ())
 
     ###########################################################################
     #### Decoration                                                        ####
@@ -112,36 +116,29 @@ class FamilyTree:
 
         # TODO protect singletons (e.g., refounders without littles) after a
         # certain date so they don't disappear without at least a warning?
-        singletons = [
-                key
-                for key, degree
-                in self.graph.degree_iter()
-                if degree == 0
-                and isinstance(self.graph.node[key]['record'], entity.Member)
-                ]
+        singletons = [key for key, degree in self.graph.degree_iter() if degree == 0
+                and isinstance(self.graph.node[key]['record'], entity.Member)]
 
         self.graph.remove_nodes_from(singletons)
 
     def add_node_attributes(self):
         '''
         Calculate the DOT node attributes for each entity in the graph, and
-        store the attributes in the entity's networkx node dictionary.
+        store the attributes in the entity's networkx attribute dictionary.
         '''
 
-        # TODO simplify
-        for key, node_dict in self.graph.nodes_iter(data=True):
-            record = node_dict['record']
-            attributes = node_dict.get('dot_node_attributes', {})
-            attributes.update(record.dot_node_attributes())
-            node_dict['dot_node_attributes'] = attributes
+        for key, record, node_dict in self.nodes_iter('record', node_dict=True):
+            node_dict['dot_node_attributes'] = record.dot_node_attributes()
 
     def add_edge_attributes(self):
 
-        for parent_key, child_key, edge_dict in self.graph.edges_iter(data=True):
-            parent_record = self.graph.node[parent_key]['record']
-            child_record = self.graph.node[child_key]['record']
+        for pkey, ckey, edge_dict in self.graph.edges_iter(data=True):
+
+            parent = self.graph.node[pkey]['record']
+            child = self.graph.node[ckey]['record']
+
             attributes = edge_dict.get('dot_edge_attributes', {})
-            attributes.update(parent_record.dot_edge_attributes(child_record))
+            attributes.update(parent.dot_edge_attributes(child))
             edge_dict['dot_edge_attributes'] = attributes
 
     def add_families(self):
