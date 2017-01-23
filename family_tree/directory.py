@@ -149,12 +149,11 @@ class Directory:
         'graph_defaults' : Defaults('all'),
         }, required=True, extra=False)
 
-    def __init__(self):
-        '''
-        Turn into a more useful constructor.
-        '''
-        self._members = []
-        self.settings = {}
+    def __init__(self, member_list, affiliations_list, settings_dict):
+
+        self.set_members(member_list)
+        self.mark_affiliations(affiliations_list)
+        self.set_settings(settings_dict)
 
     def set_members(self, members):
 

@@ -30,14 +30,13 @@ def to_directory(
         settings_path=None,
         ):
 
-    directory = Directory()
-    directory.set_settings(read_settings(settings_path) if settings_path else {})
-    directory.set_members(retrieve_members(members_path) +
-            (retrieve_members(extra_members_path) if extra_members_path else []))
-    directory.mark_affiliations(retrieve_affiliations(affiliations_path)
-            if affiliations_path else [])
+    settings = read_settings(settings_path) if settings_path else {}
 
-    return directory
+    members = retrieve_members(members_path) + \
+            (retrieve_members(extra_members_path) if extra_members_path else [])
+    affiliations = retrieve_affiliations(affiliations_path) if affiliations_path else []
+
+    return Directory(members, affiliations, settings)
 
 def retrieve_members(path):
     '''

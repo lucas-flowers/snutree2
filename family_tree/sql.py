@@ -19,19 +19,18 @@ def to_directory(
         ):
 
     settings = read_settings(settings_path)
+
     mysql_cnf = settings['mysql']
     cxn = MySQLdb.Connection(**mysql_cnf)
 
-    directory = Directory()
-    directory.set_settings(settings)
     # TODO you know, this `extra_members_path` could be the full local
     # directory, in addition to BNKs...
-    directory.set_members(retrieve_members(cxn) +
+    members = retrieve_members(cxn) + \
             (family_tree.csv.retrieve_members(extra_members_path)
-                if extra_members_path else []))
-    directory.mark_affiliations(retrieve_affiliations(cxn))
+                if extra_members_path else [])
+    affiliations = retrieve_affiliations(cxn)
 
-    return directory
+    return Directory(members, affiliations, settings)
 
 def retrieve_members(mysql_connection):
     '''
