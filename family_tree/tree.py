@@ -288,30 +288,34 @@ class FamilyTree:
         '''
         An iterator over this graph's nodes and node dictionaries, in the order
         they should be printed.
+
+        First: The (weakly) connected components of the graph are put in a
+        list. The components are then sorted by the minimum
+        (lexicographically-speaking) key they contain. Then, the random seed in
+        the settings dictionary is used to shuffle the components. A few notes:
+
+            + The components are randomized because strange behavior might
+            occur if the nodes are left to be in the same order produced by
+            normal iteration. This makes the resulting graph look ugly.
+
+            + The user can provide a seed value in the settings dictionary to
+            help obtain the same result every time the program is run on the
+            same input. The user can also change the seed to change the layout
+            instead of fiddling around with the DOT code.
+
+            + The components are sorted even though they are then immediately
+            shuffled again. This is to ensure the rng.shuffle function produces
+            the same result for the same seed.
+
+        Second: The keys and node dictionaries for all of the nodes in all of
+        the components are then returned in lexicographical order.
         '''
 
-        # Find the different connected components of the graph (i.e., each
-        # component is a different family, unless it includes a reorganization
-        # node which can connect unrelated families). (TODO remove reference to
-        # reorganization in this comment.)
-        #
-        # Add the nodes from each component to the DOT graph, in the order of
-        # component. The order of components is randomized to help prevent
-        # strange behavior (e.g., excessively long nodes) and allow the user to
-        # change the graph by choosing a different random seed if the graph is
-        # not aesthetic. (The previous method placed nodes in the source code
-        # by the order found, but that consistently produced ugly results.)
-        #
-        # There might be a specific order that would be satisfactory, but
-        # randomizing is easier for now. A user could of course manually adjust
-        # nodes, but I want to avoid having the potentially unskilled user
-        # change DOT source code or fiddle with DOT attributes.
-        #
-        # (The components themselves and their members' edges (see
-        # self.ordered_edges() are not randomized)
-        components = sorted(list(weakly_connected_components(self.graph)), key=lambda x : min(map(str, x)))
+        components = weakly_connected_components(self.graph)
+        components = sorted(components, key = lambda component : min(component, key=str))
         rng = random.Random(self.settings['seed'])
         rng.shuffle(components)
+
         for component in components:
             for key in sorted(component, key=str):
                 yield key, self.graph.node[key]
@@ -319,13 +323,17 @@ class FamilyTree:
     def ordered_edges(self):
         '''
         An iterator over this graph's edges and edge dictionaries, in the order
-        they should be printed.
+        they should be printed. The edges are sorted first by parent key, then
+        child key, then (if necessary) the string form of the edge's attribute
+        dictionary.
         '''
 
-        # Sort the list of edges by parent then child key (the `t` in lambda is
-        # a 3-tuple of the form (parent, child, edge_dict)). Ensures the order
-        # of edges printed to source is the identical for the same input data.
-        edges = sorted(self.graph.edges(data=True), key=lambda t : tuple(map(str, t[:-1])))
+        edges = self.graph.edges(data=True)
+
+        # t[0]: parent key
+        # t[1]: child key
+        # t[2]: edge attribute dictionary
+        edges = sorted(edges, key = lambda t : (t[0], t[1], map(str, t[2])))
 
         yield from edges
 
