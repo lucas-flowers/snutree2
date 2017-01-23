@@ -22,11 +22,11 @@ class FamilyTree:
         # TODO add the following as options to settings. use special decorators
         # to mark the options?
 
-        self.add_affiliations(directory.get_affiliations())
         self.add_edges()
         self.add_custom_nodes()
         self.add_custom_edges()
-        self.remove_singletons()
+        self.remove_singleton_members() # ^ add_member, add_edges, add_custom_edges
+        self.add_affiliations(directory.get_affiliations())
         self.add_families()
         self.add_orphan_parents()
         self.add_node_attributes()
@@ -60,9 +60,13 @@ class FamilyTree:
             self.graph.add_node(member.get_key(), record=member)
 
     def add_affiliations(self, affiliations_dict):
+        '''
+        Look up and add affiliations for each member in the graph, using the
+        provided dictionary of affiliations.
+        '''
 
-        for badge, affiliations in affiliations_dict.items():
-            self.graph.node[badge]['record'].affiliations = affiliations
+        for key, member in self.nodes_iter('record'):
+            member.affiliations = affiliations_dict[key]
 
     def add_custom_nodes(self):
         '''
@@ -99,15 +103,23 @@ class FamilyTree:
                     # field in Entities that gives the appropriate message?
                     raise Exception('Brother with badge {} has unknown big brother: "{}"'.format(key, member.parent))
 
-    def remove_singletons(self):
+    def remove_singleton_members(self):
         '''
-        Remove all nodes in the tree that do not have parents, as determined by
-        the node's degree (including both in-edges and out-edges).
+        Remove all members in the tree whose nodes neither have parents nor
+        children, as determined by the node's degree (including both in-edges
+        and out-edges).
         '''
 
         # TODO protect singletons (e.g., refounders without littles) after a
         # certain date so they don't disappear without at least a warning?
-        singletons = [key for key, deg in self.graph.degree_iter() if deg == 0]
+        singletons = [
+                key
+                for key, degree
+                in self.graph.degree_iter()
+                if degree == 0
+                and isinstance(self.graph.node[key]['record'], entity.Member)
+                ]
+
         self.graph.remove_nodes_from(singletons)
 
     def add_node_attributes(self):
@@ -151,18 +163,46 @@ class FamilyTree:
                 self.graph.node[descendant_key]['family'] = head_key
 
     def add_orphan_parents(self):
+        '''
+        Add custom entities as parents to members whose nodes have no parents,
+        as determined by the nodes' in-degrees.
 
-        # Find members that had big brothers whose identities are unknown
-        orphan_keys = [
-                key for key, in_degree in self.graph.in_degree().items()
-                if in_degree == 0 and isinstance(self.graph.node[key]['record'], entity.Member)
+        Note: This must occur after edges are generated in order to determine
+        degrees. But it must also occur after singletons are removed, because
+        many singletons do not have well-formed pledge class semester values in
+        the directory (and determining pledge class semester values accurately
+        is not simple enough for me to bother doing). If ever pledge class
+        semesters were filled in, this could occur before add_edges and we can
+        remove some of the extra code in this function that would normally be
+        done by add_XXX_attributes.
+        '''
+
+        orphan_keys = [key
+                for key, in_degree
+                in self.graph.in_degree().items()
+                if in_degree == 0
+                and isinstance(self.graph.node[key]['record'], entity.Member)
                 ]
 
         for orphan_key in orphan_keys:
-            parent_record = entity.UnidentifiedKnight.from_member(self.graph.node[orphan_key]['record'])
-            parent_key = parent_record.get_key()
-            self.graph.add_node(parent_key, record=parent_record, dot_node_attributes=self.settings['node_defaults']['unknown'])
-            self.graph.add_edge(parent_key, orphan_key, dot_edge_attributes=self.settings['edge_defaults']['unknown'])
+
+            orphan = self.graph.node[orphan_key]['record']
+
+            parent = entity.UnidentifiedKnight(orphan,
+                    self.settings['node_defaults']['unknown'],
+                    self.settings['edge_defaults']['unknown'])
+            parent_key = parent.get_key()
+
+            # Set orphan parent
+            orphan.parent = parent_key
+
+            self.graph.add_node(parent_key,
+                    record=parent,
+                    dot_node_attributes=parent.dot_node_attributes())
+
+            self.graph.add_edge(parent_key, orphan_key,
+                    dot_edge_attributes=parent.dot_edge_attributes(orphan))
+
 
     ###########################################################################
     #### Convert to DOT                                                    ####

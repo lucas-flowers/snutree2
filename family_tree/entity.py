@@ -38,12 +38,7 @@ class TreeEntity(metaclass=ABCMeta):
 
 class Custom(TreeEntity):
 
-    def __init__(self,
-            key,
-            semester=None,
-            attributes=None,
-            ):
-
+    def __init__(self, key, semester=None, attributes=None):
         self.key = key
         self.semester = semester
         self.node_attributes = attributes
@@ -58,23 +53,21 @@ class Custom(TreeEntity):
     def dot_edge_attributes(self, other):
         return self.edge_attributes
 
-class UnidentifiedKnight(TreeEntity):
+class UnidentifiedKnight(Custom):
     '''
     All members are assumed to have big brothers. If a member does not have a
     known big brother, this class is used as a placeholder. UnidentifiedKnights
     are given pledge semesters a semester before the members they are bigs to.
     '''
 
-    def __init__(self, semester, key):
-        self.semester = semester
-        self.key = key
+    def __init__(self, member, dot_node_attributes, dot_edge_attributes):
+        self.key = member.get_key()
+        self.semester = member.semester - 1
+        self.node_attributes = dot_node_attributes
+        self.edge_attributes = dot_edge_attributes
 
     def get_key(self):
         return '{} Parent'.format(self.key)
-
-    @classmethod
-    def from_member(cls, member):
-        return cls(member.semester - 1, member.get_key())
 
 class Member(TreeEntity, metaclass=ABCMeta):
 
