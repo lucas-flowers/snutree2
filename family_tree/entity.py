@@ -1,7 +1,5 @@
 from abc import ABCMeta, abstractmethod
 import difflib
-from collections import defaultdict
-from family_tree.color import ColorChooser
 
 class TreeEntity(metaclass=ABCMeta):
     '''
@@ -70,9 +68,6 @@ class UnidentifiedKnight(Custom):
         return '{} Parent'.format(self.key)
 
 class Member(TreeEntity, metaclass=ABCMeta):
-
-    color_chooser = ColorChooser.from_graphviz_colors()
-    family_colors = defaultdict(color_chooser.next_color)
 
     @abstractmethod
     def get_dot_label(self):
