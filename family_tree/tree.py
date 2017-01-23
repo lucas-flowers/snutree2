@@ -18,7 +18,20 @@ class FamilyTree:
         self.settings = directory.settings
 
         self.add_members(directory.get_members())
+
+        # TODO add the following as options to settings. use special decorators
+        # to mark the options?
+
         self.add_affiliations(directory.get_affiliations())
+        self.add_edges()
+        self.add_custom_nodes()
+        self.add_custom_edges()
+        self.remove_singletons()
+        self.add_families()
+        self.add_orphan_parents()
+        self.add_node_attributes()
+        self.add_colors()
+        self.add_edge_attributes()
 
     ###########################################################################
     #### Iterator Wrappers                                                 ####
@@ -37,20 +50,6 @@ class FamilyTree:
     ###########################################################################
     #### Decoration                                                        ####
     ###########################################################################
-
-    def decorate(self):
-
-        # TODO added as options to settings. use special decorators to mark
-        # the options?
-        self.add_edges()
-        self.add_custom_nodes()
-        self.add_custom_edges()
-        self.remove_singletons()
-        self.add_families()
-        self.add_orphan_parents()
-        self.add_node_attributes()
-        self.add_colors()
-        self.add_edge_attributes()
 
     def add_members(self, member_list):
         '''

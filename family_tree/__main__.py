@@ -32,9 +32,6 @@ directory = family_tree.sql.to_directory(
 # Intermediate -> Tree
 tree = FamilyTree(directory)
 
-# Tree -> Decorated tree
-tree.decorate()
-
 # Tree -> DOT graph
 dotgraph = tree.to_dot_graph()
 
