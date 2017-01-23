@@ -24,12 +24,12 @@ def to_directory(
 
     directory = Directory()
     directory.set_settings(settings)
-    directory.set_affiliations(retrieve_affiliations(cxn))
     # TODO you know, this `extra_members_path` could be the full local
     # directory, in addition to BNKs...
     directory.set_members(retrieve_members(cxn) +
             (family_tree.csv.retrieve_members(extra_members_path)
                 if extra_members_path else []))
+    directory.mark_affiliations(retrieve_affiliations(cxn))
 
     return directory
 

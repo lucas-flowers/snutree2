@@ -151,7 +151,6 @@ class Directory:
 
     def __init__(self):
         self._members = []
-        self._affiliations = []
         self.settings = {}
 
     def set_members(self, members):
@@ -164,25 +163,25 @@ class Directory:
             MemberType = row['status']
             self._members.append(MemberType(**row))
 
-    def set_affiliations(self, affiliations):
+    def mark_affiliations(self, affiliations):
 
         validate([(a['chapter_name'], a['other_badge']) for a in affiliations], Schema(Unique()))
         affiliations = [validate(a, self.affiliations_schema) for a in affiliations]
 
-        self._affiliations = defaultdict(list)
+        affiliations_map = defaultdict(list)
         for row in affiliations:
             badge = row['badge']
             other_badge = '{} {}'.format(to_greek_name(row['chapter_name']), row['other_badge'])
-            self._affiliations[badge].append(other_badge)
+            affiliations_map[badge].append(other_badge)
+
+        for member in self._members:
+            member.affiliations = affiliations_map[member.get_key()]
 
     def set_settings(self, settings_dict):
         self.settings = validate(settings_dict, self.settings_schema)
 
     def get_members(self):
         return self._members
-
-    def get_affiliations(self):
-        return self._affiliations
 
 def read_settings(path):
     with open(path, 'r') as f:

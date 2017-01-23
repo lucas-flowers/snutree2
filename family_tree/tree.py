@@ -26,7 +26,6 @@ class FamilyTree:
         self.add_custom_nodes()
         self.add_custom_edges()
         self.remove_singleton_members() # ^ add_member, add_edges, add_custom_edges
-        self.mark_affiliations(directory.get_affiliations())
         self.mark_families()
         self.add_orphan_parents()
         self.add_colors()
@@ -68,18 +67,6 @@ class FamilyTree:
 
         for member in member_list:
             self.add_entity(member)
-
-    def mark_affiliations(self, affiliations_dict):
-        '''
-        Look up and add affiliations for each member in the graph, using the
-        provided dictionary of affiliations.
-        '''
-
-        # TODO DOT attributes already added; affiliations won't be shown
-        # for key, member in self.nodes_iter('record'):
-        #     member.affiliations = affiliations_dict[key]
-
-        pass
 
     def add_custom_nodes(self):
         '''
