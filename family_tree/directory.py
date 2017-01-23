@@ -1,9 +1,7 @@
 import json, yaml
-import networkx as nx
 from voluptuous import Schema, All, Any, Coerce, DefaultTo, Extra, Length, Optional, Unique
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
-from family_tree.tree import FamilyTree
 from family_tree.semester import Semester
 from family_tree.entity import Knight, Brother, Candidate, Expelled
 import family_tree.utilities as util
@@ -128,62 +126,36 @@ class Directory:
         self._affiliations = []
         self.settings = {}
 
-    def to_tree(self):
-
-        members_graph = read_directory(self._members)
-        affiliations_dict = read_affiliations(self._affiliations)
-
-        for badge, affiliations in affiliations_dict.items():
-
-            members_graph.node[badge]['record'].affiliations = affiliations
-
-        tree = FamilyTree()
-        tree.graph = members_graph
-        tree.settings = self.settings
-
-        return tree
-
     def set_members(self, members):
+
         validate([m['badge'] for m in members if 'badge' in m], Schema(Unique()))
-        self._members = [validate(m, self.member_schema) for m in members]
+        members = [validate(m, self.member_schema) for m in members]
+
+        self._members = []
+        for row in members:
+            MemberType = row['status']
+            self._members.append(MemberType(**row))
 
     def set_affiliations(self, affiliations):
+
         validate([(a['chapter_name'], a['other_badge']) for a in affiliations], Schema(Unique()))
-        self._affiliations = [validate(a, self.affiliations_schema) for a in affiliations]
+        affiliations = [validate(a, self.affiliations_schema) for a in affiliations]
+
+        self._affiliations = defaultdict(list)
+        for row in affiliations:
+            badge = row['badge']
+            other_badge = '{} {}'.format(util.to_greek_name(row['chapter_name']), row['other_badge'])
+            self._affiliations[badge].append(other_badge)
 
     def set_settings(self, settings_dict):
         self.settings = validate(settings_dict, self.settings_schema)
 
-def read_directory_row(row, graph):
+    def get_members(self):
+        return self._members
 
-    MemberType = row['status']
-    member = MemberType(**row)
-    graph.add_node(member.get_key(), record=member)
+    def get_affiliations(self):
+        return self._affiliations
 
-read_directory = util.TableReaderFunction(
-        read_directory_row,
-        nx.DiGraph,
-        first_row=2 # TODO this assumes a CSV; maybe replace TableReaderFunction?
-        )
-
-def read_affiliations_row(row, affiliations_dict):
-
-    badge = row['badge']
-    other_badge = '{} {}'.format(
-            util.to_greek_name(row['chapter_name']),
-            row['other_badge']
-            )
-    affiliations_dict[badge].append(other_badge)
-
-read_affiliations = util.TableReaderFunction(
-        read_affiliations_row,
-        lambda : defaultdict(list),
-        first_row=2
-        )
-
-# TODO rename to distinguish from read_directory and read_affiliations, which
-# move members/affiliations into the tree (whereas this function reads settings
-# from a path into the Directory)
 def read_settings(path):
     with open(path, 'r') as f:
 

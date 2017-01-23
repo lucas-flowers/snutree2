@@ -12,9 +12,13 @@ from family_tree import entity
 
 class FamilyTree:
 
-    def __init__(self):
+    def __init__(self, directory):
+
         self.graph = nx.DiGraph()
-        self.settings = {}
+        self.settings = directory.settings
+
+        self.add_members(directory.get_members())
+        self.add_affiliations(directory.get_affiliations())
 
     ###########################################################################
     #### Iterator Wrappers                                                 ####
@@ -47,6 +51,24 @@ class FamilyTree:
         self.add_node_attributes()
         self.add_colors()
         self.add_edge_attributes()
+
+    def add_members(self, member_list):
+        '''
+        Add the members to the graph.
+        '''
+
+        for member in member_list:
+            self.graph.add_node(member.get_key(),
+                    record = member,
+                    dot_node_attributes = {},
+                    edge_node_attributes = {},
+                    )
+
+    def add_affiliations(self, affiliations_dict):
+
+        for badge, affiliations in affiliations_dict.items():
+            self.graph.node[badge]['record'].affiliations = affiliations
+
 
     def add_custom_nodes(self):
         '''

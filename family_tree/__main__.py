@@ -1,5 +1,6 @@
 # import family_tree.csv
 import family_tree.sql
+from family_tree.tree import FamilyTree
 
 directory_path = 'directory.csv'
 bnks_path = 'brothers_not_knights.csv'
@@ -29,7 +30,7 @@ directory = family_tree.sql.to_directory(
 ############################
 
 # Intermediate -> Tree
-tree = directory.to_tree()
+tree = FamilyTree(directory)
 
 # Tree -> Decorated tree
 tree.decorate()
