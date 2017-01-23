@@ -1,17 +1,17 @@
 
-file:
-  members: 'directory.csv'
-  affiliations: 'affiliations.csv'
+# file:
+#   members: 'directory.csv'
+#   affiliations: 'affiliations.csv'
 
 extra_members: 'brothers_not_knights.csv'
 
-# # MySQL server information
-# mysql:
-#   host: '***REMOVED***'
-#   user: '***REMOVED***'
-#   passwd: '***REMOVED***'
-#   port: '***REMOVED***'
-#   db: '***REMOVED***'
+# MySQL server information
+mysql:
+  host: '***REMOVED***'
+  user: '***REMOVED***'
+  passwd: '***REMOVED***'
+  port: '***REMOVED***'
+  db: '***REMOVED***'
 
 # Defaults style for Graphviz graphs and subgraphs
 graph_defaults:

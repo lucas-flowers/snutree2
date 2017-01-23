@@ -66,14 +66,16 @@ class Directory:
     is an intermediate form before the data is turned into a tree. It stores a
     list of brothers from the directory, a list for brothers not made knights,
     a dictionary of affiliations, and a dictionary of YAML settings.
+
+    The Directory class guarantees that entries in its members and affiliations
+    lists will be dictionaries that follow the following schema.
+
+    Furthermore, the class guarantees that all members in the member list are
+    unique (as determined by their badge), and that all
+    chapter_name/other_badge pairs in the affiliations list are unique.
     '''
 
-    # The Directory class guarantees that entries in its members and
-    # affiliations lists will be dictionaries that follow the following schema.
-    #
-    # Furthermore, the class guarantees that all members in the member list are
-    # unique (as determined by their badge), and that all
-    # chapter_name/other_badge pairs in the affiliations list are unique.
+    # TODO provide messages for schema
 
     member_schema = Schema(Any(
 

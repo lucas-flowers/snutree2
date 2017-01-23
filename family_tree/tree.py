@@ -98,9 +98,7 @@ class FamilyTree:
                 if member.parent in self.graph:
                     self.add_relationship(member.parent, key)
                 else:
-                    # TODO candidates and BNKs don't have badges... Maybe use a
-                    # field in Entities that gives the appropriate message?
-                    raise Exception('Brother with badge {} has unknown big brother: "{}"'.format(key, member.parent))
+                    raise TreeException('Node with key "{}" has unknown parent node: "{}"'.format(key, member.parent))
 
     def remove_singleton_members(self):
         '''
@@ -342,4 +340,7 @@ class FamilyTree:
         edges = sorted(edges, key = lambda t : (t[0], t[1], map(str, t[2])))
 
         yield from edges
+
+class TreeException(Exception):
+    pass
 
