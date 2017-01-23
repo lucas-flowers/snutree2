@@ -150,6 +150,9 @@ class Directory:
         }, required=True, extra=False)
 
     def __init__(self):
+        '''
+        Turn into a more useful constructor.
+        '''
         self._members = []
         self.settings = {}
 
