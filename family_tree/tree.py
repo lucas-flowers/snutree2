@@ -50,11 +50,11 @@ class FamilyTree:
 
     def add_entity(self, entity):
         self.graph.add_node(entity.get_key(), entity=entity,
-                dot_node_attributes=entity.dot_attributes())
+                dot_attributes=entity.dot_attributes())
 
-    def add_relationship(self, parent_key, child_key, dot_edge_attributes=None):
+    def add_relationship(self, parent_key, child_key, dot_attributes=None):
         self.graph.add_edge(parent_key, child_key,
-                dot_edge_attributes = dot_edge_attributes or {})
+                dot_attributes = dot_attributes or {})
 
     ###########################################################################
     #### Decoration                                                        ####
@@ -85,7 +85,7 @@ class FamilyTree:
             nodes = path['nodes']
             attributes = path['attributes']
             edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
-            self.graph.add_edges_from(edges, dot_edge_attributes=attributes)
+            self.graph.add_edges_from(edges, dot_attributes=attributes)
 
     def add_relationships(self):
         '''
@@ -167,7 +167,7 @@ class FamilyTree:
 
             self.add_entity(parent)
             self.add_relationship(parent_key, orphan_key,
-                    dot_edge_attributes=self.settings['edge_defaults']['unknown'])
+                    dot_attributes=self.settings['edge_defaults']['unknown'])
 
     ###########################################################################
     #### Convert to DOT                                                    ####
@@ -185,7 +185,7 @@ class FamilyTree:
         # for the same input data.
         for key, node_dict in sorted(self.graph.nodes_iter(data=True)):
             if isinstance(node_dict['entity'], entity.Member):
-                node_dict['dot_node_attributes']['color'] = family_color_map[node_dict['family']]
+                node_dict['dot_attributes']['color'] = family_color_map[node_dict['family']]
 
     def to_dot_graph(self):
 
@@ -258,11 +258,11 @@ class FamilyTree:
 
         nodes = []
         for key, node_dict in self.ordered_nodes():
-            nodes.append(dot.Node(key, node_dict['dot_node_attributes']))
+            nodes.append(dot.Node(key, node_dict['dot_attributes']))
 
         edges = []
         for parent_key, child_key, edge_dict in self.ordered_edges():
-            edges.append(dot.Edge(parent_key, child_key, edge_dict['dot_edge_attributes']))
+            edges.append(dot.Edge(parent_key, child_key, edge_dict['dot_attributes']))
 
         dotgraph.children = nodes + edges
 
