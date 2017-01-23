@@ -4,7 +4,35 @@ from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.semester import Semester
 from family_tree.entity import Knight, Brother, Candidate, Expelled
-import family_tree.utilities as util
+
+greek_mapping = {
+        'Alpha' : 'A',
+        'Beta' : 'B',
+        'Gamma' : 'Γ',
+        'Delta' : 'Δ',
+        'Epsilon' : 'E',
+        'Zeta' : 'Z',
+        'Eta' : 'H',
+        'Theta' : 'Θ',
+        'Iota' : 'I',
+        'Kappa' : 'K',
+        'Lambda' : 'Λ',
+        'Mu' : 'M',
+        'Nu' : 'N',
+        'Xi' : 'Ξ',
+        'Omicron' : 'O',
+        'Pi' : 'Π',
+        'Rho' : 'P',
+        'Sigma' : 'Σ',
+        'Tau' : 'T',
+        'Upsilon' : 'Y',
+        'Phi' : 'Φ',
+        'Chi' : 'X',
+        'Psi' : 'Ψ',
+        'Omega' : 'Ω',
+        '(A)' : '(A)', # Because of Eta Mu (A) Chapter
+        '(B)' : '(B)', # Because of Eta Mu (B) Chapter
+        }
 
 member_status_mapping = {
         'Knight' : Knight,
@@ -144,7 +172,7 @@ class Directory:
         self._affiliations = defaultdict(list)
         for row in affiliations:
             badge = row['badge']
-            other_badge = '{} {}'.format(util.to_greek_name(row['chapter_name']), row['other_badge'])
+            other_badge = '{} {}'.format(to_greek_name(row['chapter_name']), row['other_badge'])
             self._affiliations[badge].append(other_badge)
 
     def set_settings(self, settings_dict):
@@ -169,4 +197,7 @@ def read_settings(path):
         # This could easily be avoided by just not writing integers in the YAML
         # file, but that could be expecting too much of someone editing it.
         return json.loads(json.dumps(yaml.load(f)))
+
+def to_greek_name(english_name):
+    return ''.join([greek_mapping[w] for w in english_name.split(' ')])
 
