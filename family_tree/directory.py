@@ -1,5 +1,5 @@
 import json, yaml
-from voluptuous import Schema, All, Any, Coerce, DefaultTo, Extra, Length, Optional, Unique
+from voluptuous import Schema, All, Exclusive, Any, Coerce, DefaultTo, Extra, Length, Optional, Unique, IsFile
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.semester import Semester
@@ -125,13 +125,18 @@ class Directory:
 
     # TODO determine what to do when there are missing options
     settings_schema = Schema({
-        Optional('mysql', None) : {
+        Exclusive('file', 'sources') : {
+            'members' : IsFile,
+            'affiliations' : IsFile,
+            },
+        Exclusive('mysql', 'sources') : {
             'host' : NonEmptyString,
             'user' : NonEmptyString,
             'passwd' : NonEmptyString,
             'port' : int,
             'db' : NonEmptyString,
             },
+        Optional('extra_members') : IsFile,
         Optional('nodes', default={}) : Nullable({
             Extra : {
                 'semester' : All(str, Coerce(Semester)), # Semester can coerce int, but we don't want that in settings

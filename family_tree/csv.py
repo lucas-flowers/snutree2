@@ -1,8 +1,8 @@
 import csv
 from voluptuous import Schema, Optional
 from voluptuous.humanize import validate_with_humanized_errors as validate
-from family_tree.directory import Directory, read_settings
 from family_tree.semester import Semester
+from family_tree.directory import Directory
 
 # Required headers in a CSV members file
 csv_member_schema = Schema({
@@ -22,19 +22,13 @@ csv_affiliation_schema = Schema({
     'other_badge' : str,
     }, required=True)
 
-# TODO move paths into settings
-def to_directory(
-        members_path,
-        extra_members_path=None, # Intended for brothers not made knights
-        affiliations_path=None,
-        settings_path=None,
-        ):
+def retrieve_directory(settings):
 
-    settings = read_settings(settings_path) if settings_path else {}
+    members = retrieve_members(settings['file']['members'])
+    if 'extra_members' in settings:
+        members += retrieve_members(settings['extra_members'])
 
-    members = retrieve_members(members_path) + \
-            (retrieve_members(extra_members_path) if extra_members_path else [])
-    affiliations = retrieve_affiliations(affiliations_path) if affiliations_path else []
+    affiliations = retrieve_affiliations(settings['file']['affiliations'])
 
     return Directory(members, affiliations, settings)
 
