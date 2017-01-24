@@ -155,6 +155,7 @@ class Directory:
             Required('port', 'SQL server port required') : int,
             Required('db', 'database name required') : NonEmptyString,
             },
+        # TODO finish error messages
         Optional('extra_members') : IsFile,
         Optional('nodes', default={}) : Nullable({
             Extra : {
