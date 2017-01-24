@@ -26,10 +26,7 @@ class Semester(int):
                     year = int(match.group(2))
                     value = 2 * year + season
                 else:
-                    raise ValueError(
-                            'Semester names must match "{}" but "{}" was received'
-                            .format(Semester.matcher.pattern, arg)
-                            )
+                    raise ValueError('semester names must match "{}"'.format(Semester.matcher.pattern, arg))
 
         elif len(arg) == 2 and isinstance(arg[0], str) and isinstance(arg[1], int):
 
@@ -40,18 +37,12 @@ class Semester(int):
             elif season == 'Fall':
                 season = 1
             else:
-                raise ValueError(
-                        'Semester seasons must match "Spring" or "Fall", but "{}" was received'
-                        .format(season)
-                        )
+                raise ValueError('semester seasons must match "Spring" or "Fall"')
 
             value = 2 * year + season
 
         else:
-            raise TypeError(
-                    'Expected int, str, or *(str, int) but received {}'
-                    .format(type(arg))
-                    )
+            raise TypeError('expected int, str, or *(str, int)')
 
         return super(Semester, cls).__new__(cls, value)
 

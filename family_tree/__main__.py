@@ -10,7 +10,7 @@ tree = FamilyTree(directory)
 dotgraph = tree.to_dot_graph()
 dotcode = dotgraph.to_dot()
 
-folder = settings['output']['directory']
+folder = settings['output']['folder']
 
 dot_filename = os.path.join(folder, settings['output']['name'] + '.dot')
 with open(dot_filename, 'w+') as dotfile:

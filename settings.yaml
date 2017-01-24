@@ -1,6 +1,6 @@
 
 output:
-  directory: '.'
+  folder: '.'
   name: 'tree'
 
 file:

@@ -1,5 +1,5 @@
 import json, yaml
-from voluptuous import Required, Schema, All, IsDir, Exclusive, Any, Coerce, DefaultTo, Extra, Length, Optional, Unique, IsFile
+from voluptuous import Invalid, Required, Schema, All, Exclusive, Any, Coerce, DefaultTo, Extra, Length, Optional, Unique, IsFile
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.semester import Semester
@@ -41,7 +41,7 @@ member_status_mapping = {
         'Expelled' : Expelled
         }
 
-NonEmptyString = All(str, Length(min=1))
+NonEmptyString = All(str, Length(min=1), msg='must be a nonempty string')
 
 # Matches the schema or None. If it matches None, it uses the constructor of
 # schema's class to create a new, presumably empty, object of the right type.
@@ -58,9 +58,17 @@ def MemberType(status_string):
         if string == status_string:
             return member_type
         else:
-            raise ValueError('Status must be one of {}'.format(member_status_mapping.keys()))
+            raise Invalid('status must be one of {{{}}}'.format(', '.join(member_status_mapping.keys())))
 
     return validator
+
+def SemesterLike(semester_string):
+
+    try:
+        return Semester(semester_string)
+    except (TypeError, ValueError) as e:
+        raise Invalid(str(e))
+
 
 def Defaults(*categories):
     return { Optional(category) : Attributes for category in categories }
@@ -91,7 +99,7 @@ class Directory:
             Optional('preferred_name') : NonEmptyString,
             Required('last_name') : NonEmptyString,
             Optional('big_badge') : NonEmptyString,
-            Optional('pledge_semester') : Coerce(Semester),
+            Optional('pledge_semester') : SemesterLike,
             },
 
         {
@@ -100,7 +108,7 @@ class Directory:
             Optional('preferred_name') : NonEmptyString,
             Required('last_name') : NonEmptyString,
             Optional('big_badge') : NonEmptyString,
-            Optional('pledge_semester') : Coerce(Semester),
+            Optional('pledge_semester') : SemesterLike,
             },
 
         {
@@ -109,7 +117,7 @@ class Directory:
             Optional('preferred_name') : NonEmptyString,
             Required('last_name') : NonEmptyString,
             Optional('big_badge') : NonEmptyString,
-            Optional('pledge_semester') : Coerce(Semester),
+            Optional('pledge_semester') : SemesterLike,
             },
 
         {
@@ -119,50 +127,50 @@ class Directory:
             Optional('preferred_name') : NonEmptyString,
             Optional('last_name') : NonEmptyString,
             Optional('big_badge') : NonEmptyString,
-            Optional('pledge_semester') : Coerce(Semester),
+            Optional('pledge_semester') : SemesterLike,
             },
 
         ), required=True, extra=False)
 
     affiliations_schema = Schema({
-        'badge' : NonEmptyString,
-        'chapter_name' : NonEmptyString,
-        'other_badge' : NonEmptyString,
+        Required('badge') : NonEmptyString,
+        Required('chapter_name') : NonEmptyString,
+        Required('other_badge') : NonEmptyString,
         })
 
     # TODO determine what to do when there are missing options
     settings_schema = Schema({
-        'output' : {
-            'directory' : IsDir,
-            'name' : NonEmptyString,
+        Required('output') : {
+            Required('directory', 'output folder name required') : NonEmptyString,
+            Required('name', 'output file name required') : NonEmptyString,
             },
         Exclusive('file', 'sources') : {
-            'members' : IsFile,
-            'affiliations' : IsFile,
+            Required('members', 'members CSV required') : NonEmptyString,
+            Required('affiliations', 'affiliations CSV required') : NonEmptyString,
             },
         Exclusive('mysql', 'sources') : {
-            'host' : NonEmptyString,
-            'user' : NonEmptyString,
-            'passwd' : NonEmptyString,
-            'port' : int,
-            'db' : NonEmptyString,
+            Required('host', 'SQL hostname required') : NonEmptyString,
+            Required('user', 'SQL user required') : NonEmptyString,
+            Required('passwd', 'SQL password required') : NonEmptyString,
+            Required('port', 'SQL server port required') : int,
+            Required('db', 'database name required') : NonEmptyString,
             },
         Optional('extra_members') : IsFile,
         Optional('nodes', default={}) : Nullable({
             Extra : {
-                'semester' : All(str, Coerce(Semester)), # Semester can coerce int, but we don't want that in settings
+                Required('semester') : All(str, Coerce(Semester)), # Semester can coerce int, but we don't want that in settings
                 Optional('attributes', default={}) : Nullable(Attributes),
                 }
             }),
         Optional('edges', default=[]) : Nullable([{
-            'nodes' : All([NonEmptyString], Length(min=2)),
+            Required('nodes') : All([NonEmptyString], Length(min=2)),
             Optional('attributes', default={}) : Nullable(Attributes)
             }]),
-        'seed' : int,
+        Required('seed') : int,
         Optional('family_colors', default={}) : Nullable({ Extra : NonEmptyString }),
-        'edge_defaults' : Defaults('all', 'semester', 'unknown'),
-        'node_defaults' : Defaults('all', 'semester', 'unknown', 'member'),
-        'graph_defaults' : Defaults('all'),
+        Required('edge_defaults') : Defaults('all', 'semester', 'unknown'),
+        Required('node_defaults') : Defaults('all', 'semester', 'unknown', 'member'),
+        Required('graph_defaults') : Defaults('all'),
         }, required=True, extra=False)
 
     def __init__(self, member_list, affiliations_list, settings_dict):
@@ -173,8 +181,8 @@ class Directory:
 
     def set_members(self, members):
 
-        validate([m['badge'] for m in members if 'badge' in m], Schema(Unique()))
         members = [validate(m, self.member_schema) for m in members]
+        validate([m['badge'] for m in members if 'badge' in m], Schema(Unique()))
 
         self._members = []
         for row in members:
@@ -183,8 +191,8 @@ class Directory:
 
     def mark_affiliations(self, affiliations):
 
-        validate([(a['chapter_name'], a['other_badge']) for a in affiliations], Schema(Unique()))
         affiliations = [validate(a, self.affiliations_schema) for a in affiliations]
+        validate([(a['chapter_name'], a['other_badge']) for a in affiliations], Schema(Unique()))
 
         affiliations_map = defaultdict(list)
         for row in affiliations:
