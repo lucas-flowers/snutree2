@@ -1,5 +1,5 @@
 import json, yaml
-from voluptuous import Schema, All, IsDir, Exclusive, Any, Coerce, DefaultTo, Extra, Length, Optional, Unique, IsFile
+from voluptuous import Required, Schema, All, IsDir, Exclusive, Any, Coerce, DefaultTo, Extra, Length, Optional, Unique, IsFile
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.semester import Semester
@@ -50,12 +50,17 @@ Nullable = lambda schema : Any(schema, DefaultTo(type(schema)()))
 # Attribute dicts are arbitrary dicts of Graphviz values.
 Attributes = {Extra: Any(str, int, float, bool)}
 
-def MemberType(status):
-    member_type = member_status_mapping.get(status, None)
-    if member_type:
-        return member_type
-    else:
-        raise ValueError('Status must be one of {}'.format(member_status_mapping.keys()))
+def MemberType(status_string):
+
+    member_type = member_status_mapping[status_string]
+
+    def validator(string):
+        if string == status_string:
+            return member_type
+        else:
+            raise ValueError('Status must be one of {}'.format(member_status_mapping.keys()))
+
+    return validator
 
 def Defaults(*categories):
     return { Optional(category) : Attributes for category in categories }
@@ -80,41 +85,41 @@ class Directory:
     member_schema = Schema(Any(
 
         {
-            'status' : MemberType,
-            'badge' : NonEmptyString,
-            'first_name' : NonEmptyString,
+            Required('status') : MemberType('Knight'),
+            Required('badge') : NonEmptyString,
+            Required('first_name') : NonEmptyString,
             Optional('preferred_name') : NonEmptyString,
-            'last_name' : NonEmptyString,
+            Required('last_name') : NonEmptyString,
             Optional('big_badge') : NonEmptyString,
-            Optional('pledge_semester') : Semester,
+            Optional('pledge_semester') : Coerce(Semester),
             },
 
         {
-            'status' : MemberType,
+            Required('status') : MemberType('Brother'),
             Optional('first_name') : NonEmptyString,
             Optional('preferred_name') : NonEmptyString,
-            'last_name' : NonEmptyString,
+            Required('last_name') : NonEmptyString,
             Optional('big_badge') : NonEmptyString,
-            Optional('pledge_semester') : Semester,
+            Optional('pledge_semester') : Coerce(Semester),
             },
 
         {
-            'status' : MemberType,
-            'first_name' : NonEmptyString,
+            Required('status') : MemberType('Candidate'),
+            Required('first_name') : NonEmptyString,
             Optional('preferred_name') : NonEmptyString,
-            'last_name' : NonEmptyString,
+            Required('last_name') : NonEmptyString,
             Optional('big_badge') : NonEmptyString,
-            Optional('pledge_semester') : Semester,
+            Optional('pledge_semester') : Coerce(Semester),
             },
 
         {
-            'status' : MemberType,
-            'badge' : NonEmptyString,
+            Required('status') : MemberType('Expelled'),
+            Required('badge') : NonEmptyString,
             Optional('first_name') : NonEmptyString,
             Optional('preferred_name') : NonEmptyString,
             Optional('last_name') : NonEmptyString,
             Optional('big_badge') : NonEmptyString,
-            Optional('pledge_semester') : Semester,
+            Optional('pledge_semester') : Coerce(Semester),
             },
 
         ), required=True, extra=False)

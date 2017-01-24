@@ -1,7 +1,6 @@
 import csv
 from voluptuous import Schema, Optional
 from voluptuous.humanize import validate_with_humanized_errors as validate
-from family_tree.semester import Semester
 from family_tree.directory import Directory
 
 # Required headers in a CSV members file
@@ -57,11 +56,6 @@ def retrieve_members(path):
             for key, field in list(row.items()):
                 if not field:
                     del row[key]
-
-            # Convert pledge semester to a Semester object
-            semester = row.get('pledge_semester', None)
-            if semester:
-                row['pledge_semester'] = Semester(semester)
 
             # Collapse status categories that indicate types of Knights
             if row.get('status', None) in ('Active', 'Alumni', 'Left School'):
