@@ -18,5 +18,5 @@ with open(dot_filename, 'w+') as dotfile:
 
 pdf_filename = os.path.join(folder, settings['output']['name'] + '.pdf')
 with open(dot_filename, 'r') as dotfile, open(pdf_filename, 'wb') as pdffile:
-    subprocess.run(['dot', '-Tpdf'], check=True, stdin=dot_filename, stdout=pdf_filename)
+    subprocess.run(['dot', '-Tpdf'], check=True, stdin=dotfile, stdout=pdffile)
 
