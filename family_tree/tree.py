@@ -1,10 +1,9 @@
 import random
 import networkx as nx
-from networkx.algorithms import dag
 from networkx.algorithms.components import weakly_connected_components
 from family_tree import dot
+from family_tree.color import graphviz_colors
 from family_tree.semester import semester_range
-from family_tree.color import graphviz_color_map
 
 # TODO remove when Member call is removed (calls to Member should be removed if
 # possible)
@@ -122,15 +121,14 @@ class FamilyTree:
                     if isinstance(member, entity.Member)]
                 )
 
-        # Find heads of members-only graph
-        family_heads = [key for key, in_degree in members_only.in_degree().items()
-                if in_degree == 0]
+        # Families are weakly connected components of the members-only graph
+        families = weakly_connected_components(members_only)
 
-        # Mark descendants of the heads
-        for head_key in family_heads:
-            self.graph.node[head_key]['family'] = head_key
-            for descendant_key in dag.descendants(members_only, head_key):
-                self.graph.node[descendant_key]['family'] = head_key
+        # Add a pointer to each member's family subgraph
+        for family in families:
+            family_dict = {}
+            for key in family:
+                self.graph.node[key]['family'] = family_dict
 
     def add_orphan_parents(self):
         '''
@@ -176,16 +174,26 @@ class FamilyTree:
     def add_colors(self):
         '''
         Add colors to member nodes, based on their family. Uses settings
-        dictionary to provide initial colors, and generates the rest as need.
+        dictionary to provide initial colors, and generates the rest as needed.
         '''
 
-        family_color_map = graphviz_color_map(initial_mappings=self.settings['family_colors'])
+        family_colors = self.settings['family_colors']
+        other_colors = graphviz_colors()
+
+        for key, color in family_colors.items():
+            # TODO error check if the key is actually a member
+            other_colors.discard(color)
+            self.graph.node[key]['family']['color'] = color
 
         # The nodes are sorted first, to ensure that the same colors are used
         # for the same input data.
         for key, node_dict in sorted(self.graph.nodes_iter(data=True)):
             if isinstance(node_dict['entity'], entity.Member):
-                node_dict['dot_attributes']['color'] = family_color_map[node_dict['family']]
+                family_dict = node_dict['family']
+                if 'color' not in family_dict:
+                    color = other_colors.pop()
+                    family_dict['color'] = color
+                node_dict['dot_attributes']['color'] = family_dict['color']
 
     def to_dot_graph(self):
 
