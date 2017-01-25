@@ -59,7 +59,6 @@ def MemberType(status_string):
         if string == status_string:
             return member_type
         else:
-            print(string, status_string)
             raise Invalid('status must be one of {{{}}}'.format(', '.join(member_status_mapping.keys())))
 
     return validator
