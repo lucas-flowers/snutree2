@@ -7,7 +7,7 @@ from family_tree.semester import semester_range
 
 # TODO remove when Member call is removed (calls to Member should be removed if
 # possible)
-from family_tree import entity
+from family_tree.entity import Member, Custom, UnidentifiedKnight
 
 class FamilyTree:
 
@@ -21,8 +21,8 @@ class FamilyTree:
         # TODO add the following as options to settings. use special decorators
         # to mark the options?
 
-        self.add_relationships()
         self.add_custom_nodes()
+        self.add_member_relationships()
         self.add_custom_edges()
         self.remove_singleton_members() # ^ add_member, add_edges, add_custom_edges
         self.mark_families()
@@ -73,7 +73,7 @@ class FamilyTree:
         '''
 
         for key, value in self.settings['nodes'].items():
-            self.add_entity(entity.Custom(key, **value))
+            self.add_entity(Custom(key, **value))
 
     def add_custom_edges(self):
         '''
@@ -86,14 +86,15 @@ class FamilyTree:
             edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
             self.graph.add_edges_from(edges, dot_attributes=attributes)
 
-    def add_relationships(self):
+    def add_member_relationships(self):
         '''
-        Connect all entities in the tree by finding each entity's parent and
-        adding the edge (parent, entity).
+        Connect all members in the tree, based on the value of their parent
+        field, by adding the edge (parent, member).
         '''
 
-        for key, member in self.nodes_iter('entity'):
-            if member.parent:
+        for key, entity in self.nodes_iter('entity'):
+            if isinstance(entity, Member) and entity.parent:
+                member = entity
                 if member.parent in self.graph:
                     self.add_relationship(member.parent, key)
                 else:
@@ -109,7 +110,7 @@ class FamilyTree:
         # TODO protect singletons (e.g., refounders without littles) after a
         # certain date so they don't disappear without at least a warning?
         singletons = [key for key, degree in self.graph.degree_iter() if degree == 0
-                and isinstance(self.graph.node[key]['entity'], entity.Member)]
+                and isinstance(self.graph.node[key]['entity'], Member)]
 
         self.graph.remove_nodes_from(singletons)
 
@@ -118,7 +119,7 @@ class FamilyTree:
         # Members-only graph
         members_only = self.graph.subgraph(
                 [key for key, member in self.nodes_iter('entity')
-                    if isinstance(member, entity.Member)]
+                    if isinstance(member, Member)]
                 )
 
         # Families are weakly connected components of the members-only graph
@@ -149,14 +150,14 @@ class FamilyTree:
                 for key, in_degree
                 in self.graph.in_degree().items()
                 if in_degree == 0
-                and isinstance(self.graph.node[key]['entity'], entity.Member)
+                and isinstance(self.graph.node[key]['entity'], Member)
                 ]
 
         for orphan_key in orphan_keys:
 
             orphan = self.graph.node[orphan_key]['entity']
 
-            parent = entity.UnidentifiedKnight(orphan,
+            parent = UnidentifiedKnight(orphan,
                     self.settings['node_defaults']['unknown'])
             parent_key = parent.get_key()
 
@@ -189,7 +190,7 @@ class FamilyTree:
         # The nodes are sorted first, to ensure that the same colors are used
         # for the same input data.
         for key, node_dict in sorted(self.graph.nodes_iter(data=True)):
-            if isinstance(node_dict['entity'], entity.Member):
+            if isinstance(node_dict['entity'], Member):
                 family_dict = node_dict['family']
                 if 'color' not in family_dict:
                     color = other_colors.pop()

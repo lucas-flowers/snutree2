@@ -57,6 +57,18 @@ class UnidentifiedKnight(Custom):
         return '{} Parent'.format(self.key)
 
 class Member(TreeEntity, metaclass=ABCMeta):
+    '''
+    A member of the organization. Every member provides these functions:
+
+        + get_dot_label(self): Returns the DOT label for the member, to be used
+        in the member class's get_dot_attributes function.
+
+    In addition, every member should have these fields:
+
+        + parent: The (key of the) parent node of this member, i.e., the
+        member's big brother.
+    '''
+
 
     @abstractmethod
     def get_dot_label(self):
