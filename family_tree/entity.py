@@ -65,6 +65,20 @@ class Member(TreeEntity, metaclass=ABCMeta):
     def dot_attributes(self):
         return {'label' : self.get_dot_label()}
 
+class KeylessEntity(Member):
+
+    def __init__(self, status=None, name=None, pledge_semester=None, big_name=None):
+
+        self.key = name
+        self.semester = pledge_semester
+        self.parent = big_name
+
+    def get_key(self):
+        return self.key
+
+    def get_dot_label(self):
+        return self.key
+
 class Knight(Member):
 
     def __init__(self,

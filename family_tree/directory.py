@@ -3,7 +3,7 @@ from voluptuous import Invalid, Required, Schema, All, Exclusive, Any, Coerce, D
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.semester import Semester
-from family_tree.entity import Knight, Brother, Candidate, Expelled
+from family_tree.entity import Knight, Brother, Candidate, Expelled, KeylessEntity
 
 greek_mapping = {
         'Alpha' : 'A',
@@ -38,7 +38,8 @@ member_status_mapping = {
         'Knight' : Knight,
         'Brother' : Brother,
         'Candidate' : Candidate,
-        'Expelled' : Expelled
+        'Expelled' : Expelled,
+        'KeylessEntity' : KeylessEntity,
         }
 
 NonEmptyString = All(str, Length(min=1), msg='must be a nonempty string')
@@ -58,6 +59,7 @@ def MemberType(status_string):
         if string == status_string:
             return member_type
         else:
+            print(string, status_string)
             raise Invalid('status must be one of {{{}}}'.format(', '.join(member_status_mapping.keys())))
 
     return validator
@@ -91,6 +93,13 @@ class Directory:
     # TODO provide messages for schema
 
     member_schema = Schema(Any(
+
+        {
+            Required('status') : MemberType('KeylessEntity'),
+            Required('name') : NonEmptyString,
+            Optional('big_name') : Any(None, NonEmptyString),
+            Optional('pledge_semester') : SemesterLike,
+            },
 
         {
             Required('status') : MemberType('Knight'),
@@ -144,7 +153,11 @@ class Directory:
             Required('folder', 'output folder name required') : NonEmptyString,
             Required('name', 'output file name required') : NonEmptyString,
             },
-        Exclusive('file', 'sources') : {
+        Exclusive('dot', 'sources') : {
+            Required('members', 'members CSV required') : NonEmptyString,
+            # Required('affiliations', 'affiliations CSV required') : NonEmptyString,
+            },
+        Exclusive('csv', 'sources') : {
             Required('members', 'members CSV required') : NonEmptyString,
             Required('affiliations', 'affiliations CSV required') : NonEmptyString,
             },
