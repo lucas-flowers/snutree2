@@ -3,9 +3,9 @@ output:
   folder: '.'
   name: 'tree'
 
-# csv:
-#   members: 'directory.csv'
-#   affiliations: 'affiliations.csv'
+csv:
+  members: 'directory.csv'
+  affiliations: 'affiliations.csv'
 
 extra_members: 'brothers_not_knights.csv'
 

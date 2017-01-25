@@ -183,6 +183,7 @@ class FamilyTree:
         for key, color in family_colors.items():
             # TODO error check if the key is actually a member
             other_colors.discard(color)
+            # TODO handle what happens when a family has more than one color
             self.graph.node[key]['family']['color'] = color
 
         # The nodes are sorted first, to ensure that the same colors are used
