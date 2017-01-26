@@ -290,13 +290,6 @@ class FamilyTree:
 
     def to_dot_graph(self):
 
-        if self.settings['layout']['semesters']:
-            self.check_semesters()
-            min_semester, max_semester = self.get_semester_bounds()
-            dates_left = self.create_date_subgraph('L', min_semester, max_semester)
-            dates_right = self.create_date_subgraph('R', min_semester, max_semester)
-            ranks = self.create_ranks()
-
         tree = self.create_tree_subgraph('members')
 
         dotgraph = dot.Graph(
@@ -308,7 +301,13 @@ class FamilyTree:
                 )
 
         if self.settings['layout']['semesters']:
+            self.check_semesters()
+            min_semester, max_semester = self.get_semester_bounds()
+            dates_left = self.create_date_subgraph('L', min_semester, max_semester)
+            dates_right = self.create_date_subgraph('R', min_semester, max_semester)
+            ranks = self.create_ranks()
             dotgraph.children = [dates_left, tree, dates_right] + ranks
+
         else:
             dotgraph.children = [tree]
 
