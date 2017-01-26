@@ -30,9 +30,6 @@ class FamilyTree:
         self.graph = nx.DiGraph()
         self.settings = directory.settings
 
-        # TODO remove
-        self.settings['layout'] = {'include_semesters' : True}
-
         # Add all the entities in the settings and directory provided
         self.add_members(directory.get_members())
         self.add_custom_nodes()
@@ -41,18 +38,27 @@ class FamilyTree:
         self.add_member_relationships()
         self.add_custom_edges()
 
-
-        # TODO add the following as options to settings. use special decorators
-        # to mark the options?
-
         self.remove_singleton_members()
         self.mark_families()
-        self.add_orphan_parents()
         self.add_colors()
+        self.add_orphan_parents()
 
     ###########################################################################
     #### Utilities                                                         ####
     ###########################################################################
+
+    class option:
+        def __init__(self, option_name, negate=False):
+            self.option_name = option_name
+            self.negate = negate
+        def __call__(self, function):
+            def wrapped(tree_self):
+                option = tree_self.settings['layout'][self.option_name]
+                if self.negate:
+                    option = not option
+                if option:
+                    function(tree_self)
+            return wrapped
 
     def nodes_iter(self, *attributes, node_dict=False):
         '''
@@ -95,7 +101,7 @@ class FamilyTree:
         if not isinstance(parent, Knight):
             raise TreeException('big brother of {!r} must be an initiated member: {!r}'
                     .format(ckey, pkey))
-        elif self.settings['layout']['include_semesters'] and member.semester < parent.semester:
+        elif self.settings['layout']['semesters'] and member.semester < parent.semester:
             raise TreeException('semester {!r} of member {!r} cannot be prior to semester of big brother {!r}: {!r}'
                     .format(member.semester, ckey, pkey, parent.semester))
         else:
@@ -113,6 +119,7 @@ class FamilyTree:
         for member in member_list:
             self.add_entity(member)
 
+    @option('custom_nodes')
     def add_custom_nodes(self):
         '''
         Add all custom nodes loaded from settings.
@@ -121,6 +128,7 @@ class FamilyTree:
         for key, value in self.settings['nodes'].items():
             self.add_entity(Custom(key, **value))
 
+    @option('custom_edges')
     def add_custom_edges(self):
         '''
         Add all custom edges loaded from settings.
@@ -158,6 +166,7 @@ class FamilyTree:
         except NetworkXNoCycle:
             pass
 
+    @option('singletons', negate=True)
     def remove_singleton_members(self):
         '''
         Remove all members in the tree whose nodes neither have parents nor
@@ -172,6 +181,7 @@ class FamilyTree:
 
         self.graph.remove_nodes_from(singletons)
 
+    @option('family_colors')
     def mark_families(self):
 
         # Members-only graph
@@ -189,6 +199,7 @@ class FamilyTree:
             for key in family:
                 self.graph.node[key]['family'] = family_dict
 
+    @option('unknowns')
     def add_orphan_parents(self):
         '''
         Add custom entities as parents to members whose nodes have no parents,
@@ -229,6 +240,7 @@ class FamilyTree:
     #### Convert to DOT                                                    ####
     ###########################################################################
 
+    @option('family_colors')
     def add_colors(self):
         '''
         Add colors to member nodes, based on their family. Uses settings
@@ -278,7 +290,7 @@ class FamilyTree:
 
     def to_dot_graph(self):
 
-        if self.settings['layout']['include_semesters']:
+        if self.settings['layout']['semesters']:
             self.check_semesters()
             min_semester, max_semester = self.get_semester_bounds()
             dates_left = self.create_date_subgraph('L', min_semester, max_semester)
@@ -295,7 +307,7 @@ class FamilyTree:
                 edge_defaults=self.settings['edge_defaults']['all'],
                 )
 
-        if self.settings['layout']['include_semesters']:
+        if self.settings['layout']['semesters']:
             dotgraph.children = [dates_left, tree, dates_right] + ranks
         else:
             dotgraph.children = [tree]

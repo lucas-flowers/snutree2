@@ -20,6 +20,14 @@ extra_members: 'brothers_not_knights.csv'
 #   port: '***REMOVED***'
 #   db: '***REMOVED***'
 
+layout:
+  semesters: True
+  custom_nodes: True
+  custom_edges: True
+  singletons: False
+  family_colors: True
+  unknowns: True
+
 # Defaults style for Graphviz graphs and subgraphs
 graph_defaults:
   all:

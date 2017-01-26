@@ -168,6 +168,14 @@ class Directory:
             Required('db', 'database name required') : NonEmptyString,
             },
         # TODO finish error messages
+        Required('layout') : {
+            Required('semesters') : bool,
+            Required('custom_nodes') : bool,
+            Required('custom_edges') : bool,
+            Required('singletons') : bool,
+            Required('family_colors') : bool,
+            Required('unknowns') : bool,
+            },
         Optional('extra_members') : IsFile,
         Optional('nodes', default={}) : Nullable({
             Extra : {
