@@ -45,16 +45,14 @@ class UnidentifiedKnight(Custom):
     '''
     All members are assumed to have big brothers. If a member does not have a
     known big brother, this class is used as a placeholder. UnidentifiedKnights
-    are given pledge semesters a semester before the members they are bigs to.
+    are given pledge semesters a semester before the members they are bigs to,
+    unless the semester is unknown in which case it is left null.
     '''
 
     def __init__(self, member, attributes=None):
-        self.key = member.get_key()
-        self.semester = member.semester - 1
+        self.key = '{} Parent'.format(member.get_key())
+        self.semester = member.semester - 1 if member.semester else None
         self.attributes = attributes or {}
-
-    def get_key(self):
-        return '{} Parent'.format(self.key)
 
 class Member(TreeEntity, metaclass=ABCMeta):
     '''
