@@ -1,6 +1,8 @@
 import random
 import networkx as nx
 from networkx.algorithms.components import weakly_connected_components
+from networkx.algorithms.cycles import find_cycle
+from networkx.exception import NetworkXNoCycle
 from family_tree import dot
 from family_tree.color import graphviz_colors
 from family_tree.semester import semester_range
@@ -63,6 +65,12 @@ class FamilyTree:
                     *(self.graph.node[key][attr] for attr in attributes)) + \
                     ((self.graph.node[key],) if node_dict else ())
 
+    def member_subgraph(self):
+        return self.graph.subgraph([
+            key for key, node_dict in self.graph.nodes_iter(data=True)
+            if isinstance(node_dict['entity'], Member)
+            ])
+
     def add_entity(self, entity):
 
         key = entity.get_key()
@@ -117,15 +125,27 @@ class FamilyTree:
 
                 member = entity
                 pkey = member.parent
+                parent = self.graph.node[pkey]['entity']
 
                 if pkey not in self.graph:
-                    raise TreeException('member {} has unknown parent: {}'
-                            .format(repr(key), repr(pkey)))
-                elif not isinstance(self.graph.node[pkey]['entity'], Knight):
-                    raise TreeException('big brother of {} must be an initiated member: {}'
-                            .format(repr(key), repr(pkey)))
+                    raise TreeException('member {!r} has unknown parent: {!r}'
+                            .format(key, pkey))
+                elif not isinstance(parent, Knight):
+                    raise TreeException('big brother of {!r} must be an initiated member: {!r}'
+                            .format(key, pkey))
+                elif member.semester < parent.semester:
+                    raise TreeException('semester {!r} of member {!r} cannot be prior to semester of big brother {!r}: {!r}'
+                            .format(member.semester, key, pkey, parent.semester))
                 else:
                     self.add_relationship(member.parent, key)
+
+        # There must be no cycles in the tree of members
+        try:
+            cycle_edges = find_cycle(self.member_subgraph(), orientation='ignore')
+            raise TreeException('found unexpected cycle in big-little relationships: {!r}'
+                    .format(cycle_edges))
+        except NetworkXNoCycle:
+            pass
 
     def remove_singleton_members(self):
         '''
