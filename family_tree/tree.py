@@ -81,9 +81,25 @@ class FamilyTree:
             raise TreeException('duplicate entity key: {}'.format(repr(key)))
         self.graph.add_node(key, entity=entity, dot_attributes=entity.dot_attributes())
 
-    def add_relationship(self, parent_key, child_key, dot_attributes=None):
-        self.graph.add_edge(parent_key, child_key,
-                dot_attributes = dot_attributes or {})
+    def add_big_relationship(self, member, dot_attributes=None):
+
+        ckey = member.get_key()
+        pkey = member.parent
+
+        if pkey not in self.graph:
+            raise TreeException('member {!r} has unknown parent: {!r}'
+                    .format(ckey, pkey))
+
+        parent = self.graph.node[pkey]['entity']
+
+        if not isinstance(parent, Knight):
+            raise TreeException('big brother of {!r} must be an initiated member: {!r}'
+                    .format(ckey, pkey))
+        elif self.settings['layout']['include_semesters'] and member.semester < parent.semester:
+            raise TreeException('semester {!r} of member {!r} cannot be prior to semester of big brother {!r}: {!r}'
+                    .format(member.semester, ckey, pkey, parent.semester))
+        else:
+            self.graph.add_edge(pkey, ckey, dot_attributes=dot_attributes or {})
 
     ###########################################################################
     #### Decoration                                                        ####
@@ -132,22 +148,7 @@ class FamilyTree:
 
         for key, entity in self.nodes_iter('entity'):
             if isinstance(entity, Member) and entity.parent:
-
-                member = entity
-                pkey = member.parent
-                parent = self.graph.node[pkey]['entity']
-
-                if pkey not in self.graph:
-                    raise TreeException('member {!r} has unknown parent: {!r}'
-                            .format(key, pkey))
-                elif not isinstance(parent, Knight):
-                    raise TreeException('big brother of {!r} must be an initiated member: {!r}'
-                            .format(key, pkey))
-                elif self.settings['layout']['include_semesters'] and member.semester < parent.semester:
-                    raise TreeException('semester {!r} of member {!r} cannot be prior to semester of big brother {!r}: {!r}'
-                            .format(member.semester, key, pkey, parent.semester))
-                else:
-                    self.add_relationship(member.parent, key)
+                self.add_big_relationship(entity)
 
         # There must be no cycles in the tree of members
         try:
@@ -216,13 +217,12 @@ class FamilyTree:
 
             parent = UnidentifiedKnight(orphan,
                     self.settings['node_defaults']['unknown'])
-            parent_key = parent.get_key()
 
             # Set orphan parent
             orphan.parent = parent.get_key()
 
             self.add_entity(parent)
-            self.add_relationship(parent_key, orphan_key,
+            self.graph.add_edge(orphan.parent, orphan_key,
                     dot_attributes=self.settings['edge_defaults']['unknown'])
 
     ###########################################################################
