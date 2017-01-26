@@ -239,19 +239,27 @@ class FamilyTree:
         other_colors = graphviz_colors()
 
         for key, color in family_colors.items():
-            if key in self.graph.node:
+
+            if key not in self.graph.node:
+                print('warning: family color map includes nonexistent member: {!r}'
+                        .format(key))
+
+            else:
 
                 # Add the used color to the end and remove the first instance of it
                 other_colors.append(color)
                 other_colors.remove(color)
 
-                # TODO handle what happens when a family has more than one color
-                self.graph.node[key]['family']['color'] = color
+                family = self.graph.node[key]['family']
+                if 'color' in family:
+                    raise TreeException('family of member {!r} already assigned the color {!r}'
+                            .format(key, color))
 
-            # TODO is this adequate?
-            else:
-                print('warning: family color map includes nonexistent member: {!r}'
-                        .format(key))
+                # Add the used color to the end and remove the first instance of it
+                other_colors.append(color)
+                other_colors.remove(color)
+
+                self.graph.node[key]['family']['color'] = color
 
         # The nodes are sorted first, to ensure that the same colors are used
         # for the same input data.
