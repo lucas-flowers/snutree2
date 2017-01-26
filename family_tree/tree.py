@@ -30,6 +30,9 @@ class FamilyTree:
         self.graph = nx.DiGraph()
         self.settings = directory.settings
 
+        # TODO remove
+        self.settings['layout'] = {'include_semesters' : True}
+
         # Add all the entities in the settings and directory provided
         self.add_members(directory.get_members())
         self.add_custom_nodes()
@@ -42,7 +45,7 @@ class FamilyTree:
         # TODO add the following as options to settings. use special decorators
         # to mark the options?
 
-        self.remove_singleton_members() # ^ add_member, add_edges, add_custom_edges
+        self.remove_singleton_members()
         self.mark_families()
         self.add_orphan_parents()
         self.add_colors()
@@ -140,7 +143,7 @@ class FamilyTree:
                 elif not isinstance(parent, Knight):
                     raise TreeException('big brother of {!r} must be an initiated member: {!r}'
                             .format(key, pkey))
-                elif member.semester < parent.semester:
+                elif self.settings['layout']['include_semesters'] and member.semester < parent.semester:
                     raise TreeException('semester {!r} of member {!r} cannot be prior to semester of big brother {!r}: {!r}'
                             .format(member.semester, key, pkey, parent.semester))
                 else:
@@ -262,12 +265,14 @@ class FamilyTree:
 
     def to_dot_graph(self):
 
-        self.check_semesters()
-        min_semester, max_semester = self.get_semester_bounds()
-        dates_left = self.create_date_subgraph('L', min_semester, max_semester)
-        dates_right = self.create_date_subgraph('R', min_semester, max_semester)
+        if self.settings['layout']['include_semesters']:
+            self.check_semesters()
+            min_semester, max_semester = self.get_semester_bounds()
+            dates_left = self.create_date_subgraph('L', min_semester, max_semester)
+            dates_right = self.create_date_subgraph('R', min_semester, max_semester)
+            ranks = self.create_ranks()
+
         tree = self.create_tree_subgraph('members')
-        ranks = self.create_ranks()
 
         dotgraph = dot.Graph(
                 'family_tree',
@@ -276,7 +281,11 @@ class FamilyTree:
                 node_defaults=self.settings['node_defaults']['all'],
                 edge_defaults=self.settings['edge_defaults']['all'],
                 )
-        dotgraph.children = [dates_left, tree, dates_right] + ranks
+
+        if self.settings['layout']['include_semesters']:
+            dotgraph.children = [dates_left, tree, dates_right] + ranks
+        else:
+            dotgraph.children = [tree]
 
         return dotgraph
 
