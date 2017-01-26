@@ -147,6 +147,7 @@ class Directory:
         })
 
     # TODO determine what to do when there are missing options
+    # TODO some schemas don't work as expected
     settings_schema = Schema({
         Required('output') : {
             Required('folder', 'output folder name required') : NonEmptyString,
