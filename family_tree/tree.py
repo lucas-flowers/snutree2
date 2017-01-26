@@ -48,15 +48,11 @@ class FamilyTree:
     ###########################################################################
 
     class option:
-        def __init__(self, option_name, negate=False):
+        def __init__(self, option_name):
             self.option_name = option_name
-            self.negate = negate
         def __call__(self, function):
             def wrapped(tree_self):
-                option = tree_self.settings['layout'][self.option_name]
-                if self.negate:
-                    option = not option
-                if option:
+                if tree_self.settings['layout'][self.option_name]:
                     function(tree_self)
             return wrapped
 
@@ -166,7 +162,7 @@ class FamilyTree:
         except NetworkXNoCycle:
             pass
 
-    @option('singletons', negate=True)
+    @option('no_singletons')
     def remove_singleton_members(self):
         '''
         Remove all members in the tree whose nodes neither have parents nor

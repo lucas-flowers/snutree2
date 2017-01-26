@@ -3,6 +3,7 @@ from voluptuous import Schema, Optional
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from family_tree.directory import Directory
 
+
 # Required headers in a CSV members file
 csv_member_schema = Schema({
     'status' : str,
@@ -27,7 +28,10 @@ def retrieve_directory(settings):
     if 'extra_members' in settings:
         members += retrieve_members(settings['extra_members'])
 
-    affiliations = retrieve_affiliations(settings['csv']['affiliations'])
+    if settings['csv']['affiliations']:
+        affiliations = retrieve_affiliations(settings['csv']['affiliations'])
+    else:
+        affiliations = {}
 
     return Directory(members, affiliations, settings)
 
