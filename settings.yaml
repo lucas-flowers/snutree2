@@ -10,8 +10,6 @@ csv:
   members: 'directory.csv'
   affiliations: 'affiliations.csv'
 
-extra_members: 'brothers_not_knights.csv'
-
 # # MySQL server information
 # mysql:
 #   host: '***REMOVED***'
@@ -19,6 +17,8 @@ extra_members: 'brothers_not_knights.csv'
 #   passwd: '***REMOVED***'
 #   port: '***REMOVED***'
 #   db: '***REMOVED***'
+
+extra_members: 'brothers_not_knights.csv'
 
 layout:
   semesters: True

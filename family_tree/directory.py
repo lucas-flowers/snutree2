@@ -1,5 +1,5 @@
 import json, yaml
-from voluptuous import Invalid, Required, Schema, All, Exclusive, Any, Coerce, DefaultTo, Extra, Length, Optional, Unique, IsFile
+from voluptuous import Invalid, Required, Schema, All, Exclusive, Any, Coerce, DefaultTo, Extra, Length, Optional, Unique
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.semester import Semester
@@ -73,6 +73,8 @@ def SemesterLike(semester_string):
 
 def Defaults(*categories):
     return { Optional(category) : Attributes for category in categories }
+
+source_msg = 'only one of csv, mysql, or dot may be used at a time'
 
 class Directory:
     '''
@@ -153,15 +155,15 @@ class Directory:
             Required('folder', 'output folder name required') : NonEmptyString,
             Required('name', 'output file name required') : NonEmptyString,
             },
-        Exclusive('dot', 'sources') : {
-            Required('members', 'members CSV required') : NonEmptyString,
-            # Required('affiliations', 'affiliations CSV required') : NonEmptyString,
+        Exclusive('dot', 'sources', msg=source_msg) : {
+            Required('members', 'members DOT file required') : NonEmptyString,
+            Optional('affiliations', default={}) : Any(NonEmptyString, DefaultTo({})),
             },
-        Exclusive('csv', 'sources') : {
+        Exclusive('csv', 'sources', msg=source_msg) : {
             Required('members', 'members CSV required') : NonEmptyString,
-            Required('affiliations', 'affiliations CSV required') : NonEmptyString,
+            Optional('affiliations', default={}) : Any(NonEmptyString, DefaultTo({})),
             },
-        Exclusive('mysql', 'sources') : {
+        Exclusive('mysql', 'sources', msg=source_msg) : {
             Required('host', 'SQL hostname required') : NonEmptyString,
             Required('user', 'SQL user required') : NonEmptyString,
             Required('passwd', 'SQL password required') : NonEmptyString,
@@ -177,7 +179,7 @@ class Directory:
             Required('family_colors') : bool,
             Required('unknowns') : bool,
             },
-        Optional('extra_members') : IsFile,
+        Optional('extra_members') : NonEmptyString,
         Optional('nodes', default={}) : Nullable({
             Extra : {
                 Required('semester') : All(str, Coerce(Semester)), # Semester can coerce int, but we don't want that in settings
@@ -226,12 +228,15 @@ class Directory:
             member.affiliations = affiliations_map[member.get_key()]
 
     def set_settings(self, settings_dict):
-        self.settings = validate(settings_dict, self.settings_schema)
+        # TODO figure out where to put all settings schema and functions; this
+        # used to have a validation function
+        self.settings = settings_dict
 
     def get_members(self):
         return self._members
 
-def read_settings(path):
+def retrieve_settings(path):
+
     with open(path, 'r') as f:
 
         # Load into YAML first, then dump into a JSON string, then load again
@@ -243,7 +248,9 @@ def read_settings(path):
         #
         # This could easily be avoided by just not writing integers in the YAML
         # file, but that could be expecting too much of someone editing it.
-        return json.loads(json.dumps(yaml.load(f)))
+        settings = json.loads(json.dumps(yaml.load(f)))
+
+    return validate(settings, Directory.settings_schema)
 
 def to_greek_name(english_name):
     return ''.join([greek_mapping[w] for w in english_name.split(' ')])

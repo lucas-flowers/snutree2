@@ -1,6 +1,6 @@
 import os, subprocess, click
 from family_tree.tree import FamilyTree
-from family_tree.directory import read_settings
+from family_tree.directory import retrieve_settings
 from family_tree import csv, sql, dotread
 
 @click.command()
@@ -10,7 +10,7 @@ def main(settings_path):
     Create a big-little family tree.
     '''
 
-    settings = read_settings(settings_path)
+    settings = retrieve_settings(settings_path)
 
     if 'mysql' in settings:
         directory = sql
