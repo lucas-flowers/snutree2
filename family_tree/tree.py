@@ -42,7 +42,7 @@ class FamilyTree:
         # TODO add the following as options to settings. use special decorators
         # to mark the options?
 
-        self.remove_singleton_members() # ^ add_member, add_edges, add_custom_edges
+        # self.remove_singleton_members() # ^ add_member, add_edges, add_custom_edges
         self.mark_families()
         self.add_orphan_parents()
         self.add_colors()
@@ -230,7 +230,11 @@ class FamilyTree:
 
         for key, color in family_colors.items():
             # TODO error check if the key is actually a member
-            other_colors.discard(color)
+
+            # Add the used color to the end and remove the first instance of it
+            other_colors.append(color)
+            other_colors.remove(color)
+
             # TODO handle what happens when a family has more than one color
             self.graph.node[key]['family']['color'] = color
 
@@ -240,8 +244,13 @@ class FamilyTree:
             if isinstance(node_dict['entity'], Member):
                 family_dict = node_dict['family']
                 if 'color' not in family_dict:
-                    color = other_colors.pop()
+
+                    # Pop a color, save it, and move it to deque's other end
+                    color = other_colors.popleft()
+                    other_colors.append(color)
+
                     family_dict['color'] = color
+
                 node_dict['dot_attributes']['color'] = family_dict['color']
 
     def to_dot_graph(self):

@@ -1,7 +1,7 @@
-from orderedset import OrderedSet
+from collections import deque
 
 def graphviz_colors():
-    return OrderedSet([
+    return deque([
             'limegreen',
             'tan3',
             'brown4',
