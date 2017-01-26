@@ -67,7 +67,6 @@ edge_defaults:
     style: dotted
 
 # Colors for specific families; each badge is the badge of family's head
-# TODO print warnings when family badges do not coincide with data
 family_colors:
   '663': deeppink
   '760': brown1
