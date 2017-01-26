@@ -42,7 +42,7 @@ class FamilyTree:
         # TODO add the following as options to settings. use special decorators
         # to mark the options?
 
-        # self.remove_singleton_members() # ^ add_member, add_edges, add_custom_edges
+        self.remove_singleton_members() # ^ add_member, add_edges, add_custom_edges
         self.mark_families()
         self.add_orphan_parents()
         self.add_colors()
@@ -108,8 +108,15 @@ class FamilyTree:
         '''
 
         for path in self.settings['edges']:
+
             nodes = path['nodes']
+            for key in nodes:
+                if key not in self.graph:
+                    path_type = 'path' if len(nodes) > 2 else 'edge'
+                    raise TreeException('custom {} {!r} has undefined node: {!r}'
+                            .format(path_type, path['nodes'], key))
             attributes = path['attributes']
+
             edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
             self.graph.add_edges_from(edges, dot_attributes=attributes)
 
