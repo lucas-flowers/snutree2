@@ -16,8 +16,8 @@ class FamilyTree:
     Representation of the family tree. The tree is made of nodes connected by
     edges (duh). Every node must store a TreeEntity object in node['entity'],
     and TreeEntities may either be Members or non-Members. All entities must
-    have a valid semester field when the tree is printed (TODO unless semesters
-    are ignored).
+    have a valid semester field when the tree is printed (unless semesters are
+    ignored in the settings dictionary).
 
     Members have big-little relationships, determined by the parent field. This
     relationship determines the edges between them. Non-members do *not* have
@@ -209,7 +209,7 @@ class FamilyTree:
         degrees. But it must also occur after singletons are removed, because
         many singletons do not have well-formed pledge class semester values in
         the directory (and determining pledge class semester values accurately
-        is not simple enough for me to bother doing). If ever pledge class
+        is not simple enough for me to bother doing). If every pledge class
         semesters were filled in, this could occur before add_edges and we can
         remove some of the extra code in this function that would normally be
         done by add_XXX_attributes.
