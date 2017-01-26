@@ -22,7 +22,7 @@ def add_member_dicts(graph):
 
     # Add name and status from nodes
     for key in graph.nodes_iter():
-        row = {'status' : 'KeylessEntity', 'name' : key}
+        row = {'status' : 'KeylessInitiate', 'name' : key}
         graph.node[key].update(row)
 
     # Add big brothers from edges

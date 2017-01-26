@@ -7,23 +7,39 @@ from family_tree.semester import semester_range
 
 # TODO remove when Member call is removed (calls to Member should be removed if
 # possible)
-from family_tree.entity import Member, Custom, UnidentifiedKnight
+from family_tree.entity import Member, Custom, UnidentifiedKnight, Knight
 
 class FamilyTree:
+    '''
+    Representation of the family tree. The tree is made of nodes connected by
+    edges (duh). Every node must store a TreeEntity object in node['entity'],
+    and TreeEntities may either be Members or non-Members. All entities must
+    have a valid semester field when the tree is printed (TODO unless semesters
+    are ignored).
+
+    Members have big-little relationships, determined by the parent field. This
+    relationship determines the edges between them. Non-members do *not* have
+    such relationships, though they may have edges in the tree provided from
+    outside the directory (either through custom edges or special code).
+    '''
 
     def __init__(self, directory):
 
         self.graph = nx.DiGraph()
         self.settings = directory.settings
 
+        # Add all the entities in the settings and directory provided
         self.add_members(directory.get_members())
+        self.add_custom_nodes()
+
+        # Add all the edges in the settings and members provided
+        self.add_member_relationships()
+        self.add_custom_edges()
+
 
         # TODO add the following as options to settings. use special decorators
         # to mark the options?
 
-        self.add_custom_nodes()
-        self.add_member_relationships()
-        self.add_custom_edges()
         self.remove_singleton_members() # ^ add_member, add_edges, add_custom_edges
         self.mark_families()
         self.add_orphan_parents()
@@ -48,8 +64,11 @@ class FamilyTree:
                     ((self.graph.node[key],) if node_dict else ())
 
     def add_entity(self, entity):
-        self.graph.add_node(entity.get_key(), entity=entity,
-                dot_attributes=entity.dot_attributes())
+
+        key = entity.get_key()
+        if key in self.graph:
+            raise TreeException('duplicate entity key: {}'.format(repr(key)))
+        self.graph.add_node(key, entity=entity, dot_attributes=entity.dot_attributes())
 
     def add_relationship(self, parent_key, child_key, dot_attributes=None):
         self.graph.add_edge(parent_key, child_key,
@@ -88,17 +107,25 @@ class FamilyTree:
 
     def add_member_relationships(self):
         '''
-        Connect all members in the tree, based on the value of their parent
-        field, by adding the edge (parent, member).
+        Connect all Members in the tree, based on the value of their parent
+        field, by adding the edge (parent, member). Parents must also be
+        Members (to add non-Members as parent nodes, use custom edges).
         '''
 
         for key, entity in self.nodes_iter('entity'):
             if isinstance(entity, Member) and entity.parent:
+
                 member = entity
-                if member.parent in self.graph:
-                    self.add_relationship(member.parent, key)
+                pkey = member.parent
+
+                if pkey not in self.graph:
+                    raise TreeException('member {} has unknown parent: {}'
+                            .format(repr(key), repr(pkey)))
+                elif not isinstance(self.graph.node[pkey]['entity'], Knight):
+                    raise TreeException('big brother of {} must be an initiated member: {}'
+                            .format(repr(key), repr(pkey)))
                 else:
-                    raise TreeException('Node with key "{}" has unknown parent node: "{}"'.format(key, member.parent))
+                    self.add_relationship(member.parent, key)
 
     def remove_singleton_members(self):
         '''

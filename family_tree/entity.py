@@ -77,20 +77,6 @@ class Member(TreeEntity, metaclass=ABCMeta):
     def dot_attributes(self):
         return {'label' : self.get_dot_label()}
 
-class KeylessEntity(Member):
-
-    def __init__(self, status=None, name=None, pledge_semester=None, big_name=None):
-
-        self.key = name
-        self.semester = pledge_semester
-        self.parent = big_name
-
-    def get_key(self):
-        return self.key
-
-    def get_dot_label(self):
-        return self.key
-
 class Knight(Member):
 
     def __init__(self,
@@ -115,6 +101,20 @@ class Knight(Member):
     def get_dot_label(self):
         affiliations = ['ΔA {}'.format(self.badge)] + self.affiliations
         return '{}\\n{}'.format(self.name, ', '.join(affiliations))
+
+class KeylessInitiate(Knight):
+
+    def __init__(self, status=None, name=None, pledge_semester=None, big_name=None):
+
+        self.key = name
+        self.semester = pledge_semester
+        self.parent = big_name
+
+    def get_key(self):
+        return self.key
+
+    def get_dot_label(self):
+        return self.key
 
 class Brother(Member):
 
@@ -175,6 +175,9 @@ class Candidate(Member):
         return '{}\\nΔA Candidate'.format(self.name)
 
 class Expelled(Knight):
+    '''
+    A member that was initiated, but was then expelled.
+    '''
 
     def __init__(self,
             status=None,

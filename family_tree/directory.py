@@ -3,7 +3,7 @@ from voluptuous import Invalid, Required, Schema, All, Exclusive, Any, Coerce, D
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
 from family_tree.semester import Semester
-from family_tree.entity import Knight, Brother, Candidate, Expelled, KeylessEntity
+from family_tree.entity import Knight, Brother, Candidate, Expelled, KeylessInitiate
 
 greek_mapping = {
         'Alpha' : 'A',
@@ -39,7 +39,7 @@ member_status_mapping = {
         'Brother' : Brother,
         'Candidate' : Candidate,
         'Expelled' : Expelled,
-        'KeylessEntity' : KeylessEntity,
+        'KeylessInitiate' : KeylessInitiate,
         }
 
 NonEmptyString = All(str, Length(min=1), msg='must be a nonempty string')
@@ -94,7 +94,7 @@ class Directory:
     member_schema = Schema(Any(
 
         {
-            Required('status') : MemberType('KeylessEntity'),
+            Required('status') : MemberType('KeylessInitiate'),
             Required('name') : NonEmptyString,
             Optional('big_name') : Any(None, NonEmptyString),
             Optional('pledge_semester') : SemesterLike,
