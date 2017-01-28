@@ -1,4 +1,3 @@
-import yaml
 from voluptuous import Schema, Unique
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
@@ -85,18 +84,6 @@ class Directory:
 
     def get_members(self):
         return self._members
-
-def retrieve_settings(path):
-
-    with open(path, 'r') as f:
-        settings = yaml.load(f)
-
-    settings = schema.settings_schema.validated(settings)
-    if settings:
-        return settings
-    else:
-        raise Exception(str(schema.settings_schema.errors))
-
 
 def to_greek_name(english_name):
     return ''.join([greek_mapping[w] for w in english_name.split(' ')])

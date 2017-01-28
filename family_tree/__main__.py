@@ -1,6 +1,6 @@
 import os, subprocess, click
 from family_tree.tree import FamilyTree
-from family_tree.directory import retrieve_settings
+from family_tree.settings import retrieve_settings
 from family_tree import csv, sql, dotread
 
 @click.command()
