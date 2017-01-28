@@ -13,16 +13,11 @@ def retrieve_settings(path):
     else:
         raise Exception(str(settings_schema.errors))
 
-sources = frozenset({'csv', 'mysql', 'dot'})
-
-flags = [
-        'semesters',
-        'custom_edges',
-        'custom_nodes',
-        'no_singletons',
-        'family_colors',
-        'unknowns',
-        ]
+###############################################################################
+###############################################################################
+#### Utilities                                                             ####
+###############################################################################
+###############################################################################
 
 # A required string; must be nonempty and not None
 nonempty_string = {
@@ -45,6 +40,34 @@ optional_boolean = {
         'type' : 'boolean',
         'default' : True,
         }
+
+# Is a string coerceable to a semester
+semester_like = {
+        'coerce' : Semester
+        }
+
+# Optional version of semester_like that defaults to None
+optional_semester_like = {
+        'coerce' : Semester,
+        'default' : None,
+        }
+
+###############################################################################
+###############################################################################
+#### Settings Schema                                                       ####
+###############################################################################
+###############################################################################
+
+sources = frozenset({'csv', 'mysql', 'dot'})
+
+flags = [
+        'semesters',
+        'custom_edges',
+        'custom_nodes',
+        'no_singletons',
+        'family_colors',
+        'unknowns',
+        ]
 
 # Graphviz attributes
 attributes = {
@@ -141,10 +164,7 @@ settings_schema = Validator({
             'valueschema' : {
                 'type' : 'dict',
                 'schema' : {
-                    'semester' : {
-                        'type' : 'string',
-                        'coerce' : Semester,
-                        },
+                    'semester' : semester_like,
                     'attributes' : attributes,
                     }
                 }
@@ -178,3 +198,4 @@ settings_schema = Validator({
         }
 
     })
+
