@@ -3,8 +3,8 @@ output:
   folder: '.'
   name: 'tree'
 
-# dot:
-#   members: ''
+dot:
+  members: ''
 
 csv:
   members: 'directory.csv'
