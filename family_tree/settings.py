@@ -1,4 +1,4 @@
-import yaml
+import yaml, pprint
 from cerberus import Validator
 from family_tree.semester import Semester
 
@@ -17,7 +17,10 @@ def retrieve_settings(path):
     if settings:
         return settings
     else:
-        raise Exception(str(settings_schema.errors))
+        raise SettingsException('\n' + pprint.pformat(settings_schema.errors))
+
+class SettingsException(Exception):
+    pass
 
 ###############################################################################
 ###############################################################################
@@ -204,4 +207,5 @@ settings_schema = Validator({
         }
 
     })
+
 
