@@ -25,7 +25,7 @@ csv_affiliation_schema = Schema({
 def retrieve_directory(settings):
 
     members = retrieve_members(settings['csv']['members'])
-    if 'extra_members' in settings:
+    if settings.get('extra_members'):
         members += retrieve_members(settings['extra_members'])
 
     if settings['csv']['affiliations']:

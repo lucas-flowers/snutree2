@@ -12,9 +12,9 @@ def main(settings_path):
 
     settings = retrieve_settings(settings_path)
 
-    if 'mysql' in settings:
+    if settings.get('mysql'):
         directory = sql
-    elif 'csv' in settings:
+    elif settings.get('csv'):
         directory = csv
     else: # 'dot' in settings
         directory = dotread
@@ -35,5 +35,6 @@ def main(settings_path):
         subprocess.run(['dot', '-Tpdf'], check=True, stdin=dotfile, stdout=pdffile)
 
 if __name__ == '__main__':
+
     main()
 

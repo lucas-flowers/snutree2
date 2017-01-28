@@ -31,7 +31,7 @@ def retrieve_directory(settings):
     cxn = MySQLdb.Connection(**mysql_cnf)
 
     members = retrieve_members(cxn)
-    if 'extra_members' in settings:
+    if settings.get('extra_members'):
         members += csv.retrieve_members(settings['extra_members'])
 
     affiliations = retrieve_affiliations(cxn)

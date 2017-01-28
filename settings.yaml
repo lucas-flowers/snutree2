@@ -4,11 +4,11 @@ output:
   name: 'tree'
 
 # dot:
-#   members: '
+#   members: ''
 
 csv:
   members: 'directory.csv'
-  # affiliations: 'affiliations.csv'
+  affiliations: 'affiliations.csv'
 
 # # MySQL server information
 # mysql:
@@ -18,16 +18,15 @@ csv:
 #   port: '***REMOVED***'
 #   db: '***REMOVED***'
 
-# extra_members: 'brothers_not_knights.csv'
+extra_members: 'brothers_not_knights.csv'
 
 layout:
-  # semesters: True
+  semesters: True
   custom_nodes: True
-  # custom_edges: True
-  # no_singletons: True
-  # family_colors: True
-  # unknowns: True
-  tes: True
+  custom_edges: True
+  no_singletons: True
+  family_colors: True
+  unknowns: True
 
 # Defaults style for Graphviz graphs and subgraphs
 graph_defaults:

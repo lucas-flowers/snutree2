@@ -1,4 +1,4 @@
-import json, yaml
+import yaml
 from voluptuous import Schema, Unique
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from collections import defaultdict
@@ -89,19 +89,14 @@ class Directory:
 def retrieve_settings(path):
 
     with open(path, 'r') as f:
+        settings = yaml.load(f)
 
-        # Load into YAML first, then dump into a JSON string, then load again
-        # using the json library. This is done because YAML accepts nonstring
-        # (i.e., integer) keys, but JSON and Graphviz do not. So if a key in
-        # the settings file were an integer, the program's internal
-        # representation could end up having two different versions of a node:
-        # One with an integer key and another with a string key.
-        #
-        # This could easily be avoided by just not writing integers in the YAML
-        # file, but that could be expecting too much of someone editing it.
-        settings = json.loads(json.dumps(yaml.load(f)))
+    settings = schema.settings_schema.validated(settings)
+    if settings:
+        return settings
+    else:
+        raise Exception(str(schema.settings_schema.errors))
 
-    return validate(settings, schema.settings_schema)
 
 def to_greek_name(english_name):
     return ''.join([greek_mapping[w] for w in english_name.split(' ')])
