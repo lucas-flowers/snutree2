@@ -2,9 +2,10 @@ from voluptuous import Invalid, Required, Schema, All, Any, Length, Optional
 from family_tree.entity import Knight, Brother, Candidate, Expelled, KeylessInitiate
 from family_tree.semester import Semester
 
-# Here we use voluptuous instead of cerberus because cerberus was *very* slow
-# with this schema. (I think it had to to with its string-based options, and
-# the fact that it appears not to be focused on /lists/ of dictionaries.)
+# The schema for the two tables (members and affiliations) are lists of
+# dictionaries, which cerberus appears not to be focused on because cerberous
+# is focused on nested dictionaries. I tried a cerberus schema here, but it was
+# very slow (possible my fault). It's just simpler to use voluptuous here.
 
 ###############################################################################
 ###############################################################################

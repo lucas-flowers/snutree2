@@ -2,6 +2,9 @@ import yaml
 from cerberus import Validator
 from family_tree.semester import Semester
 
+# Cerberus is perfected for the YAML configuration file. I tried voluptuous,
+# but it was a big ugly mess of code for these nested structures.
+
 def retrieve_settings(path):
 
     with open(path, 'r') as f:
