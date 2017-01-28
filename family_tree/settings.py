@@ -142,6 +142,7 @@ settings_schema = Validator({
                 'type' : 'dict',
                 'schema' : {
                     'semester' : {
+                        'type' : 'string',
                         'coerce' : Semester,
                         },
                     'attributes' : attributes,
