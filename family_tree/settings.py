@@ -6,8 +6,6 @@ from family_tree.semester import Semester
 # the voluptuous schema was uglier, more complicated, and did not handle None
 # vs. empty vs. key nonexistence very well.
 
-# TODO cerberus error handlers
-
 def retrieve_settings(path):
 
     with open(path, 'r') as f:
