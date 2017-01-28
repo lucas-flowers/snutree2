@@ -1,23 +1,19 @@
-from voluptuous import Invalid, Required, Schema, All, Any, DefaultTo, Extra, Length, Optional
+from voluptuous import Invalid, Required, Schema, All, Any, Length, Optional
 from family_tree.entity import Knight, Brother, Candidate, Expelled, KeylessInitiate
 from family_tree.semester import Semester
 
+# Here we use voluptuous instead of cerberus because cerberus was *very* slow
+# with this schema. (I think it had to to with its string-based options, and
+# the fact that it appears not to be focused on /lists/ of dictionaries.)
+
 ###############################################################################
 ###############################################################################
-#### Custom Validators                                                     ####
+#### Utilities                                                             ####
 ###############################################################################
 ###############################################################################
 
 # Matches nonempty strings
 NonEmptyString = All(str, Length(min=1), msg='must be a nonempty string')
-
-# Matches the schema or None. If it matches None, it uses the constructor of
-# schema's class without arguments to create a new, presumably empty, object of
-# the right type.
-Nullable = lambda schema : Any(schema, DefaultTo(type(schema)()))
-
-# Attribute dicts are arbitrary dicts of Graphviz values.
-Attributes = {Extra: Any(str, int, float, bool)}
 
 # Matches member types according to the dict, and returns the right constructor
 def MemberType(status_string):
@@ -43,12 +39,9 @@ def SemesterLike(semester_string):
     except (TypeError, ValueError) as e:
         raise Invalid(str(e))
 
-def Defaults(*categories):
-    return { Optional(category) : Attributes for category in categories }
-
 ###############################################################################
 ###############################################################################
-#### Custom Validators                                                     ####
+#### Schema                                                                ####
 ###############################################################################
 ###############################################################################
 
