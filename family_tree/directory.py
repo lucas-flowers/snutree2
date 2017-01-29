@@ -179,7 +179,6 @@ class Directory:
                 MemberType = self.member_schemas[member['status']]['constructor']
                 self._members.append(MemberType(**member))
 
-            # validate([m['badge'] for m in members if 'badge' in m], Schema(Unique()))
         except Error as e:
             raise DirectoryError('Found invalid member:\n{}'.format(e))
 
