@@ -80,7 +80,8 @@ class FamilyTree:
 
         key = entity.get_key()
         if key in self.graph:
-            raise TreeException('duplicate entity key: {}'.format(repr(key)))
+            msg = 'duplicate entity key: {!r}'
+            raise TreeException(msg.format(key))
         self.graph.add_node(key, entity=entity, dot_attributes=entity.dot_attributes())
 
     def add_big_relationship(self, member, dot_attributes=None):
@@ -89,17 +90,18 @@ class FamilyTree:
         pkey = member.parent
 
         if pkey not in self.graph:
-            raise TreeException('member {!r} has unknown parent: {!r}'
-                    .format(ckey, pkey))
+            msg = 'member {!r} has unknown parent: {!r}'
+            raise TreeException(msg.format(ckey, pkey))
 
         parent = self.graph.node[pkey]['entity']
 
         if not isinstance(parent, Knight):
-            raise TreeException('big brother of {!r} must be an initiated member: {!r}'
-                    .format(ckey, pkey))
+            msg = 'big brother of {!r} must be an initiated member: {!r}'
+            raise TreeException(msg.format(ckey, pkey))
         elif self.settings['layout']['semesters'] and member.semester < parent.semester:
-            raise TreeException('semester {!r} of member {!r} cannot be prior to semester of big brother {!r}: {!r}'
-                    .format(member.semester, ckey, pkey, parent.semester))
+            msg = 'semester {!r} of member {!r} cannot be prior to semester of big brother {!r}: {!r}'
+            vals = member.semester, ckey, pkey, parent.semester
+            raise TreeException(msg.format(*vals))
         else:
             self.graph.add_edge(pkey, ckey, dot_attributes=dot_attributes or {})
 
@@ -136,8 +138,9 @@ class FamilyTree:
             for key in nodes:
                 if key not in self.graph:
                     path_type = 'path' if len(nodes) > 2 else 'edge'
-                    raise TreeException('custom {} {!r} has undefined node: {!r}'
-                            .format(path_type, path['nodes'], key))
+                    msg = 'custom {} {!r} has undefined node: {!r}'
+                    vals = path_type, path['nodes'], key
+                    raise TreeException(msg.format(*vals))
             attributes = path['attributes']
 
             edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
@@ -157,8 +160,8 @@ class FamilyTree:
         # There must be no cycles in the tree of members
         try:
             cycle_edges = find_cycle(self.member_subgraph(), orientation='ignore')
-            raise TreeException('found unexpected cycle in big-little relationships: {!r}'
-                    .format(cycle_edges))
+            msg = 'found unexpected cycle in big-little relationships: {!r}'
+            raise TreeException(msg.format(cycle_edges))
         except NetworkXNoCycle:
             pass
 
@@ -260,8 +263,8 @@ class FamilyTree:
 
                 family = self.graph.node[key]['family']
                 if 'color' in family:
-                    raise TreeException('family of member {!r} already assigned the color {!r}'
-                            .format(key, color))
+                    msg = 'family of member {!r} already assigned the color {!r}'
+                    raise TreeException(msg.format(key, color))
 
                 # Add the used color to the end and remove the first instance of it
                 other_colors.append(color)
@@ -297,7 +300,7 @@ class FamilyTree:
                 )
 
         if self.settings['layout']['semesters']:
-            self.check_semesters()
+            self.check_semesters() # TODO this doesn't catch everything
             min_semester, max_semester = self.get_semester_bounds()
             dates_left = self.create_date_subgraph('L', min_semester, max_semester)
             dates_right = self.create_date_subgraph('R', min_semester, max_semester)
@@ -323,8 +326,8 @@ class FamilyTree:
 
         for key, entity in self.nodes_iter('entity'):
             if not entity.semester:
-                raise TreeException('cannot place entity {!r} on graph without a value for semester'
-                        .format(key))
+                msg = 'cannot place entity {!r} on graph without a value for semester'
+                raise TreeException(msg.format(key))
 
     def get_semester_bounds(self):
         min_sem = float('inf')
