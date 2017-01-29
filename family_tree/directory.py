@@ -1,23 +1,8 @@
 from pprint import pformat
 from collections import defaultdict
 from cerberus import Validator
-from voluptuous.humanize import validate_with_humanized_errors as validate
-from voluptuous import Error, Invalid, Required, Schema, All, Length, Unique
 from family_tree.entity import Knight, Brother, Candidate, Expelled, KeylessInitiate
-from family_tree.semester import Semester
 from family_tree.utilities import nonempty_string, optional_nonempty_string, optional_semester_like
-
-###########
-
-# Matches nonempty strings
-NonEmptyString = All(str, Length(min=1), msg='must be a nonempty string')
-
-# Semesters or strings that can be converted to semesters
-def SemesterLike(semester_string):
-    try:
-        return Semester(semester_string)
-    except (TypeError, ValueError) as e:
-        raise Invalid(str(e))
 
 ###############################################################################
 ###############################################################################
@@ -138,10 +123,10 @@ class Directory:
             }
         }, allow_unknown = True)
 
-    affiliations_schema = Schema({
-        Required('badge') : NonEmptyString,
-        Required('chapter_name') : NonEmptyString,
-        Required('other_badge') : NonEmptyString,
+    affiliations_schema = Validator({
+        'badge' : nonempty_string,
+        'chapter_name' : nonempty_string,
+        'other_badge' : nonempty_string
         })
 
     def __init__(self, member_list, affiliations_list, settings_dict):
@@ -177,18 +162,34 @@ class Directory:
 
     def mark_affiliations(self, affiliations):
 
-        try:
-            affiliations = [validate(a, self.affiliations_schema) for a in affiliations]
-            validate([(a['chapter_name'], a['other_badge']) for a in affiliations], Schema(Unique()))
-        except Error as e:
-            raise DirectoryError('Found invalid affiliation:\n{}'.format(e))
-
         affiliations_map = defaultdict(list)
-        for row in affiliations:
-            badge = row['badge']
-            other_badge = '{} {}'.format(to_greek_name(row['chapter_name']), row['other_badge'])
-            affiliations_map[badge].append(other_badge)
+        used_affiliations = set()
+        for affiliation in affiliations:
 
+            # Validate affiliation format
+            if not self.affiliations_schema.validate(affiliation):
+                msg = 'Invalid affiliation:\n{}\nRules violated:\n{}'
+                vals = pformat(affiliation), pformat(self.affiliations_schema.errors)
+                raise DirectoryError(msg.format(*vals))
+
+            badge = affiliation['badge']
+            chapter_name = affiliation['chapter_name']
+            other_badge = affiliation['other_badge']
+
+            # Catch duplicate affiliations
+            if (chapter_name, other_badge) in used_affiliations:
+                msg = 'Duplicate affiliation: {} {}'
+                vals = chapter_name, other_badge
+                raise DirectoryError(msg.format(*vals))
+            else:
+                used_affiliations.add((chapter_name, other_badge))
+
+            # Add affiliation to the mapping
+            chapter_designation = to_greek_name(chapter_name)
+            other_designation = '{} {}'.format(chapter_designation, other_badge)
+            affiliations_map[badge].append(other_designation)
+
+        # Add all affiliations to the respective members
         for member in self._members:
             member.affiliations = affiliations_map[member.get_key()]
 
