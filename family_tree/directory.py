@@ -166,13 +166,13 @@ class Directory:
                 member = self.member_status_schema.validated(member)
 
                 if not member:
-                    raise Exception(self.member_status_schema.errors)
+                    raise DirectoryError(self.member_status_schema.errors)
 
                 validator = self.member_schemas[member['status']]['validator']
                 member = validator.validated(member)
 
                 if not member:
-                    raise Exception(validator.errors)
+                    raise DirectoryError(validator.errors)
 
                 members_validated.append(member)
 
