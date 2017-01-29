@@ -1,3 +1,4 @@
+from pprint import pformat
 from collections import defaultdict
 from cerberus import Validator
 from voluptuous.humanize import validate_with_humanized_errors as validate
@@ -158,16 +159,35 @@ class Directory:
 
                 # Make sure the member status field is valid first
                 if not self.member_status_schema.validate(member):
-                    raise DirectoryError(self.member_status_schema.errors)
+                    raise DirectoryError(
+                            'Invalid member status in:\n'
+                            '{}\n'
+                            'Rules violated:\n{}'
+                            .format(
+                                pformat(member),
+                                pformat(self.member_status_schema.errors)
+                                )
+                            )
 
                 # Use the validator for this member type
                 validator = self.member_schemas[member['status']]['validator']
 
                 # Validate and normalize the other fields
-                member = validator.validated(member)
-                if not member:
-                    raise DirectoryError(validator.errors)
+                if validator.validate(member):
+                    member = validator.document
+                else:
+                    raise DirectoryError(
+                            'Invalid {} in:\n'
+                            '{}\n'
+                            'Rules violated:\n{}'
+                            .format(
+                                member['status'],
+                                pformat(member),
+                                pformat(validator.errors)
+                                )
+                            )
 
+                # Create member object and add to list
                 MemberType = self.member_schemas[member['status']]['constructor']
                 self._members.append(MemberType(**member))
 
