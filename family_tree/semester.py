@@ -12,21 +12,19 @@ class Semester(int):
 
     def __new__(cls, *arg):
 
-        if len(arg) == 1:
+        if len(arg) == 1 and isinstance(arg[0], int):
+            value = arg[0]
+
+        elif len(arg) == 1 and isinstance(arg[0], str):
 
             arg = arg[0]
-            if isinstance(arg, int):
-                value = arg
-
-            elif isinstance(arg, str):
-
-                match = Semester.matcher.match(arg)
-                if match:
-                    season = 1 if match.group(1) == 'Fall' else 0
-                    year = int(match.group(2))
-                    value = 2 * year + season
-                else:
-                    raise ValueError('semester names must match "{}"'.format(Semester.matcher.pattern, arg))
+            match = Semester.matcher.match(arg)
+            if match:
+                season = 1 if match.group(1) == 'Fall' else 0
+                year = int(match.group(2))
+                value = 2 * year + season
+            else:
+                raise ValueError('semester names must match "{}"'.format(Semester.matcher.pattern, arg))
 
         elif len(arg) == 2 and isinstance(arg[0], str) and isinstance(arg[1], int):
 
