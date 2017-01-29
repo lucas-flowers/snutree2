@@ -1,6 +1,6 @@
 import yaml, pprint
 from cerberus import Validator
-from family_tree.semester import Semester
+from family_tree.utilities import nonempty_string, optional_nonempty_string, optional_boolean, semester_like
 
 # Cerberus is perfect for the YAML configuration file. I tried voluptuous, but
 # the voluptuous schema was uglier, more complicated, and did not handle None
@@ -22,45 +22,6 @@ def retrieve_settings(path):
 
 class SettingsException(Exception):
     pass
-
-###############################################################################
-###############################################################################
-#### Utilities                                                             ####
-###############################################################################
-###############################################################################
-
-# A required string; must be nonempty and not None
-nonempty_string = {
-        'type' : 'string',
-        'required' : True,
-        'empty' : False,
-        'nullable' : False,
-        }
-
-# An optional string defaulting to None; must be nonempty if it does exist
-optional_nonempty_string = {
-        'type' : 'string',
-        'default' : None,
-        'empty' : False,
-        'nullable' : True,
-        }
-
-# Optional boolean with True default
-optional_boolean = {
-        'type' : 'boolean',
-        'default' : True,
-        }
-
-# Is a string coerceable to a semester
-semester_like = {
-        'coerce' : Semester
-        }
-
-# Optional version of semester_like that defaults to None
-optional_semester_like = {
-        'coerce' : Semester,
-        'default' : None,
-        }
 
 ###############################################################################
 ###############################################################################

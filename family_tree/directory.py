@@ -1,27 +1,26 @@
 from collections import defaultdict
+from cerberus import Validator
 from voluptuous.humanize import validate_with_humanized_errors as validate
-from voluptuous import Invalid, Required, Schema, All, Any, Length, Optional, Unique
+from voluptuous import Error, Invalid, Required, Schema, All, Length, Unique
 from family_tree.entity import Knight, Brother, Candidate, Expelled, KeylessInitiate
 from family_tree.semester import Semester
+from family_tree.utilities import nonempty_string, optional_nonempty_string, optional_semester_like
 
-###############################################################################
-###############################################################################
-#### Schema Utilities                                                      ####
-###############################################################################
-###############################################################################
+member_status_mapping = {
+        'Knight' : Knight,
+        'Brother' : Brother,
+        'Candidate' : Candidate,
+        'Expelled' : Expelled,
+        'KeylessInitiate' : KeylessInitiate,
+        }
+
+###########
 
 # Matches nonempty strings
 NonEmptyString = All(str, Length(min=1), msg='must be a nonempty string')
 
 # Matches member types according to the dict, and returns the right constructor
 def MemberType(status_string):
-    member_status_mapping = {
-            'Knight' : Knight,
-            'Brother' : Brother,
-            'Candidate' : Candidate,
-            'Expelled' : Expelled,
-            'KeylessInitiate' : KeylessInitiate,
-            }
     member_type = member_status_mapping[status_string]
     def validator(string):
         if string == status_string:
@@ -93,54 +92,61 @@ class Directory:
     # here, but it was very slow (possibly my fault). It's just simpler to use
     # voluptuous here.
 
-    member_schema = Schema(Any(
+    member_status_schema = Validator({
+        'status' : {
+            'allowed' : list(member_status_mapping.keys()),
+            'required' : True,
+            }
+        }, allow_unknown = True)
 
-        {
-            Required('status') : MemberType('KeylessInitiate'),
-            Required('name') : NonEmptyString,
-            Optional('big_name') : Any(None, NonEmptyString),
-            Optional('pledge_semester') : SemesterLike,
-            },
+    member_schemas = {
 
-        {
-            Required('status') : MemberType('Knight'),
-            Required('badge') : NonEmptyString,
-            Required('first_name') : NonEmptyString,
-            Optional('preferred_name') : NonEmptyString,
-            Required('last_name') : NonEmptyString,
-            Optional('big_badge') : NonEmptyString,
-            Optional('pledge_semester') : SemesterLike,
-            },
+            'KeylessInitiate' : Validator({
+                'status' : {'allowed' : ['KeylessInitiate']},
+                'name' : nonempty_string,
+                'big_name' : optional_nonempty_string,
+                'pledge_semester' : optional_semester_like,
+                }),
 
-        {
-            Required('status') : MemberType('Brother'),
-            Optional('first_name') : NonEmptyString,
-            Optional('preferred_name') : NonEmptyString,
-            Required('last_name') : NonEmptyString,
-            Optional('big_badge') : NonEmptyString,
-            Optional('pledge_semester') : SemesterLike,
-            },
+            'Knight' : Validator({
+                'status' : {'allowed' : ['Knight']},
+                'badge' : nonempty_string,
+                'first_name' : nonempty_string,
+                'preferred_name' : optional_nonempty_string,
+                'last_name' : nonempty_string,
+                'big_badge' : optional_nonempty_string,
+                'pledge_semester' : optional_semester_like,
+                }),
 
-        {
-            Required('status') : MemberType('Candidate'),
-            Required('first_name') : NonEmptyString,
-            Optional('preferred_name') : NonEmptyString,
-            Required('last_name') : NonEmptyString,
-            Optional('big_badge') : NonEmptyString,
-            Optional('pledge_semester') : SemesterLike,
-            },
+            'Brother' : Validator({
+                'status' : {'allowed' : ['Brother']},
+                'first_name' : optional_nonempty_string,
+                'preferred_name' : optional_nonempty_string,
+                'last_name' : nonempty_string,
+                'big_badge' : optional_nonempty_string,
+                'pledge_semester' : optional_semester_like,
+                }),
 
-        {
-            Required('status') : MemberType('Expelled'),
-            Required('badge') : NonEmptyString,
-            Optional('first_name') : NonEmptyString,
-            Optional('preferred_name') : NonEmptyString,
-            Optional('last_name') : NonEmptyString,
-            Optional('big_badge') : NonEmptyString,
-            Optional('pledge_semester') : SemesterLike,
-            },
+            'Candidate' : Validator({
+                'status' : {'allowed' : ['Candidate']},
+                'first_name' : nonempty_string,
+                'preferred_name' : optional_nonempty_string,
+                'last_name' : nonempty_string,
+                'big_badge' : optional_nonempty_string,
+                'pledge_semester' : optional_semester_like,
+                }),
 
-        ), required=True, extra=False)
+            'Expelled' : Validator({
+                'status' : {'allowed' : ['Expelled']},
+                'badge' : nonempty_string,
+                'first_name' : optional_nonempty_string,
+                'preferred_name' : optional_nonempty_string,
+                'last_name' : optional_nonempty_string,
+                'big_badge' : optional_nonempty_string,
+                'pledge_semester' : optional_semester_like,
+                }),
+
+            }
 
     affiliations_schema = Schema({
         Required('badge') : NonEmptyString,
@@ -156,18 +162,39 @@ class Directory:
 
     def set_members(self, members):
 
-        members = [validate(m, self.member_schema) for m in members]
-        validate([m['badge'] for m in members if 'badge' in m], Schema(Unique()))
+        try:
+            members_validated = []
+            for member in members:
+
+                member = self.member_status_schema.validated(member)
+
+                if not member:
+                    raise Exception(self.member_status_schema.errors)
+
+                validator = self.member_schemas[member['status']]
+                member = validator.validated(member)
+
+                if not member:
+                    raise Exception(validator.errors)
+
+                members_validated.append(member)
+
+            # validate([m['badge'] for m in members if 'badge' in m], Schema(Unique()))
+        except Error as e:
+            raise DirectoryError('Found invalid member:\n{}'.format(e))
 
         self._members = []
-        for row in members:
-            MemberType = row['status']
+        for row in members_validated:
+            MemberType = member_status_mapping[row['status']]
             self._members.append(MemberType(**row))
 
     def mark_affiliations(self, affiliations):
 
-        affiliations = [validate(a, self.affiliations_schema) for a in affiliations]
-        validate([(a['chapter_name'], a['other_badge']) for a in affiliations], Schema(Unique()))
+        try:
+            affiliations = [validate(a, self.affiliations_schema) for a in affiliations]
+            validate([(a['chapter_name'], a['other_badge']) for a in affiliations], Schema(Unique()))
+        except Error as e:
+            raise DirectoryError('Found invalid affiliation:\n{}'.format(e))
 
         affiliations_map = defaultdict(list)
         for row in affiliations:
@@ -183,4 +210,7 @@ class Directory:
 
 def to_greek_name(english_name):
     return ''.join([greek_mapping[w] for w in english_name.split(' ')])
+
+class DirectoryError(Exception):
+    pass
 
