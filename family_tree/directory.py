@@ -157,35 +157,21 @@ class Directory:
 
             # Make sure the member status field is valid first
             if not self.member_status_schema.validate(member):
-                raise DirectoryError(
-                        'Invalid member status in:\n'
-                        '{}\n'
-                        'Rules violated:\n{}'
-                        .format(
-                            pformat(member),
-                            pformat(self.member_status_schema.errors)
-                            )
-                        )
+                msg = 'Invalid member status in:\n{}\nRules violated:\n{}'
+                vals = pformat(member), pformat(self.member_status_schema.errors)
+                raise DirectoryError(msg.format(*vals))
 
             # Use the validator for this member type
             validator = self.member_schemas[member['status']]['validator']
 
-            # Validate and normalize the other fields
-            if validator.validate(member):
-                member = validator.document
-            else:
-                raise DirectoryError(
-                        'Invalid {} in:\n'
-                        '{}\n'
-                        'Rules violated:\n{}'
-                        .format(
-                            member['status'],
-                            pformat(member),
-                            pformat(validator.errors)
-                            )
-                        )
+            # Validate the other fields
+            if not validator.validate(member):
+                msg = 'Invalid {} in:\n{}\nRules violated:\n{}'
+                vals = member['status'], pformat(member), pformat(validator.errors)
+                raise DirectoryError(msg.format(*vals))
 
-            # Create member object and add to list
+            # Create member object from the normalized dict and add to list
+            member = validator.document
             MemberType = self.member_schemas[member['status']]['constructor']
             self._members.append(MemberType(**member))
 
