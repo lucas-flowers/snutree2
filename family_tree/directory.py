@@ -160,30 +160,28 @@ class Directory:
     def set_members(self, members):
 
         try:
-            members_validated = []
+
+            self._members = []
             for member in members:
 
-                member = self.member_status_schema.validated(member)
-
-                if not member:
+                # Make sure the member status field is valid first
+                if not self.member_status_schema.validate(member):
                     raise DirectoryError(self.member_status_schema.errors)
 
+                # Use the validator for this member type
                 validator = self.member_schemas[member['status']]['validator']
-                member = validator.validated(member)
 
+                # Validate and normalize the other fields
+                member = validator.validated(member)
                 if not member:
                     raise DirectoryError(validator.errors)
 
-                members_validated.append(member)
+                MemberType = self.member_schemas[member['status']]['constructor']
+                self._members.append(MemberType(**member))
 
             # validate([m['badge'] for m in members if 'badge' in m], Schema(Unique()))
         except Error as e:
             raise DirectoryError('Found invalid member:\n{}'.format(e))
-
-        self._members = []
-        for row in members_validated:
-            MemberType = self.member_schemas[row['status']]['constructor']
-            self._members.append(MemberType(**row))
 
     def mark_affiliations(self, affiliations):
 
