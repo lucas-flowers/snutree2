@@ -300,7 +300,6 @@ class FamilyTree:
                 )
 
         if self.settings['layout']['semesters']:
-            self.check_semesters() # TODO this doesn't catch everything
             min_semester, max_semester = self.get_semester_bounds()
             dates_left = self.create_date_subgraph('L', min_semester, max_semester)
             dates_right = self.create_date_subgraph('R', min_semester, max_semester)
@@ -311,23 +310,6 @@ class FamilyTree:
             dotgraph.children = [tree]
 
         return dotgraph
-
-    def check_semesters(self):
-        '''
-        Make sure every entity on the graph has a non-null value for its
-        semester field.
-
-        I wish it were possible to check this earlier in the program, but that
-        would require filling in pledge class semesters /all/ members in our
-        actual directory manually. Because pledge classes are not the same as
-        initiation dates or candidate ceremony dates, that would be a tedious
-        task.
-        '''
-
-        for key, entity in self.nodes_iter('entity'):
-            if not entity.semester:
-                msg = 'cannot place entity {!r} on graph without a value for semester'
-                raise TreeException(msg.format(key))
 
     def get_semester_bounds(self):
         min_sem = float('inf')

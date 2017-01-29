@@ -30,7 +30,7 @@ class TreeEntity(metaclass=ABCMeta):
         if self._semester:
             return self._semester
         else:
-            msg = 'no semester assigned to entity {!r}'
+            msg = 'missing semester value for entity {!r}'
             raise TreeEntityError(msg.format(self.get_key()))
 
     @semester.setter
