@@ -57,22 +57,14 @@ class Directory:
     '''
     This class is used to store data from either a CSV file or a SQL query. It
     is an intermediate form before the data is turned into a tree. It stores a
-    list of brothers from the directory, a list for brothers not made knights,
-    a dictionary of affiliations, and a dictionary of YAML settings.
+    list of brothers from the directory (with affiliations) and a dictionary of
+    YAML settings.
 
     The Directory class guarantees that entries in its members and affiliations
-    lists will be dictionaries that follow the following schema.
-
-    Furthermore, the class guarantees that all members in the member list are
-    unique (as determined by their badge), and that all
-    chapter_name/other_badge pairs in the affiliations list are unique.
+    lists will be dictionaries that follow the following schema. Furthermore,
+    the class guarantees that all chapter_name/other_badge pairs in the
+    affiliations are unique.
     '''
-
-    # The schema for the two tables (members and affiliations) are lists of
-    # dictionaries, which cerberus appears not to be focused on because
-    # cerberous is focused on nested dictionaries. I tried a cerberus schema
-    # here, but it was very slow (possibly my fault). It's just simpler to use
-    # voluptuous here.
 
     member_schemas = {
 
