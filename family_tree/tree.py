@@ -6,9 +6,6 @@ from networkx.exception import NetworkXNoCycle
 from family_tree import dot
 from family_tree.color import graphviz_colors
 from family_tree.semester import semester_range
-
-# TODO remove when Member call is removed (calls to Member should be removed if
-# possible)
 from family_tree.entity import Member, Custom, UnidentifiedKnight, Knight
 
 class FamilyTree:
