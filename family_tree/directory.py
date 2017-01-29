@@ -152,47 +152,42 @@ class Directory:
 
     def set_members(self, members):
 
-        try:
+        self._members = []
+        for member in members:
 
-            self._members = []
-            for member in members:
-
-                # Make sure the member status field is valid first
-                if not self.member_status_schema.validate(member):
-                    raise DirectoryError(
-                            'Invalid member status in:\n'
-                            '{}\n'
-                            'Rules violated:\n{}'
-                            .format(
-                                pformat(member),
-                                pformat(self.member_status_schema.errors)
-                                )
+            # Make sure the member status field is valid first
+            if not self.member_status_schema.validate(member):
+                raise DirectoryError(
+                        'Invalid member status in:\n'
+                        '{}\n'
+                        'Rules violated:\n{}'
+                        .format(
+                            pformat(member),
+                            pformat(self.member_status_schema.errors)
                             )
+                        )
 
-                # Use the validator for this member type
-                validator = self.member_schemas[member['status']]['validator']
+            # Use the validator for this member type
+            validator = self.member_schemas[member['status']]['validator']
 
-                # Validate and normalize the other fields
-                if validator.validate(member):
-                    member = validator.document
-                else:
-                    raise DirectoryError(
-                            'Invalid {} in:\n'
-                            '{}\n'
-                            'Rules violated:\n{}'
-                            .format(
-                                member['status'],
-                                pformat(member),
-                                pformat(validator.errors)
-                                )
+            # Validate and normalize the other fields
+            if validator.validate(member):
+                member = validator.document
+            else:
+                raise DirectoryError(
+                        'Invalid {} in:\n'
+                        '{}\n'
+                        'Rules violated:\n{}'
+                        .format(
+                            member['status'],
+                            pformat(member),
+                            pformat(validator.errors)
                             )
+                        )
 
-                # Create member object and add to list
-                MemberType = self.member_schemas[member['status']]['constructor']
-                self._members.append(MemberType(**member))
-
-        except Error as e:
-            raise DirectoryError('Found invalid member:\n{}'.format(e))
+            # Create member object and add to list
+            MemberType = self.member_schemas[member['status']]['constructor']
+            self._members.append(MemberType(**member))
 
     def mark_affiliations(self, affiliations):
 
