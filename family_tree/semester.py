@@ -24,7 +24,9 @@ class Semester(int):
                 year = int(match.group(2))
                 value = 2 * year + season
             else:
-                raise ValueError('semester names must match "{}"'.format(Semester.matcher.pattern, arg))
+                msg = 'semester names must match "{}"'
+                vals = Semester.matcher.pattern, arg
+                raise ValueError(msg.format(*vals))
 
         elif len(arg) == 2 and isinstance(arg[0], str) and isinstance(arg[1], int):
 

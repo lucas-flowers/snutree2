@@ -16,9 +16,9 @@ def retrieve_settings(path):
         return settings
     else:
         errors = settings_schema.errors
-        s = '' if len(errors) == 1 else 's'
-        raise SettingsException('Error{} found in settings file:\n{}'.
-                format(s, pprint.pformat(settings_schema.errors)))
+        msg = 'Error{} found in settings file:\n{}'
+        vals = '' if len(errors) == 1 else 's', pprint.pformat(errors)
+        raise SettingsException(msg.format(*vals))
 
 class SettingsException(Exception):
     pass

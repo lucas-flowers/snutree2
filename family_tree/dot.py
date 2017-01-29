@@ -27,10 +27,9 @@ class Graph(DotCommon):
             node_defaults=None, edge_defaults=None):
 
         if graph_type not in Graph.graph_types:
-            raise ValueError(
-                    'Expected graph type in {}, but received: {}'
-                    .format(Graph.graph_types, graph_type)
-                    )
+            msg = 'Expected graph type in {}, but received: {}'
+            vals = Graph.graph_types, graph_type
+            raise ValueError(msg.format(*vals))
 
         self.graph_type = graph_type
         self.children = children or []
