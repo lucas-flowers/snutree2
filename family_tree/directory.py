@@ -4,12 +4,6 @@ from cerberus import Validator
 from family_tree.entity import Knight, Brother, Candidate, Expelled, KeylessInitiate
 from family_tree.utilities import nonempty_string, optional_nonempty_string, optional_semester_like
 
-###############################################################################
-###############################################################################
-#### Directory                                                             ####
-###############################################################################
-###############################################################################
-
 greek_mapping = {
         'Alpha' : 'A',
         'Beta' : 'B',
@@ -38,6 +32,14 @@ greek_mapping = {
         '(A)' : '(A)', # Because of Eta Mu (A) Chapter
         '(B)' : '(B)', # Because of Eta Mu (B) Chapter
         }
+
+def to_greek_name(english_name):
+    try:
+        return ''.join([greek_mapping[w] for w in english_name.split(' ')])
+    except KeyError:
+        msg = 'chapter names must be made of words in {}'
+        val = sorted(greek_mapping.keys())
+        raise ValueError(msg.format(val))
 
 class Directory:
     '''
@@ -125,7 +127,7 @@ class Directory:
 
     affiliations_schema = Validator({
         'badge' : nonempty_string,
-        'chapter_name' : nonempty_string,
+        'chapter_name' : { 'coerce' : to_greek_name },
         'other_badge' : nonempty_string
         })
 
@@ -172,20 +174,23 @@ class Directory:
                 vals = pformat(affiliation), pformat(self.affiliations_schema.errors)
                 raise DirectoryError(msg.format(*vals))
 
-            badge = affiliation['badge']
+            # Catch duplicate affiliations
             chapter_name = affiliation['chapter_name']
             other_badge = affiliation['other_badge']
-
-            # Catch duplicate affiliations
             if (chapter_name, other_badge) in used_affiliations:
-                msg = 'Duplicate affiliation: {} {}'
-                vals = chapter_name, other_badge
+                msg = 'Duplicate affiliation:\n{}\nBased on key:\n{}'
+                vals = pformat(affiliation), (chapter_name, other_badge)
                 raise DirectoryError(msg.format(*vals))
             else:
                 used_affiliations.add((chapter_name, other_badge))
 
+            # Used normalized dict
+            affiliation = self.affiliations_schema.document
+            badge = affiliation['badge']
+            chapter_designation = affiliation['chapter_name'] # Normalized
+            other_badge = affiliation['other_badge']
+
             # Add affiliation to the mapping
-            chapter_designation = to_greek_name(chapter_name)
             other_designation = '{} {}'.format(chapter_designation, other_badge)
             affiliations_map[badge].append(other_designation)
 
@@ -195,9 +200,6 @@ class Directory:
 
     def get_members(self):
         return self._members
-
-def to_greek_name(english_name):
-    return ''.join([greek_mapping[w] for w in english_name.split(' ')])
 
 class DirectoryError(Exception):
     pass
