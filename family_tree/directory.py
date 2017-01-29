@@ -6,28 +6,10 @@ from family_tree.entity import Knight, Brother, Candidate, Expelled, KeylessInit
 from family_tree.semester import Semester
 from family_tree.utilities import nonempty_string, optional_nonempty_string, optional_semester_like
 
-member_status_mapping = {
-        'Knight' : Knight,
-        'Brother' : Brother,
-        'Candidate' : Candidate,
-        'Expelled' : Expelled,
-        'KeylessInitiate' : KeylessInitiate,
-        }
-
 ###########
 
 # Matches nonempty strings
 NonEmptyString = All(str, Length(min=1), msg='must be a nonempty string')
-
-# Matches member types according to the dict, and returns the right constructor
-def MemberType(status_string):
-    member_type = member_status_mapping[status_string]
-    def validator(string):
-        if string == status_string:
-            return member_type
-        else:
-            raise Invalid('status must be one of {{{}}}'.format(', '.join(member_status_mapping.keys())))
-    return validator
 
 # Semesters or strings that can be converted to semesters
 def SemesterLike(semester_string):
@@ -92,61 +74,76 @@ class Directory:
     # here, but it was very slow (possibly my fault). It's just simpler to use
     # voluptuous here.
 
+    member_schemas = {
+
+            'KeylessInitiate' : {
+                'validator' : Validator({
+                    'status' : {'allowed' : ['KeylessInitiate']},
+                    'name' : nonempty_string,
+                    'big_name' : optional_nonempty_string,
+                    'pledge_semester' : optional_semester_like,
+                    }),
+                'constructor' : KeylessInitiate
+                },
+
+            'Knight' : {
+                'validator' : Validator({
+                    'status' : {'allowed' : ['Knight']},
+                    'badge' : nonempty_string,
+                    'first_name' : nonempty_string,
+                    'preferred_name' : optional_nonempty_string,
+                    'last_name' : nonempty_string,
+                    'big_badge' : optional_nonempty_string,
+                    'pledge_semester' : optional_semester_like,
+                    }),
+                'constructor' : Knight,
+                },
+
+            'Brother' : {
+                'validator' : Validator({
+                    'status' : {'allowed' : ['Brother']},
+                    'first_name' : optional_nonempty_string,
+                    'preferred_name' : optional_nonempty_string,
+                    'last_name' : nonempty_string,
+                    'big_badge' : optional_nonempty_string,
+                    'pledge_semester' : optional_semester_like,
+                    }),
+                'constructor' : Brother,
+                },
+
+            'Candidate' : {
+                'validator' : Validator({
+                    'status' : {'allowed' : ['Candidate']},
+                    'first_name' : nonempty_string,
+                    'preferred_name' : optional_nonempty_string,
+                    'last_name' : nonempty_string,
+                    'big_badge' : optional_nonempty_string,
+                    'pledge_semester' : optional_semester_like,
+                    }),
+                'constructor' : Candidate,
+                },
+
+            'Expelled' : {
+                'validator' : Validator({
+                    'status' : {'allowed' : ['Expelled']},
+                    'badge' : nonempty_string,
+                    'first_name' : optional_nonempty_string,
+                    'preferred_name' : optional_nonempty_string,
+                    'last_name' : optional_nonempty_string,
+                    'big_badge' : optional_nonempty_string,
+                    'pledge_semester' : optional_semester_like,
+                    }),
+                'constructor' : Expelled,
+                }
+
+            }
+
     member_status_schema = Validator({
         'status' : {
-            'allowed' : list(member_status_mapping.keys()),
+            'allowed' : list(member_schemas.keys()),
             'required' : True,
             }
         }, allow_unknown = True)
-
-    member_schemas = {
-
-            'KeylessInitiate' : Validator({
-                'status' : {'allowed' : ['KeylessInitiate']},
-                'name' : nonempty_string,
-                'big_name' : optional_nonempty_string,
-                'pledge_semester' : optional_semester_like,
-                }),
-
-            'Knight' : Validator({
-                'status' : {'allowed' : ['Knight']},
-                'badge' : nonempty_string,
-                'first_name' : nonempty_string,
-                'preferred_name' : optional_nonempty_string,
-                'last_name' : nonempty_string,
-                'big_badge' : optional_nonempty_string,
-                'pledge_semester' : optional_semester_like,
-                }),
-
-            'Brother' : Validator({
-                'status' : {'allowed' : ['Brother']},
-                'first_name' : optional_nonempty_string,
-                'preferred_name' : optional_nonempty_string,
-                'last_name' : nonempty_string,
-                'big_badge' : optional_nonempty_string,
-                'pledge_semester' : optional_semester_like,
-                }),
-
-            'Candidate' : Validator({
-                'status' : {'allowed' : ['Candidate']},
-                'first_name' : nonempty_string,
-                'preferred_name' : optional_nonempty_string,
-                'last_name' : nonempty_string,
-                'big_badge' : optional_nonempty_string,
-                'pledge_semester' : optional_semester_like,
-                }),
-
-            'Expelled' : Validator({
-                'status' : {'allowed' : ['Expelled']},
-                'badge' : nonempty_string,
-                'first_name' : optional_nonempty_string,
-                'preferred_name' : optional_nonempty_string,
-                'last_name' : optional_nonempty_string,
-                'big_badge' : optional_nonempty_string,
-                'pledge_semester' : optional_semester_like,
-                }),
-
-            }
 
     affiliations_schema = Schema({
         Required('badge') : NonEmptyString,
@@ -171,7 +168,7 @@ class Directory:
                 if not member:
                     raise Exception(self.member_status_schema.errors)
 
-                validator = self.member_schemas[member['status']]
+                validator = self.member_schemas[member['status']]['validator']
                 member = validator.validated(member)
 
                 if not member:
@@ -185,7 +182,7 @@ class Directory:
 
         self._members = []
         for row in members_validated:
-            MemberType = member_status_mapping[row['status']]
+            MemberType = self.member_schemas[row['status']]['constructor']
             self._members.append(MemberType(**row))
 
     def mark_affiliations(self, affiliations):
