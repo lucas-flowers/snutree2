@@ -16,14 +16,26 @@ class TreeEntity(metaclass=ABCMeta):
 
     Entities should also have these fields:
 
-        + semester: A field storing a Semester object, used to determine the
-        entity's rank in DOT
+        + _semester: A private field storing a Semester object, used to
+        determine the entity's rank in DOT
 
     '''
 
     @abstractmethod
     def get_key(self):
         pass
+
+    @property
+    def semester(self):
+        if self._semester:
+            return self._semester
+        else:
+            msg = 'no semester assigned to entity {!r}'
+            raise TreeEntityError(msg.format(self.get_key()))
+
+    @semester.setter
+    def semester(self, value):
+        self._semester = value
 
     def dot_attributes(self):
         return {}
@@ -229,4 +241,7 @@ def combine_names(first_name, preferred_name, last_name, threshold=.5):
         first_name = preferred_name
 
     return '{} {}'.format(first_name, last_name)
+
+class TreeEntityError(Exception):
+    pass
 
