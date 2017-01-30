@@ -1,5 +1,6 @@
 import csv
 from family_tree.directory import Directory
+from family_tree.utilities import logged
 
 def retrieve_directory(settings):
 
@@ -14,6 +15,7 @@ def retrieve_directory(settings):
 
     return Directory(members, affiliations, settings)
 
+@logged
 def retrieve_members(path):
     '''
     Get the table of members from the CSV file at the given path. Adjust the
@@ -45,6 +47,7 @@ def retrieve_members(path):
 
     return members
 
+@logged
 def retrieve_affiliations(path):
     '''
     Get the table of affiliations from the CSV file at the given path. Adjust
