@@ -57,7 +57,7 @@ class Directory:
     member_schemas = {
 
             'KeylessInitiate' : {
-                'validator' : {
+                'schema' : {
                     'status' : {'allowed' : ['KeylessInitiate']},
                     'name' : nonempty_string,
                     'big_name' : optional_nonempty_string,
@@ -67,7 +67,7 @@ class Directory:
                 },
 
             'Knight' : {
-                'validator' : {
+                'schema' : {
                     'status' : {'allowed' : ['Knight']},
                     'badge' : nonempty_string,
                     'first_name' : nonempty_string,
@@ -80,7 +80,7 @@ class Directory:
                 },
 
             'Brother' : {
-                'validator' : {
+                'schema' : {
                     'status' : {'allowed' : ['Brother']},
                     'first_name' : optional_nonempty_string,
                     'preferred_name' : optional_nonempty_string,
@@ -92,7 +92,7 @@ class Directory:
                 },
 
             'Candidate' : {
-                'validator' : {
+                'schema' : {
                     'status' : {'allowed' : ['Candidate']},
                     'first_name' : nonempty_string,
                     'preferred_name' : optional_nonempty_string,
@@ -104,7 +104,7 @@ class Directory:
                 },
 
             'Expelled' : {
-                'validator' : {
+                'schema' : {
                     'status' : {'allowed' : ['Expelled']},
                     'badge' : nonempty_string,
                     'first_name' : optional_nonempty_string,
@@ -152,7 +152,7 @@ class Directory:
                 'type' : 'list',
                 'schema' : {
                     'type' : 'dict',
-                    'schema' : self.member_schemas[status]['validator']
+                    'schema' : self.member_schemas[status]['schema']
                     }
                 }})
 

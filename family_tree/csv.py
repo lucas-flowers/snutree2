@@ -3,7 +3,6 @@ from voluptuous import Schema, Optional
 from voluptuous.humanize import validate_with_humanized_errors as validate
 from family_tree.directory import Directory
 
-
 # Required headers in a CSV members file
 csv_member_schema = Schema({
     'status' : str,
