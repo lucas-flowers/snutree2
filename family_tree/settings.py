@@ -6,7 +6,7 @@ from family_tree.utilities import logged, nonempty_string, optional_nonempty_str
 def retrieve_settings(path):
 
     with open(path, 'r') as f:
-        settings = yaml.load(f)
+        settings = yaml.safe_load(f)
 
     settings = settings_schema.validated(settings)
     if not settings:
