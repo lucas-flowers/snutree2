@@ -1,4 +1,4 @@
-import logging
+import logging, time
 from family_tree.semester import Semester
 
 # A required string; must be nonempty and not None
@@ -36,8 +36,9 @@ optional_semester_like = {
 def logged(function):
     def wrapped(*args, **kwargs):
         logging.info('Started %s . . .', function.__name__)
+        t0 = time.time()
         result = function(*args, **kwargs)
-        logging.info('Finished!')
+        logging.info('Finished in ~%.2f ms', (time.time() - t0) * 1000 )
         return result
     return wrapped
 
