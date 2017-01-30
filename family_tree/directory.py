@@ -118,13 +118,6 @@ class Directory:
 
             }
 
-    member_status_schema = Validator({
-        'status' : {
-            'allowed' : list(member_schemas.keys()),
-            'required' : True,
-            }
-        }, allow_unknown = True)
-
     affiliations_schema = Validator({
         'badge' : nonempty_string,
         'chapter_name' : { 'coerce' : to_greek_name },
@@ -144,9 +137,9 @@ class Directory:
         for member in members:
 
             # Make sure the member status field is valid first
-            if not self.member_status_schema.validate(member):
-                msg = 'Invalid member status in:\n{}\nRules violated:\n{}'
-                vals = pformat(member), pformat(self.member_status_schema.errors)
+            if member.get('status') not in self.member_schemas.keys():
+                msg = 'Invalid member status in:\n{}\nStatus must be one of:\n{}'
+                vals = pformat(member), list(self.member_schemas.keys())
                 raise DirectoryError(msg.format(*vals))
 
             # Use the validator for this member type
