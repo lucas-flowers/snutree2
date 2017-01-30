@@ -9,13 +9,13 @@ def retrieve_settings(path):
         settings = yaml.load(f)
 
     settings = settings_schema.validated(settings)
-    if settings:
-        return settings
-    else:
+    if not settings:
         errors = settings_schema.errors
         msg = 'Error{} found in settings file:\n{}'
         vals = '' if len(errors) == 1 else 's', pprint.pformat(errors)
         raise SettingsException(msg.format(*vals))
+
+    return settings
 
 class SettingsException(Exception):
     pass
