@@ -57,17 +57,17 @@ class Directory:
     member_schemas = {
 
             'KeylessInitiate' : {
-                'validator' : Validator({
+                'validator' : {
                     'status' : {'allowed' : ['KeylessInitiate']},
                     'name' : nonempty_string,
                     'big_name' : optional_nonempty_string,
                     'pledge_semester' : optional_semester_like,
-                    }),
+                    },
                 'constructor' : KeylessInitiate
                 },
 
             'Knight' : {
-                'validator' : Validator({
+                'validator' : {
                     'status' : {'allowed' : ['Knight']},
                     'badge' : nonempty_string,
                     'first_name' : nonempty_string,
@@ -75,36 +75,36 @@ class Directory:
                     'last_name' : nonempty_string,
                     'big_badge' : optional_nonempty_string,
                     'pledge_semester' : optional_semester_like,
-                    }),
+                    },
                 'constructor' : Knight,
                 },
 
             'Brother' : {
-                'validator' : Validator({
+                'validator' : {
                     'status' : {'allowed' : ['Brother']},
                     'first_name' : optional_nonempty_string,
                     'preferred_name' : optional_nonempty_string,
                     'last_name' : nonempty_string,
                     'big_badge' : optional_nonempty_string,
                     'pledge_semester' : optional_semester_like,
-                    }),
+                    },
                 'constructor' : Brother,
                 },
 
             'Candidate' : {
-                'validator' : Validator({
+                'validator' : {
                     'status' : {'allowed' : ['Candidate']},
                     'first_name' : nonempty_string,
                     'preferred_name' : optional_nonempty_string,
                     'last_name' : nonempty_string,
                     'big_badge' : optional_nonempty_string,
                     'pledge_semester' : optional_semester_like,
-                    }),
+                    },
                 'constructor' : Candidate,
                 },
 
             'Expelled' : {
-                'validator' : Validator({
+                'validator' : {
                     'status' : {'allowed' : ['Expelled']},
                     'badge' : nonempty_string,
                     'first_name' : optional_nonempty_string,
@@ -112,7 +112,7 @@ class Directory:
                     'last_name' : optional_nonempty_string,
                     'big_badge' : optional_nonempty_string,
                     'pledge_semester' : optional_semester_like,
-                    }),
+                    },
                 'constructor' : Expelled,
                 }
 
@@ -134,6 +134,7 @@ class Directory:
     def set_members(self, members):
 
         self._members = []
+        member_status_map = defaultdict(list)
         for member in members:
 
             # Make sure the member status field is valid first
@@ -142,17 +143,34 @@ class Directory:
                 vals = pformat(member), list(self.member_schemas.keys())
                 raise DirectoryError(msg.format(*vals))
 
-            # Use the validator for this member type
-            validator = self.member_schemas[member['status']]['validator']
+            member_status_map[member['status']].append(member)
 
-            # Validate the other fields
-            if not validator.validate(member):
-                msg = 'Invalid {} in:\n{}\nRules violated:\n{}'
-                vals = member['status'], pformat(member), pformat(validator.errors)
-                raise DirectoryError(msg.format(*vals))
+        members_list = []
+        for status, members in member_status_map.items():
 
-            # Create member object from the normalized dict and add to list
-            member = validator.document
+            validator = Validator({'members' : {
+                'type' : 'list',
+                'schema' : {
+                    'type' : 'dict',
+                    'schema' : self.member_schemas[status]['validator']
+                    }
+                }})
+
+            if not validator.validate({'members' : members}):
+                errors = []
+                for member_errors in validator.errors['members']:
+                    for i, error in member_errors.items():
+                        errors.append({
+                            'Invalid {}'.format(status) : validator.document['members'][i],
+                            'Rules Violated' : error
+                            })
+                msg = 'Errors found:\n{}'
+                raise DirectoryError(msg.format(pformat(errors)))
+
+            members_list += validator.document['members']
+
+        # Create member object from the normalized dict and add to list
+        for member in members_list:
             MemberType = self.member_schemas[member['status']]['constructor']
             self._members.append(MemberType(**member))
 

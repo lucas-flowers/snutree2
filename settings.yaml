@@ -6,17 +6,17 @@ output:
 # dot:
 #   members: ''
 
-# csv:
-#   members: 'directory.csv'
-#   affiliations: 'affiliations.csv'
+csv:
+  members: 'directory.csv'
+  affiliations: 'affiliations.csv'
 
-# MySQL server information
-mysql:
-  host: '***REMOVED***'
-  user: '***REMOVED***'
-  passwd: '***REMOVED***'
-  port: '***REMOVED***'
-  db: '***REMOVED***'
+# # MySQL server information
+# mysql:
+#   host: '***REMOVED***'
+#   user: '***REMOVED***'
+#   passwd: '***REMOVED***'
+#   port: '***REMOVED***'
+#   db: '***REMOVED***'
 
 extra_members: 'brothers_not_knights.csv'
 
