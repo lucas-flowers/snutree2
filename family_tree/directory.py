@@ -164,7 +164,7 @@ class Directory:
                             'Invalid {}'.format(status) : validator.document['members'][i],
                             'Rules Violated' : error
                             })
-                msg = 'Errors found:\n{}'
+                msg = 'Errors found in directory:\n{}'
                 raise DirectoryError(msg.format(pformat(errors)))
 
             members_list += validator.document['members']

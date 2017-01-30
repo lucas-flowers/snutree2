@@ -13,11 +13,11 @@ def retrieve_settings(path):
         errors = settings_schema.errors
         msg = 'Error{} found in settings file:\n{}'
         vals = '' if len(errors) == 1 else 's', pprint.pformat(errors)
-        raise SettingsException(msg.format(*vals))
+        raise SettingsError(msg.format(*vals))
 
     return settings
 
-class SettingsException(Exception):
+class SettingsError(Exception):
     pass
 
 ###############################################################################
