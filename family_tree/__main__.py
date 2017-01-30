@@ -1,6 +1,7 @@
 import os, subprocess, click, logging
 from family_tree.tree import FamilyTree
 from family_tree.settings import retrieve_settings
+from family_tree.utilities import logged
 from family_tree import csv, sql, dotread
 
 @click.command()
@@ -29,18 +30,21 @@ def main(settings_path):
 
     folder = settings['output']['folder']
 
-    logging.info('Start writing to DOT file...')
     dot_filename = os.path.join(folder, settings['output']['name'] + '.dot')
-    with open(dot_filename, 'w+') as dotfile:
-        dotfile.write(dotcode)
-    logging.info('Finished!')
+    write_dotfile(dotcode, dot_filename)
 
-    logging.info('Start writing to PDF...')
     pdf_filename = os.path.join(folder, settings['output']['name'] + '.pdf')
-    with open(dot_filename, 'r') as dotfile, open(pdf_filename, 'wb') as pdffile:
-        subprocess.run(['dot', '-Tpdf'], check=True, stdin=dotfile, stdout=pdffile)
-    logging.info('Finished!')
+    write_pdffile(dotcode, pdf_filename)
 
+@logged
+def write_dotfile(dotcode, filename):
+    with open(filename, 'w+') as dotfile:
+        dotfile.write(dotcode)
+
+@logged
+def write_pdffile(dotcode, pdf_filename):
+    subprocess.run(['dot', '-Tpdf', '-o', pdf_filename],
+            check=True, input=dotcode, universal_newlines=True)
 
 if __name__ == '__main__':
 
