@@ -120,7 +120,7 @@ class Directory:
 
     affiliations_schema = Validator({
         'badge' : nonempty_string,
-        'chapter_name' : { 'coerce' : to_greek_name },
+        'chapter_name' : { 'required' : True, 'coerce' : to_greek_name },
         'other_badge' : nonempty_string
         })
 

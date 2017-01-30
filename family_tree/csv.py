@@ -1,25 +1,5 @@
 import csv
-from voluptuous import Schema, Optional
-from voluptuous.humanize import validate_with_humanized_errors as validate
 from family_tree.directory import Directory
-
-# Required headers in a CSV members file
-csv_member_schema = Schema({
-    'status' : str,
-    Optional('badge') : str,
-    Optional('first_name') : str,
-    Optional('preferred_name') : str,
-    'last_name' : str,
-    'big_badge' : str,
-    'pledge_semester' : str,
-    }, required=True)
-
-# Required headers in a CSV affiliations file
-csv_affiliation_schema = Schema({
-    'badge' : str,
-    'chapter_name' : str,
-    'other_badge' : str,
-    }, required=True)
 
 def retrieve_directory(settings):
 
@@ -46,22 +26,19 @@ def retrieve_members(path):
     members = []
     for row in rows:
 
-        # Make sure all required fields exist
-        validate(row, csv_member_schema)
-
         # The 'Reaffiliate' status is used to mark the extra badges for
         # brothers with more than one badge in the same chapter, so people
         # aren't confused when they find the same person twice. We don't need
         # this for the tree, so ignore all reaffiliate badges.
-        if row['status'] != 'Reaffiliate':
+        if row.get('status') != 'Reaffiliate':
 
-            # Remove keys point to falsy values for each member.
+            # Remove keys pointing to falsy values for each member.
             for key, field in list(row.items()):
                 if not field:
                     del row[key]
 
             # Collapse status categories that indicate types of Knights
-            if row.get('status', None) in ('Active', 'Alumni', 'Left School'):
+            if row.get('status') in ('Active', 'Alumni', 'Left School'):
                 row['status'] = 'Knight'
 
             members.append(row)
@@ -80,18 +57,15 @@ def retrieve_affiliations(path):
     affiliations = []
     for row in rows:
 
-        # Make sure all required fields exist
-        validate(row, csv_affiliation_schema)
-
-        badge = row['badge']
-        other_badge = row['other_badge']
-        chapter_name = row['chapter_name']
+        badge = row.get('badge')
+        other_badge = row.get('other_badge')
+        chapter_name = row.get('chapter_name')
 
         # Primary Delta Alpha badges are already handled separately; don't
         # include the duplicates.
-        if not (chapter_name == 'Delta Alpha' and badge == other_badge):
+        if not (chapter_name == 'Delta Alpha' and badge == other_badge and badge):
 
-            # Delte all keys pointing to falsy values
+            # Delete all keys pointing to falsy values
             for key, field in list(row.items()):
                 if not field:
                     del row[key]
