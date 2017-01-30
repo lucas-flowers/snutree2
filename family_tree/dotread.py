@@ -1,11 +1,14 @@
-import re, pydotplus
+import re, pydotplus, logging
 import networkx.drawing.nx_pydot as nx_pydot
 from family_tree.directory import Directory
+from family_tree.utilities import logged
 
+@logged
 def read_pydot(filename):
     with open(filename, 'r') as f:
         return pydotplus.parser.parse_dot_data(f.read())
 
+@logged
 def pydot_to_nx(pydot):
     '''
     Covert the pydot graph to an nx graph, populate it with members, and add
@@ -97,11 +100,12 @@ def remove_reciprocal_relationships(graph):
             graph.node[child]['big_name'] = None
 
     if pairs:
-        print('The following paths were removed, add to custom edges:')
+        logging.warn('The following paths were removed, add to custom edges:')
         for pair in pairs:
             key1, key2 = tuple(pair)
-            print([key1, key2, key1])
+            logging.warn([key1, key2, key1])
 
+@logged
 def retrieve_members(graph):
 
     return [node_dict for _, node_dict in graph.nodes_iter(data=True)]

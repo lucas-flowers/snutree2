@@ -1,3 +1,4 @@
+import logging
 from family_tree.semester import Semester
 
 # A required string; must be nonempty and not None
@@ -31,4 +32,12 @@ semester_like = {
 optional_semester_like = {
         'coerce' : lambda x : Semester(x) if x != None else None,
         }
+
+def logged(function):
+    def wrapped(*args, **kwargs):
+        logging.info('Started %s . . .', function.__name__)
+        result = function(*args, **kwargs)
+        logging.info('Finished!')
+        return result
+    return wrapped
 

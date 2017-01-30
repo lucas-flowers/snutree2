@@ -2,7 +2,7 @@ from pprint import pformat
 from collections import defaultdict
 from cerberus import Validator
 from family_tree.entity import Knight, Brother, Candidate, Expelled, KeylessInitiate
-from family_tree.utilities import nonempty_string, optional_nonempty_string, optional_semester_like
+from family_tree.utilities import logged, nonempty_string, optional_nonempty_string, optional_semester_like
 
 greek_mapping = {
         'Alpha' : 'A',
@@ -137,6 +137,7 @@ class Directory:
         self.set_members(member_list)
         self.mark_affiliations(affiliations_list)
 
+    @logged
     def set_members(self, members):
 
         self._members = []
@@ -162,6 +163,7 @@ class Directory:
             MemberType = self.member_schemas[member['status']]['constructor']
             self._members.append(MemberType(**member))
 
+    @logged
     def mark_affiliations(self, affiliations):
 
         affiliations_map = defaultdict(list)

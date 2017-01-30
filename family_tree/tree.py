@@ -7,6 +7,7 @@ from family_tree import dot
 from family_tree.color import graphviz_colors
 from family_tree.semester import semester_range
 from family_tree.entity import Member, Custom, UnidentifiedKnight, Knight
+from family_tree.utilities import logged
 
 class FamilyTree:
     '''
@@ -106,6 +107,7 @@ class FamilyTree:
     #### Decoration                                                        ####
     ###########################################################################
 
+    @logged
     def add_members(self, member_list):
         '''
         Add the members to the graph.
@@ -115,6 +117,7 @@ class FamilyTree:
             self.add_entity(member)
 
     @option('custom_nodes')
+    @logged
     def add_custom_nodes(self):
         '''
         Add all custom nodes loaded from settings.
@@ -124,6 +127,7 @@ class FamilyTree:
             self.add_entity(Custom(key, **value))
 
     @option('custom_edges')
+    @logged
     def add_custom_edges(self):
         '''
         Add all custom edges loaded from settings.
@@ -143,6 +147,7 @@ class FamilyTree:
             edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
             self.graph.add_edges_from(edges, dot_attributes=attributes)
 
+    @logged
     def add_member_relationships(self):
         '''
         Connect all Members in the tree, based on the value of their parent
@@ -163,6 +168,7 @@ class FamilyTree:
             pass
 
     @option('no_singletons')
+    @logged
     def remove_singleton_members(self):
         '''
         Remove all members in the tree whose nodes neither have parents nor
@@ -178,6 +184,7 @@ class FamilyTree:
         self.graph.remove_nodes_from(singletons)
 
     @option('family_colors')
+    @logged
     def mark_families(self):
 
         # Members-only graph
@@ -196,6 +203,7 @@ class FamilyTree:
                 self.graph.node[key]['family'] = family_dict
 
     @option('unknowns')
+    @logged
     def add_orphan_parents(self):
         '''
         Add custom entities as parents to members whose nodes have no parents,
@@ -237,6 +245,7 @@ class FamilyTree:
     ###########################################################################
 
     @option('family_colors')
+    @logged
     def add_colors(self):
         '''
         Add colors to member nodes, based on their family. Uses settings
@@ -284,6 +293,7 @@ class FamilyTree:
 
                 node_dict['dot_attributes']['color'] = family_dict['color']
 
+    @logged
     def to_dot_graph(self):
 
         tree = self.create_tree_subgraph('members')

@@ -1,11 +1,12 @@
 import yaml, pprint
 from cerberus import Validator
-from family_tree.utilities import nonempty_string, optional_nonempty_string, optional_boolean, semester_like
+from family_tree.utilities import logged, nonempty_string, optional_nonempty_string, optional_boolean, semester_like
 
 # Cerberus is perfect for the YAML configuration file. I tried voluptuous, but
 # the voluptuous schema was uglier, more complicated, and did not handle None
 # vs. empty vs. key nonexistence very well.
 
+@logged
 def retrieve_settings(path):
 
     with open(path, 'r') as f:
