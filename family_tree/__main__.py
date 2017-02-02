@@ -8,7 +8,8 @@ from family_tree import csv, sql, dotread
 
 @click.command()
 @click.argument('settings_path')
-def main(settings_path):
+@click.option('--seed', default=0)
+def main(settings_path, seed):
     '''
     Create a big-little family tree.
     '''
@@ -17,6 +18,7 @@ def main(settings_path):
     logging.info('Started')
 
     settings = retrieve_settings(settings_path)
+    settings['seed'] = seed or settings.get('seed')
 
     if settings.get('mysql'):
         directory = sql

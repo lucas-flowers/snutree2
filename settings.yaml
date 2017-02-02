@@ -132,5 +132,5 @@ edges:
   - nodes: ['Reorganization', '1051']
 
 # Random seed for ordering family placement
-seed: 54
+seed: 5
 
