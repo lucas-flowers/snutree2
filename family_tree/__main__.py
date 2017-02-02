@@ -14,7 +14,7 @@ def main(settings_path, seed):
     Create a big-little family tree.
     '''
 
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s: %(name)s %(message)s')
     logging.info('Started')
 
     settings = retrieve_settings(settings_path)

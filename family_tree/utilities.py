@@ -33,12 +33,18 @@ optional_semester_like = {
         'coerce' : lambda x : Semester(x) if x != None else None,
         }
 
+
+
 def logged(function):
+
+    logger = logging.getLogger(function.__module__)
+
     def wrapped(*args, **kwargs):
-        logging.info('Started %s . . .', function.__name__)
+        logger.info('%s started . . .', function.__name__)
         t0 = time.time()
         result = function(*args, **kwargs)
-        logging.info('Finished in ~%.2f ms', (time.time() - t0) * 1000 )
+        logger.info('%s finished in ~%.2f ms', function.__name__, (time.time() - t0) * 1000 )
         return result
+
     return wrapped
 
