@@ -2,6 +2,7 @@ import MySQLdb, MySQLdb.cursors
 import family_tree.csv as csv
 from family_tree.semester import Semester
 from family_tree.directory import Directory
+from family_tree.utilities import logged
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 # TODO sort affiliations in each member
@@ -38,6 +39,7 @@ def retrieve_directory(settings):
 
     return Directory(members, affiliations, settings)
 
+@logged
 def retrieve_members(mysql_connection):
     '''
     Get the table of members from the SQL database. Adjust the values for
