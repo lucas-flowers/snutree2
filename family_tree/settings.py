@@ -3,10 +3,12 @@ from cerberus import Validator
 from family_tree.utilities import logged, nonempty_string, optional_nonempty_string, optional_boolean, semester_like
 
 @logged
-def retrieve_settings(path):
+def retrieve_settings(*paths):
 
-    with open(path, 'r') as f:
-        settings = yaml.safe_load(f)
+    settings = {}
+    for path in paths:
+        with open(path, 'r') as f:
+            settings.update(yaml.safe_load(f))
 
     settings = settings_schema.validated(settings)
     if not settings:

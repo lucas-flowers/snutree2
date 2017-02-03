@@ -7,10 +7,10 @@ from family_tree.directory import DirectoryError
 from family_tree import csv, sql, dotread
 
 @click.command()
-@click.argument('settings_path')
+@click.argument('settings_paths', nargs=-1, type=click.Path(exists=True))
 @click.option('--seed', default=0)
 @logged
-def main(settings_path, seed):
+def main(settings_paths, seed):
     '''
     Create a big-little family tree.
     '''
@@ -18,7 +18,7 @@ def main(settings_path, seed):
     logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(asctime)s %(levelname)s: %(name)s - %(message)s')
     logging.info('Started')
 
-    settings = retrieve_settings(settings_path)
+    settings = retrieve_settings(*settings_paths)
     settings['seed'] = seed or settings.get('seed')
 
     if settings.get('mysql'):
