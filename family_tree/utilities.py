@@ -40,10 +40,10 @@ def logged(function):
     logger = logging.getLogger(function.__module__)
 
     def wrapped(*args, **kwargs):
-        logger.info('%s started . . .', function.__name__)
+        logger.debug('%s started . . .', function.__name__)
         t0 = time.time()
         result = function(*args, **kwargs)
-        logger.info('%s finished in ~%.2f ms', function.__name__, (time.time() - t0) * 1000 )
+        logger.debug('%s finished in ~%.2f ms', function.__name__, (time.time() - t0) * 1000 )
         return result
 
     return wrapped
