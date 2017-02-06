@@ -20,6 +20,7 @@ def main(settings_paths, seed):
 
     settings = retrieve_settings(*settings_paths)
     settings['seed'] = seed or settings.get('seed')
+    logging.info('Using seed=%s', settings['seed'])
 
     if settings.get('mysql'):
         directory = sql
