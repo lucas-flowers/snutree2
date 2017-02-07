@@ -1,6 +1,6 @@
 import os, subprocess, click, logging, sys
 from family_tree.tree import FamilyTree, TreeError
-from family_tree.entity import TreeEntityError
+from family_tree.entity import TreeEntityAttributeError
 from family_tree.settings import retrieve_settings, SettingsError
 from family_tree.utilities import logged
 from family_tree.directory import DirectoryError
@@ -69,7 +69,7 @@ if __name__ == '__main__':
 
     try:
         main()
-    except (TreeError, TreeEntityError, DirectoryError, SettingsError) as e:
+    except (TreeError, TreeEntityAttributeError, DirectoryError, SettingsError) as e:
         logging.error(e)
         sys.exit(1)
     except Exception as e:

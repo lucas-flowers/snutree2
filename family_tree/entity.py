@@ -31,7 +31,7 @@ class TreeEntity(metaclass=ABCMeta):
             return self._semester
         else:
             msg = 'missing semester value for entity {!r}'
-            raise TreeEntityError(msg.format(self.get_key()))
+            raise TreeEntityAttributeError(msg.format(self.get_key()))
 
     @semester.setter
     def semester(self, value):
@@ -242,6 +242,6 @@ def combine_names(first_name, preferred_name, last_name, threshold=.5):
 
     return '{} {}'.format(first_name, last_name)
 
-class TreeEntityError(Exception):
+class TreeEntityAttributeError(AttributeError):
     pass
 
