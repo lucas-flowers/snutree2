@@ -3,11 +3,29 @@ from collections import namedtuple
 
 # TODO add indents to final DOT file
 
+
 def dict_to_dot_attributes(attributes_dict, sep=','):
-    return sep.join(
-            ['{}="{}"'.format(key, value)
-                for key, value in sorted(attributes_dict.items())]
-            )
+    '''
+    Form a DOT attribute list from the provided dictionary, using the separator
+    to separate attributes. The attributes will be sorted by key and value, to
+    ensure consistency when compiling (i.e., to make the result code more
+    diffable).
+    '''
+
+    dot_attributes = []
+    for key, value in sorted(attributes_dict.items()):
+
+        # If the value is a string bracketed by '<' and '>', use those
+        if type(value) == str and len(value) >= 2 and (value[0], value[-1]) == ('<', '>'):
+            bracketed_value = '{}'.format(value)
+
+        # Otherwise, use quotes
+        else:
+            bracketed_value = '"{}"'.format(value)
+
+        dot_attributes.append('{}={}'.format(key, bracketed_value))
+
+    return sep.join(dot_attributes)
 
 class DotCommon(metaclass=ABCMeta):
 
