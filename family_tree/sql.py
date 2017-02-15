@@ -1,4 +1,5 @@
 import MySQLdb, MySQLdb.cursors
+from sshtunnel import SSHTunnelForwarder as forwarder
 import family_tree.csv as csv
 from family_tree.directory import Directory
 from family_tree.utilities import logged
@@ -14,12 +15,23 @@ directory_query = "***REMOVED***"
 
 def sshtunnel(fn):
 
-    from sshtunnel import SSHTunnelForwarder as ssh
     def fn_wrapped(settings):
-        with ssh(('***REMOVED***', 22), ssh_pkey="***REMOVED***",
-                remote_bind_address=('127.0.0.1', 3306)) as ssh_cxn:
-            if 'mysql' in settings:
-                settings['mysql']['port'] = ssh_cxn.local_bind_port
+
+        ssh = settings.get('ssh', None)
+        if not ssh:
+            return fn(settings)
+
+        mysql = settings['mysql']
+        remote = ssh['host'], ssh['port']
+        user = ssh['user']
+        key = ssh['public_key']
+        remote_bind = mysql['host'], mysql['port']
+
+        with forwarder(remote,
+                ssh_username=user,
+                ssh_pkey=key,
+                remote_bind_address=remote_bind) as tunnel:
+            mysql['port'] = tunnel.local_bind_port
             return fn(settings)
 
     return fn_wrapped

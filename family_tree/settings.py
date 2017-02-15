@@ -103,6 +103,19 @@ settings_schema = Validator({
             }
         },
 
+    # SSH for remote MySQL databases
+    'ssh' : {
+        'type' : 'dict',
+        'dependencies' : 'mysql',
+        'schema' : {
+            'host' : nonempty_string,
+            'port' : { 'type' : 'integer' },
+            'user' : nonempty_string,
+            'public_key' : nonempty_string,
+            }
+        },
+
+
     # An additional CSV with members
     'extra_members' : optional_nonempty_string,
 

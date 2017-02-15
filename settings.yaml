@@ -10,19 +10,25 @@
 # dot:
 #   members: 'tree.dot'
 
-# Use CSV files as the data source for brothers and big-little pairs
+# # Use CSV files as the data source for brothers and big-little pairs
 # csv:
 #   members: 'directory.csv'
 #   affiliations: 'affiliations.csv'
 
 # Use the website's CiviCRM database as the data source
-# MySQL server information
 mysql:
   host: '***REMOVED***'
+  port: '***REMOVED***'
   user: '***REMOVED***'
   passwd: '***REMOVED***'
-  port: '***REMOVED***'
   db: '***REMOVED***'
+
+# Tunneling information, if this is not actually running on the server
+ssh:
+  host: '***REMOVED***'
+  port: '***REMOVED***'
+  user: '***REMOVED***'
+  public_key: '***REMOVED***'
 
 # Use this CSV as the source for additional members. In our case, these are
 # brothers who were never made knights since, in the old ritual, you could be a
