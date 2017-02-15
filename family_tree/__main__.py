@@ -4,7 +4,7 @@ from family_tree.entity import TreeEntityAttributeError
 from family_tree.settings import retrieve_settings, SettingsError
 from family_tree.utilities import logged
 from family_tree.directory import DirectoryError
-from family_tree import csv, sql, dotread
+from family_tree.readers import csv, sql, dotread
 
 @click.command()
 @click.argument('settings_paths', nargs=-1, type=click.Path(exists=True))

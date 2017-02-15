@@ -1,6 +1,6 @@
 import MySQLdb, MySQLdb.cursors
 from sshtunnel import SSHTunnelForwarder as forwarder
-import family_tree.csv as csv
+from family_tree.readers import csv
 from family_tree.directory import Directory
 from family_tree.utilities import logged
 
