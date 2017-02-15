@@ -1,7 +1,7 @@
 from pprint import pformat
 from collections import defaultdict
 from cerberus import Validator
-from family_tree.entity import Knight, Brother, Candidate, Expelled, KeylessInitiate
+from family_tree.entity import Knight, Brother, Candidate, Expelled, KeylessInitiate # TODO can we get rid of this?
 from family_tree.utilities import logged, nonempty_string, optional_nonempty_string, optional_semester_like
 
 greek_mapping = {

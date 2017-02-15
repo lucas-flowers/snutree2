@@ -1,6 +1,5 @@
 import MySQLdb, MySQLdb.cursors
 import family_tree.csv as csv
-from family_tree.semester import Semester
 from family_tree.directory import Directory
 from family_tree.utilities import logged
 
@@ -60,11 +59,11 @@ def retrieve_members(mysql_connection):
             if not field:
                 del row[key]
 
-        # Convert pledge semester to a Semester object
+        # Combine the season and year into one string
         season = row.pop('pledge_semester_season', None)
         year = row.pop('pledge_semester_year', None)
         if season and year != None:
-            row['pledge_semester'] = Semester(season, year)
+            row['pledge_semester'] = ' '.join((season, str(year)))
 
         # Collapse status categories that indicate types of Knights
         if row.get('status', None) in ('Active', 'Alumni', 'Left School'):
