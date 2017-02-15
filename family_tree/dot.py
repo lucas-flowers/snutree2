@@ -16,16 +16,10 @@ def dict_to_dot_attributes(attributes_dict, sep=','):
 
     dot_attributes = []
     for key, value in sorted(attributes_dict.items()):
-
-        # If the value is a string bracketed by '<' and '>', use those
-        if type(value) == str and len(value) >= 2 and (value[0], value[-1]) == ('<', '>'):
-            bracketed_value = '{}'.format(value)
-
-        # Otherwise, use quotes
-        else:
-            bracketed_value = '"{}"'.format(value)
-
-        dot_attributes.append('{}={}'.format(key, bracketed_value))
+        # If the value is a string bracketed by '<' and '>', use those instead
+        bracketed = type(value) == str and len(value) > 1 and value[0::len(value)-1] == '<>'
+        template = '{}="{}"' if not bracketed else '{}={}'
+        dot_attributes.append(template.format(key, value))
 
     return sep.join(dot_attributes)
 
