@@ -1,8 +1,10 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 
-# TODO add indents to final DOT file
+TABSTOP = 4
 
+def indent(indent_level):
+    return TABSTOP * indent_level * ' '
 
 def dict_to_dot_attributes(attributes_dict, sep=','):
     '''
@@ -34,7 +36,7 @@ class DotCommon(metaclass=ABCMeta):
         self.attributes = attributes or {}
 
     @abstractmethod
-    def to_dot(self):
+    def to_dot(self, indent=0):
         pass
 
 class Graph(DotCommon):
@@ -52,20 +54,27 @@ class Graph(DotCommon):
         self.children = children or []
         super().__init__(key, attributes)
 
-    def to_dot(self):
+    def to_dot(self, indent_level=0):
 
         lines = []
-        lines.append('{} "{}" {{'.format(self.graph_type, self.key))
+
+        template = '{}{} "{}" {{'
+        values = indent(indent_level), self.graph_type, self.key
+        lines.append(template.format(*values))
 
         if self.attributes:
-            template = '{};'
-            value = dict_to_dot_attributes(self.attributes, sep=';\n')
-            lines.append(template.format(value))
+            sep = ';\n{}'.format(indent(indent_level+1))
+            attributes = dict_to_dot_attributes(self.attributes, sep=sep)
+            template = '{}{};'
+            values = indent(indent_level+1), attributes
+            lines.append(template.format(*values))
 
         for child in self.children:
-            lines.append(child.to_dot())
+            lines.append(child.to_dot(indent_level+1))
 
-        lines.append('}')
+        template = '{}}}'
+        value = indent(indent_level)
+        lines.append(template.format(value))
 
         return '\n'.join(lines)
 
@@ -82,24 +91,22 @@ class Defaults(DotCommon):
 
         super().__init__(key, attributes)
 
-    def to_dot(self):
-        template = '{} [{}];'
-        values = self.key, dict_to_dot_attributes(self.attributes) or ''
+    def to_dot(self, indent_level=0):
+        attributes = dict_to_dot_attributes(self.attributes) or ''
+        template = '{}{} [{}];'
+        values = indent(indent_level), self.key, attributes
         return template.format(*values)
 
 class Node(DotCommon):
 
-    def to_dot(self):
+    def to_dot(self, indent_level=0):
 
-        attr_string = dict_to_dot_attributes(self.attributes)
+        template = ' [{}]'
+        value = dict_to_dot_attributes(self.attributes)
+        attributes = template.format(value) if value else ''
 
-        if attr_string:
-            template = '"{}" [{}];'
-            values = self.key, attr_string
-        else:
-            template = '"{}";'
-            values = self.key
-
+        template = '{}"{}"{};'
+        values = indent(indent_level), self.key, attributes
         return template.format(*values)
 
 class Edge(DotCommon):
@@ -109,17 +116,14 @@ class Edge(DotCommon):
     def __init__(self, parent_key, child_key, attributes=None):
         super().__init__(Edge.EdgeKey(parent_key, child_key), attributes)
 
-    def to_dot(self):
+    def to_dot(self, indent_level=0):
 
-        attr_string = dict_to_dot_attributes(self.attributes)
+        template = ' [{}]'
+        value = dict_to_dot_attributes(self.attributes)
+        attributes = template.format(value) if value else ''
 
-        if attr_string:
-            template =  '"{}" -> "{}" [{}];'
-            values = self.key.parent, self.key.child, attr_string
-        else:
-            template = '"{}" -> "{}";'
-            values = self.key.parent, self.key.child
-
+        template =  '{}"{}" -> "{}"{};'
+        values = indent(indent_level), self.key.parent, self.key.child, attributes
         return template.format(*values)
 
 class Rank:
@@ -127,8 +131,9 @@ class Rank:
     def __init__(self, keys=None):
         self.keys = keys or []
 
-    def to_dot(self):
-        template =  '{{rank=same {}}};'
-        value = ' '.join(['"{}"'.format(k) for k in sorted(self.keys, key=str)])
-        return template.format(value)
+    def to_dot(self, indent_level=0):
+        keys = ' '.join(['"{}"'.format(k) for k in sorted(self.keys, key=str)])
+        template =  '{}{{rank=same {}}};'
+        values = indent(indent_level), keys
+        return template.format(*values)
 
