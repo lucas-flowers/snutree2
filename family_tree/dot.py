@@ -41,8 +41,7 @@ class Graph(DotCommon):
 
     graph_types = ('graph', 'digraph', 'subgraph')
 
-    def __init__(self, key, graph_type, children=None, attributes=None,
-            node_defaults=None, edge_defaults=None):
+    def __init__(self, key, graph_type, attributes=None, children=None):
 
         if graph_type not in Graph.graph_types:
             msg = 'Expected graph type in {}, but received: {}'
@@ -51,8 +50,6 @@ class Graph(DotCommon):
 
         self.graph_type = graph_type
         self.children = children or []
-        self.node_defaults = node_defaults or {}
-        self.edge_defaults = edge_defaults or {}
         super().__init__(key, attributes)
 
     def to_dot(self):
@@ -61,15 +58,30 @@ class Graph(DotCommon):
         lines.append('{} "{}" {{'.format(self.graph_type, self.key))
         if self.attributes:
             lines.append('{};'.format(dict_to_dot_attributes(self.attributes, sep=';\n')))
-        if self.node_defaults:
-            lines.append('node [{}];'.format(dict_to_dot_attributes(self.node_defaults)))
-        if self.edge_defaults:
-            lines.append('edge [{}];'.format(dict_to_dot_attributes(self.edge_defaults)))
         for child in self.children:
             lines.append(child.to_dot())
         lines.append('}')
 
         return '\n'.join(lines)
+
+class Defaults(DotCommon):
+
+    defaults_types = ('node', 'edge')
+
+    def __init__(self, key, attributes=None):
+
+        if key not in Defaults.defaults_types:
+            msg = 'Expected defaults type in {}, but received: {}'
+            vals = Defaults.defaults_types, key
+            raise ValueError(msg.format(*vals))
+
+        super().__init__(key, attributes)
+
+    def to_dot(self):
+
+        attr_string = dict_to_dot_attributes(self.attributes) or ''
+        return '{} [{}];'.format(self.key, attr_string)
+
 
 class Node(DotCommon):
 
