@@ -56,10 +56,15 @@ class Graph(DotCommon):
 
         lines = []
         lines.append('{} "{}" {{'.format(self.graph_type, self.key))
+
         if self.attributes:
-            lines.append('{};'.format(dict_to_dot_attributes(self.attributes, sep=';\n')))
+            template = '{};'
+            value = dict_to_dot_attributes(self.attributes, sep=';\n')
+            lines.append(template.format(value))
+
         for child in self.children:
             lines.append(child.to_dot())
+
         lines.append('}')
 
         return '\n'.join(lines)
@@ -78,10 +83,9 @@ class Defaults(DotCommon):
         super().__init__(key, attributes)
 
     def to_dot(self):
-
-        attr_string = dict_to_dot_attributes(self.attributes) or ''
-        return '{} [{}];'.format(self.key, attr_string)
-
+        template = '{} [{}];'
+        values = self.key, dict_to_dot_attributes(self.attributes) or ''
+        return template.format(*values)
 
 class Node(DotCommon):
 
@@ -90,9 +94,13 @@ class Node(DotCommon):
         attr_string = dict_to_dot_attributes(self.attributes)
 
         if attr_string:
-            return '"{}" [{}];'.format(self.key, attr_string)
+            template = '"{}" [{}];'
+            values = self.key, attr_string
         else:
-            return '"{}";'.format(self.key)
+            template = '"{}";'
+            values = self.key
+
+        return template.format(*values)
 
 class Edge(DotCommon):
 
@@ -106,9 +114,13 @@ class Edge(DotCommon):
         attr_string = dict_to_dot_attributes(self.attributes)
 
         if attr_string:
-            return '"{}" -> "{}" [{}];'.format(self.key.parent, self.key.child, attr_string)
+            template =  '"{}" -> "{}" [{}];'
+            values = self.key.parent, self.key.child, attr_string
         else:
-            return '"{}" -> "{}";'.format(self.key.parent, self.key.child)
+            template = '"{}" -> "{}";'
+            values = self.key.parent, self.key.child
+
+        return template.format(*values)
 
 class Rank:
 
@@ -116,7 +128,7 @@ class Rank:
         self.keys = keys or []
 
     def to_dot(self):
-        return '{{rank=same {}}};'.format(
-                ' '.join(['"{}"'.format(key) for key in sorted(self.keys, key=str)])
-                )
+        template =  '{{rank=same {}}};'
+        value = ' '.join(['"{}"'.format(k) for k in sorted(self.keys, key=str)])
+        return template.format(value)
 
