@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from family_tree.cli import main
+from snutree.cli import main
 
 '''
 Wrapper for running the family tree program directly.
