@@ -1,4 +1,5 @@
 import csv
+from ..entity import Candidate, Brother, Knight, Expelled
 from ..directory import Directory
 from ..utilities import logged
 
@@ -13,7 +14,8 @@ def retrieve_directory(settings):
     else:
         affiliations = {}
 
-    return Directory(members, affiliations, settings)
+    return Directory(members, affiliations, settings, 
+            [Candidate, Brother, Knight, Expelled])
 
 @logged
 def retrieve_members(path):

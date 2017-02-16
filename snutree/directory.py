@@ -1,8 +1,7 @@
 from pprint import pformat
 from collections import defaultdict
 from cerberus import Validator
-from .entity import Knight, Brother, Candidate, Expelled, KeylessInitiate # TODO can we get rid of this?
-from .utilities import logged, nonempty_string, optional_nonempty_string, optional_semester_like
+from .utilities import logged, nonempty_string
 
 greek_mapping = {
         'Alpha' : 'A',
@@ -54,77 +53,18 @@ class Directory:
     affiliations are unique.
     '''
 
-    member_schemas = {
-
-            'KeylessInitiate' : {
-                'schema' : {
-                    'status' : {'allowed' : ['KeylessInitiate']},
-                    'name' : nonempty_string,
-                    'big_name' : optional_nonempty_string,
-                    'pledge_semester' : optional_semester_like,
-                    },
-                'constructor' : KeylessInitiate
-                },
-
-            'Knight' : {
-                'schema' : {
-                    'status' : {'allowed' : ['Knight']},
-                    'badge' : nonempty_string,
-                    'first_name' : nonempty_string,
-                    'preferred_name' : optional_nonempty_string,
-                    'last_name' : nonempty_string,
-                    'big_badge' : optional_nonempty_string,
-                    'pledge_semester' : optional_semester_like,
-                    },
-                'constructor' : Knight,
-                },
-
-            'Brother' : {
-                'schema' : {
-                    'status' : {'allowed' : ['Brother']},
-                    'first_name' : optional_nonempty_string,
-                    'preferred_name' : optional_nonempty_string,
-                    'last_name' : nonempty_string,
-                    'big_badge' : optional_nonempty_string,
-                    'pledge_semester' : optional_semester_like,
-                    },
-                'constructor' : Brother,
-                },
-
-            'Candidate' : {
-                'schema' : {
-                    'status' : {'allowed' : ['Candidate']},
-                    'first_name' : nonempty_string,
-                    'preferred_name' : optional_nonempty_string,
-                    'last_name' : nonempty_string,
-                    'big_badge' : optional_nonempty_string,
-                    'pledge_semester' : optional_semester_like,
-                    },
-                'constructor' : Candidate,
-                },
-
-            'Expelled' : {
-                'schema' : {
-                    'status' : {'allowed' : ['Expelled']},
-                    'badge' : nonempty_string,
-                    'first_name' : optional_nonempty_string,
-                    'preferred_name' : optional_nonempty_string,
-                    'last_name' : optional_nonempty_string,
-                    'big_badge' : optional_nonempty_string,
-                    'pledge_semester' : optional_semester_like,
-                    },
-                'constructor' : Expelled,
-                }
-
-            }
-
     affiliations_schema = Validator({
         'badge' : nonempty_string,
         'chapter_name' : { 'required' : True, 'coerce' : to_greek_name },
         'other_badge' : nonempty_string
         })
 
-    def __init__(self, member_list, affiliations_list, settings_dict):
+    def __init__(self, member_list, affiliations_list, settings_dict, member_types):
+
+        self.member_schemas = {}
+        for typ in member_types:
+            for allowed in typ.schema['status']['allowed']:
+                self.member_schemas[allowed] = typ.get_schema()
 
         self.settings = settings_dict
         self.set_members(member_list)

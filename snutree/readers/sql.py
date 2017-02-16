@@ -1,6 +1,7 @@
 import MySQLdb, MySQLdb.cursors
 from sshtunnel import SSHTunnelForwarder as forwarder
 from . import csv
+from ..entity import Candidate, Brother, Knight, Expelled
 from ..directory import Directory
 from ..utilities import logged
 
@@ -48,7 +49,8 @@ def retrieve_directory(settings):
 
     affiliations = retrieve_affiliations(cxn)
 
-    return Directory(members, affiliations, settings)
+    return Directory(members, affiliations, settings,
+            [Candidate, Brother, Knight, Expelled])
 
 @logged
 def retrieve_members(mysql_connection):

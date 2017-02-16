@@ -1,5 +1,6 @@
-from abc import ABCMeta, abstractmethod
 import difflib
+from abc import ABCMeta, abstractmethod
+from .utilities import nonempty_string, optional_nonempty_string, optional_semester_like
 
 class TreeEntity(metaclass=ABCMeta):
     '''
@@ -70,6 +71,9 @@ class Member(TreeEntity, metaclass=ABCMeta):
     '''
     A member of the organization. Every member provides these functions:
 
+        + get_validator(cls): Returns a validator used to validate a row in the
+        Directory that might contain this type of member.
+
         + get_dot_label(self): Returns the DOT label for the member, to be used
         in the member class's get_dot_attributes function.
 
@@ -79,6 +83,9 @@ class Member(TreeEntity, metaclass=ABCMeta):
         member's big brother.
     '''
 
+    @classmethod
+    def get_schema(cls):
+        return { 'schema' : cls.schema, 'constructor' : cls }
 
     @abstractmethod
     def get_dot_label(self):
@@ -88,6 +95,16 @@ class Member(TreeEntity, metaclass=ABCMeta):
         return {'label' : self.get_dot_label()}
 
 class Knight(Member):
+
+    schema = {
+            'status' : {'allowed' : ['Knight']},
+            'badge' : nonempty_string,
+            'first_name' : nonempty_string,
+            'preferred_name' : optional_nonempty_string,
+            'last_name' : nonempty_string,
+            'big_badge' : optional_nonempty_string,
+            'pledge_semester' : optional_semester_like,
+            }
 
     def __init__(self,
             status=None,
@@ -114,6 +131,13 @@ class Knight(Member):
 
 class KeylessInitiate(Knight):
 
+    schema = {
+            'status' : {'allowed' : ['KeylessInitiate']},
+            'name' : nonempty_string,
+            'big_name' : optional_nonempty_string,
+            'pledge_semester' : optional_semester_like,
+            }
+
     def __init__(self,
             status=None,
             name=None,
@@ -132,6 +156,15 @@ class KeylessInitiate(Knight):
         return self.key
 
 class Brother(Member):
+
+    schema = {
+            'status' : {'allowed' : ['Brother']},
+            'first_name' : optional_nonempty_string,
+            'preferred_name' : optional_nonempty_string,
+            'last_name' : nonempty_string,
+            'big_badge' : optional_nonempty_string,
+            'pledge_semester' : optional_semester_like,
+            }
 
     bid = 0
 
@@ -161,6 +194,15 @@ class Brother(Member):
         return '{}\\nΔA Brother'.format(self.name)
 
 class Candidate(Member):
+
+    schema = {
+            'status' : {'allowed' : ['Candidate']},
+            'first_name' : nonempty_string,
+            'preferred_name' : optional_nonempty_string,
+            'last_name' : nonempty_string,
+            'big_badge' : optional_nonempty_string,
+            'pledge_semester' : optional_semester_like,
+            }
 
     cid = 0
 
@@ -193,6 +235,16 @@ class Expelled(Knight):
     '''
     A member that was initiated, but was then expelled.
     '''
+
+    schema = {
+            'status' : {'allowed' : ['Expelled']},
+            'badge' : nonempty_string,
+            'first_name' : optional_nonempty_string,
+            'preferred_name' : optional_nonempty_string,
+            'last_name' : optional_nonempty_string,
+            'big_badge' : optional_nonempty_string,
+            'pledge_semester' : optional_semester_like,
+            }
 
     def __init__(self,
             status=None,

@@ -1,5 +1,6 @@
 import re, pydotplus, logging
 import networkx.drawing.nx_pydot as nx_pydot
+from ..entity import KeylessInitiate
 from ..directory import Directory
 from ..utilities import logged
 
@@ -121,5 +122,5 @@ def retrieve_directory(settings):
     pydot = read_pydot(settings['dot']['members'])
     graph = pydot_to_nx(pydot)
     members = retrieve_members(graph)
-    return Directory(members, {}, settings)
+    return Directory(members, {}, settings, [KeylessInitiate])
 
