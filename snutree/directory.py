@@ -73,7 +73,6 @@ class Directory:
     @logged
     def set_members(self, members):
 
-        self._members = []
         member_status_map = defaultdict(list)
         for member in members:
 
@@ -110,6 +109,7 @@ class Directory:
             members_list += validator.document['members']
 
         # Create member object from the normalized dict and add to list
+        self._members = []
         for member in members_list:
             MemberType = self.member_schemas[member['status']]['constructor']
             self._members.append(MemberType(**member))
