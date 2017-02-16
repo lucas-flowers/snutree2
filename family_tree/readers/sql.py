@@ -1,8 +1,8 @@
 import MySQLdb, MySQLdb.cursors
 from sshtunnel import SSHTunnelForwarder as forwarder
-from family_tree.readers import csv
-from family_tree.directory import Directory
-from family_tree.utilities import logged
+from . import csv
+from ..directory import Directory
+from ..utilities import logged
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 # TODO sort affiliations in each member

@@ -1,10 +1,10 @@
 import os, subprocess, click, logging, sys
-from family_tree.tree import FamilyTree, TreeError
-from family_tree.entity import TreeEntityAttributeError
-from family_tree.settings import retrieve_settings, SettingsError
-from family_tree.utilities import logged
-from family_tree.directory import DirectoryError
-from family_tree.readers import csv, sql, dotread
+from .tree import FamilyTree, TreeError
+from .entity import TreeEntityAttributeError
+from .settings import retrieve_settings, SettingsError
+from .utilities import logged
+from .directory import DirectoryError
+from .readers import csv, sql, dotread
 
 def main():
 

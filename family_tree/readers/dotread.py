@@ -1,7 +1,7 @@
 import re, pydotplus, logging
 import networkx.drawing.nx_pydot as nx_pydot
-from family_tree.directory import Directory
-from family_tree.utilities import logged
+from ..directory import Directory
+from ..utilities import logged
 
 @logged
 def read_pydot(filename):

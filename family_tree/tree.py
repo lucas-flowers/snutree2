@@ -4,10 +4,10 @@ from collections import deque
 from networkx.algorithms.components import weakly_connected_components
 from networkx.algorithms.cycles import find_cycle
 from networkx.exception import NetworkXNoCycle
-from family_tree import dot
-from family_tree.semester import semester_range
-from family_tree.entity import Member, Custom, UnidentifiedKnight, Knight
-from family_tree.utilities import logged
+from . import dot
+from .semester import semester_range
+from .entity import Member, Custom, UnidentifiedKnight, Knight
+from .utilities import logged
 
 class FamilyTree:
     '''

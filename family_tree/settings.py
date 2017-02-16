@@ -1,6 +1,6 @@
 import yaml, pprint
 from cerberus import Validator
-from family_tree.utilities import logged, nonempty_string, optional_nonempty_string, optional_boolean, semester_like
+from .utilities import logged, nonempty_string, optional_nonempty_string, optional_boolean, semester_like
 
 @logged
 def retrieve_settings(*paths):

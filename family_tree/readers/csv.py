@@ -1,6 +1,6 @@
 import csv
-from family_tree.directory import Directory
-from family_tree.utilities import logged
+from ..directory import Directory
+from ..utilities import logged
 
 def retrieve_directory(settings):
 

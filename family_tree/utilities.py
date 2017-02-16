@@ -1,5 +1,5 @@
 import logging, time
-from family_tree.semester import Semester
+from .semester import Semester
 
 # A required string; must be nonempty and not None
 nonempty_string = {
