@@ -1,7 +1,6 @@
-import sys
 from collections import OrderedDict
-from nose.tools import *
-from family_tree.dot import *
+from nose.tools import assert_equals
+from snutree.dot import Node, Edge, Rank, Graph
 from inspect import cleandoc as trim
 
 

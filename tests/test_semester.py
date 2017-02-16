@@ -1,6 +1,6 @@
-from nose.tools import *
+import nose.tools as nt
 from itertools import permutations
-from family_tree.semester import Semester, semester_range
+from snutree.semester import Semester, semester_range
 
 def test_comparisons():
 
@@ -14,57 +14,57 @@ def test_comparisons():
 
     # General
     for P in permutations(semesters):
-        assert_equals(sorted(P), semesters)
+        nt.assert_equals(sorted(P), semesters)
 
     # Make sure total ordering worked
-    assert_not_equal(b, c)
-    assert_greater(e, c)
-    assert_greater_equal(e, c)
-    assert_greater_equal(e, e)
+    nt.assert_not_equal(b, c)
+    nt.assert_greater(e, c)
+    nt.assert_greater_equal(e, c)
+    nt.assert_greater_equal(e, e)
 
     # Min and max
-    assert_equals(max(a, b, c), c)
-    assert_equals(min(a, e, d), a)
+    nt.assert_equals(max(a, b, c), c)
+    nt.assert_equals(min(a, e, d), a)
 
 def test_incdec():
 
     a = Semester('Fall 1995')
     a += 1
     a -= 1
-    assert_equals(a, Semester('Fall 1995'))
+    nt.assert_equals(a, Semester('Fall 1995'))
 
     b = Semester('Spring 1995')
     b += 1
     b -= 1
-    assert_equals(b, Semester('Spring 1995'))
+    nt.assert_equals(b, Semester('Spring 1995'))
 
 def test_string():
 
-    assert_equals(str(Semester('Fall 0001933')), 'Fall 1933')
-    assert_equals(str(Semester('Spring 323')), 'Spring 323')
+    nt.assert_equals(str(Semester('Fall 0001933')), 'Fall 1933')
+    nt.assert_equals(str(Semester('Spring 323')), 'Spring 323')
 
 def test_math():
 
-    assert_is_instance(Semester('Fall 2001') + 8, Semester)
-    assert_equals(str(Semester('Fall 2001') + 8), 'Fall 2005')
-    assert_equals(str(8 + Semester('Fall 2001')), 'Fall 2005')
-    assert_equals(str(Semester('Fall 2001') + Semester('Spring 2001')), 'Fall 4002')
+    nt.assert_is_instance(Semester('Fall 2001') + 8, Semester)
+    nt.assert_equals(str(Semester('Fall 2001') + 8), 'Fall 2005')
+    nt.assert_equals(str(8 + Semester('Fall 2001')), 'Fall 2005')
+    nt.assert_equals(str(Semester('Fall 2001') + Semester('Spring 2001')), 'Fall 4002')
 
 def test_subtract():
 
-    assert_equals(str(Semester('Fall 2001') - 1), 'Spring 2001')
+    nt.assert_equals(str(Semester('Fall 2001') - 1), 'Spring 2001')
 
 def test_range():
 
     a = Semester('Fall 2000')
     b = Semester('Spring 2002')
 
-    assert_equals(
+    nt.assert_equals(
             [str(s) for s in semester_range(a, b)],
             ['Fall 2000', 'Spring 2001', 'Fall 2001'],
             )
 
-    assert_equals(
+    nt.assert_equals(
             list(semester_range(a, b)),
             [Semester(s) for s in ('Fall 2000', 'Spring 2001', 'Fall 2001')],
             )
