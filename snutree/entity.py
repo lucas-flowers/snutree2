@@ -114,7 +114,12 @@ class Knight(Member):
 
 class KeylessInitiate(Knight):
 
-    def __init__(self, status=None, name=None, pledge_semester=None, big_name=None):
+    def __init__(self,
+            status=None,
+            name=None,
+            pledge_semester=None,
+            big_name=None
+            ):
 
         self.key = name
         self.semester = pledge_semester
