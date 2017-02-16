@@ -84,7 +84,7 @@ class Directory:
 
             member_status_map[member['status']].append(member)
 
-        members_list = []
+        self._members = []
         for status, members in member_status_map.items():
 
             validator = Validator({'members' : {
@@ -106,13 +106,9 @@ class Directory:
                 msg = 'Errors found in directory:\n{}'
                 raise DirectoryError(msg.format(pformat(errors)))
 
-            members_list += validator.document['members']
-
-        # Create member object from the normalized dict and add to list
-        self._members = []
-        for member in members_list:
-            MemberType = self.member_schemas[member['status']]['constructor']
-            self._members.append(MemberType(**member))
+            MemberType = self.member_schemas[status]['constructor']
+            for member in validator.document['members']:
+                self._members.append(MemberType(**member))
 
     @logged
     def mark_affiliations(self, affiliations):
