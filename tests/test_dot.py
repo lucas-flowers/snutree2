@@ -1,8 +1,15 @@
 from collections import OrderedDict
-from nose.tools import assert_equals
-from snutree.dot import Node, Edge, Rank, Graph
+from nose.tools import assert_equals, assert_raises
+from snutree.dot import Defaults, Node, Edge, Rank, Graph
 from inspect import cleandoc as trim
 
+def test_Defaults():
+
+    assert_raises(ValueError, Defaults, 'key', attributes={'label' : 'A label'})
+
+    defaults = Defaults('node', attributes={'label' : 'A label'})
+    assert_equals(defaults.to_dot(), 'node [label="A label"];')
+    assert_equals(defaults.to_dot(3), '            node [label="A label"];')
 
 def test_Node():
 
