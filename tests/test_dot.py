@@ -49,37 +49,38 @@ def test_Graph():
 
     rank = Rank([node.key for node in (node1, node2)])
 
+    sub_edge_defaults = Defaults('edge', sorted_dict({'label' : 'this'}))
+
     subgraph = Graph(
             'something',
             'subgraph',
-            [Node('S1', sorted_dict({'label' : 5})), Node('S2')],
-            None,
-            default_edge_attributes=sorted_dict({'label' : 'this'}),
+            children=[sub_edge_defaults, Node('S1', sorted_dict({'label' : 5})), Node('S2')],
             )
+
+    node_defaults = Defaults('node', sorted_dict({'width' : 4, 'penwidth' : '5'}))
+    edge_defaults = Defaults('edge', sorted_dict({'width' : 5, 'penwidth' : '4'}))
 
     graph = Graph(
             'tree',
             'digraph',
-            [node1, edge, node2, subgraph, rank],
-            sorted_dict({'size' : 5, 'width' : 'gold'}),
-            sorted_dict({'width' : 4, 'penwidth' : '5'}),
-            sorted_dict({'width' : 5, 'penwidth' : '4'}),
+            attributes={'size' : 5, 'width' : 'gold'},
+            children=[node_defaults, edge_defaults, node1, edge, node2, subgraph, rank],
             )
 
     assert_equals(graph.to_dot(), trim('''
         digraph "tree" {
-        size="5";
-        width="gold";
-        node [penwidth="5",width="4"];
-        edge [penwidth="4",width="5"];
-        "Key One" [color="piss yellow",label="A Label"];
-        "Key One" -> "Key Two";
-        "Key Two";
-        subgraph "something" {
-        edge [label="this"];
-        "S1" [label="5"];
-        "S2";
-        }
-        {rank=same "Key One" "Key Two"};
+            size="5";
+            width="gold";
+            node [penwidth="5",width="4"];
+            edge [penwidth="4",width="5"];
+            "Key One" [color="piss yellow",label="A Label"];
+            "Key One" -> "Key Two";
+            "Key Two";
+            subgraph "something" {
+                edge [label="this"];
+                "S1" [label="5"];
+                "S2";
+            }
+            {rank=same "Key One" "Key Two"};
         }'''))
 
