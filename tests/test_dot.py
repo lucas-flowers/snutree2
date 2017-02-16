@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from nose.tools import assert_equals, assert_raises
 from snutree.dot import Defaults, Node, Edge, Rank, Graph
 from inspect import cleandoc as trim
@@ -37,11 +36,7 @@ def test_Rank():
 
 def test_Graph():
 
-    # Sorting is necessary to ensure consistent equality checks with the output
-    # string. The sorting key is the dict key.
-    sorted_dict = lambda d : OrderedDict(sorted(d.items(), key=lambda t : t[0]))
-
-    node1 = Node('Key One', sorted_dict({'label' : 'A Label', 'color' : 'piss yellow'}))
+    node1 = Node('Key One', {'label' : 'A Label', 'color' : 'piss yellow'})
     node2 = Node('Key Two')
 
     edge = Edge(node1.key, node2.key)
@@ -49,16 +44,16 @@ def test_Graph():
 
     rank = Rank([node.key for node in (node1, node2)])
 
-    sub_edge_defaults = Defaults('edge', sorted_dict({'label' : 'this'}))
+    sub_edge_defaults = Defaults('edge', {'label' : 'this'})
 
     subgraph = Graph(
             'something',
             'subgraph',
-            children=[sub_edge_defaults, Node('S1', sorted_dict({'label' : 5})), Node('S2')],
+            children=[sub_edge_defaults, Node('S1', {'label' : 5}), Node('S2')],
             )
 
-    node_defaults = Defaults('node', sorted_dict({'width' : 4, 'penwidth' : '5'}))
-    edge_defaults = Defaults('edge', sorted_dict({'width' : 5, 'penwidth' : '4'}))
+    node_defaults = Defaults('node', {'width' : 4, 'penwidth' : '5'})
+    edge_defaults = Defaults('edge', {'width' : 5, 'penwidth' : '4'})
 
     graph = Graph(
             'tree',
