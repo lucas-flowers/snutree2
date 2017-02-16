@@ -1,4 +1,4 @@
-from .family_tree import main
+from .cli import main
 
 '''
 Execute the package as a script.

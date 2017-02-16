@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from family_tree.family_tree import main
+from family_tree.cli import main
 
 '''
 Wrapper for running the family tree program directly.

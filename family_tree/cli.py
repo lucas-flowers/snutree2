@@ -9,7 +9,7 @@ from .readers import csv, sql, dotread
 def main():
 
     try:
-        command()
+        cli()
     except (TreeError, TreeEntityAttributeError, DirectoryError, SettingsError) as e:
         logging.error(e)
         sys.exit(1)
@@ -22,7 +22,7 @@ def main():
 @click.option('--seed', default=0)
 @click.option('--debug/--no-debug', default=False)
 @logged
-def command(settings_paths, seed, debug):
+def cli(settings_paths, seed, debug):
     '''
     Create a big-little family tree.
     '''
