@@ -1,5 +1,5 @@
 import csv
-from ..entity import Candidate, Brother, Knight, Expelled
+from ..schemas.sigmanu import Candidate, Brother, Knight, Expelled
 from ..directory import Directory
 from ..utilities import logged
 

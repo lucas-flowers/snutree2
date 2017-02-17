@@ -1,6 +1,6 @@
 import re, pydotplus, logging
 import networkx.drawing.nx_pydot as nx_pydot
-from ..entity import KeylessInitiate
+from ..schemas import KeylessInitiate
 from ..directory import Directory
 from ..utilities import logged
 
