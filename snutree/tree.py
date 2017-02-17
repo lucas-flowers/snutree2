@@ -23,10 +23,10 @@ class FamilyTree:
     outside the directory (either through custom edges or special code).
     '''
 
-    def __init__(self, directory):
+    def __init__(self, directory, settings=None):
 
         self.graph = nx.DiGraph()
-        self.settings = directory.settings
+        self.settings = settings or {}
 
         # Add all the entities in the settings and directory provided
         self.add_members(directory.get_members())

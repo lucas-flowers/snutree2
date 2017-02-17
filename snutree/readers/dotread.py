@@ -1,15 +1,10 @@
 import re, pydotplus, logging
 import networkx.drawing.nx_pydot as nx_pydot
-from ..schemas import KeylessInitiate
-from ..directory import Directory
-from ..utilities import logged
 
-@logged
 def read_pydot(filename):
     with open(filename, 'r') as f:
         return pydotplus.parser.parse_dot_data(f.read())
 
-@logged
 def pydot_to_nx(pydot):
     '''
     Covert the pydot graph to an nx graph, populate it with members, and add
@@ -26,8 +21,7 @@ def add_member_dicts(graph):
 
     # Add name and status from nodes
     for key in graph.nodes_iter():
-        row = {'status' : 'KeylessInitiate', 'name' : key}
-        graph.node[key].update(row)
+        graph.node[key].update({'name' : key})
 
     # Add big brothers from edges
     for parent, child in graph.edges_iter():
@@ -106,21 +100,18 @@ def remove_reciprocal_relationships(graph):
             key1, key2 = tuple(pair)
             logging.warn([key1, key2, key1])
 
-@logged
-def retrieve_members(graph):
+def get_rows(graph):
 
     return [node_dict for _, node_dict in graph.nodes_iter(data=True)]
 
-def retrieve_directory(settings):
+def get_table(path):
     '''
     Read a DOT file into a pydotplus graph, convert that graph into an
-    intermediate networkx graph (they're easier to deal with), get a list of
-    member entries from the networkx graph, and then return a new Directory
-    using those members.
+    intermediate networkx graph (they're easier to deal with), and get a list
+    of member entries from the networkx graph.
     '''
 
-    pydot = read_pydot(settings['dot']['members'])
+    pydot = read_pydot(path)
     graph = pydot_to_nx(pydot)
-    members = retrieve_members(graph)
-    return Directory(members, {}, settings, [KeylessInitiate])
+    return get_rows(graph)
 

@@ -1,51 +1,14 @@
 from pprint import pformat
 from collections import defaultdict
 from cerberus import Validator
-from .utilities import logged, nonempty_string
-
-greek_mapping = {
-        'Alpha' : 'A',
-        'Beta' : 'B',
-        'Gamma' : 'Γ',
-        'Delta' : 'Δ',
-        'Epsilon' : 'E',
-        'Zeta' : 'Z',
-        'Eta' : 'H',
-        'Theta' : 'Θ',
-        'Iota' : 'I',
-        'Kappa' : 'K',
-        'Lambda' : 'Λ',
-        'Mu' : 'M',
-        'Nu' : 'N',
-        'Xi' : 'Ξ',
-        'Omicron' : 'O',
-        'Pi' : 'Π',
-        'Rho' : 'P',
-        'Sigma' : 'Σ',
-        'Tau' : 'T',
-        'Upsilon' : 'Y',
-        'Phi' : 'Φ',
-        'Chi' : 'X',
-        'Psi' : 'Ψ',
-        'Omega' : 'Ω',
-        '(A)' : '(A)', # Because of Eta Mu (A) Chapter
-        '(B)' : '(B)', # Because of Eta Mu (B) Chapter
-        }
-
-def to_greek_name(english_name):
-    try:
-        return ''.join([greek_mapping[w] for w in english_name.split(' ')])
-    except KeyError:
-        msg = 'chapter names must be made of words in {}'
-        val = sorted(greek_mapping.keys())
-        raise ValueError(msg.format(val))
+from .utilities import logged
+from .tree import FamilyTree
 
 class Directory:
     '''
     This class is used to store data from either a CSV file or a SQL query. It
     is an intermediate form before the data is turned into a tree. It stores a
-    list of brothers from the directory (with affiliations) and a dictionary of
-    YAML settings.
+    list of brothers from the directory.
 
     The Directory class guarantees that entries in its members and affiliations
     lists will be dictionaries that follow the following schema. Furthermore,
@@ -53,22 +16,14 @@ class Directory:
     affiliations are unique.
     '''
 
-    affiliations_schema = Validator({
-        'badge' : nonempty_string,
-        'chapter_name' : { 'required' : True, 'coerce' : to_greek_name },
-        'other_badge' : nonempty_string
-        })
-
-    def __init__(self, member_list, affiliations_list, settings_dict, member_types):
+    def __init__(self, member_list, member_types):
 
         self.member_schemas = {}
         for typ in member_types:
             for allowed in typ.schema['status']['allowed']:
                 self.member_schemas[allowed] = typ.get_schema()
 
-        self.settings = settings_dict
         self.set_members(member_list)
-        self.mark_affiliations(affiliations_list)
 
     @logged
     def set_members(self, members):
@@ -110,45 +65,16 @@ class Directory:
             for member in validator.document['members']:
                 self._members.append(MemberType(**member))
 
-    @logged
-    def mark_affiliations(self, affiliations):
-
-        affiliations_map = defaultdict(list)
-        used_affiliations = set()
-        for affiliation in affiliations:
-
-            # Validate affiliation format
-            if not self.affiliations_schema.validate(affiliation):
-                msg = 'Invalid affiliation:\n{}\nRules violated:\n{}'
-                vals = pformat(affiliation), pformat(self.affiliations_schema.errors)
-                raise DirectoryError(msg.format(*vals))
-
-            # Catch duplicate affiliations
-            chapter_name = affiliation['chapter_name']
-            other_badge = affiliation['other_badge']
-            if (chapter_name, other_badge) in used_affiliations:
-                msg = 'Duplicate affiliation:\n{}\nBased on key:\n{}'
-                vals = pformat(affiliation), (chapter_name, other_badge)
-                raise DirectoryError(msg.format(*vals))
-            else:
-                used_affiliations.add((chapter_name, other_badge))
-
-            # Used normalized dict
-            affiliation = self.affiliations_schema.document
-            badge = affiliation['badge']
-            chapter_designation = affiliation['chapter_name'] # Normalized
-            other_badge = affiliation['other_badge']
-
-            # Add affiliation to the mapping
-            other_designation = '{} {}'.format(chapter_designation, other_badge)
-            affiliations_map[badge].append(other_designation)
-
-        # Add all affiliations to the respective members
-        for member in self._members:
-            member.affiliations = affiliations_map[member.get_key()]
-
     def get_members(self):
         return self._members
+
+    def to_dotcode(self, tree_cnf):
+        tree = FamilyTree(self, tree_cnf)
+        dotgraph = tree.to_dot_graph()
+        dotcode = dotgraph.to_dot()
+        return dotcode
+
+
 
 class DirectoryError(Exception):
     pass

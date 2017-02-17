@@ -2,10 +2,13 @@ import difflib
 from ..entity import Member, Initiate
 from ..utilities import nonempty_string, optional_nonempty_string, optional_semester_like
 
+# TODO for SQL, make sure DA affiliations agree with the external ID.
+# TODO sort affiliations in each member
+
 class Knight(Initiate):
 
     schema = {
-            'status' : {'allowed' : ['Knight']},
+            'status' : {'allowed' : ['Active', 'Alumni', 'Left School']},
             'badge' : nonempty_string,
             'first_name' : nonempty_string,
             'preferred_name' : optional_nonempty_string,
