@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import subprocess, click, logging, sys, yaml, csv
+from pathlib import Path
 from cerberus import Validator
 from snutree.readers import sql
 from snutree.schemas.sigmanu import Candidate, Brother, Knight, Expelled
@@ -21,14 +22,13 @@ def main():
 
 # TODO shorten option names
 @click.command()
-@click.argument('tables', nargs=-1, type=click.Path(exists=True))
+@click.argument('paths', nargs=-1, type=click.Path(exists=True))
 @click.option('--name', required=True, type=click.Path())
 @click.option('--settings', type=click.Path(exists=True))
-@click.option('--civicrm', type=click.Path(exists=True))
 @click.option('--seed', default=0)
 @click.option('--debug/--no-debug', default=False)
 @logged
-def cli(tables, settings, name, civicrm, seed, debug):
+def cli(paths, name, settings, seed, debug):
     '''
     Create a big-little family tree.
     '''
@@ -38,18 +38,14 @@ def cli(tables, settings, name, civicrm, seed, debug):
     else:
         logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(levelname)s: %(message)s')
 
+    logging.info('Retrieving big-little data from data sources')
+    members = get_from_sources(paths)
+
     ###########################################################################
     ###########################################################################
 
     # Lines between the two comment rulers are the custom lines
     # TODO generalize this
-
-    logging.info('Retrieving big-little data from data source')
-    members = []
-    for table in tables or []:
-        members += get_from_csv(table)
-    if civicrm:
-        members += get_from_civicrm_settings(civicrm)
 
     logging.info('Validating directory')
     directory = Directory(members, [Candidate, Brother, Knight, Expelled], ['Reaffiliate'])
@@ -76,6 +72,26 @@ def cli(tables, settings, name, civicrm, seed, debug):
     pdf_filename = name + '.pdf'
     write_pdffile(dotcode, pdf_filename)
 
+def get_from_sources(paths):
+
+    # TODO get better name
+    table_getters = {
+        '.yaml' : get_from_sql_settings,
+        '.csv' : get_from_csv,
+        }
+
+    members = []
+    for path in paths or []:
+        filetype = Path(path).suffix
+        table_getter = table_getters.get(filetype)
+        if not table_getter:
+            # TODO subclass NotImplementedError and catch it
+            msg = 'Filetype "{}" not supported'
+            raise NotImplementedError(msg.format(filetype))
+        members += table_getter(path)
+
+    return members
+
 @logged
 def write_dotfile(dotcode, filename):
     with open(filename, 'w+') as dotfile:
@@ -90,15 +106,13 @@ def write_pdffile(dotcode, pdf_filename):
 # TODO sort affiliations in each member
 
 
-QUERY = "***REMOVED***"
-
-
-
 def get_from_csv(path):
     with open(path, 'r') as f:
         return list(csv.DictReader(f))
 
 MYSQL_CNF_VALIDATOR = Validator({
+
+    'query' : nonempty_string,
 
     'mysql' : {
         'type' : 'dict',
@@ -126,17 +140,17 @@ MYSQL_CNF_VALIDATOR = Validator({
 
     })
 
-def get_from_civicrm_settings(path):
+def get_from_sql_settings(path):
     with open(path, 'r') as f:
-        return get_from_civicrm(yaml.safe_load(f))
+        return get_from_sql(yaml.safe_load(f))
 
-def get_from_civicrm(cnf):
+def get_from_sql(cnf):
     '''
     Get the table of members from the SQL database.
     '''
 
     cnf = validate(MYSQL_CNF_VALIDATOR, cnf)
-    return sql.get_table(QUERY, cnf['mysql'], ssh_cnf=cnf['ssh'])
+    return sql.get_table(cnf['query'], cnf['mysql'], ssh_cnf=cnf['ssh'])
 
 if __name__ == '__main__':
     main()
