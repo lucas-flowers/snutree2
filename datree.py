@@ -52,7 +52,7 @@ def cli(tables, settings, name, civicrm, seed, debug):
         members += get_from_civicrm_settings(civicrm)
 
     logging.info('Validating directory')
-    directory = to_directory(members)
+    directory = Directory(members, [Candidate, Brother, Knight, Expelled], ['Reaffiliate'])
 
     ###########################################################################
     ###########################################################################
@@ -137,26 +137,6 @@ def get_from_civicrm(cnf):
 
     cnf = validate(MYSQL_CNF_VALIDATOR, cnf)
     return sql.get_table(QUERY, cnf['mysql'], ssh_cnf=cnf['ssh'])
-
-def to_directory(member_list):
-    '''
-    Get the table of members from the SQL database. Adjust the values for
-    compatibility with the Directory class.
-    '''
-
-    members = []
-    for row in member_list:
-
-        # Remove the keys pointing to falsy values from each member. This
-        # simplifies code in the Directory class (e.g., Directory does not have
-        # to worry about handling values of None or empty strings).
-        for key, field in list(row.items()):
-            if not field:
-                del row[key]
-
-        members.append(row)
-
-    return Directory(members, [Candidate, Brother, Knight, Expelled], ['Reaffiliate'])
 
 if __name__ == '__main__':
     main()

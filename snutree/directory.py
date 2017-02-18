@@ -17,6 +17,16 @@ class Directory:
 
     def __init__(self, member_list, member_types, ignored_statuses=None):
 
+        # Remove the keys pointing to falsy values from each member. This
+        # simplifies code in the Directory class (e.g., Directory does not
+        # have to worry about handling values of None or empty strings).
+        members = []
+        for row in member_list:
+            for key, field in list(row.items()):
+                if not field:
+                    del row[key]
+            members.append(row)
+
         self.member_schemas = {}
         for typ in member_types:
             for allowed in typ.schema['status']['allowed']:
@@ -24,7 +34,7 @@ class Directory:
 
         self.ignored_statuses = set(ignored_statuses or ())
 
-        self.set_members(member_list)
+        self.set_members(members)
 
     @logged
     def set_members(self, members):
