@@ -40,18 +40,13 @@ def cli(settings_paths, name, civicrm, seed, debug):
     settings = retrieve_settings(*settings_paths)
 
     logging.info('Retrieving big-little data from data source')
+    members = []
     if civicrm:
         with open(civicrm, 'r') as f:
             cnf = yaml.safe_load(f)
-        members = get_from_civicrm(
-                query, settings, cnf['mysql'], cnf['ssh']
-                )
-    elif settings.get('csv'):
-        members = get_from_csv(
-                settings['csv']['members']
-                )
-    else:
-        raise Exception()
+        members += get_from_civicrm(query, settings, cnf['mysql'], cnf['ssh'])
+    if settings.get('csv'):
+        members += get_from_csv(settings['csv']['members'])
 
     logging.info('Validating directory')
     directory = to_directory(members)
