@@ -23,7 +23,7 @@ def main():
 # TODO shorten option names
 @click.command()
 @click.argument('paths', nargs=-1, type=click.Path(exists=True))
-@click.option('--output', '-o', required=True, type=click.Path())
+@click.option('--output', '-o', type=click.Path(), multiple=False, default=None)
 @click.option('--config', '-c', type=click.Path(exists=True), multiple=True)
 @click.option('--seed', '-s', default=0)
 @click.option('--verbose', '-v', is_flag=True, default=False)
@@ -33,10 +33,11 @@ def cli(paths, output, config, seed, verbose):
     Create a big-little family tree.
     '''
 
-    if verbose:
-        logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format='%(asctime)s %(levelname)s: %(name)s - %(message)s')
-    else:
-        logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(levelname)s: %(message)s')
+    if output is not None:
+        if verbose:
+            logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format='%(asctime)s %(levelname)s: %(name)s - %(message)s')
+        else:
+            logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(levelname)s: %(message)s')
 
     logging.info('Retrieving big-little data from data sources')
     members = get_from_sources(paths)
@@ -65,13 +66,27 @@ def cli(paths, output, config, seed, verbose):
     logging.info('Converting DOT code representation to text')
     dotcode = dotgraph.to_dot()
 
-    logging.info('Writing DOT file')
-    dot_filename = output + '.dot'
-    write_dotfile(dotcode, dot_filename)
+    logging.info('Writing output')
+    write_output(dotcode, output)
 
-    logging.info('Compiling DOT file to PDF with Graphviz')
-    pdf_filename = output + '.pdf'
-    write_pdffile(dotcode, pdf_filename)
+def write_output(dotcode, output=None):
+
+    filetype = Path(output).suffix if output is not None else None
+    output = output or sys.stdout
+
+    writers = {
+            '.pdf' : write_pdffile,
+            '.dot' : write_dotfile,
+            None : write_textio
+            }
+
+    write = writers.get(filetype)
+    if not write:
+        # TODO subclass NotImplementedError and catch it
+        msg = 'Output filetype "{}" not supported'
+        raise NotImplementedError(msg.format(filetype))
+
+    write(dotcode, output)
 
 def load_configuration(paths):
     config = {}
@@ -94,11 +109,15 @@ def get_from_sources(paths):
         table_getter = table_getters.get(filetype)
         if not table_getter:
             # TODO subclass NotImplementedError and catch it
-            msg = 'Filetype "{}" not supported'
+            msg = 'Input filetype "{}" not supported'
             raise NotImplementedError(msg.format(filetype))
         members += table_getter(path)
 
     return members
+
+@logged
+def write_textio(dotcode, output):
+    output.write(dotcode)
 
 @logged
 def write_dotfile(dotcode, filename):
