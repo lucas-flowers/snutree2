@@ -23,17 +23,17 @@ def main():
 # TODO shorten option names
 @click.command()
 @click.argument('paths', nargs=-1, type=click.Path(exists=True))
-@click.option('--name', required=True, type=click.Path())
-@click.option('--settings', type=click.Path(exists=True))
-@click.option('--seed', default=0)
-@click.option('--debug/--no-debug', default=False)
+@click.option('--output', '-o', required=True, type=click.Path())
+@click.option('--config', '-c', type=click.Path(exists=True), multiple=True)
+@click.option('--seed', '-s', default=0)
+@click.option('--verbose', '-v', is_flag=True, default=False)
 @logged
-def cli(paths, name, settings, seed, debug):
+def cli(paths, output, config, seed, verbose):
     '''
     Create a big-little family tree.
     '''
 
-    if debug:
+    if verbose:
         logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format='%(asctime)s %(levelname)s: %(name)s - %(message)s')
     else:
         logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(levelname)s: %(message)s')
@@ -53,9 +53,10 @@ def cli(paths, name, settings, seed, debug):
     ###########################################################################
     ###########################################################################
 
+    logging.info('Loading tree configuration')
+    tree_cnf = load_configuration(config)
+
     logging.info('Constructing family tree data structure')
-    with open(settings, 'r') as f:
-        tree_cnf = yaml.safe_load(f)
     tree = FamilyTree(directory, tree_cnf)
 
     logging.info('Creating internal DOT code representation')
@@ -65,12 +66,19 @@ def cli(paths, name, settings, seed, debug):
     dotcode = dotgraph.to_dot()
 
     logging.info('Writing DOT file')
-    dot_filename = name + '.dot'
+    dot_filename = output + '.dot'
     write_dotfile(dotcode, dot_filename)
 
     logging.info('Compiling DOT file to PDF with Graphviz')
-    pdf_filename = name + '.pdf'
+    pdf_filename = output + '.pdf'
     write_pdffile(dotcode, pdf_filename)
+
+def load_configuration(paths):
+    config = {}
+    for path in paths:
+        with open(path, 'r') as f:
+            config.update(yaml.safe_load(f))
+    return config
 
 def get_from_sources(paths):
 
