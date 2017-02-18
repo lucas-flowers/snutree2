@@ -38,6 +38,12 @@ def cli(tables, settings, name, civicrm, csv, seed, debug):
     else:
         logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(levelname)s: %(message)s')
 
+    ###########################################################################
+    ###########################################################################
+
+    # Lines between the two comment rulers are the custom lines
+    # TODO generalize this
+
     logging.info('Retrieving big-little data from data source')
     members = []
     for table in tables or []:
@@ -47,6 +53,9 @@ def cli(tables, settings, name, civicrm, csv, seed, debug):
 
     logging.info('Validating directory')
     directory = to_directory(members)
+
+    ###########################################################################
+    ###########################################################################
 
     logging.info('Constructing family tree data structure')
     with open(settings, 'r') as f:
