@@ -2,8 +2,9 @@
 import subprocess, click, logging, sys, yaml, csv
 from pathlib import Path
 from cerberus import Validator
-from snutree.readers import sql
+from snutree.readers import sql, dotread
 from snutree.schemas.sigmanu import Candidate, Brother, Knight, Expelled
+# from snutree.schemas.basic import KeylessInitiate
 from snutree.tree import FamilyTree, TreeError
 from snutree.entity import TreeEntityAttributeError
 from snutree.utilities import logged, SettingsError, nonempty_string, validate
@@ -46,17 +47,10 @@ def cli(paths, output, config, seed, debug, verbose, quiet):
     logging.info('Retrieving big-little data from data sources')
     members = get_from_sources(paths)
 
-    ###########################################################################
-    ###########################################################################
-
-    # Lines between the two comment rulers are the custom lines
-    # TODO generalize this
-
     logging.info('Validating directory')
+    # TODO generalize this
     directory = Directory(members, [Candidate, Brother, Knight, Expelled], ['Reaffiliate'])
-
-    ###########################################################################
-    ###########################################################################
+    # directory = Directory(members, [KeylessInitiate])
 
     logging.info('Loading tree configuration')
     tree_cnf = load_configuration(config)
@@ -105,6 +99,7 @@ def get_from_sources(paths):
     table_getters = {
         '.yaml' : get_from_sql_settings,
         '.csv' : get_from_csv,
+        '.dot' : get_from_dot
         }
 
     members = []
@@ -136,6 +131,9 @@ def write_pdffile(dotcode, pdf_filename):
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 # TODO sort affiliations in each member
 
+
+def get_from_dot(path):
+    return dotread.get_table(path)
 
 def get_from_csv(path):
     with open(path, 'r') as f:

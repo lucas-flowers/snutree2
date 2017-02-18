@@ -44,6 +44,11 @@ class Directory:
         member_status_map = defaultdict(list)
         for member in members:
 
+            if len(self.member_schemas) == 1:
+                # If there is only one type of member, ignore the status field
+                # and fill it with that one type of member
+                member['status'] = list(self.member_schemas.keys())[0]
+
             status = member.get('status')
 
             # Don't include if ignored
@@ -56,7 +61,7 @@ class Directory:
                 vals = pformat(member), list(self.member_schemas.keys())
                 raise DirectoryError(msg.format(*vals))
 
-            member_status_map[member['status']].append(member)
+            member_status_map[status].append(member)
 
         self._members = []
         for status, members in member_status_map.items():
