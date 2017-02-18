@@ -1,9 +1,60 @@
-import difflib
+import difflib, json
 from ..entity import Member, Initiate
 from ..utilities import nonempty_string, optional_nonempty_string, optional_semester_like
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 # TODO sort affiliations in each member
+
+greek_mapping = {
+        'Alpha' : 'A',
+        'Beta' : 'B',
+        'Gamma' : 'Γ',
+        'Delta' : 'Δ',
+        'Epsilon' : 'E',
+        'Zeta' : 'Z',
+        'Eta' : 'H',
+        'Theta' : 'Θ',
+        'Iota' : 'I',
+        'Kappa' : 'K',
+        'Lambda' : 'Λ',
+        'Mu' : 'M',
+        'Nu' : 'N',
+        'Xi' : 'Ξ',
+        'Omicron' : 'O',
+        'Pi' : 'Π',
+        'Rho' : 'P',
+        'Sigma' : 'Σ',
+        'Tau' : 'T',
+        'Upsilon' : 'Y',
+        'Phi' : 'Φ',
+        'Chi' : 'X',
+        'Psi' : 'Ψ',
+        'Omega' : 'Ω',
+        '(A)' : '(A)', # Because of Eta Mu (A) Chapter
+        '(B)' : '(B)', # Because of Eta Mu (B) Chapter
+        }
+
+def to_greek_name(english_name):
+    try:
+        return ''.join([greek_mapping[w] for w in english_name.split(' ')])
+    except KeyError:
+        msg = 'chapter names must be made of words in {}'
+        val = sorted(greek_mapping.keys())
+        raise ValueError(msg.format(val))
+
+def coerce_affiliation(affiliation):
+    vals = to_greek_name(affiliation['chapter_name']), affiliation['other_badge']
+    return '{} {!s}'.format(*vals)
+
+affiliations_schema = {
+        'type' : 'list',
+        'required' : False,
+        'coerce' : lambda s : json.loads(s),
+        'schema' : {
+            'type' : 'string',
+            'coerce' : coerce_affiliation
+        }
+    }
 
 class Knight(Initiate):
 
@@ -15,7 +66,9 @@ class Knight(Initiate):
             'last_name' : nonempty_string,
             'big_badge' : optional_nonempty_string,
             'pledge_semester' : optional_semester_like,
+            'affiliations' : affiliations_schema,
             }
+
 
     def __init__(self,
             status=None,
@@ -25,20 +78,30 @@ class Knight(Initiate):
             last_name=None,
             big_badge=None,
             pledge_semester=None,
+            affiliations=None,
             ):
 
         self.badge = badge
         self.name = combine_names(first_name, preferred_name, last_name)
         self.parent = big_badge
         self.semester = pledge_semester
-        self.affiliations = []
+
+        # TODO generalize
+        self.affiliations = set(affiliations or []) | {'ΔA {}'.format(badge)}
 
     def get_key(self):
         return self.badge
 
     def get_dot_label(self):
-        affiliations = ['ΔA {}'.format(self.badge)] + self.affiliations
+        # TODO generalize
+        affiliations =  sorted(self.affiliations, key=self.affiliations_key())
         return '{}\\n{}'.format(self.name, ', '.join(affiliations))
+
+    def affiliations_key(self):
+        # TODO generalize
+        return lambda s : (not s.startswith('ΔA '), s)
+
+
 
 class Brother(Member):
 
@@ -49,6 +112,7 @@ class Brother(Member):
             'last_name' : nonempty_string,
             'big_badge' : optional_nonempty_string,
             'pledge_semester' : optional_semester_like,
+            'affiliations' : {'allowed' : []}
             }
 
     bid = 0
@@ -87,6 +151,7 @@ class Candidate(Member):
             'last_name' : nonempty_string,
             'big_badge' : optional_nonempty_string,
             'pledge_semester' : optional_semester_like,
+            'affiliations' : {'allowed' : []}
             }
 
     cid = 0
@@ -129,6 +194,7 @@ class Expelled(Knight):
             'last_name' : optional_nonempty_string,
             'big_badge' : optional_nonempty_string,
             'pledge_semester' : optional_semester_like,
+            'affiliations' : affiliations_schema
             }
 
     def __init__(self,
@@ -139,13 +205,14 @@ class Expelled(Knight):
             last_name=None,
             big_badge=None,
             pledge_semester=None,
+            affiliations=None
             ):
 
         self.badge = badge
         self.name = 'Member Expelled'
         self.parent = big_badge
         self.semester = pledge_semester
-        self.affiliations = []
+        self.affiliations = affiliations or []
 
     def get_dot_label(self):
         return '{}\\n{}'.format(self.name, self.badge)
