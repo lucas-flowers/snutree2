@@ -3,7 +3,6 @@ from ..entity import Member, Initiate
 from ..utilities import nonempty_string, optional_nonempty_string, optional_semester_like
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
-# TODO sort affiliations in each member
 
 greek_mapping = {
         'Alpha' : 'A',
