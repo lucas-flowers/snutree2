@@ -1,6 +1,8 @@
 import logging, time, pprint
 from .semester import Semester
 
+# TODO separate validation class?
+
 # A required string; must be nonempty and not None
 nonempty_string = {
         'type' : 'string',
