@@ -1,6 +1,6 @@
 #!/usr/bin/env python
-import subprocess, click, logging, sys, yaml
-from snutree.readers import csv, sql
+import subprocess, click, logging, sys, yaml, csv
+from snutree.readers import sql
 from snutree.schemas.sigmanu import Candidate, Brother, Knight, Expelled
 from snutree.tree import FamilyTree, TreeError
 from snutree.entity import TreeEntityAttributeError
@@ -23,10 +23,11 @@ def main():
 @click.argument('settings_paths', nargs=-1, type=click.Path(exists=True))
 @click.option('--name', required=True, type=click.Path())
 @click.option('--civicrm', type=click.Path(exists=True))
+@click.option('--csv', type=click.Path(exists=True))
 @click.option('--seed', default=0)
 @click.option('--debug/--no-debug', default=False)
 @logged
-def cli(settings_paths, name, civicrm, seed, debug):
+def cli(settings_paths, name, civicrm, csv, seed, debug):
     '''
     Create a big-little family tree.
     '''
@@ -42,11 +43,9 @@ def cli(settings_paths, name, civicrm, seed, debug):
     logging.info('Retrieving big-little data from data source')
     members = []
     if civicrm:
-        with open(civicrm, 'r') as f:
-            cnf = yaml.safe_load(f)
-        members += get_from_civicrm(query, settings, cnf['mysql'], cnf['ssh'])
-    if settings.get('csv'):
-        members += get_from_csv(settings['csv']['members'])
+        members += get_from_civicrm_settings(civicrm)
+    if csv:
+        members += get_from_csv(csv)
 
     logging.info('Validating directory')
     directory = to_directory(members)
@@ -82,21 +81,27 @@ def write_pdffile(dotcode, pdf_filename):
 # TODO sort affiliations in each member
 
 
-query = "***REMOVED***"
+QUERY = "***REMOVED***"
 
 
 
 def get_from_csv(path):
+    with open(path, 'r') as f:
+        return list(csv.DictReader(f))
 
-    return csv.get_table(path)
+def get_from_civicrm_settings(path):
+    with open(path, 'r') as f:
+        # TODO validation
+        cnf = yaml.safe_load(f)
+    return get_from_civicrm(cnf['mysql'], ssh_cnf=cnf['ssh'])
 
-def get_from_civicrm(query, tree_cnf, mysql_cnf, ssh_cnf):
+
+def get_from_civicrm(mysql_cnf, ssh_cnf):
     '''
-    Get the table of members from the SQL database. Adjust the values for
-    compatibility with the Directory class.
+    Get the table of members from the SQL database.
     '''
 
-    return sql.get_table(query, mysql_cnf, ssh_cnf=ssh_cnf)
+    return sql.get_table(QUERY, mysql_cnf, ssh_cnf=ssh_cnf)
 
 def to_directory(member_list):
     '''
