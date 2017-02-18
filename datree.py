@@ -25,11 +25,10 @@ def main():
 @click.option('--name', required=True, type=click.Path())
 @click.option('--settings', type=click.Path(exists=True))
 @click.option('--civicrm', type=click.Path(exists=True))
-@click.option('--csv', type=click.Path(exists=True))
 @click.option('--seed', default=0)
 @click.option('--debug/--no-debug', default=False)
 @logged
-def cli(tables, settings, name, civicrm, csv, seed, debug):
+def cli(tables, settings, name, civicrm, seed, debug):
     '''
     Create a big-little family tree.
     '''
