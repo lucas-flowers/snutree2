@@ -15,12 +15,14 @@ class Directory:
     affiliations are unique.
     '''
 
-    def __init__(self, member_list, member_types):
+    def __init__(self, member_list, member_types, ignored_statuses=None):
 
         self.member_schemas = {}
         for typ in member_types:
             for allowed in typ.schema['status']['allowed']:
                 self.member_schemas[allowed] = typ.get_schema()
+
+        self.ignored_statuses = set(ignored_statuses or ())
 
         self.set_members(member_list)
 
@@ -30,8 +32,14 @@ class Directory:
         member_status_map = defaultdict(list)
         for member in members:
 
+            status = member.get('status')
+
+            # Don't include if ignored
+            if status in self.ignored_statuses:
+                continue
+
             # Make sure the member status field is valid first
-            if member.get('status') not in self.member_schemas.keys():
+            if status not in self.member_schemas.keys():
                 msg = 'Invalid member status in:\n{}\nStatus must be one of:\n{}'
                 vals = pformat(member), list(self.member_schemas.keys())
                 raise DirectoryError(msg.format(*vals))

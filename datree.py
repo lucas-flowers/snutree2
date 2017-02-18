@@ -147,18 +147,16 @@ def to_directory(member_list):
     members = []
     for row in member_list:
 
-        if row.get('status') != 'Reaffiliate':
+        # Remove the keys pointing to falsy values from each member. This
+        # simplifies code in the Directory class (e.g., Directory does not have
+        # to worry about handling values of None or empty strings).
+        for key, field in list(row.items()):
+            if not field:
+                del row[key]
 
-            # Remove the keys pointing to falsy values from each member. This
-            # simplifies code in the Directory class (e.g., Directory does not have
-            # to worry about handling values of None or empty strings).
-            for key, field in list(row.items()):
-                if not field:
-                    del row[key]
+        members.append(row)
 
-            members.append(row)
-
-    return Directory(members, [Candidate, Brother, Knight, Expelled])
+    return Directory(members, [Candidate, Brother, Knight, Expelled], ['Reaffiliate'])
 
 if __name__ == '__main__':
     main()
