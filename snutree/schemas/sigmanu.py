@@ -45,6 +45,8 @@ def coerce_affiliation(affiliation):
     vals = to_greek_name(affiliation['chapter_name']), affiliation['other_badge']
     return '{} {!s}'.format(*vals)
 
+# TODO checking this schema adds ~300 ms to the time, compared to loading the
+# json directly in the Knight constructor
 affiliations_schema = {
         'type' : 'list',
         'required' : False,
