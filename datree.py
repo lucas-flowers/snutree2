@@ -4,8 +4,7 @@ from snutree.readers import sql
 from snutree.schemas.sigmanu import Candidate, Brother, Knight, Expelled
 from snutree.tree import FamilyTree, TreeError
 from snutree.entity import TreeEntityAttributeError
-from snutree.settings import retrieve_settings, SettingsError
-from snutree.utilities import logged
+from snutree.utilities import logged, SettingsError
 from snutree.directory import Directory, DirectoryError
 
 def main():
@@ -39,9 +38,6 @@ def cli(tables, settings, name, civicrm, csv, seed, debug):
     else:
         logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(levelname)s: %(message)s')
 
-    logging.info('Reading configuration')
-    settings = retrieve_settings(settings) # TODO names overload
-
     logging.info('Retrieving big-little data from data source')
     members = []
     for table in tables or []:
@@ -53,7 +49,9 @@ def cli(tables, settings, name, civicrm, csv, seed, debug):
     directory = to_directory(members)
 
     logging.info('Constructing family tree data structure')
-    tree = FamilyTree(directory, settings)
+    with open(settings, 'r') as f:
+        tree_cnf = yaml.safe_load(f)
+    tree = FamilyTree(directory, tree_cnf)
 
     logging.info('Creating internal DOT code representation')
     dotgraph = tree.to_dot_graph()

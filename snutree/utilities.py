@@ -1,4 +1,4 @@
-import logging, time
+import logging, time, pprint
 from .semester import Semester
 
 # A required string; must be nonempty and not None
@@ -33,6 +33,19 @@ optional_semester_like = {
         'coerce' : lambda x : Semester(x) if x != None else None,
         }
 
+def validate(validator, obj):
+
+    obj = validator.validated(obj)
+    if not obj:
+        errors = validator.errors
+        msg = 'Error{} found in options file:\n{}'
+        vals = '' if len(errors) == 1 else 's', pprint.pformat(errors)
+        raise SettingsError(msg.format(*vals))
+
+    return obj
+
+class SettingsError(Exception):
+    pass
 
 
 def logged(function):

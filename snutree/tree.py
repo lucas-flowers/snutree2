@@ -1,5 +1,6 @@
 import random
 import networkx as nx
+from cerberus import Validator
 from collections import deque
 from networkx.algorithms.components import weakly_connected_components
 from networkx.algorithms.cycles import find_cycle
@@ -7,7 +8,38 @@ from networkx.exception import NetworkXNoCycle
 from . import dot
 from .semester import semester_range
 from .entity import Member, Custom, UnidentifiedInitiate, Initiate
-from .utilities import logged
+from .utilities import logged, optional_boolean, nonempty_string, semester_like, validate
+
+sources = frozenset({'csv', 'mysql', 'dot'})
+
+flags = [
+        'semesters',
+        'custom_edges',
+        'custom_nodes',
+        'no_singletons',
+        'family_colors',
+        'unknowns',
+        ]
+
+# Graphviz attributes
+attributes = {
+        'type' : 'dict',
+        'default' : {},
+        'valueschema' : {
+            'type' : ['string', 'number', 'boolean']
+            }
+        }
+
+# Contains groups of attributes labeled by the strings in `allowed`
+dot_defaults = lambda *allowed : {
+        'type' : 'dict',
+        'nullable' : False,
+        'default' : { a : {} for a in allowed },
+        'keyschema' : {
+            'allowed' : allowed,
+            },
+        'valueschema' : attributes
+        }
 
 class FamilyTree:
     '''
@@ -23,10 +55,132 @@ class FamilyTree:
     outside the directory (either through custom edges or special code).
     '''
 
+    SETTINGS_VALIDATOR = Validator({
+
+        # # Output file information
+        # 'output' : {
+        #     'type' : 'dict',
+        #     'required' : True,
+        #     'schema' : {
+        #         'folder' : nonempty_string,
+        #         'name' : nonempty_string,
+        #         },
+        #     },
+
+        # # Input can be exactly one of: A DOT file, a CSV file, or the database.
+        # 'dot' : {
+        #     'type' : 'dict',
+        #     'excludes' : list(sources - {'dot'}),
+        #     'required' : True,
+        #     'schema' : {
+        #         'members' : nonempty_string
+        #         }
+        #     },
+        # 'csv' : {
+        #     'type' : 'dict',
+        #     'excludes' : list(sources - {'csv'}),
+        #     'required' : True,
+        #     'schema' : {
+        #         'members' : nonempty_string,
+        #         'affiliations' : optional_nonempty_string
+        #         }
+        #     },
+        # 'mysql' : {
+        #     'type' : 'dict',
+        #     'excludes' : list(sources - {'mysql'}),
+        #     'required' : True,
+        #     'schema' : {
+        #         'host' : nonempty_string,
+        #         'user' : nonempty_string,
+        #         'passwd' : nonempty_string,
+        #         'port' : { 'type': 'integer' },
+        #         'db' : nonempty_string,
+        #         }
+        #     },
+
+        # # SSH for remote MySQL databases
+        # 'ssh' : {
+        #     'type' : 'dict',
+        #     'dependencies' : 'mysql',
+        #     'schema' : {
+        #         'host' : nonempty_string,
+        #         'port' : { 'type' : 'integer' },
+        #         'user' : nonempty_string,
+    #         'public_key' : nonempty_string,
+    #         }
+    #     },
+
+
+    # # An additional CSV with members
+    # 'extra_members' : optional_nonempty_string,
+
+    # Layout options
+    'layout' : {
+            'type' : 'dict',
+            'schema' : { flag : optional_boolean for flag in flags },
+            'default' : { flag : True for flag in flags },
+            },
+
+    # Default attributes for graphs, nodes, edges, and their subcategories
+    'graph_defaults' : dot_defaults('all'),
+    'node_defaults' : dot_defaults('all', 'semester', 'unknown', 'member'),
+    'edge_defaults' : dot_defaults('all', 'semester', 'unknown'),
+
+    # A mapping of node keys to colors
+    'family_colors' : {
+            'type' : 'dict',
+            'default' : {},
+            'keyschema' : nonempty_string,
+            'valueschema' : nonempty_string,
+            },
+
+    # Custom nodes, each with Graphviz attributes and a semester
+    'nodes' : {
+            'type' : 'dict',
+            'default' : {},
+            'keyschema' : nonempty_string,
+            'valueschema' : {
+                'type' : 'dict',
+                'schema' : {
+                    'semester' : semester_like,
+                    'attributes' : attributes,
+                    }
+                }
+            },
+
+    # Custom edges: Each entry in the list has a list of nodes, which are used
+    # to represent a path from which to create edges (which is why there must
+    # be at least two nodes in each list). There are also edge attributes
+    # applied to all edges in the path.
+    'edges' : {
+            'type' : 'list',
+            'default' : [],
+            'schema' : {
+                'type' : 'dict',
+                'schema' : {
+                    'nodes' : {
+                        'type' : 'list',
+                        'required' : True,
+                        'minlength' : 2,
+                        'schema' : nonempty_string,
+                        },
+                    'attributes' : attributes,
+                    }
+                },
+            },
+
+    # Seed for the RNG, to provide consistent output
+    'seed': {
+            'type' : 'integer',
+            'default' : 71,
+            }
+
+    })
+
     def __init__(self, directory, settings=None):
 
         self.graph = nx.DiGraph()
-        self.settings = settings or {}
+        self.settings = validate(self.SETTINGS_VALIDATOR, settings) if settings else {}
 
         # Add all the entities in the settings and directory provided
         self.add_members(directory.get_members())
