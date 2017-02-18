@@ -63,6 +63,11 @@ class Directory:
 
             member_status_map[status].append(member)
 
+        # TODO make sense of this member_status_map mess
+        # TODO note that if the validator is applied *once* directly to a dict
+        # with keys of status and values of members (rather than several
+        # validators several times, on just lists of members), that would shave
+        # about ~50 ms from the runtime
         self._members = []
         for status, members in member_status_map.items():
 
