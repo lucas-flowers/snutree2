@@ -19,15 +19,17 @@ def main():
         logging.error('Unexpected error.', exc_info=True)
         sys.exit(1)
 
+# TODO shorten option names
 @click.command()
-@click.argument('settings_paths', nargs=-1, type=click.Path(exists=True))
+@click.argument('tables', nargs=-1, type=click.Path(exists=True))
 @click.option('--name', required=True, type=click.Path())
+@click.option('--settings', type=click.Path(exists=True))
 @click.option('--civicrm', type=click.Path(exists=True))
 @click.option('--csv', type=click.Path(exists=True))
 @click.option('--seed', default=0)
 @click.option('--debug/--no-debug', default=False)
 @logged
-def cli(settings_paths, name, civicrm, csv, seed, debug):
+def cli(tables, settings, name, civicrm, csv, seed, debug):
     '''
     Create a big-little family tree.
     '''
@@ -38,14 +40,15 @@ def cli(settings_paths, name, civicrm, csv, seed, debug):
         logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(levelname)s: %(message)s')
 
     logging.info('Reading configuration')
-    settings = retrieve_settings(*settings_paths)
+    settings = retrieve_settings(settings) # TODO names overload
 
     logging.info('Retrieving big-little data from data source')
     members = []
     if civicrm:
         members += get_from_civicrm_settings(civicrm)
-    if csv:
-        members += get_from_csv(csv)
+    if tables:
+        for table in tables:
+            members += get_from_csv(table)
 
     logging.info('Validating directory')
     directory = to_directory(members)
