@@ -57,13 +57,8 @@ def cli(settings_paths, name, civicrm, seed, debug):
     logging.info('Retrieving big-little data from data source')
     # directory = directory.retrieve_directory(settings)
 
+    logging.info('Validating directory')
     directory = to_directory(members)
-
-
-
-
-
-
 
     logging.info('Constructing family tree data structure')
     tree = FamilyTree(directory, settings)
