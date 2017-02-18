@@ -3,6 +3,8 @@ from collections import defaultdict
 from cerberus import Validator
 from .utilities import logged
 
+# TODO remove this class?
+
 class Directory:
     '''
     This class is used to store data from either a CSV file or a SQL query. It
