@@ -38,8 +38,6 @@ def cli(settings_paths, name, civicrm, seed, debug):
 
     logging.info('Reading configuration')
     settings = retrieve_settings(*settings_paths)
-    settings['seed'] = seed or settings.get('seed')
-    logging.info('Using seed=%s', settings['seed'])
 
     if civicrm:
         with open(civicrm, 'r') as f:
