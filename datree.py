@@ -21,7 +21,6 @@ def main():
         logging.error('Unexpected error.', exc_info=True)
         sys.exit(1)
 
-# TODO shorten option names
 @click.command()
 @click.argument('paths', nargs=-1, type=click.Path(exists=True))
 @click.option('--output', '-o', type=click.Path(), multiple=False, default=None)
