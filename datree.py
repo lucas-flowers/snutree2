@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 import subprocess, click, logging, sys, yaml, csv
+from cerberus import Validator
 from snutree.readers import sql
 from snutree.schemas.sigmanu import Candidate, Brother, Knight, Expelled
 from snutree.tree import FamilyTree, TreeError
 from snutree.entity import TreeEntityAttributeError
-from snutree.utilities import logged, SettingsError
+from snutree.utilities import logged, SettingsError, nonempty_string, validate
 from snutree.directory import Directory, DirectoryError
 
 def main():
@@ -98,19 +99,45 @@ def get_from_csv(path):
     with open(path, 'r') as f:
         return list(csv.DictReader(f))
 
+MYSQL_CNF_VALIDATOR = Validator({
+
+    'mysql' : {
+        'type' : 'dict',
+        'required' : True,
+        'schema' : {
+            'host' : nonempty_string,
+            'user' : nonempty_string,
+            'passwd' : nonempty_string,
+            'port' : { 'type': 'integer' },
+            'db' : nonempty_string,
+            }
+        },
+
+    # SSH for remote MySQL databases
+    'ssh' : {
+        'type' : 'dict',
+        'required' : False,
+        'schema' : {
+            'host' : nonempty_string,
+            'port' : { 'type' : 'integer' },
+            'user' : nonempty_string,
+            'public_key' : nonempty_string,
+            }
+        }
+
+    })
+
 def get_from_civicrm_settings(path):
     with open(path, 'r') as f:
-        # TODO validation
-        cnf = yaml.safe_load(f)
-    return get_from_civicrm(cnf['mysql'], ssh_cnf=cnf['ssh'])
+        return get_from_civicrm(yaml.safe_load(f))
 
-
-def get_from_civicrm(mysql_cnf, ssh_cnf):
+def get_from_civicrm(cnf):
     '''
     Get the table of members from the SQL database.
     '''
 
-    return sql.get_table(QUERY, mysql_cnf, ssh_cnf=ssh_cnf)
+    cnf = validate(MYSQL_CNF_VALIDATOR, cnf)
+    return sql.get_table(QUERY, cnf['mysql'], ssh_cnf=cnf['ssh'])
 
 def to_directory(member_list):
     '''

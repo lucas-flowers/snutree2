@@ -10,8 +10,6 @@ from .semester import semester_range
 from .entity import Member, Custom, UnidentifiedInitiate, Initiate
 from .utilities import logged, optional_boolean, nonempty_string, semester_like, validate
 
-sources = frozenset({'csv', 'mysql', 'dot'})
-
 flags = [
         'semesters',
         'custom_edges',
@@ -56,63 +54,6 @@ class FamilyTree:
     '''
 
     SETTINGS_VALIDATOR = Validator({
-
-        # # Output file information
-        # 'output' : {
-        #     'type' : 'dict',
-        #     'required' : True,
-        #     'schema' : {
-        #         'folder' : nonempty_string,
-        #         'name' : nonempty_string,
-        #         },
-        #     },
-
-        # # Input can be exactly one of: A DOT file, a CSV file, or the database.
-        # 'dot' : {
-        #     'type' : 'dict',
-        #     'excludes' : list(sources - {'dot'}),
-        #     'required' : True,
-        #     'schema' : {
-        #         'members' : nonempty_string
-        #         }
-        #     },
-        # 'csv' : {
-        #     'type' : 'dict',
-        #     'excludes' : list(sources - {'csv'}),
-        #     'required' : True,
-        #     'schema' : {
-        #         'members' : nonempty_string,
-        #         'affiliations' : optional_nonempty_string
-        #         }
-        #     },
-        # 'mysql' : {
-        #     'type' : 'dict',
-        #     'excludes' : list(sources - {'mysql'}),
-        #     'required' : True,
-        #     'schema' : {
-        #         'host' : nonempty_string,
-        #         'user' : nonempty_string,
-        #         'passwd' : nonempty_string,
-        #         'port' : { 'type': 'integer' },
-        #         'db' : nonempty_string,
-        #         }
-        #     },
-
-        # # SSH for remote MySQL databases
-        # 'ssh' : {
-        #     'type' : 'dict',
-        #     'dependencies' : 'mysql',
-        #     'schema' : {
-        #         'host' : nonempty_string,
-        #         'port' : { 'type' : 'integer' },
-        #         'user' : nonempty_string,
-    #         'public_key' : nonempty_string,
-    #         }
-    #     },
-
-
-    # # An additional CSV with members
-    # 'extra_members' : optional_nonempty_string,
 
     # Layout options
     'layout' : {
