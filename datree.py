@@ -44,11 +44,10 @@ def cli(tables, settings, name, civicrm, csv, seed, debug):
 
     logging.info('Retrieving big-little data from data source')
     members = []
+    for table in tables or []:
+        members += get_from_csv(table)
     if civicrm:
         members += get_from_civicrm_settings(civicrm)
-    if tables:
-        for table in tables:
-            members += get_from_csv(table)
 
     logging.info('Validating directory')
     directory = to_directory(members)
