@@ -49,7 +49,7 @@ def coerce_affiliation(affiliation):
 affiliations_schema = {
         'type' : 'list',
         'required' : False,
-        'coerce' : lambda s : json.loads(s),
+        'coerce' : json.loads,
         'schema' : {
             'type' : 'string',
             'coerce' : coerce_affiliation
