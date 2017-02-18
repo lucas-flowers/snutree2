@@ -2,7 +2,6 @@ from pprint import pformat
 from collections import defaultdict
 from cerberus import Validator
 from .utilities import logged
-from .tree import FamilyTree
 
 class Directory:
     '''
@@ -67,14 +66,6 @@ class Directory:
 
     def get_members(self):
         return self._members
-
-    def to_dotcode(self, tree_cnf):
-        tree = FamilyTree(self, tree_cnf)
-        dotgraph = tree.to_dot_graph()
-        dotcode = dotgraph.to_dot()
-        return dotcode
-
-
 
 class DirectoryError(Exception):
     pass
