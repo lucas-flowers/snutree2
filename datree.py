@@ -25,19 +25,23 @@ def main():
 @click.argument('paths', nargs=-1, type=click.Path(exists=True))
 @click.option('--output', '-o', type=click.Path(), multiple=False, default=None)
 @click.option('--config', '-c', type=click.Path(exists=True), multiple=True)
-@click.option('--seed', '-s', default=0)
+@click.option('--seed', '-S', default=0)
+@click.option('--debug', '-d', is_flag=True, default=False)
 @click.option('--verbose', '-v', is_flag=True, default=False)
+@click.option('--quiet', '-q', is_flag=True, default=False)
 @logged
-def cli(paths, output, config, seed, verbose):
+def cli(paths, output, config, seed, debug, verbose, quiet):
     '''
     Create a big-little family tree.
     '''
 
     if output is not None:
-        if verbose:
+        if debug:
             logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format='%(asctime)s %(levelname)s: %(name)s - %(message)s')
-        else:
+        elif verbose:
             logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(levelname)s: %(message)s')
+        elif not quiet:
+            logging.basicConfig(level=logging.WARNING, stream=sys.stdout, format='%(levelname)s: %(message)s')
 
     logging.info('Retrieving big-little data from data sources')
     members = get_from_sources(paths)
