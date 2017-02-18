@@ -39,6 +39,7 @@ def cli(settings_paths, name, civicrm, seed, debug):
     logging.info('Reading configuration')
     settings = retrieve_settings(*settings_paths)
 
+    logging.info('Retrieving big-little data from data source')
     if civicrm:
         with open(civicrm, 'r') as f:
             cnf = yaml.safe_load(f)
@@ -51,9 +52,6 @@ def cli(settings_paths, name, civicrm, seed, debug):
                 )
     else:
         raise Exception()
-
-    logging.info('Retrieving big-little data from data source')
-    # directory = directory.retrieve_directory(settings)
 
     logging.info('Validating directory')
     directory = to_directory(members)
