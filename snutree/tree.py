@@ -53,14 +53,16 @@ class FamilyTree:
     outside the directory (either through custom edges or special code).
     '''
 
+    # TODO shouldn't defaults be immutables?
+
     SETTINGS_VALIDATOR = Validator({
 
         # Layout options
         'layout' : {
-                'type' : 'dict',
-                'schema' : { flag : optional_boolean for flag in flags },
-                'default' : { flag : True for flag in flags },
-                },
+            'type' : 'dict',
+            'schema' : { flag : optional_boolean for flag in flags },
+            'default' : { flag : True for flag in flags },
+            },
 
         # Default attributes for graphs, nodes, edges, and their subcategories
         'graph_defaults' : dot_defaults('all'),
@@ -69,46 +71,46 @@ class FamilyTree:
 
         # A mapping of node keys to colors
         'family_colors' : {
-                'type' : 'dict',
-                'default' : {},
-                'keyschema' : nonempty_string,
-                'valueschema' : nonempty_string,
-                },
+            'type' : 'dict',
+            'default' : {},
+            'keyschema' : nonempty_string,
+            'valueschema' : nonempty_string,
+            },
 
         # Custom nodes, each with Graphviz attributes and a semester
         'nodes' : {
+            'type' : 'dict',
+            'default' : {},
+            'keyschema' : nonempty_string,
+            'valueschema' : {
                 'type' : 'dict',
-                'default' : {},
-                'keyschema' : nonempty_string,
-                'valueschema' : {
-                    'type' : 'dict',
-                    'schema' : {
-                        'semester' : semester_like,
-                        'attributes' : attributes,
-                        }
+                'schema' : {
+                    'semester' : semester_like,
+                    'attributes' : attributes,
                     }
-                },
+                }
+            },
 
         # Custom edges: Each entry in the list has a list of nodes, which are
         # used to represent a path from which to create edges (which is why
         # there must be at least two nodes in each list). There are also edge
         # attributes applied to all edges in the path.
         'edges' : {
-                'type' : 'list',
-                'default' : [],
+            'type' : 'list',
+            'default' : [],
+            'schema' : {
+                'type' : 'dict',
                 'schema' : {
-                    'type' : 'dict',
-                    'schema' : {
-                        'nodes' : {
-                            'type' : 'list',
-                            'required' : True,
-                            'minlength' : 2,
-                            'schema' : nonempty_string,
-                            },
-                        'attributes' : attributes,
-                        }
-                    },
+                    'nodes' : {
+                        'type' : 'list',
+                        'required' : True,
+                        'minlength' : 2,
+                        'schema' : nonempty_string,
+                        },
+                    'attributes' : attributes,
+                    }
                 },
+            },
 
         # Seed for the RNG, to provide consistent output
         'seed': {
