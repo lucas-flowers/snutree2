@@ -1,6 +1,4 @@
 from pprint import pformat
-from collections import defaultdict
-from cerberus import Validator
 from .utilities import logged
 
 # TODO remove this class?
@@ -29,10 +27,10 @@ class Directory:
                     del row[key]
             members.append(row)
 
-        self.member_schemas = {}
+        self.allowed_statuses = {}
         for typ in member_types:
-            for allowed in typ.schema['status']['allowed']:
-                self.member_schemas[allowed] = typ.get_schema()
+            for allowed in typ.allowed:
+                self.allowed_statuses[allowed] = typ
 
         self.ignored_statuses = set(ignored_statuses or ())
 
@@ -41,13 +39,16 @@ class Directory:
     @logged
     def set_members(self, members):
 
-        member_status_map = defaultdict(list)
+        self._members = []
         for member in members:
 
-            if len(self.member_schemas) == 1:
+            if len(self.allowed_statuses) == 1:
                 # If there is only one type of member, ignore the status field
                 # and fill it with that one type of member
-                member['status'] = list(self.member_schemas.keys())[0]
+                #
+                # TODO zero just takes the first one (it shouldn't matter, but
+                # it's kind of ugly)
+                member['status'] = list(self.allowed_statuses.keys())[0]
 
             status = member.get('status')
 
@@ -56,43 +57,13 @@ class Directory:
                 continue
 
             # Make sure the member status field is valid first
-            if status not in self.member_schemas.keys():
+            if status not in self.allowed_statuses:
                 msg = 'Invalid member status in:\n{}\nStatus must be one of:\n{}'
-                vals = pformat(member), list(self.member_schemas.keys())
+                vals = pformat(member), list(self.allowed_statuses.keys())
                 raise DirectoryError(msg.format(*vals))
 
-            member_status_map[status].append(member)
-
-        # TODO make sense of this member_status_map mess
-        # TODO note that if the validator is applied *once* directly to a dict
-        # with keys of status and values of members (rather than several
-        # validators several times, on just lists of members), that would shave
-        # about ~50 ms from the runtime
-        self._members = []
-        for status, members in member_status_map.items():
-
-            validator = Validator({'members' : {
-                'type' : 'list',
-                'schema' : {
-                    'type' : 'dict',
-                    'schema' : self.member_schemas[status]['schema']
-                    }
-                }})
-
-            if not validator.validate({'members' : members}):
-                errors = []
-                for member_errors in validator.errors['members']:
-                    for i, error in member_errors.items():
-                        errors.append({
-                            'Invalid {}'.format(status) : validator.document['members'][i],
-                            'Rules Violated' : error
-                            })
-                msg = 'Errors found in directory:\n{}'
-                raise DirectoryError(msg.format(pformat(errors)))
-
-            MemberType = self.member_schemas[status]['constructor']
-            for member in validator.document['members']:
-                self._members.append(MemberType(**member))
+            # TODO error checking
+            self._members.append(self.allowed_statuses[status].from_dict((member)))
 
     def get_members(self):
         return self._members

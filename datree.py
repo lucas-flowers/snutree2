@@ -15,7 +15,7 @@ def main():
     try:
         cli()
     # except:
-        # import pdb; pdb.post_mortem()
+    #     import pdb; pdb.post_mortem()
     except (TreeError, TreeEntityAttributeError, DirectoryError, SettingsError) as e:
         logging.error(e)
         sys.exit(1)

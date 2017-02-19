@@ -1,6 +1,7 @@
 import difflib, json
+from voluptuous import Schema, Optional, All, Length, In, Coerce
 from ..entity import Member, Initiate
-from ..utilities import nonempty_string, optional_nonempty_string, optional_semester_like
+from ..semester import Semester
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 
@@ -47,7 +48,7 @@ def coerce_affiliation(affiliation):
 
 # TODO checking this schema adds ~300 ms to the time, compared to loading the
 # json directly in the Knight constructor
-affiliations_schema = {
+affiliations_validator = {
         'type' : 'list',
         'required' : False,
         'coerce' : json.loads,
@@ -57,19 +58,22 @@ affiliations_schema = {
         }
     }
 
+NonEmptyString = All(str, Length(min=1))
+
 class Knight(Initiate):
 
-    schema = {
-            'status' : {'allowed' : ['Active', 'Alumni', 'Left School']},
-            'badge' : nonempty_string,
-            'first_name' : nonempty_string,
-            'preferred_name' : optional_nonempty_string,
-            'last_name' : nonempty_string,
-            'big_badge' : optional_nonempty_string,
-            'pledge_semester' : optional_semester_like,
-            'affiliations' : affiliations_schema,
-            }
+    allowed = {'Active', 'Alumni', 'Left School'}
 
+    validator = Schema({
+        'status' : In(allowed),
+        'badge' : NonEmptyString,
+        'first_name' : NonEmptyString,
+        Optional('preferred_name') : NonEmptyString,
+        'last_name' : NonEmptyString,
+        Optional('big_badge') : NonEmptyString,
+        Optional('pledge_semester') : Coerce(Semester),
+        'affiliations' : object,
+        })
 
     def __init__(self,
             status=None,
@@ -88,7 +92,9 @@ class Knight(Initiate):
         self.semester = pledge_semester
 
         # TODO generalize
-        self.affiliations = set(affiliations or []) | {'ΔA {}'.format(badge)}
+        # TODO uncomment
+        self.affiliations = []
+        # self.affiliations = set(affiliations or []) | {'ΔA {}'.format(badge)}
 
     def get_key(self):
         return self.badge
@@ -102,19 +108,19 @@ class Knight(Initiate):
         # TODO generalize
         return lambda s : (not s.startswith('ΔA '), s)
 
-
-
 class Brother(Member):
 
-    schema = {
-            'status' : {'allowed' : ['Brother']},
-            'first_name' : optional_nonempty_string,
-            'preferred_name' : optional_nonempty_string,
-            'last_name' : nonempty_string,
-            'big_badge' : optional_nonempty_string,
-            'pledge_semester' : optional_semester_like,
-            'affiliations' : {'allowed' : []}
-            }
+    allowed = {'Brother'}
+
+    validator = Schema({
+        'status' : In(allowed),
+        Optional('first_name') : NonEmptyString,
+        Optional('preferred_name') : NonEmptyString,
+        'last_name' : NonEmptyString,
+        Optional('big_badge') : NonEmptyString,
+        Optional('pledge_semester') : Coerce(Semester),
+        'affiliations' : object
+        })
 
     bid = 0
 
@@ -145,15 +151,17 @@ class Brother(Member):
 
 class Candidate(Member):
 
-    schema = {
-            'status' : {'allowed' : ['Candidate']},
-            'first_name' : nonempty_string,
-            'preferred_name' : optional_nonempty_string,
-            'last_name' : nonempty_string,
-            'big_badge' : optional_nonempty_string,
-            'pledge_semester' : optional_semester_like,
-            'affiliations' : {'allowed' : []}
-            }
+    allowed = {'Candidate'}
+
+    validator = Schema({
+        'status' : In(allowed),
+        'first_name' : NonEmptyString,
+        Optional('preferred_name') : NonEmptyString,
+        'last_name' : NonEmptyString,
+        Optional('big_badge') : NonEmptyString,
+        Optional('pledge_semester') : Coerce(Semester),
+        'affiliations' : object
+        })
 
     cid = 0
 
@@ -187,16 +195,18 @@ class Expelled(Knight):
     A member that was initiated, but was then expelled.
     '''
 
-    schema = {
-            'status' : {'allowed' : ['Expelled']},
-            'badge' : nonempty_string,
-            'first_name' : optional_nonempty_string,
-            'preferred_name' : optional_nonempty_string,
-            'last_name' : optional_nonempty_string,
-            'big_badge' : optional_nonempty_string,
-            'pledge_semester' : optional_semester_like,
-            'affiliations' : affiliations_schema
-            }
+    allowed = {'Expelled'}
+
+    validator = Schema({
+        'status' : In(allowed),
+        'badge' : NonEmptyString,
+        Optional('first_name') : NonEmptyString,
+        Optional('preferred_name') : NonEmptyString,
+        Optional('last_name') : NonEmptyString,
+        Optional('big_badge') : NonEmptyString,
+        Optional('pledge_semester') : Coerce(Semester),
+        'affiliations' : object,
+        })
 
     def __init__(self,
             status=None,

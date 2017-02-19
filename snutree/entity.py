@@ -82,8 +82,8 @@ class Member(TreeEntity, metaclass=ABCMeta):
     '''
 
     @classmethod
-    def get_schema(cls):
-        return { 'schema' : cls.schema, 'constructor' : cls }
+    def from_dict(cls, dct):
+        return cls(**cls.validator(dct))
 
     @abstractmethod
     def get_dot_label(self):
