@@ -5,7 +5,7 @@ from ..semester import Semester
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 
-class Affiliation(str):
+class Affiliation:
     '''
     A chapter affiliation. Two definitions should be made clear here:
 
@@ -180,7 +180,7 @@ class Knight(Initiate):
         'last_name' : NonEmptyString,
         Optional('big_badge') : NonEmptyString,
         Optional('pledge_semester') : Coerce(Semester),
-        'affiliations' : object,
+        Optional('affiliations') : Coerce(Affiliation),
         })
 
     def __init__(self,
@@ -202,7 +202,8 @@ class Knight(Initiate):
         # TODO generalize
         # TODO uncomment
         self.affiliations = []
-        # self.affiliations = set(affiliations or []) | {'ΔA {}'.format(badge)}
+        self.affiliations = set(affiliations or []) |  \
+                {Affiliation('ΔA {}'.format(badge))}
 
     def get_key(self):
         return self.badge
@@ -227,7 +228,7 @@ class Brother(Member):
         'last_name' : NonEmptyString,
         Optional('big_badge') : NonEmptyString,
         Optional('pledge_semester') : Coerce(Semester),
-        'affiliations' : object
+        Optional('affiliations') : Coerce(Affiliation),
         })
 
     bid = 0
@@ -268,7 +269,7 @@ class Candidate(Member):
         'last_name' : NonEmptyString,
         Optional('big_badge') : NonEmptyString,
         Optional('pledge_semester') : Coerce(Semester),
-        'affiliations' : object
+        Optional('affiliations') : Coerce(Affiliation),
         })
 
     cid = 0
@@ -313,7 +314,7 @@ class Expelled(Knight):
         Optional('last_name') : NonEmptyString,
         Optional('big_badge') : NonEmptyString,
         Optional('pledge_semester') : Coerce(Semester),
-        'affiliations' : object,
+        Optional('affiliations') : Coerce(Affiliation),
         })
 
     def __init__(self,
