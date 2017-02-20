@@ -1,4 +1,4 @@
-from voluptuous import Schema, In
+from voluptuous import Schema, In, Coerce
 from ..entity import Initiate
 from ..directory import Directory
 from ..utilities import NonEmptyString
@@ -11,16 +11,18 @@ class Chapter(Initiate):
         'status' : In(allowed),
         'mother' : NonEmptyString,
         'child' : NonEmptyString,
+        'founded' : Coerce(int)
         })
 
     def __init__(self,
             mother=None,
             child=None,
+            founded=None,
             **ignore
             ):
 
         self.key = child
-        self.semester = None
+        self.semester = founded
         self.parent = mother
 
     def get_key(self):
