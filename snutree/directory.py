@@ -1,9 +1,10 @@
+from abc import ABCMeta
 from pprint import pformat
 from .utilities import logged
 
 # TODO remove this class?
 
-class Directory:
+class Directory(metaclass=ABCMeta):
     '''
     This class is used to store data from either a CSV file or a SQL query. It
     is an intermediate form before the data is turned into a tree. It stores a
@@ -15,7 +16,10 @@ class Directory:
     affiliations are unique.
     '''
 
-    def __init__(self, member_list, member_types, ignored_statuses=None):
+    member_types = NotImplemented
+    ignored_statuses = []
+
+    def __init__(self, member_list):
 
         # Remove the keys pointing to falsy values from each member. This
         # simplifies code in the Directory class (e.g., Directory does not
@@ -28,11 +32,9 @@ class Directory:
             members.append(row)
 
         self.allowed_statuses = {}
-        for typ in member_types:
+        for typ in self.member_types:
             for allowed in typ.allowed:
                 self.allowed_statuses[allowed] = typ
-
-        self.ignored_statuses = set(ignored_statuses or ())
 
         self.set_members(members)
 

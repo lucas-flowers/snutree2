@@ -2,13 +2,12 @@
 import subprocess, click, logging, sys, yaml, csv
 from pathlib import Path
 from cerberus import Validator
+from snutree.schemas import basic, sigmanu
 from snutree.readers import sql, dotread
-from snutree.schemas.sigmanu import Candidate, Brother, Knight, Expelled
-# from snutree.schemas.basic import KeylessInitiate
 from snutree.tree import FamilyTree, TreeError
 from snutree.entity import TreeEntityAttributeError
 from snutree.utilities import logged, SettingsError, nonempty_string, validate
-from snutree.directory import Directory, DirectoryError
+from snutree.directory import DirectoryError
 
 def main():
 
@@ -23,6 +22,11 @@ def main():
         logging.error('Unexpected error.', exc_info=True)
         sys.exit(1)
 
+directory_types = {
+        'sigmanu' : sigmanu.SigmaNuDirectory,
+        'default' : basic.DefaultDirectory,
+        }
+
 @click.command()
 @click.argument('paths', nargs=-1, type=click.Path(exists=True))
 @click.option('--output', '-o', type=click.Path(), multiple=False, default=None)
@@ -31,8 +35,9 @@ def main():
 @click.option('--debug', '-d', is_flag=True, default=False)
 @click.option('--verbose', '-v', is_flag=True, default=False)
 @click.option('--quiet', '-q', is_flag=True, default=False)
+@click.option('--schema', '-m', type=click.Choice(directory_types.keys()), default='default')
 @logged
-def cli(paths, output, config, seed, debug, verbose, quiet):
+def cli(paths, output, config, seed, debug, verbose, quiet, schema):
     '''
     Create a big-little family tree.
     '''
@@ -49,9 +54,8 @@ def cli(paths, output, config, seed, debug, verbose, quiet):
     members = get_from_sources(paths)
 
     logging.info('Validating directory')
-    # TODO generalize this
-    directory = Directory(members, [Candidate, Brother, Knight, Expelled], ['Reaffiliate'])
-    # directory = Directory(members, [KeylessInitiate])
+    DirectoryType = directory_types[schema]
+    directory = DirectoryType(members)
 
     logging.info('Loading tree configuration')
     tree_cnf = load_configuration(config)

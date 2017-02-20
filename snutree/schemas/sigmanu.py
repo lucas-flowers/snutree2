@@ -1,5 +1,6 @@
 import difflib, re
 from voluptuous import Schema, Optional, All, Length, In, Coerce
+from ..directory import Directory
 from ..entity import Member, Initiate
 from ..semester import Semester
 
@@ -205,6 +206,11 @@ def combine_names(first_name, preferred_name, last_name, threshold=.5):
         first_name = preferred_name
 
     return '{} {}'.format(first_name, last_name)
+
+class SigmaNuDirectory(Directory):
+
+    member_types = [Candidate, Brother, Knight, Expelled]
+    ignored_statuses = ['Reaffiliate']
 
 class Affiliation:
     '''
