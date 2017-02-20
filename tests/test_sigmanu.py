@@ -2,9 +2,7 @@ import string
 import nose.tools as nt
 from snutree.schemas.sigmanu import Affiliation
 
-def test_Affiliation():
-
-    # IMPORTANT NOTE: The letters we are testing against
+def test_Affiliation_dicts():
 
     # Make sure the lookalike dict is set right (it's hard to tell)
     for latin, greek in Affiliation.LATIN_TO_GREEK.items():
@@ -15,6 +13,8 @@ def test_Affiliation():
     # Make sure the mapping dict is also set right
     for greek in Affiliation.ENGLISH_TO_GREEK.values():
         nt.assert_not_in(greek, string.ascii_letters)
+
+def test_Affiliation_constructor():
 
     # Input designation on the left; canonical designation on the right.
     # NOTE: The right side consists of /only/ Greek letters (i.e., 'Α' not 'A')
@@ -68,6 +68,8 @@ def test_Affiliation():
 
     # Not a string
     nt.assert_raises(TypeError, Affiliation, object())
+
+def test_Affiliation_sorting():
 
     # Sorting. Primary chapter (default is 'ΔΑ') goes first
     a, c, b, d = tuple(Affiliation(s) for s in ('ΔA 1', 'Α 2', 'ΔA 2', 'Ω 1'))
