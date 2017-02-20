@@ -356,7 +356,7 @@ class Affiliation:
         '''
         Create an affiliation to the primary chapter with the given badge.
         '''
-        return cls(cls.get_primary_chapter(), badge)
+        return cls(cls.get_primary_chapter(), int(badge))
 
     @classmethod
     def get_primary_chapter(cls):
