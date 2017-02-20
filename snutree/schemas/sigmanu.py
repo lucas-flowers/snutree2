@@ -227,8 +227,6 @@ class Knight(Initiate):
         self.semester = pledge_semester
 
         # TODO generalize
-        # TODO uncomment
-        self.affiliations = []
         self.affiliations = set(affiliations or []) |  \
                 {Affiliation('{} {}'.format(Affiliation.get_primary_chapter(), badge))}
 
