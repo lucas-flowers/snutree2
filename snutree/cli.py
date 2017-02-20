@@ -7,7 +7,7 @@ from .readers import sql, dotread
 from .tree import FamilyTree, TreeError
 from .entity import TreeEntityAttributeError
 from .utilities import logged, SettingsError, nonempty_string, validate
-from .directory import DirectoryError
+from .directory import Directory, DirectoryError
 
 def main():
 
@@ -73,6 +73,8 @@ def cli(paths, output, config, seed, debug, verbose, quiet, schema):
             DirectoryType = module.Directory
         except AttributeError as e:
             raise Exception('Custom module must have a Directory class')
+        if not issubclass(DirectoryType, Directory):
+            raise Exception('Custom Directory class must subclass snutree.Directory')
 
     directory = DirectoryType(members)
 
