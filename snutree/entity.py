@@ -62,7 +62,10 @@ class UnidentifiedInitiate(Custom):
 
     def __init__(self, member, attributes=None):
         self.key = '{} Parent'.format(member.get_key())
-        self.semester = member.semester - 1 if member.semester else None
+        try:
+            self.semester = member.semester - 1
+        except TreeEntityAttributeError:
+            self.semester = None
         self.attributes = attributes or {}
 
 class Member(TreeEntity, metaclass=ABCMeta):
