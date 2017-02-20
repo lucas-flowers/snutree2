@@ -1,6 +1,6 @@
 import nose.tools as nt
 from itertools import permutations
-from snutree.semester import Semester, semester_range
+from snutree.semester import Semester
 
 def test_comparisons():
 
@@ -53,19 +53,4 @@ def test_math():
 def test_subtract():
 
     nt.assert_equals(str(Semester('Fall 2001') - 1), 'Spring 2001')
-
-def test_range():
-
-    a = Semester('Fall 2000')
-    b = Semester('Spring 2002')
-
-    nt.assert_equals(
-            [str(s) for s in semester_range(a, b)],
-            ['Fall 2000', 'Spring 2001', 'Fall 2001'],
-            )
-
-    nt.assert_equals(
-            list(semester_range(a, b)),
-            [Semester(s) for s in ('Fall 2000', 'Spring 2001', 'Fall 2001')],
-            )
 

@@ -6,7 +6,6 @@ from networkx.algorithms.components import weakly_connected_components
 from networkx.algorithms.cycles import find_cycle
 from networkx.exception import NetworkXNoCycle
 from . import dot
-from .semester import semester_range
 from .entity import Member, Custom, UnidentifiedInitiate, Initiate
 from .utilities import logged, optional_boolean, nonempty_string, semester_like, validate
 
@@ -440,9 +439,8 @@ class FamilyTree:
 
         nodes = []
         edges = []
-        # TODO use range() instead, delete semester_range, and use some kind
-        # of casting to generalize the side labels
-        for sem in semester_range(min_semester, max_semester+1):
+        sem = min_semester
+        while sem <= max_semester:
             nodes.append(dot.Node(
                 '{}{}'.format(sem, key),
                 {'label' : sem},
@@ -451,8 +449,8 @@ class FamilyTree:
                 '{}{}'.format(sem, key),
                 '{}{}'.format(sem+1, key),
                 ))
+            sem += 1
 
-        sem += 1
         nodes.append(dot.Node(
             '{}{}'.format(sem, key),
             {'label' : sem},

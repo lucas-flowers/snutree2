@@ -1,11 +1,5 @@
 import re
 
-def semester_range(start, stop, step=1):
-    i = start
-    while i < stop:
-        yield i
-        i += step
-
 class Semester(int):
 
     matcher = re.compile('(Spring|Fall) (\d+)')
