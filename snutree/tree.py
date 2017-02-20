@@ -440,6 +440,8 @@ class FamilyTree:
 
         nodes = []
         edges = []
+        # TODO use range() instead, delete semester_range, and use some kind
+        # of casting to generalize the side labels
         for sem in semester_range(min_semester, max_semester+1):
             nodes.append(dot.Node(
                 '{}{}'.format(sem, key),
