@@ -1,7 +1,10 @@
 import logging, time, pprint
+from voluptuous import All, Length
 from .semester import Semester
 
 # TODO separate validation class?
+
+NonEmptyString = All(str, Length(min=1))
 
 # A required string; must be nonempty and not None
 nonempty_string = {

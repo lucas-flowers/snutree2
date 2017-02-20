@@ -1,13 +1,13 @@
 import difflib, re
-from voluptuous import Schema, Optional, All, Length, In, Coerce
+from voluptuous import Schema, Optional, In, Coerce
 from ..directory import Directory
 from ..entity import Member, Initiate
 from ..semester import Semester
+from ..utilities import NonEmptyString
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 
 # Voluptuous validators
-NonEmptyString = All(str, Length(min=1))
 AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
 
 class Knight(Initiate):

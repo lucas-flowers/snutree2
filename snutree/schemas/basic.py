@@ -1,14 +1,19 @@
+from voluptuous import Schema, In, Optional, Coerce
+from ..directory import Directory
 from ..entity import Initiate
-from ..utilities import nonempty_string, optional_nonempty_string, optional_semester_like
+from ..semester import Semester
+from ..utilities import NonEmptyString
 
 class KeylessInitiate(Initiate):
 
-    schema = {
-            'status' : {'allowed' : ['KeylessInitiate']},
-            'name' : nonempty_string,
-            'big_name' : optional_nonempty_string,
-            'pledge_semester' : optional_semester_like,
-            }
+    allowed = {'Initiate'}
+
+    validator = Schema({
+            'status' : In(allowed),
+            'name' : NonEmptyString,
+            Optional('big_name') : NonEmptyString,
+            'pledge_semester' : Coerce(Semester),
+            })
 
     def __init__(self,
             status=None,
@@ -26,4 +31,8 @@ class KeylessInitiate(Initiate):
 
     def get_dot_label(self):
         return self.key
+
+class DefaultDirectory(Directory):
+    member_types = [KeylessInitiate]
+    ignored_statuses = []
 
