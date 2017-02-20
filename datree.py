@@ -129,8 +129,6 @@ def write_pdffile(dotcode, pdf_filename):
     subprocess.run(['dot', '-Tpdf', '-o', pdf_filename],
             check=True, input=dotcode, universal_newlines=True)
 
-# TODO for SQL, make sure DA affiliations agree with the external ID.
-
 def get_from_dot(path):
     return dotread.get_table(path)
 
