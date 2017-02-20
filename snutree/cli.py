@@ -56,6 +56,7 @@ def cli(paths, output, config, seed, debug, verbose, quiet, schema):
 
     logging.info('Validating directory')
     # TODO clean this up
+    # TODO don't subclass directory, but have factories?
     DirectoryType = directory_types.get(schema or 'default')
     if not DirectoryType:
         path = Path(schema)
