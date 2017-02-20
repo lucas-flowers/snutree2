@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-import subprocess, click, logging, sys, yaml, csv
+import subprocess, click, logging, sys, yaml, csv, importlib.util
 from pathlib import Path
 from cerberus import Validator
-from snutree.schemas import basic, sigmanu, sigmanu_chapter
-from snutree.readers import sql, dotread
-from snutree.tree import FamilyTree, TreeError
-from snutree.entity import TreeEntityAttributeError
-from snutree.utilities import logged, SettingsError, nonempty_string, validate
-from snutree.directory import DirectoryError
+from .schemas import basic, sigmanu, sigmanu_chapter
+from .readers import sql, dotread
+from .tree import FamilyTree, TreeError
+from .entity import TreeEntityAttributeError
+from .utilities import logged, SettingsError, nonempty_string, validate
+from .directory import DirectoryError
 
 def main():
 
@@ -23,22 +23,23 @@ def main():
         sys.exit(1)
 
 directory_types = {
-        'sigmanu' : sigmanu.SigmaNuDirectory,
-        'sigmanu_chapters' : sigmanu_chapter.ChapterDirectory,
-        'default' : basic.DefaultDirectory,
+        'sigmanu' : sigmanu.Directory,
+        'sigmanu_chapters' : sigmanu_chapter.Directory,
+        'default' : basic.Directory,
         }
 
 @click.command()
 @click.argument('paths', nargs=-1, type=click.Path(exists=True))
-@click.option('--output', '-o', type=click.Path(), multiple=False, default=None)
+@click.option('--output', '-o', type=click.Path(), default=None)
 @click.option('--config', '-c', type=click.Path(exists=True), multiple=True)
 @click.option('--seed', '-S', default=0)
 @click.option('--debug', '-d', is_flag=True, default=False)
 @click.option('--verbose', '-v', is_flag=True, default=False)
 @click.option('--quiet', '-q', is_flag=True, default=False)
-@click.option('--schema', '-m', type=click.Choice(directory_types.keys()), default='default')
+@click.option('--schema', '-m', type=(click.Choice(directory_types.keys())), default=None)
+@click.option('--custom-schema', '-M', type=click.Path())
 @logged
-def cli(paths, output, config, seed, debug, verbose, quiet, schema):
+def cli(paths, output, config, seed, debug, verbose, quiet, schema, custom_schema):
     '''
     Create a big-little family tree.
     '''
@@ -55,7 +56,17 @@ def cli(paths, output, config, seed, debug, verbose, quiet, schema):
     members = get_from_sources(paths)
 
     logging.info('Validating directory')
-    DirectoryType = directory_types[schema]
+    # TODO better error
+    assert not (schema and custom_schema)
+    if custom_schema:
+        module_name, path = Path(custom_schema).stem, custom_schema
+        spec = importlib.util.spec_from_file_location(module_name, path)
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        DirectoryType = module.Directory
+    else:
+        DirectoryType = directory_types.get(schema or 'default')
+
     directory = DirectoryType(members)
 
     logging.info('Loading tree configuration')

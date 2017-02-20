@@ -32,7 +32,7 @@ class KeylessInitiate(Initiate):
     def get_dot_label(self):
         return self.key
 
-class DefaultDirectory(Directory):
+class Directory(Directory):
     member_types = [KeylessInitiate]
     ignored_statuses = []
 

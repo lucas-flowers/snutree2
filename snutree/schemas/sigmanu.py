@@ -208,7 +208,7 @@ def combine_names(first_name, preferred_name, last_name, threshold=.5):
 
     return '{} {}'.format(first_name, last_name)
 
-class SigmaNuDirectory(Directory):
+class Directory(Directory):
 
     member_types = [Candidate, Brother, Knight, Expelled]
     ignored_statuses = ['Reaffiliate']

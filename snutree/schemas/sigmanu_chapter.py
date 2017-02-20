@@ -31,7 +31,7 @@ class Chapter(Initiate):
     def get_dot_label(self):
         return self.key
 
-class ChapterDirectory(Directory):
+class Directory(Directory):
     member_types = [Chapter]
     ignored_statuses = []
 
