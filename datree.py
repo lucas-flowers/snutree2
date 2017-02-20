@@ -2,7 +2,7 @@
 import subprocess, click, logging, sys, yaml, csv
 from pathlib import Path
 from cerberus import Validator
-from snutree.schemas import basic, sigmanu
+from snutree.schemas import basic, sigmanu, sigmanu_chapter
 from snutree.readers import sql, dotread
 from snutree.tree import FamilyTree, TreeError
 from snutree.entity import TreeEntityAttributeError
@@ -24,6 +24,7 @@ def main():
 
 directory_types = {
         'sigmanu' : sigmanu.SigmaNuDirectory,
+        'sigmanu_chapters' : sigmanu_chapter.ChapterDirectory,
         'default' : basic.DefaultDirectory,
         }
 
