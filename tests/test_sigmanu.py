@@ -69,3 +69,7 @@ def test_affiliation():
     # Not a string
     nt.assert_raises(TypeError, Affiliation, object())
 
+    # Sorting. Primary chapter (default is 'ΔΑ') goes first
+    a, c, b, d = tuple(Affiliation(s) for s in ('ΔA 1', 'Α 2', 'ΔA 2', 'Ω 1'))
+    nt.assert_equals(sorted([a, c, b, d]), [a, b, c, d])
+

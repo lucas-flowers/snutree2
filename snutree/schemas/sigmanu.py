@@ -1,10 +1,12 @@
 import difflib, re
+from functools import total_ordering
 from voluptuous import Schema, Optional, All, Length, In, Coerce
 from ..entity import Member, Initiate
 from ..semester import Semester
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 
+@total_ordering
 class Affiliation:
     '''
     A chapter affiliation. Two definitions should be made clear here:
@@ -24,6 +26,10 @@ class Affiliation:
         letter. They are case-insensitive.
 
     '''
+
+    @classmethod
+    def set_primary_chapter(cls, chapter_designation):
+        cls._primary_chapter = cls.str_to_designation(chapter_designation)
 
     # English words to Unicode Greek letters
     ENGLISH_TO_GREEK = {
@@ -103,12 +109,6 @@ class Affiliation:
     # Matches a chapter designation
     DESIGNATION_MATCHER = re.compile('^({})+$'.format(DESIGNATION_TOKEN))
 
-    VALUE_ERROR_MSG = \
-            'expected a badge number preceded by a chapter name in one of the two forms:\n' \
-            '    1. names of Greek letters separated by spaces (e.g., "Delta Alpha 100")\n' \
-            '    2. several actual Greek letters together (e.g., "ΔA 100")\n' \
-            'but got {!r}'
-
     def __init__(self, arg):
         '''
         Initialize a chapter affiliation based on arg, which should be a string
@@ -129,44 +129,67 @@ class Affiliation:
         # Split into the name half and the digit half
         match = self.AFFILIATION_MATCHER.match(arg)
         if not match:
-            raise ValueError(self.VALUE_ERROR_MSG.format(arg))
-        chapter_id = match.group('chapter_id')
-        badge = int(match.group('badge'))
+            msg = 'expected a chapter name followed by a badge number but got {!r}'
+            raise ValueError(msg.format(arg))
 
-        # See if chapter_id is a full chapter name (i.e., English words)
-        words = [w.title() for w in chapter_id.split()]
-        greek_letters = [self.ENGLISH_TO_GREEK[w] for w in words if w in self.ENGLISH_TO_GREEK]
+        self.designation = self.str_to_designation(match.group('chapter_id'))
+        self.badge = int(match.group('badge'))
+
+    @classmethod
+    def str_to_designation(cls, string):
+
+        # See if string is a full chapter name (i.e., English words)
+        words = [w.title() for w in string.split()]
+        greek_letters = [cls.ENGLISH_TO_GREEK[w] for w in words if w in cls.ENGLISH_TO_GREEK]
         if len(greek_letters) == len(words):
             designation = ''.join(greek_letters)
 
-        # See if chapter_id is a short chapter designation (i.e., Greek letters)
-        elif self.DESIGNATION_MATCHER.match(chapter_id):
+        # See if string is a short chapter designation (i.e., Greek letters)
+        elif cls.DESIGNATION_MATCHER.match(string):
 
             # Get a list of chapter designation tokens, capitalized
-            tokens = re.findall(self.DESIGNATION_TOKEN, chapter_id.upper())
+            tokens = re.findall(cls.DESIGNATION_TOKEN, string.upper())
 
             # Translate Latin lookalikes to true Greek
-            greek_letters = [self.LATIN_TO_GREEK.get(s, s) for s in tokens]
+            greek_letters = [cls.LATIN_TO_GREEK.get(s, s) for s in tokens]
 
             designation = ''.join(greek_letters)
 
         else:
-            raise ValueError(self.VALUE_ERROR_MSG.format(arg))
+            msg = 'expected a chapter name in one of the two forms:\n' \
+                    '    1. names of Greek letters separated by spaces (e.g., "Delta Alpha 100")\n' \
+                    '    2. several actual Greek letters together (e.g., "ΔA 100")\n' \
+                    'but got {!r}'
+            raise ValueError(msg.format(string))
 
-        self.designation = designation
-        self.badge = badge
+        return designation
 
     def __str__(self):
         return '{} {}'.format(self.designation, self.badge)
 
+    def __repr__(self):
+        return str(self)
+
     def __lt__(self, other):
-        return (self.designation, self.badge) < (other.designation, other.badge)
+        if not isinstance(other, Affiliation):
+            return NotImplemented
+        key_self = (self.designation != self._primary_chapter, self.designation, self.badge)
+        key_other = (other.designation != self._primary_chapter, other.designation, other.badge)
+        return  key_self < key_other
 
     def __eq__(self, other):
         return isinstance(other, Affiliation) and \
                 (self.designation, self.badge) == (other.designation, other.badge)
 
+    def __hash__(self):
+        return hash((self.designation, self.badge))
+
+# TODO generalize
+Affiliation.set_primary_chapter('ΔA')
+
 NonEmptyString = All(str, Length(min=1))
+
+AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
 
 class Knight(Initiate):
 
@@ -180,7 +203,7 @@ class Knight(Initiate):
         'last_name' : NonEmptyString,
         Optional('big_badge') : NonEmptyString,
         Optional('pledge_semester') : Coerce(Semester),
-        Optional('affiliations') : Coerce(Affiliation),
+        Optional('affiliations') : AffiliationsList,
         })
 
     def __init__(self,
@@ -209,13 +232,8 @@ class Knight(Initiate):
         return self.badge
 
     def get_dot_label(self):
-        # TODO generalize
-        affiliations =  sorted(self.affiliations, key=self.affiliations_key())
-        return '{}\\n{}'.format(self.name, ', '.join(affiliations))
-
-    def affiliations_key(self):
-        # TODO generalize
-        return lambda s : (not s.startswith('ΔA '), s)
+        affiliation_strings =  [str(s) for s in sorted(self.affiliations)]
+        return '{}\\n{}'.format(self.name, ', '.join(affiliation_strings))
 
 class Brother(Member):
 
@@ -228,7 +246,7 @@ class Brother(Member):
         'last_name' : NonEmptyString,
         Optional('big_badge') : NonEmptyString,
         Optional('pledge_semester') : Coerce(Semester),
-        Optional('affiliations') : Coerce(Affiliation),
+        Optional('affiliations') : AffiliationsList,
         })
 
     bid = 0
@@ -269,7 +287,7 @@ class Candidate(Member):
         'last_name' : NonEmptyString,
         Optional('big_badge') : NonEmptyString,
         Optional('pledge_semester') : Coerce(Semester),
-        Optional('affiliations') : Coerce(Affiliation),
+        Optional('affiliations') : AffiliationsList,
         })
 
     cid = 0
@@ -314,7 +332,7 @@ class Expelled(Knight):
         Optional('last_name') : NonEmptyString,
         Optional('big_badge') : NonEmptyString,
         Optional('pledge_semester') : Coerce(Semester),
-        Optional('affiliations') : Coerce(Affiliation),
+        Optional('affiliations') : AffiliationsList,
         })
 
     def __init__(self,
