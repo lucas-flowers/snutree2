@@ -36,10 +36,9 @@ directory_types = {
 @click.option('--debug', '-d', is_flag=True, default=False)
 @click.option('--verbose', '-v', is_flag=True, default=False)
 @click.option('--quiet', '-q', is_flag=True, default=False)
-@click.option('--schema', '-m', type=(click.Choice(directory_types.keys())), default=None)
-@click.option('--custom-schema', '-M', type=click.Path())
+@click.option('--schema', '-m', type=str, default=None)
 @logged
-def cli(paths, output, config, seed, debug, verbose, quiet, schema, custom_schema):
+def cli(paths, output, config, seed, debug, verbose, quiet, schema):
     '''
     Create a big-little family tree.
     '''
@@ -56,16 +55,24 @@ def cli(paths, output, config, seed, debug, verbose, quiet, schema, custom_schem
     members = get_from_sources(paths)
 
     logging.info('Validating directory')
-    # TODO better error
-    assert not (schema and custom_schema)
-    if custom_schema:
-        module_name, path = Path(custom_schema).stem, custom_schema
-        spec = importlib.util.spec_from_file_location(module_name, path)
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        DirectoryType = module.Directory
-    else:
-        DirectoryType = directory_types.get(schema or 'default')
+    # TODO clean this up
+    DirectoryType = directory_types.get(schema or 'default')
+    if not DirectoryType:
+        path = Path(schema)
+        if not path.exists() or path.suffix != '.py':
+            # TODO better error
+            raise Exception('Must be one of ??? or a custom Python module')
+        module_name = path.stem
+        try:
+            spec = importlib.util.spec_from_file_location(module_name, str(path))
+            module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(module)
+        except Exception:
+            raise Exception('Could not import custom module.')
+        try:
+            DirectoryType = module.Directory
+        except AttributeError as e:
+            raise Exception('Custom module must have a Directory class')
 
     directory = DirectoryType(members)
 
