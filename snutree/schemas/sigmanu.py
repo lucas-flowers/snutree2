@@ -351,6 +351,7 @@ class Affiliation:
         self.designation = designation
         self.badge = badge
 
+    @classmethod
     def with_primary(cls, badge):
         '''
         Create an affiliation to the primary chapter with the given badge.
