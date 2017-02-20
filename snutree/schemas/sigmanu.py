@@ -5,8 +5,8 @@ from ..semester import Semester
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 
+# Voluptuous validators
 NonEmptyString = All(str, Length(min=1))
-
 AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
 
 class Knight(Initiate):
@@ -39,10 +39,7 @@ class Knight(Initiate):
         self.name = combine_names(first_name, preferred_name, last_name)
         self.parent = big_badge
         self.semester = pledge_semester
-
-        # TODO simplify second line?
-        self.affiliations = set(affiliations or []) |  \
-                {Affiliation('{} {}'.format(Affiliation.get_primary_chapter(), badge))}
+        self.affiliations = set(affiliations or []) | {Affiliation.with_primary(badge)}
 
     def get_key(self):
         return self.badge
@@ -236,14 +233,6 @@ class Affiliation:
 
     '''
 
-    @classmethod
-    def get_primary_chapter(cls):
-        return cls._primary_chapter
-
-    @classmethod
-    def set_primary_chapter(cls, chapter_designation):
-        cls._primary_chapter = cls.str_to_designation(chapter_designation)
-
     # English words to Unicode Greek letters, in titlecaps
     ENGLISH_TO_GREEK = {
             'Alpha' :'Α',
@@ -322,31 +311,59 @@ class Affiliation:
     # Matches a chapter designation
     DESIGNATION_MATCHER = re.compile('^({})+$'.format(DESIGNATION_TOKEN))
 
-    def __init__(self, arg):
+    def __init__(self, *args):
         '''
-        Initialize a chapter affiliation based on arg, which should be a string
-        of the form '<chapter_id> <badge>' where <badge> is the badge number
-        and <chapter_id> is an identifier for the chapter. That identifier can
-        either be a chapter designation (essentially Greek letters with no
-        spaces) or a full chapter name (English names of Greek letters,
-        separated by spaces). In addition to Greek letters, the strings '(A)'
-        and '(B)' are permissible for Eta Mu (A) and Eta Mu (B) chapters.
+        Initialize a chapter affiliation based on args.
+
+        If args is a string, it should be of the form '<chapter_id> <badge>'
+        where <badge> is the badge number and <chapter_id> is an identifier for
+        the chapter. That identifier can either be a chapter designation
+        (essentially Greek letters with no spaces) or a full chapter name
+        (English names of Greek letters, separated by spaces). In addition to
+        Greek letters, the strings '(A)' and '(B)' are permissible for Eta Mu
+        (A) and Eta Mu (B) chapters.
+
+        If args is a tuple, it should be of length two and of the form
+        "(<chapter_id>, <badge>)".
         '''
 
-        if not isinstance(arg, str):
-            raise TypeError('expected str')
+        if len(args) == 1 and isinstance(args[0], str):
 
-        # Take out leading and trailing whitespace
-        arg = arg.strip()
+            # Take out leading and trailing whitespace
+            arg = args[0].strip()
 
-        # Split into the name half and the digit half
-        match = self.AFFILIATION_MATCHER.match(arg)
-        if not match:
-            msg = 'expected a chapter name followed by a badge number but got {!r}'
-            raise ValueError(msg.format(arg))
+            # Split into the name half and the digit half
+            match = self.AFFILIATION_MATCHER.match(arg)
+            if not match:
+                msg = 'expected a chapter name followed by a badge number but got {!r}'
+                raise ValueError(msg.format(arg))
 
-        self.designation = self.str_to_designation(match.group('chapter_id'))
-        self.badge = int(match.group('badge'))
+            designation = self.str_to_designation(match.group('chapter_id'))
+            badge = int(match.group('badge'))
+
+        elif len(args) == 2 and isinstance(args[0], str) and isinstance(args[1], int):
+            designation, badge = args
+
+        else:
+            msg = 'expected *(str,) or *(str, int) but got *{}'
+            raise TypeError(msg.format(args))
+
+        self.designation = designation
+        self.badge = badge
+
+    def with_primary(cls, badge):
+        '''
+        Create an affiliation to the primary chapter with the given badge.
+        '''
+        return cls(cls.get_primary_chapter(), badge)
+
+    @classmethod
+    def get_primary_chapter(cls):
+        return cls._primary_chapter
+
+    @classmethod
+    def set_primary_chapter(cls, chapter_designation):
+        cls._primary_chapter = cls.str_to_designation(chapter_designation)
 
     @classmethod
     def str_to_designation(cls, string):

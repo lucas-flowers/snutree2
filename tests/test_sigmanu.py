@@ -14,7 +14,7 @@ def test_Affiliation_dicts():
     for greek in Affiliation.ENGLISH_TO_GREEK.values():
         nt.assert_not_in(greek, string.ascii_letters)
 
-def test_Affiliation_constructor():
+def test_Affiliation_constructor_string_success():
 
     # Input designation on the left; canonical designation on the right.
     # NOTE: The right side consists of /only/ Greek letters (i.e., 'Α' not 'A')
@@ -45,6 +45,18 @@ def test_Affiliation_constructor():
     for i, o in designations:
         nt.assert_equals(Affiliation(i), Affiliation(o))
 
+def test_Affiliation_constructor_tuple_success():
+
+    designations = [
+            ('A', 1),
+            ('Beta Beta', 1234)
+            ]
+
+    for d in designations:
+        Affiliation(*d)
+
+def test_Affiliation_constructor_value_failure():
+
     failed_designations = [
             'a 5', # 'a' is not Greek, nor a Greek lookalike
             'D 5', # Same with 'D'
@@ -66,8 +78,20 @@ def test_Affiliation_constructor():
     for f in failed_designations:
         nt.assert_raises(ValueError, Affiliation, f)
 
-    # Not a string
-    nt.assert_raises(TypeError, Affiliation, object())
+def test_Affiliation_constructor_type_failure():
+
+    # Failed constructor types
+    failed_types = [
+            ('Α', '1'),
+            (1, 1),
+            (1, '1'),
+            (object(),),
+            (1,),
+            ]
+
+    for f in failed_types:
+        nt.assert_raises(TypeError, Affiliation, *f)
+
 
 def test_Affiliation_sorting():
 
