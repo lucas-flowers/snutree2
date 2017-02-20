@@ -1,5 +1,4 @@
 import difflib, re
-from functools import total_ordering
 from voluptuous import Schema, Optional, All, Length, In, Coerce
 from ..entity import Member, Initiate
 from ..semester import Semester
@@ -210,7 +209,6 @@ def combine_names(first_name, preferred_name, last_name, threshold=.5):
 
     return '{} {}'.format(first_name, last_name)
 
-@total_ordering
 class Affiliation:
     '''
     A chapter affiliation. Two definitions should be made clear here:
