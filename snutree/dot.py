@@ -6,7 +6,7 @@ TABSTOP = 4
 def indent(indent_level):
     return TABSTOP * indent_level * ' '
 
-def dict_to_dot_attributes(attributes_dict, sep=','):
+def dict_to_attr(attributes_dict, sep=','):
     '''
     Form a DOT attribute list from the provided dictionary, using the separator
     to separate attributes. The attributes will be sorted by key and value, to
@@ -58,7 +58,7 @@ class Graph(DotCommon):
 
         if self.attributes:
             sep = ';\n{}'.format(indent(indent_level+1))
-            attributes = dict_to_dot_attributes(self.attributes, sep=sep)
+            attributes = dict_to_attr(self.attributes, sep=sep)
             template = '{}{};'
             values = indent(indent_level+1), attributes
             lines.append(template.format(*values))
@@ -86,7 +86,7 @@ class Defaults(DotCommon):
         super().__init__(key, attributes)
 
     def to_dot(self, indent_level=0):
-        attributes = dict_to_dot_attributes(self.attributes) or ''
+        attributes = dict_to_attr(self.attributes) or ''
         template = '{}{} [{}];'
         values = indent(indent_level), self.key, attributes
         return template.format(*values)
@@ -96,7 +96,7 @@ class Node(DotCommon):
     def to_dot(self, indent_level=0):
 
         template = ' [{}]'
-        value = dict_to_dot_attributes(self.attributes)
+        value = dict_to_attr(self.attributes)
         attributes = template.format(value) if value else ''
 
         template = '{}"{}"{};'
@@ -113,7 +113,7 @@ class Edge(DotCommon):
     def to_dot(self, indent_level=0):
 
         template = ' [{}]'
-        value = dict_to_dot_attributes(self.attributes)
+        value = dict_to_attr(self.attributes)
         attributes = template.format(value) if value else ''
 
         template =  '{}"{}" -> "{}"{};'
