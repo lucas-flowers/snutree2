@@ -356,6 +356,9 @@ class Affiliation:
         '''
         Create an affiliation to the primary chapter with the given badge.
         '''
+
+        # TODO make badge always an int, but replace the Member field with a
+        # string key
         return cls(cls.get_primary_chapter(), int(badge))
 
     @classmethod
