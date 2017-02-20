@@ -28,6 +28,10 @@ class Affiliation:
     '''
 
     @classmethod
+    def get_primary_chapter(cls):
+        return cls._primary_chapter
+
+    @classmethod
     def set_primary_chapter(cls, chapter_designation):
         cls._primary_chapter = cls.str_to_designation(chapter_designation)
 
@@ -226,7 +230,7 @@ class Knight(Initiate):
         # TODO uncomment
         self.affiliations = []
         self.affiliations = set(affiliations or []) |  \
-                {Affiliation('ΔA {}'.format(badge))}
+                {Affiliation('{} {}'.format(Affiliation.get_primary_chapter(), badge))}
 
     def get_key(self):
         return self.badge
@@ -274,7 +278,9 @@ class Brother(Member):
         return self.key
 
     def get_dot_label(self):
-        return '{}\\nΔA Brother'.format(self.name)
+        template = '{}\\n{} Brother'
+        values = self.name, Affiliation.get_primary_chapter()
+        return template.format(*values)
 
 class Candidate(Member):
 
@@ -315,7 +321,9 @@ class Candidate(Member):
         return self.key
 
     def get_dot_label(self):
-        return '{}\\nΔA Candidate'.format(self.name)
+        template = '{}\\n{} Candidate'
+        values = self.name, Affiliation.get_primary_chapter()
+        return template.format(*values)
 
 class Expelled(Knight):
     '''
