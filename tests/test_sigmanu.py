@@ -60,6 +60,7 @@ def test_affiliation():
             '∑ 6', # Wrong sigma (that's the sum sigma)
             '6', # No designation
             ' 6', # No designation
+            '', # Empty string
             ]
 
     for f in failed_designations:
