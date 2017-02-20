@@ -226,6 +226,7 @@ class Knight(Initiate):
         self.parent = big_badge
         self.semester = pledge_semester
 
+        # TODO simplify second line?
         self.affiliations = set(affiliations or []) |  \
                 {Affiliation('{} {}'.format(Affiliation.get_primary_chapter(), badge))}
 
