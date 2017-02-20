@@ -2,7 +2,7 @@ import string
 import nose.tools as nt
 from snutree.schemas.sigmanu import Affiliation
 
-def test_affiliation():
+def test_Affiliation():
 
     # IMPORTANT NOTE: The letters we are testing against
 
