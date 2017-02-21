@@ -28,28 +28,28 @@ directory_types = {
         'default' : basic,
         }
 
+SNUTREE_ROOT = Path(__file__).parent
+STANDARD_MODULES = {'basic', 'sigmanu', 'sigmanu_chapter'}
+
 def validate_directory_module(ctx, parameter, value):
 
-    # Pick a module or, if none is provided, use the default one
-    directory_type = directory_types.get(value or 'default')
+    # Get the path of the custom module
+    module_file = Path(value)
+    if value in STANDARD_MODULES:
+        module_path = SNUTREE_ROOT/'schemas'/module_file.with_suffix('.py')
+    elif module_file.exists() and module_file.suffix == '.py':
+        module_path = module_file
+    else:
+        # There is no custom module; giveup and raise an error
+        msg = 'must be one of {!r} or the path to a custom Python module'
+        raise click.BadParameter(msg.format(STANDARD_MODULES))
 
-    # If the schema is not found, assume it is a path to a custom module
-    if not directory_type:
-
-        # Get the path of the custom module
-        path = Path(value)
-        if not path.exists() or path.suffix != '.py':
-            # There is no custom module; giveup and raise an error
-            msg = 'must be one of {!r} or the path to a custom Python module'
-            value = tuple(directory_types.keys())
-            raise click.BadParameter(msg.format(value))
-
-        # Use the custom module
-        module_name = path.stem
-        spec = importlib.util.spec_from_file_location(module_name, str(path))
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        directory_type = module
+    # Use the custom module
+    module_name = module_path.stem
+    spec = importlib.util.spec_from_file_location(module_name, str(module_path))
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    directory_type = module
 
     return directory_type
 
@@ -57,7 +57,7 @@ def validate_directory_module(ctx, parameter, value):
 @click.argument('files', nargs=-1, type=click.File('r'))
 @click.option('output_path', '--output', '-o', type=click.Path(), default=None)
 @click.option('config_paths', '--config', '-c', type=click.Path(exists=True), multiple=True)
-@click.option('schema_module', '--schema', '-m', callback=validate_directory_module, default=None)
+@click.option('schema_module', '--schema', '-m', callback=validate_directory_module, default='basic')
 @click.option('input_format', '--format', '-f', type=str, default=None)
 @click.option('--seed', '-S', default=0)
 @click.option('--debug', '-d', is_flag=True, default=False)

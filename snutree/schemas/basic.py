@@ -1,8 +1,8 @@
 from voluptuous import Schema, Required, Coerce
-from ..directory import Directory
-from ..entity import Initiate
-from ..semester import Semester
-from ..utilities import NonEmptyString
+from snutree.directory import Directory
+from snutree.entity import Initiate
+from snutree.semester import Semester
+from snutree.utilities import NonEmptyString
 
 def directory(members):
     return Directory(members, [KeylessInitiate])

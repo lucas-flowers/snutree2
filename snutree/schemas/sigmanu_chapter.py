@@ -1,7 +1,7 @@
 from voluptuous import Schema, Coerce, Required
-from ..entity import Initiate
-from ..directory import Directory
-from ..utilities import NonEmptyString
+from snutree.entity import Initiate
+from snutree.directory import Directory
+from snutree.utilities import NonEmptyString
 
 def directory(members):
     return Directory(members, [Chapter])

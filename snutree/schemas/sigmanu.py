@@ -1,9 +1,9 @@
 import difflib, re
 from voluptuous import Schema, Required, In, Coerce
-from ..directory import Directory, DirectoryError
-from ..entity import Member, Initiate
-from ..semester import Semester
-from ..utilities import NonEmptyString
+from snutree.directory import Directory, DirectoryError
+from snutree.entity import Member, Initiate
+from snutree.semester import Semester
+from snutree.utilities import NonEmptyString
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 
