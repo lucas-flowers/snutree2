@@ -122,7 +122,7 @@ class FamilyTree:
     def __init__(self, directory, settings=None):
 
         self.graph = nx.DiGraph()
-        self.settings = validate(self.SETTINGS_VALIDATOR, settings) if settings else {}
+        self.settings = validate(self.SETTINGS_VALIDATOR, settings or {})
 
         # Add all the entities in the settings and directory provided
         self.add_members(directory.get_members())
