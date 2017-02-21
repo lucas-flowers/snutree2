@@ -1,5 +1,5 @@
 import difflib, re
-from voluptuous import Schema, Optional, In, Coerce
+from voluptuous import Schema, Required, In, Coerce
 from ..directory import Directory, DirectoryError
 from ..entity import Member, Initiate
 from ..semester import Semester
@@ -52,14 +52,14 @@ class Knight(Initiate):
     allowed = {'Active', 'Alumni', 'Left School'}
 
     validator = Schema({
-        'status' : In(allowed),
-        'badge' : NonEmptyString,
-        'first_name' : NonEmptyString,
-        Optional('preferred_name') : NonEmptyString,
-        'last_name' : NonEmptyString,
-        Optional('big_badge') : NonEmptyString,
-        Optional('pledge_semester') : Coerce(Semester),
-        Optional('affiliations') : AffiliationsList,
+        Required('status') : In(allowed),
+        Required('badge') : NonEmptyString,
+        Required('first_name') : NonEmptyString,
+        'preferred_name' : NonEmptyString,
+        Required('last_name') : NonEmptyString,
+        'big_badge' : NonEmptyString,
+        'pledge_semester' : Coerce(Semester),
+        'affiliations' : AffiliationsList,
         })
 
     def __init__(self,
@@ -91,13 +91,13 @@ class Brother(Member):
     allowed = {'Brother'}
 
     validator = Schema({
-        'status' : In(allowed),
-        Optional('first_name') : NonEmptyString,
-        Optional('preferred_name') : NonEmptyString,
-        'last_name' : NonEmptyString,
-        Optional('big_badge') : NonEmptyString,
-        Optional('pledge_semester') : Coerce(Semester),
-        Optional('affiliations') : AffiliationsList,
+        Required('status') : In(allowed),
+        'first_name' : NonEmptyString,
+        'preferred_name' : NonEmptyString,
+        Required('last_name') : NonEmptyString,
+        'big_badge' : NonEmptyString,
+        'pledge_semester' : Coerce(Semester),
+        'affiliations' : AffiliationsList,
         })
 
     bid = 0
@@ -134,13 +134,13 @@ class Candidate(Member):
     allowed = {'Candidate'}
 
     validator = Schema({
-        'status' : In(allowed),
-        'first_name' : NonEmptyString,
-        Optional('preferred_name') : NonEmptyString,
-        'last_name' : NonEmptyString,
-        Optional('big_badge') : NonEmptyString,
-        Optional('pledge_semester') : Coerce(Semester),
-        Optional('affiliations') : AffiliationsList,
+        Required('status') : In(allowed),
+        Required('first_name') : NonEmptyString,
+        'preferred_name' : NonEmptyString,
+        Required('last_name') : NonEmptyString,
+        'big_badge' : NonEmptyString,
+        'pledge_semester' : Coerce(Semester),
+        'affiliations' : AffiliationsList,
         })
 
     cid = 0
@@ -180,14 +180,14 @@ class Expelled(Knight):
     allowed = {'Expelled'}
 
     validator = Schema({
-        'status' : In(allowed),
-        'badge' : NonEmptyString,
-        Optional('first_name') : NonEmptyString,
-        Optional('preferred_name') : NonEmptyString,
-        Optional('last_name') : NonEmptyString,
-        Optional('big_badge') : NonEmptyString,
-        Optional('pledge_semester') : Coerce(Semester),
-        Optional('affiliations') : AffiliationsList,
+        Required('status') : In(allowed),
+        Required('badge') : NonEmptyString,
+        'first_name' : NonEmptyString,
+        'preferred_name' : NonEmptyString,
+        'last_name' : NonEmptyString,
+        'big_badge' : NonEmptyString,
+        'pledge_semester' : Coerce(Semester),
+        'affiliations' : AffiliationsList,
         })
 
     def __init__(self,

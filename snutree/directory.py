@@ -45,13 +45,12 @@ class Directory(metaclass=ABCMeta):
 
             if len(self.allowed_statuses) == 1:
                 # If there is only one type of member, ignore the status field
-                # and fill it with that one type of member
                 #
                 # TODO zero just takes the first one (it shouldn't matter, but
                 # it's kind of ugly)
-                member['status'] = list(self.allowed_statuses.keys())[0]
-
-            status = member.get('status')
+                status = next(iter(self.allowed_statuses.keys()))
+            else:
+                status = member.get('status')
 
             # Don't include if ignored
             if status in self.ignored_statuses:

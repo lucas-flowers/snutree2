@@ -1,4 +1,4 @@
-from voluptuous import Schema, In, Coerce
+from voluptuous import Schema, Coerce, Required
 from ..entity import Initiate
 from ..directory import Directory
 from ..utilities import NonEmptyString
@@ -11,17 +11,15 @@ class Chapter(Initiate):
     allowed = {'Chapter'}
 
     validator = Schema({
-        'status' : In(allowed),
         'mother' : NonEmptyString,
-        'child' : NonEmptyString,
-        'founded' : Coerce(int)
+        Required('child') : NonEmptyString,
+        Required('founded') : Coerce(int)
         })
 
     def __init__(self,
             mother=None,
             child=None,
             founded=None,
-            **ignore
             ):
 
         self.key = child

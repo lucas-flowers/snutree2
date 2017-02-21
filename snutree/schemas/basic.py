@@ -1,4 +1,4 @@
-from voluptuous import Schema, In, Optional, Coerce
+from voluptuous import Schema, Required, Coerce
 from ..directory import Directory
 from ..entity import Initiate
 from ..semester import Semester
@@ -12,14 +12,12 @@ class KeylessInitiate(Initiate):
     allowed = {'Initiate'}
 
     validator = Schema({
-            'status' : In(allowed),
-            'name' : NonEmptyString,
-            Optional('big_name') : NonEmptyString,
-            'pledge_semester' : Coerce(Semester),
+            Required('name') : NonEmptyString,
+            'big_name' : NonEmptyString,
+            Required('pledge_semester') : Coerce(Semester),
             })
 
     def __init__(self,
-            status=None,
             name=None,
             pledge_semester=None,
             big_name=None
