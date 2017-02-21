@@ -5,10 +5,14 @@ from click.testing import CliRunner
 from snutree.cli import cli
 from inspect import cleandoc as trim
 
-def invoke(args, input):
+TESTS_ROOT = Path(__file__).parent
+
+def invoke(args, input=None):
     runner = CliRunner()
-    infile = io.BytesIO(bytes(input, 'utf-8'))
-    infile.name = '<stdin>'
+    infile = None
+    if input:
+        infile = io.BytesIO(bytes(input, 'utf-8'))
+        infile.name = '<stdin>'
     return runner.invoke(cli, args, input=infile)
 
 def test_simple():
@@ -32,7 +36,7 @@ def test_simple():
 def test_custom_module():
 
     # The custom module should be in the same folder this test file is in
-    custom_module = str(Path(__file__).parent / 'test_cli_custom_module.py')
+    custom_module = str(Path(__file__).parent/'test_cli_custom_module.py')
     custom_csv = trim('''
         pid,cid,s
         A,B,5
@@ -41,4 +45,44 @@ def test_custom_module():
     result = invoke(['-f', 'csv', '-', '-m', custom_module], custom_csv)
     nt.assert_false(result.exception)
 
+def test_sigmanu_example():
+
+    sigmanu_root = TESTS_ROOT.parent/'examples/sigmanu-example'
+
+    config = str(sigmanu_root/'config.yaml')
+    bnks = str(sigmanu_root/'directory-brothers_not_knights.csv')
+    directory = str(sigmanu_root/'directory.csv')
+
+    result = invoke([
+        '--config', config,
+        '--schema', 'sigmanu',
+        '--seed', 75,
+        # Arguments
+        bnks, directory
+        ])
+
+    nt.assert_false(result.exception)
+
+    expected = (TESTS_ROOT/'test_cli_sigmanu_out.dot').read_text()
+    nt.assert_equal(result.output, expected)
+
+def test_sigmanu_chapters():
+
+    chapters_root = TESTS_ROOT.parent/'examples/sigmanu-chapters'
+
+    config = str(chapters_root/'config.yaml')
+    directory = str(chapters_root/'directory.csv')
+
+    result = invoke([
+        '--config', config,
+        '--schema', 'sigmanu_chapters',
+        '--seed', 76,
+        # Arguments
+        directory
+        ])
+
+    nt.assert_false(result.exception)
+
+    expected = (TESTS_ROOT/'test_cli_chapters_out.dot').read_text()
+    nt.assert_equal(result.output, expected)
 
