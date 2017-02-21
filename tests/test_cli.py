@@ -23,7 +23,8 @@ def test_simple():
         Sue,,Spring 1965
         ''')
     result = invoke(['--format', 'csv', '-'], good_csv)
-    nt.assert_false(result.exception)
+    if result.exception:
+        raise result.exception
 
     bad_csv = trim('''
         name,big_name,pledge_semester
@@ -43,46 +44,55 @@ def test_custom_module():
         ,A,2
         ''')
     result = invoke(['-f', 'csv', '-', '-m', custom_module], custom_csv)
-    nt.assert_false(result.exception)
 
-def test_sigmanu_example():
+    if result.exception:
+        raise result.exception
 
-    sigmanu_root = TESTS_ROOT.parent/'examples/sigmanu-example'
+def example_template(
+        example_name,
+        config,
+        schema,
+        seed,
+        arguments,
+        expected
+        ):
 
-    config = sigmanu_root/'config.yaml'
-    bnks = sigmanu_root/'directory-brothers_not_knights.csv'
-    directory = sigmanu_root/'directory.csv'
+    root = TESTS_ROOT.parent/'examples'/example_name
+
+    config = root/config
+    paths = [str(root/argument) for argument in arguments]
 
     result = invoke([
         '--config', str(config),
-        '--schema', 'sigmanu',
-        '--seed', 75,
-        # Arguments
-        str(bnks), str(directory)
+        '--schema', schema,
+        '--seed', seed,
+        *paths
         ])
 
-    nt.assert_false(result.exception)
+    if result.exception:
+        raise result.exception
 
-    expected = (TESTS_ROOT/'test_cli_sigmanu_out.dot').read_text()
-    nt.assert_equal(result.output, expected)
+    nt.assert_equal(result.output, (TESTS_ROOT/expected).read_text())
+
+def test_sigmanu_example():
+
+    example_template(
+            example_name='sigmanu-example',
+            config='config.yaml',
+            schema='sigmanu',
+            seed=75,
+            arguments=['directory-brothers_not_knights.csv', 'directory.csv'],
+            expected='test_cli_sigmanu_out.dot'
+            )
 
 def test_sigmanu_chapters():
 
-    chapters_root = TESTS_ROOT.parent/'examples/sigmanu-chapters'
-
-    config = chapters_root/'config.yaml'
-    directory = chapters_root/'directory.csv'
-
-    result = invoke([
-        '-c', str(config),
-        '-m', 'sigmanu_chapters',
-        '-S', 76,
-        # Arguments
-        str(directory)
-        ])
-
-    nt.assert_false(result.exception)
-
-    expected = (TESTS_ROOT/'test_cli_chapters_out.dot').read_text()
-    nt.assert_equal(result.output, expected)
+    example_template(
+            example_name='sigmanu-chapters',
+            config='config.yaml',
+            schema='sigmanu_chapters',
+            seed=76,
+            arguments=['directory.csv'],
+            expected='test_cli_chapters_out.dot'
+            )
 

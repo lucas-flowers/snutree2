@@ -66,7 +66,8 @@ def _cli(paths, output, config, seed, debug, verbose, quiet, schema, format):
         path = Path(schema)
         if not path.exists() or path.suffix != '.py':
             # TODO better error
-            raise Exception('Must be one of ??? or a custom Python module')
+            msg = 'Must be one of {} or a custom Python module'
+            raise Exception(msg.format(tuple(directory_types.keys())))
         module_name = path.stem
         spec = importlib.util.spec_from_file_location(module_name, str(path))
         module = importlib.util.module_from_spec(spec)
