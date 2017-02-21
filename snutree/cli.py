@@ -22,6 +22,37 @@ def main():
         logging.error('Unexpected error.', exc_info=True)
         sys.exit(1)
 
+directory_types = {
+        'sigmanu' : sigmanu,
+        'sigmanu_chapter' : sigmanu_chapter,
+        'default' : basic,
+        }
+
+def validate_directory_module(ctx, parameter, value):
+
+    # Pick a module or, if none is provided, use the default one
+    directory_type = directory_types.get(value or 'default')
+
+    # If the schema is not found, assume it is a path to a custom module
+    if not directory_type:
+
+        # Get the path of the custom module
+        path = Path(value)
+        if not path.exists() or path.suffix != '.py':
+            # There is no custom module; giveup and raise an error
+            msg = 'must be one of {!r} or the path to a custom Python module'
+            value = tuple(directory_types.keys())
+            raise click.BadParameter(msg.format(value))
+
+        # Use the custom module
+        module_name = path.stem
+        spec = importlib.util.spec_from_file_location(module_name, str(path))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        directory_type = module
+
+    return directory_type
+
 @click.command()
 @click.argument('paths', nargs=-1, type=click.File('r'))
 @click.option('--output', '-o', type=click.Path(), default=None)
@@ -30,7 +61,7 @@ def main():
 @click.option('--debug', '-d', is_flag=True, default=False)
 @click.option('--verbose', '-v', is_flag=True, default=False)
 @click.option('--quiet', '-q', is_flag=True, default=False)
-@click.option('--schema', '-m', type=str, default=None)
+@click.option('--schema', '-m', callback=validate_directory_module, default=None)
 @click.option('--format', '-f', type=str, default=None)
 @logged
 def cli(*args, **kwargs):
@@ -53,7 +84,7 @@ def _cli(paths, output, config, seed, debug, verbose, quiet, schema, format):
     members = get_from_sources(paths, stdin_fmt=format)
 
     logging.info('Validating directory')
-    directory = get_directory_type(schema).directory(members)
+    directory = schema.directory(members)
 
     logging.info('Loading tree configuration')
     tree_cnf = load_configuration(config)
@@ -181,36 +212,6 @@ def get_from_sql(cnf):
 
     cnf = validate(MYSQL_CNF_VALIDATOR, cnf)
     return sql.get_table(cnf['query'], cnf['mysql'], ssh_cnf=cnf['ssh'])
-
-directory_types = {
-        'sigmanu' : sigmanu,
-        'sigmanu_chapter' : sigmanu_chapter,
-        'default' : basic,
-        }
-
-def get_directory_type(schema=None):
-
-    # Pick a module or, if none is provided, use the default one
-    directory_type = directory_types.get(schema or 'default')
-
-    # If the schema is not found, assume it is a path to a custom module
-    if not directory_type:
-
-        # Get the path of the custom module
-        path = Path(schema)
-        if not path.exists() or path.suffix != '.py':
-            # There is no custom module; giveup and raise an error
-            msg = 'Must be one of {!r} or a custom Python module'
-            raise Exception(msg.format(tuple(directory_types.keys())))
-
-        # Use the custom module
-        module_name = path.stem
-        spec = importlib.util.spec_from_file_location(module_name, str(path))
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)
-        directory_type = module
-
-    return directory_type
 
 if __name__ == '__main__':
     main()
