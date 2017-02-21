@@ -22,7 +22,7 @@ def test_simple():
         Bob,Sue,Fall 1967
         Sue,,Spring 1965
         ''')
-    result = invoke(['-f', 'csv', '-'], good_csv)
+    result = invoke(['--format', 'csv', '-'], good_csv)
     nt.assert_false(result.exception)
 
     bad_csv = trim('''
@@ -74,9 +74,9 @@ def test_sigmanu_chapters():
     directory = str(chapters_root/'directory.csv')
 
     result = invoke([
-        '--config', config,
-        '--schema', 'sigmanu_chapters',
-        '--seed', 76,
+        '-c', config,
+        '-m', 'sigmanu_chapters',
+        '-S', 76,
         # Arguments
         directory
         ])
