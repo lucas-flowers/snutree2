@@ -37,14 +37,13 @@ def validate_directory_module(ctx, parameter, value):
         msg = 'must be one of {!r} or the path to a custom Python module'
         raise click.BadParameter(msg.format(STANDARD_MODULES))
 
-    # Use the custom module
+    # Use the module
     module_name = module_path.stem
     spec = importlib.util.spec_from_file_location(module_name, str(module_path))
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    directory_type = module
 
-    return directory_type
+    return module
 
 @click.command()
 @click.argument('files', nargs=-1, type=click.File('r'))
