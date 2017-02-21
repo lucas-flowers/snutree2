@@ -1,101 +1,113 @@
 import string
-import nose.tools as nt
+from unittest import TestCase
 from snutree.schemas.sigmanu import Affiliation
 
-def test_Affiliation_dicts():
+class TestAffiliation(TestCase):
 
-    # Make sure the lookalike dict is set right (it's hard to tell)
-    for latin, greek in Affiliation.LATIN_TO_GREEK.items():
-        if latin not in ('(A)', '(B)'):
-            nt.assert_in(latin, string.ascii_letters)
-            nt.assert_not_in(greek, string.ascii_letters)
+    def test_unicode_latin(self):
 
-    # Make sure the mapping dict is also set right
-    for greek in Affiliation.ENGLISH_TO_GREEK.values():
-        nt.assert_not_in(greek, string.ascii_letters)
+        # Make sure the lookalike dict is set right (it's hard to tell)
+        for latin, greek in Affiliation.LATIN_TO_GREEK.items():
+            if latin not in ('(A)', '(B)'):
+                self.assertIn(latin, string.ascii_letters)
+                self.assertNotIn(greek, string.ascii_letters)
 
-def test_Affiliation_constructor_string_success():
+    def test_unicode_english(self):
 
-    # Input designation on the left; canonical designation on the right.
-    # NOTE: The right side consists of /only/ Greek letters (i.e., 'Α' not 'A')
-    designations = [
+        # Make sure the mapping dict is also set right
+        for greek in Affiliation.ENGLISH_TO_GREEK.values():
+            self.assertNotIn(greek, string.ascii_letters)
 
-            # Greek-letter designations (beware of lookalikes)
-            ('ΔA 132', 'ΔΑ 132'),
-            ('Α 3', 'Α 3'),
-            ('Α 0', 'Α 0'),
-            ('ΗΜ(A) 5', 'ΗΜ(A) 5'), # Greek input
-            ('HM(A) 5', 'ΗΜ(A) 5'), # Latin input
-            ('(A)(A) 0023', '(A)(A) 23'), # Padded zeroes
-            ('ABK 43925', 'ΑΒΚ 43925'),
-            ('αKΚ 43925', 'AΚΚ 43925'),
-            ('AαΑ(A)(a) 5', 'ΑΑΑ(A)(A) 5'), # Mix of upper, lower, and lookalikes
-            ('Σςσ 5', 'ΣΣΣ 5'), # All the Sigmas
-            ('Π 5', 'Π 5'),
+    def test_Affiliation_constructor_string_success(self):
 
-            # English name designations
-            ('Delta Alpha 5', 'ΔΑ 5'),
-            ('        Alpha    \t    Beta\n\n\n      5    ', 'ΑΒ 5'), # Whitespace
-            ('Alpha 5', 'Α 5'),
-            ('(A) (B) (A) (B) 234', '(A)(B)(A)(B) 234'),
-            ('sigma Sigma SIGMA sIgMa 5', 'ΣΣΣΣ 5') # Various cases
+        # Input designation on the left; canonical designation on the right.
+        # NOTE: The right side consists of /only/ Greek letters (i.e., 'Α' not 'A')
+        designations = [
 
-            ]
+                # Greek-letter designations (beware of lookalikes)
+                ('ΔA 132', 'ΔΑ 132'),
+                ('Α 3', 'Α 3'),
+                ('Α 0', 'Α 0'),
+                ('ΗΜ(A) 5', 'ΗΜ(A) 5'), # Greek input
+                ('HM(A) 5', 'ΗΜ(A) 5'), # Latin input
+                ('(A)(A) 0023', '(A)(A) 23'), # Padded zeroes
+                ('ABK 43925', 'ΑΒΚ 43925'),
+                ('αKΚ 43925', 'AΚΚ 43925'),
+                ('AαΑ(A)(a) 5', 'ΑΑΑ(A)(A) 5'), # Mix of upper, lower, and lookalikes
+                ('Σςσ 5', 'ΣΣΣ 5'), # All the Sigmas
+                ('Π 5', 'Π 5'),
 
-    for i, o in designations:
-        nt.assert_equals(Affiliation(i), Affiliation(o))
+                # English name designations
+                ('Delta Alpha 5', 'ΔΑ 5'),
+                ('        Alpha    \t    Beta\n\n\n      5    ', 'ΑΒ 5'), # Whitespace
+                ('Alpha 5', 'Α 5'),
+                ('(A) (B) (A) (B) 234', '(A)(B)(A)(B) 234'),
+                ('sigma Sigma SIGMA sIgMa 5', 'ΣΣΣΣ 5') # Various cases
 
-def test_Affiliation_constructor_tuple_success():
+                ]
 
-    designations = [
-            ('A', 1),
-            ('Beta Beta', 1234)
-            ]
+        for i, o in designations:
+            with self.subTest(i=i, o=o):
+                self.assertEquals(Affiliation(i), Affiliation(o))
 
-    for d in designations:
-        Affiliation(*d)
+    def test_Affiliation_constructor_tuple_success(self):
 
-def test_Affiliation_constructor_value_failure():
+        designations = [
+                ('A', 1),
+                ('Beta Beta', 1234)
+                ]
 
-    failed_designations = [
-            'a 5', # 'a' is not Greek, nor a Greek lookalike
-            'D 5', # Same with 'D'
-            'Eta Mu(B) 5', # Needs space before '(B)'
-            'Eta Mu (C) 5', # No (C); only (A) and (B)
-            'HM (A) 5', # Must have no space before (A)
-            '(B)(B) (B) 5', # Must either be '(B) (B) (B)' ("words") or '(B)(B)(B)' ("letters")
-            'Α', # No number
-            'A ', # No number
-            'A -5', # No positive integer
-            'ΗΜ(C) 5', # No (C); only (A) and (B)
-            '∏ 6', # Wrong pi (that's the product pi)
-            '∑ 6', # Wrong sigma (that's the sum sigma)
-            '6', # No designation
-            ' 6', # No designation
-            '', # Empty string
-            ]
+        for d in designations:
+            with self.subTest(d=d):
+                try:
+                    Affiliation(*d)
+                except Exception as e:
+                    msg = 'Unexpected exception for {!r}: {}'
+                    vals = d, e
+                    self.fail(msg.format(*vals))
 
-    for f in failed_designations:
-        nt.assert_raises(ValueError, Affiliation, f)
+    def test_Affiliation_constructor_value_failure(self):
 
-def test_Affiliation_constructor_type_failure():
+        failed_designations = [
+                'a 5', # 'a' is not Greek, nor a Greek lookalike
+                'D 5', # Same with 'D'
+                'Eta Mu(B) 5', # Needs space before '(B)'
+                'Eta Mu (C) 5', # No (C); only (A) and (B)
+                'HM (A) 5', # Must have no space before (A)
+                '(B)(B) (B) 5', # Must either be '(B) (B) (B)' ("words") or '(B)(B)(B)' ("letters")
+                'Α', # No number
+                'A ', # No number
+                'A -5', # No positive integer
+                'ΗΜ(C) 5', # No (C); only (A) and (B)
+                '∏ 6', # Wrong pi (that's the product pi)
+                '∑ 6', # Wrong sigma (that's the sum sigma)
+                '6', # No designation
+                ' 6', # No designation
+                '', # Empty string
+                ]
 
-    # Failed constructor types
-    failed_types = [
-            ('Α', '1'),
-            (1, 1),
-            (1, '1'),
-            (object(),),
-            (1,),
-            ]
+        for f in failed_designations:
+            with self.subTest(f=f):
+                self.assertRaises(ValueError, Affiliation, f)
 
-    for f in failed_types:
-        nt.assert_raises(TypeError, Affiliation, *f)
+    def test_Affiliation_constructor_type_failure(self):
+
+        # Failed constructor types
+        failed_types = [
+                ('Α', '1'),
+                (1, 1),
+                (1, '1'),
+                (object(),),
+                (1,),
+                ]
+        for f in failed_types:
+            with self.subTest(f=f):
+                self.assertRaises(TypeError, Affiliation, *f)
 
 
-def test_Affiliation_sorting():
+    def test_Affiliation_sorting(self):
 
-    # Sorting. Primary chapter (default is 'ΔΑ') goes first
-    a, c, b, d = tuple(Affiliation(s) for s in ('ΔA 1', 'Α 2', 'ΔA 2', 'Ω 1'))
-    nt.assert_equals(sorted([a, c, b, d]), [a, b, c, d])
+        # Sorting. Primary chapter (default is 'ΔΑ') goes first
+        a, c, b, d = tuple(Affiliation(s) for s in ('ΔA 1', 'Α 2', 'ΔA 2', 'Ω 1'))
+        self.assertEquals(sorted([a, c, b, d]), [a, b, c, d])
 

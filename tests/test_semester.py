@@ -1,56 +1,68 @@
-import nose.tools as nt
+from unittest import TestCase
 from itertools import permutations
 from snutree.semester import Semester
 
-def test_comparisons():
+class TestSemester(TestCase):
 
-    a = Semester('Fall 1900')
-    b = Semester('Fall 1994')
-    c = Semester('Spring 1995')
-    d = Semester('Fall 1995')
-    e = Semester('Fall 001995')
-    f = Semester('Spring 3000')
-    semesters = [a, b, c, d, e, f]
+    def setUp(self):
 
-    # General
-    for P in permutations(semesters):
-        nt.assert_equals(sorted(P), semesters)
+        self.a = Semester('Fall 1900')
+        self.b = Semester('Fall 1994')
+        self.c = Semester('Spring 1995')
+        self.d = Semester('Fall 1995')
+        self.e = Semester('Fall 001995')
+        self.f = Semester('Spring 3000')
+        self.semesters = [self.a, self.b, self.c, self.d, self.e, self.f]
 
-    # Make sure total ordering worked
-    nt.assert_not_equal(b, c)
-    nt.assert_greater(e, c)
-    nt.assert_greater_equal(e, c)
-    nt.assert_greater_equal(e, e)
+    def test_sorting(self):
 
-    # Min and max
-    nt.assert_equals(max(a, b, c), c)
-    nt.assert_equals(min(a, e, d), a)
+        for p in permutations(self.semesters):
+            with self.subTest(p=p):
+                self.assertEqual(sorted(p), self.semesters)
 
-def test_incdec():
+    def test_total_ordering(self):
 
-    a = Semester('Fall 1995')
-    a += 1
-    a -= 1
-    nt.assert_equals(a, Semester('Fall 1995'))
+        self.assertNotEqual(self.b, self.c)
+        self.assertGreater(self.e, self.c)
+        self.assertGreaterEqual(self.e, self.c)
+        self.assertGreaterEqual(self.e, self.e)
 
-    b = Semester('Spring 1995')
-    b += 1
-    b -= 1
-    nt.assert_equals(b, Semester('Spring 1995'))
+    def test_min_max(self):
 
-def test_string():
+        self.assertEqual(max(self.a, self.b, self.c), self.c)
+        self.assertEqual(min(self.a, self.e, self.d), self.a)
 
-    nt.assert_equals(str(Semester('Fall 0001933')), 'Fall 1933')
-    nt.assert_equals(str(Semester('Spring 323')), 'Spring 323')
+    def test_primitive(self):
 
-def test_math():
+        a = self.a
+        a += 1
+        self.assertIsNot(a, self.a)
 
-    nt.assert_is_instance(Semester('Fall 2001') + 8, Semester)
-    nt.assert_equals(str(Semester('Fall 2001') + 8), 'Fall 2005')
-    nt.assert_equals(str(8 + Semester('Fall 2001')), 'Fall 2005')
-    nt.assert_equals(str(Semester('Fall 2001') + Semester('Spring 2001')), 'Fall 4002')
+    def test_inc_dec(self):
 
-def test_subtract():
+        a = self.a
+        a += 1
+        a -= 1
+        self.assertEqual(a, self.a)
 
-    nt.assert_equals(str(Semester('Fall 2001') - 1), 'Spring 2001')
+        b = self.b
+        b += 1
+        b -= 1
+        self.assertEqual(b, self.b)
+
+    def test_str(self):
+
+        self.assertEqual(str(Semester('Fall 0001933')), 'Fall 1933')
+        self.assertEqual(str(Semester('Spring 323')), 'Spring 323')
+
+    def test_math(self):
+
+        self.assertIsInstance(Semester('Fall 2001') + 8, Semester)
+        self.assertEqual(str(Semester('Fall 2001') + 8), 'Fall 2005')
+        self.assertEqual(str(8 + Semester('Fall 2001')), 'Fall 2005')
+        self.assertEqual(str(Semester('Fall 2001') + Semester('Spring 2001')), 'Fall 4002')
+
+    def test_subtract(self):
+
+        self.assertEqual(str(Semester('Fall 2001') - 1), 'Spring 2001')
 

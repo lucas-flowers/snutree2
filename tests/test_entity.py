@@ -1,16 +1,18 @@
-from nose.tools import assert_equal, assert_not_equal
+from unittest import TestCase
 import snutree.schemas.sigmanu as sn
 
-def test_combine_names():
+class TestEntity(TestCase):
 
-    assert_equal(sn.combine_names('Jon', 'Freaking', 'Snow'), 'Freaking Snow')
-    assert_equal(sn.combine_names('Jon', 'Jonathan', 'Snow'), 'Jonathan Snow')
-    assert_equal(sn.combine_names('Jon', 'Snowy', 'Snow'), 'Jon Snow')
-    assert_equal(sn.combine_names('Jon', 'Snowball', 'Snow'), 'Jon Snow')
+    def test_combine_names(self):
 
-    # An unfortunate compromise
-    assert_equal(sn.combine_names('Samuel', 'Dick', 'Richards'), 'Dick Richards')
+        self.assertEqual(sn.combine_names('Jon', 'Freaking', 'Snow'), 'Freaking Snow')
+        self.assertEqual(sn.combine_names('Jon', 'Jonathan', 'Snow'), 'Jonathan Snow')
+        self.assertEqual(sn.combine_names('Jon', 'Snowy', 'Snow'), 'Jon Snow')
+        self.assertEqual(sn.combine_names('Jon', 'Snowball', 'Snow'), 'Jon Snow')
 
-    assert_not_equal(sn.combine_names('Jon', 'Snow', 'Snow'), 'Snow Snow')
+        # An unfortunate compromise
+        self.assertEqual(sn.combine_names('Samuel', 'Dick', 'Richards'), 'Dick Richards')
+
+        self.assertNotEqual(sn.combine_names('Jon', 'Snow', 'Snow'), 'Snow Snow')
 
 

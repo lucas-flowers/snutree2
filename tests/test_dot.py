@@ -1,81 +1,83 @@
-from nose.tools import assert_equals, assert_raises
+from unittest import TestCase
 from snutree.dot import Defaults, Node, Edge, Rank, Graph
 from inspect import cleandoc as trim
 
-def test_Defaults():
+class TestDot(TestCase):
 
-    assert_raises(ValueError, Defaults, 'key', attributes={'label' : 'A label'})
+    def test_Defaults(self):
 
-    defaults = Defaults('node', attributes={'label' : 'A label'})
-    assert_equals(defaults.to_dot(), 'node [label="A label"];')
-    assert_equals(defaults.to_dot(3), '            node [label="A label"];')
+        self.assertRaises(ValueError, Defaults, 'key', attributes={'label': 'A label'})
 
-def test_Node():
+        defaults = Defaults('node', attributes={'label': 'A label'})
+        self.assertEquals(defaults.to_dot(), 'node [label="A label"];')
+        self.assertEquals(defaults.to_dot(3), '            node [label="A label"];')
 
-    node = Node('A Key', {'label' : 'A Key Label'})
-    assert_equals(node.to_dot(), '"A Key" [label="A Key Label"];')
+    def test_Node(self):
 
-    node = Node('A Key')
-    assert_equals(node.to_dot(), '"A Key";')
+        node = Node('A Key', {'label' : 'A Key Label'})
+        self.assertEquals(node.to_dot(), '"A Key" [label="A Key Label"];')
 
-def test_Edge():
+        node = Node('A Key')
+        self.assertEquals(node.to_dot(), '"A Key";')
 
-    node1 = Node('Key One', {'label' : 'A Label'})
-    node2 = Node('Key Two')
+    def test_Edge(self):
 
-    edge = Edge(node1.key, node2.key)
-    assert_equals(edge.to_dot(), '"Key One" -> "Key Two";')
+        node1 = Node('Key One', {'label' : 'A Label'})
+        node2 = Node('Key Two')
 
-    edge = Edge(node1.key, node2.key, {'color' : 'white'})
-    assert_equals(edge.to_dot(), '"Key One" -> "Key Two" [color="white"];')
+        edge = Edge(node1.key, node2.key)
+        self.assertEquals(edge.to_dot(), '"Key One" -> "Key Two";')
 
-def test_Rank():
+        edge = Edge(node1.key, node2.key, {'color' : 'white'})
+        self.assertEquals(edge.to_dot(), '"Key One" -> "Key Two" [color="white"];')
 
-    rank = Rank(['a', 'b', 'c d'])
-    assert_equals(rank.to_dot(), '{rank=same "a" "b" "c d"};')
+    def test_Rank(self):
 
-def test_Graph():
+        rank = Rank(['a', 'b', 'c d'])
+        self.assertEquals(rank.to_dot(), '{rank=same "a" "b" "c d"};')
 
-    node1 = Node('Key One', {'label' : 'A Label', 'color' : 'piss yellow'})
-    node2 = Node('Key Two')
+    def test_Graph(self):
 
-    edge = Edge(node1.key, node2.key)
-    assert_equals(edge.to_dot(), '"Key One" -> "Key Two";')
+        node1 = Node('Key One', {'label' : 'A Label', 'color' : 'piss yellow'})
+        node2 = Node('Key Two')
 
-    rank = Rank([node.key for node in (node1, node2)])
+        edge = Edge(node1.key, node2.key)
+        self.assertEquals(edge.to_dot(), '"Key One" -> "Key Two";')
 
-    sub_edge_defaults = Defaults('edge', {'label' : 'this'})
+        rank = Rank([node.key for node in (node1, node2)])
 
-    subgraph = Graph(
-            'something',
-            'subgraph',
-            children=[sub_edge_defaults, Node('S1', {'label' : 5}), Node('S2')],
-            )
+        sub_edge_defaults = Defaults('edge', {'label': 'this'})
 
-    node_defaults = Defaults('node', {'width' : 4, 'penwidth' : '5'})
-    edge_defaults = Defaults('edge', {'width' : 5, 'penwidth' : '4'})
+        subgraph = Graph(
+                'something',
+                'subgraph',
+                children=[sub_edge_defaults, Node('S1', {'label' : 5}), Node('S2')],
+                )
 
-    graph = Graph(
-            'tree',
-            'digraph',
-            attributes={'size' : 5, 'width' : 'gold'},
-            children=[node_defaults, edge_defaults, node1, edge, node2, subgraph, rank],
-            )
+        node_defaults = Defaults('node', {'width' : 4, 'penwidth' : '5'})
+        edge_defaults = Defaults('edge', {'width' : 5, 'penwidth' : '4'})
 
-    assert_equals(graph.to_dot(), trim('''
-        digraph "tree" {
-            size="5";
-            width="gold";
-            node [penwidth="5",width="4"];
-            edge [penwidth="4",width="5"];
-            "Key One" [color="piss yellow",label="A Label"];
-            "Key One" -> "Key Two";
-            "Key Two";
-            subgraph "something" {
-                edge [label="this"];
-                "S1" [label="5"];
-                "S2";
-            }
-            {rank=same "Key One" "Key Two"};
-        }'''))
+        graph = Graph(
+                'tree',
+                'digraph',
+                attributes={'size' : 5, 'width' : 'gold'},
+                children=[node_defaults, edge_defaults, node1, edge, node2, subgraph, rank],
+                )
+
+        self.assertEquals(graph.to_dot(), trim('''
+            digraph "tree" {
+                size="5";
+                width="gold";
+                node [penwidth="5",width="4"];
+                edge [penwidth="4",width="5"];
+                "Key One" [color="piss yellow",label="A Label"];
+                "Key One" -> "Key Two";
+                "Key Two";
+                subgraph "something" {
+                    edge [label="this"];
+                    "S1" [label="5"];
+                    "S2";
+                }
+                {rank=same "Key One" "Key Two"};
+            }'''))
 
