@@ -37,11 +37,12 @@ directory_types = {
 @click.option('--verbose', '-v', is_flag=True, default=False)
 @click.option('--quiet', '-q', is_flag=True, default=False)
 @click.option('--schema', '-m', type=str, default=None)
+@click.option('--format', '-f', type=str, default=None)
 @logged
 def cli(*args, **kwargs):
     return _cli(*args, **kwargs)
 
-def _cli(paths, output, config, seed, debug, verbose, quiet, schema):
+def _cli(paths, output, config, seed, debug, verbose, quiet, schema, format):
     '''
     Create a big-little family tree.
     '''
@@ -55,7 +56,7 @@ def _cli(paths, output, config, seed, debug, verbose, quiet, schema):
             logging.basicConfig(level=logging.WARNING, stream=sys.stdout, format='%(levelname)s: %(message)s')
 
     logging.info('Retrieving big-little data from data sources')
-    members = get_from_sources(paths)
+    members = get_from_sources(paths, stdin_fmt=format)
 
     logging.info('Validating directory')
     # TODO clean this up
@@ -121,22 +122,25 @@ def load_configuration(paths):
             config.update(yaml.safe_load(f))
     return config
 
-def get_from_sources(files):
+def get_from_sources(files, stdin_fmt=None):
 
     # TODO get better name
     table_getters = {
-        '.yaml' : get_from_sql_settings,
-        '.csv' : get_from_csv,
-        '.dot' : get_from_dot
+        'yaml' : get_from_sql_settings,
+        'csv' : get_from_csv,
+        'dot' : get_from_dot
         }
 
     members = []
     for f in files or []:
-        filetype = Path(f.name).suffix
+
+        # Filetype is the path suffix or stdin's format if input is stdin
+        filetype = Path(f.name).suffix[1:] if f.name != '<stdin>' else stdin_fmt
+
         table_getter = table_getters.get(filetype)
         if not table_getter:
             # TODO subclass NotImplementedError and catch it
-            msg = 'Input filetype "{}" not supported'
+            msg = 'input filetype {!r} not supported'
             raise NotImplementedError(msg.format(filetype))
         members += table_getter(f)
 
