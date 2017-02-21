@@ -80,6 +80,8 @@ def _cli(paths, output, config, seed, debug, verbose, quiet, schema, format):
 
     logging.info('Loading tree configuration')
     tree_cnf = load_configuration(config)
+    tree_cnf['seed'] = seed or tree_cnf.get('seed', 0)
+
 
     logging.info('Constructing family tree data structure')
     tree = FamilyTree(directory, tree_cnf)
