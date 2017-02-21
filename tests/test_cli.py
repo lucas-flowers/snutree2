@@ -35,7 +35,8 @@ class TestCliCommon(TestCase):
         paths = [str(root/argument) for argument in arguments]
 
         result = self.invoke([
-            # '--output', str(TESTS_ROOT/expected), # Uncomment to write new expected files
+            # '--output', strx(TESTS_ROOT/expected), # Uncomment to write new expected files
+            # '--output', str(TESTS_ROOT/('new-'+expected)), # Uncomment to write new expected files
             '--config', str(config),
             '--schema', schema,
             '--seed', seed,
@@ -43,7 +44,9 @@ class TestCliCommon(TestCase):
             ])
 
         if result.exception:
-            self.fail(result.exception)
+            msg = '{}. <<OUTPUT\n{}\nOUTPUT'
+            values = result.exception, result.output
+            self.fail(msg.format(*values))
 
         self.assertEqual(result.output, (TESTS_ROOT/expected).read_text())
 
