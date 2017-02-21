@@ -98,7 +98,7 @@ class TestCli(TestCliCommon):
         self.example_template(
                 example_name='sigmanu-chapters',
                 config='config.yaml',
-                schema='sigmanu_chapters',
+                schema='sigmanu_chapter',
                 seed=76,
                 arguments=['directory.csv'],
                 expected='test_cli_chapters_out.dot'
