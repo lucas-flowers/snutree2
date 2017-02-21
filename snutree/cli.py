@@ -2,7 +2,6 @@
 import subprocess, click, logging, sys, yaml, csv, importlib.util
 from pathlib import Path
 from cerberus import Validator
-from .schemas import basic, sigmanu, sigmanu_chapter
 from .readers import sql, dotread
 from .tree import FamilyTree, TreeError
 from .entity import TreeEntityAttributeError
@@ -21,12 +20,6 @@ def main():
     except Exception as e:
         logging.error('Unexpected error.', exc_info=True)
         sys.exit(1)
-
-directory_types = {
-        'sigmanu' : sigmanu,
-        'sigmanu_chapter' : sigmanu_chapter,
-        'default' : basic,
-        }
 
 SNUTREE_ROOT = Path(__file__).parent
 STANDARD_MODULES = {'basic', 'sigmanu', 'sigmanu_chapter'}
