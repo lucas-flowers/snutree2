@@ -54,25 +54,25 @@ def validate_directory_module(ctx, parameter, value):
     return directory_type
 
 @click.command()
-@click.argument('paths', nargs=-1, type=click.File('r'))
-@click.option('--output', '-o', type=click.Path(), default=None)
-@click.option('--config', '-c', type=click.Path(exists=True), multiple=True)
+@click.argument('files', nargs=-1, type=click.File('r'))
+@click.option('output_path', '--output', '-o', type=click.Path(), default=None)
+@click.option('config_paths', '--config', '-c', type=click.Path(exists=True), multiple=True)
+@click.option('schema_module', '--schema', '-m', callback=validate_directory_module, default=None)
+@click.option('input_format', '--format', '-f', type=str, default=None)
 @click.option('--seed', '-S', default=0)
 @click.option('--debug', '-d', is_flag=True, default=False)
 @click.option('--verbose', '-v', is_flag=True, default=False)
 @click.option('--quiet', '-q', is_flag=True, default=False)
-@click.option('--schema', '-m', callback=validate_directory_module, default=None)
-@click.option('--format', '-f', type=str, default=None)
 @logged
 def cli(*args, **kwargs):
     return _cli(*args, **kwargs)
 
-def _cli(paths, output, config, seed, debug, verbose, quiet, schema, format):
+def _cli(files, output_path, config_paths, seed, debug, verbose, quiet, schema_module, input_format):
     '''
     Create a big-little family tree.
     '''
 
-    if output is not None:
+    if output_path is not None:
         if debug:
             logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format='%(asctime)s %(levelname)s: %(name)s - %(message)s')
         elif verbose:
@@ -81,13 +81,13 @@ def _cli(paths, output, config, seed, debug, verbose, quiet, schema, format):
             logging.basicConfig(level=logging.WARNING, stream=sys.stdout, format='%(levelname)s: %(message)s')
 
     logging.info('Retrieving big-little data from data sources')
-    members = get_from_sources(paths, stdin_fmt=format)
+    members = get_from_sources(files, stdin_fmt=input_format)
 
     logging.info('Validating directory')
-    directory = schema.directory(members)
+    directory = schema_module.directory(members)
 
     logging.info('Loading tree configuration')
-    tree_cnf = load_configuration(config)
+    tree_cnf = load_configuration(config_paths)
     tree_cnf['seed'] = seed or tree_cnf.get('seed', 0)
 
     logging.info('Constructing family tree data structure')
@@ -100,12 +100,12 @@ def _cli(paths, output, config, seed, debug, verbose, quiet, schema, format):
     dotcode = dotgraph.to_dot()
 
     logging.info('Writing output')
-    write_output(dotcode, output)
+    write_output(dotcode, output_path)
 
-def write_output(dotcode, output=None):
+def write_output(dotcode, path=None):
 
-    filetype = Path(output).suffix if output is not None else None
-    output = output or sys.stdout
+    filetype = Path(path).suffix if path is not None else None
+    output = path or sys.stdout
 
     writers = {
             '.pdf' : write_pdffile,
