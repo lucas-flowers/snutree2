@@ -60,7 +60,6 @@ def _cli(paths, output, config, seed, debug, verbose, quiet, schema, format):
 
     logging.info('Validating directory')
     # TODO clean this up
-    # TODO don't subclass directory, but have factories?
     directory_type = directory_types.get(schema or 'default')
     if not directory_type:
         path = Path(schema)
@@ -76,7 +75,6 @@ def _cli(paths, output, config, seed, debug, verbose, quiet, schema, format):
             directory_type = module
         except AttributeError as e:
             raise Exception('Custom module must have a Directory class')
-
     directory = directory_type.directory(members)
 
     logging.info('Loading tree configuration')

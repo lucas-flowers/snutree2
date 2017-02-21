@@ -6,7 +6,6 @@ from ..semester import Semester
 from ..utilities import NonEmptyString
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
-# TODO catch duplicate affiliations
 
 # Voluptuous validators
 AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
