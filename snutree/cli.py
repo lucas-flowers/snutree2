@@ -68,12 +68,9 @@ def _cli(paths, output, config, seed, debug, verbose, quiet, schema, format):
             # TODO better error
             raise Exception('Must be one of ??? or a custom Python module')
         module_name = path.stem
-        try:
-            spec = importlib.util.spec_from_file_location(module_name, str(path))
-            module = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(module)
-        except Exception:
-            raise Exception('Could not import custom module.')
+        spec = importlib.util.spec_from_file_location(module_name, str(path))
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
         try:
             directory_type = module
         except AttributeError as e:
