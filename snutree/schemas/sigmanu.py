@@ -11,6 +11,13 @@ from ..utilities import NonEmptyString
 # Voluptuous validators
 AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
 
+def directory(members):
+    return Directory(
+            members,
+            [Candidate, Brother, Knight, Expelled],
+            ignored_statuses=['Reaffiliate']
+            )
+
 class Knight(Initiate):
 
     allowed = {'Active', 'Alumni', 'Left School'}
@@ -207,11 +214,6 @@ def combine_names(first_name, preferred_name, last_name, threshold=.5):
         first_name = preferred_name
 
     return '{} {}'.format(first_name, last_name)
-
-class Directory(Directory):
-
-    member_types = [Candidate, Brother, Knight, Expelled]
-    ignored_statuses = ['Reaffiliate']
 
 class Affiliation:
     '''

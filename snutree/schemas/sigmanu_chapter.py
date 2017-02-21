@@ -3,6 +3,9 @@ from ..entity import Initiate
 from ..directory import Directory
 from ..utilities import NonEmptyString
 
+def directory(members):
+    return Directory(members, [Chapter])
+
 class Chapter(Initiate):
 
     allowed = {'Chapter'}
@@ -30,8 +33,4 @@ class Chapter(Initiate):
 
     def get_dot_label(self):
         return self.key
-
-class Directory(Directory):
-    member_types = [Chapter]
-    ignored_statuses = []
 

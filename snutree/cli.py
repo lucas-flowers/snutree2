@@ -7,7 +7,7 @@ from .readers import sql, dotread
 from .tree import FamilyTree, TreeError
 from .entity import TreeEntityAttributeError
 from .utilities import logged, SettingsError, nonempty_string, validate
-from .directory import Directory, DirectoryError
+from .directory import DirectoryError
 
 def main():
 
@@ -23,9 +23,9 @@ def main():
         sys.exit(1)
 
 directory_types = {
-        'sigmanu' : sigmanu.Directory,
-        'sigmanu_chapters' : sigmanu_chapter.Directory,
-        'default' : basic.Directory,
+        'sigmanu' : sigmanu,
+        'sigmanu_chapters' : sigmanu_chapter,
+        'default' : basic,
         }
 
 @click.command()
@@ -57,8 +57,8 @@ def cli(paths, output, config, seed, debug, verbose, quiet, schema):
     logging.info('Validating directory')
     # TODO clean this up
     # TODO don't subclass directory, but have factories?
-    DirectoryType = directory_types.get(schema or 'default')
-    if not DirectoryType:
+    directory_type = directory_types.get(schema or 'default')
+    if not directory_type:
         path = Path(schema)
         if not path.exists() or path.suffix != '.py':
             # TODO better error
@@ -71,13 +71,11 @@ def cli(paths, output, config, seed, debug, verbose, quiet, schema):
         except Exception:
             raise Exception('Could not import custom module.')
         try:
-            DirectoryType = module.Directory
+            directory_type = module
         except AttributeError as e:
             raise Exception('Custom module must have a Directory class')
-        if not issubclass(DirectoryType, Directory):
-            raise Exception('Custom Directory class must subclass snutree.Directory')
 
-    directory = DirectoryType(members)
+    directory = directory_type.directory(members)
 
     logging.info('Loading tree configuration')
     tree_cnf = load_configuration(config)

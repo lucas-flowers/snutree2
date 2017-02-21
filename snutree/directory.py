@@ -16,10 +16,9 @@ class Directory(metaclass=ABCMeta):
     affiliations are unique.
     '''
 
-    member_types = NotImplemented
-    ignored_statuses = []
+    def __init__(self, member_list, member_types, ignored_statuses=None):
 
-    def __init__(self, member_list):
+        self.ignored_statuses = ignored_statuses or []
 
         # Remove the keys pointing to falsy values from each member. This
         # simplifies code in the Directory class (e.g., Directory does not
@@ -32,7 +31,7 @@ class Directory(metaclass=ABCMeta):
             members.append(row)
 
         self.allowed_statuses = {}
-        for typ in self.member_types:
+        for typ in member_types:
             for allowed in typ.allowed:
                 self.allowed_statuses[allowed] = typ
 

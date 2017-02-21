@@ -4,6 +4,9 @@ from ..entity import Initiate
 from ..semester import Semester
 from ..utilities import NonEmptyString
 
+def directory(members):
+    return Directory(members, [KeylessInitiate])
+
 class KeylessInitiate(Initiate):
 
     allowed = {'Initiate'}
@@ -31,8 +34,4 @@ class KeylessInitiate(Initiate):
 
     def get_dot_label(self):
         return self.key
-
-class Directory(Directory):
-    member_types = [KeylessInitiate]
-    ignored_statuses = []
 
