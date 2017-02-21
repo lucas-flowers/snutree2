@@ -1,6 +1,6 @@
 import difflib, re
 from voluptuous import Schema, Optional, In, Coerce
-from ..directory import Directory
+from ..directory import Directory, DirectoryError
 from ..entity import Member, Initiate
 from ..semester import Semester
 from ..utilities import NonEmptyString
@@ -12,11 +12,41 @@ from ..utilities import NonEmptyString
 AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
 
 def directory(members):
-    return Directory(
+    return SigmaNuDirectory(
             members,
             [Candidate, Brother, Knight, Expelled],
             ignored_statuses=['Reaffiliate']
             )
+
+class SigmaNuDirectory(Directory):
+
+    def set_members(self, members):
+
+        def check_affiliations():
+            '''
+            A generator that iterates of the provided `members` iterable. Uses
+            an excessively clever way to ensure all affiliations are unique.
+            Depends on self._members[-1] containing the most-recently processed
+            member.
+
+            This /could/ be a method, but it is dependent on the innards of
+            super().set_members and set_members is called only once per
+            directory (in expected usage), so I'm leaving it as an inner
+            function.
+            '''
+
+            used_affiliations = set()
+            for m in members:
+                yield m
+                if m.get('status') not in self.ignored_statuses:
+                    affiliations = self._members[-1].affiliations
+                    for aff in affiliations:
+                        if aff in used_affiliations:
+                            msg = 'found duplicate affiliation: {!r}'
+                            raise DirectoryError(msg.format(aff))
+                        used_affiliations.add(aff)
+
+        super().set_members(check_affiliations())
 
 class Knight(Initiate):
 
