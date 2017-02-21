@@ -38,7 +38,10 @@ directory_types = {
 @click.option('--quiet', '-q', is_flag=True, default=False)
 @click.option('--schema', '-m', type=str, default=None)
 @logged
-def cli(paths, output, config, seed, debug, verbose, quiet, schema):
+def cli(*args, **kwargs):
+    return _cli(*args, **kwargs)
+
+def _cli(paths, output, config, seed, debug, verbose, quiet, schema):
     '''
     Create a big-little family tree.
     '''
