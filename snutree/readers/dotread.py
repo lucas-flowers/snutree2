@@ -1,9 +1,8 @@
 import re, pydotplus, logging
 import networkx.drawing.nx_pydot as nx_pydot
 
-def read_pydot(filename):
-    with open(filename, 'r') as f:
-        return pydotplus.parser.parse_dot_data(f.read())
+def read_pydot(f):
+    return pydotplus.parser.parse_dot_data(f.read())
 
 def pydot_to_nx(pydot):
     '''
@@ -104,14 +103,14 @@ def get_rows(graph):
 
     return [node_dict for _, node_dict in graph.nodes_iter(data=True)]
 
-def get_table(path):
+def get_table(f):
     '''
     Read a DOT file into a pydotplus graph, convert that graph into an
     intermediate networkx graph (they're easier to deal with), and get a list
     of member entries from the networkx graph.
     '''
 
-    pydot = read_pydot(path)
+    pydot = read_pydot(f)
     graph = pydot_to_nx(pydot)
     return get_rows(graph)
 

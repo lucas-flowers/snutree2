@@ -29,7 +29,7 @@ directory_types = {
         }
 
 @click.command()
-@click.argument('paths', nargs=-1, type=click.Path(exists=True))
+@click.argument('paths', nargs=-1, type=click.File('r'))
 @click.option('--output', '-o', type=click.Path(), default=None)
 @click.option('--config', '-c', type=click.Path(exists=True), multiple=True)
 @click.option('--seed', '-S', default=0)
@@ -121,7 +121,7 @@ def load_configuration(paths):
             config.update(yaml.safe_load(f))
     return config
 
-def get_from_sources(paths):
+def get_from_sources(files):
 
     # TODO get better name
     table_getters = {
@@ -131,14 +131,14 @@ def get_from_sources(paths):
         }
 
     members = []
-    for path in paths or []:
-        filetype = Path(path).suffix
+    for f in files or []:
+        filetype = Path(f.name).suffix
         table_getter = table_getters.get(filetype)
         if not table_getter:
             # TODO subclass NotImplementedError and catch it
             msg = 'Input filetype "{}" not supported'
             raise NotImplementedError(msg.format(filetype))
-        members += table_getter(path)
+        members += table_getter(f)
 
     return members
 
@@ -156,12 +156,11 @@ def write_pdffile(dotcode, pdf_filename):
     subprocess.run(['dot', '-Tpdf', '-o', pdf_filename],
             check=True, input=dotcode, universal_newlines=True)
 
-def get_from_dot(path):
-    return dotread.get_table(path)
+def get_from_dot(f):
+    return dotread.get_table(f)
 
-def get_from_csv(path):
-    with open(path, 'r') as f:
-        return list(csv.DictReader(f))
+def get_from_csv(f):
+    return list(csv.DictReader(f))
 
 MYSQL_CNF_VALIDATOR = Validator({
 
@@ -193,9 +192,8 @@ MYSQL_CNF_VALIDATOR = Validator({
 
     })
 
-def get_from_sql_settings(path):
-    with open(path, 'r') as f:
-        return get_from_sql(yaml.safe_load(f))
+def get_from_sql_settings(f):
+    return get_from_sql(yaml.safe_load(f))
 
 def get_from_sql(cnf):
     '''
