@@ -63,6 +63,7 @@ def example_template(
     paths = [str(root/argument) for argument in arguments]
 
     result = invoke([
+        # '--output', str(TESTS_ROOT/expected), # Uncomment to write new expected files
         '--config', str(config),
         '--schema', schema,
         '--seed', seed,
@@ -82,7 +83,7 @@ def test_sigmanu_example():
             schema='sigmanu',
             seed=75,
             arguments=['directory-brothers_not_knights.csv', 'directory.csv'],
-            expected='test_cli_sigmanu_out.dot'
+            expected='test_cli_sigmanu_example_out.dot'
             )
 
 def test_sigmanu_chapters():
