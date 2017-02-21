@@ -49,16 +49,16 @@ def test_sigmanu_example():
 
     sigmanu_root = TESTS_ROOT.parent/'examples/sigmanu-example'
 
-    config = str(sigmanu_root/'config.yaml')
-    bnks = str(sigmanu_root/'directory-brothers_not_knights.csv')
-    directory = str(sigmanu_root/'directory.csv')
+    config = sigmanu_root/'config.yaml'
+    bnks = sigmanu_root/'directory-brothers_not_knights.csv'
+    directory = sigmanu_root/'directory.csv'
 
     result = invoke([
-        '--config', config,
+        '--config', str(config),
         '--schema', 'sigmanu',
         '--seed', 75,
         # Arguments
-        bnks, directory
+        str(bnks), str(directory)
         ])
 
     nt.assert_false(result.exception)
@@ -70,15 +70,15 @@ def test_sigmanu_chapters():
 
     chapters_root = TESTS_ROOT.parent/'examples/sigmanu-chapters'
 
-    config = str(chapters_root/'config.yaml')
-    directory = str(chapters_root/'directory.csv')
+    config = chapters_root/'config.yaml'
+    directory = chapters_root/'directory.csv'
 
     result = invoke([
-        '-c', config,
+        '-c', str(config),
         '-m', 'sigmanu_chapters',
         '-S', 76,
         # Arguments
-        directory
+        str(directory)
         ])
 
     nt.assert_false(result.exception)
