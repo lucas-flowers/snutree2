@@ -1,4 +1,4 @@
-import random
+import random, logging
 import networkx as nx
 from cerberus import Validator
 from collections import deque
@@ -354,8 +354,8 @@ class FamilyTree:
         for key, color in family_colors.items():
 
             if key not in self.graph.node:
-                print('warning: family color map includes nonexistent member: {!r}'
-                        .format(key))
+                msg = 'warning: family color map includes nonexistent member: {!r}'
+                logging.warn(msg.format(key))
 
             else:
 
