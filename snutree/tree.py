@@ -1,5 +1,6 @@
 import random, logging
 import networkx as nx
+from enum import Enum
 from cerberus import Validator
 from collections import deque
 from networkx.algorithms.components import weakly_connected_components
@@ -174,8 +175,9 @@ class FamilyTree:
 
         key = entity.get_key()
         if key in self.graph:
+            code = TreeErrorCode.DUPLICATE_ENTITY
             msg = 'duplicate entity key: {!r}'
-            raise TreeError(msg.format(key))
+            raise TreeError(code, msg.format(key))
         self.graph.add_node(key, entity=entity, dot_attributes=entity.dot_attributes())
 
     def add_big_relationship(self, member, dot_attributes=None):
@@ -184,15 +186,17 @@ class FamilyTree:
         pkey = member.parent
 
         if pkey not in self.graph:
+            code = TreeErrorCode.PARENT_UNKNOWN
             msg = 'member {!r} has unknown parent: {!r}'
-            raise TreeError(msg.format(ckey, pkey))
+            raise TreeError(code, msg.format(ckey, pkey))
 
         parent = self.graph.node[pkey]['entity']
 
         if self.settings['layout']['semesters'] and member.semester < parent.semester:
+            code = TreeErrorCode.PARENT_NOT_PRIOR
             msg = 'semester {!r} of member {!r} cannot be prior to semester of big brother {!r}: {!r}'
             vals = member.semester, ckey, pkey, parent.semester
-            raise TreeError(msg.format(*vals))
+            raise TreeError(code, msg.format(*vals))
         else:
             self.graph.add_edge(pkey, ckey, dot_attributes=dot_attributes or {})
 
@@ -232,9 +236,10 @@ class FamilyTree:
             for key in nodes:
                 if key not in self.graph:
                     path_type = 'path' if len(nodes) > 2 else 'edge'
+                    code = TreeErrorCode.UNKNOWN_EDGE_COMPONENT
                     msg = 'custom {} {!r} has undefined node: {!r}'
                     vals = path_type, path['nodes'], key
-                    raise TreeError(msg.format(*vals))
+                    raise TreeError(code, msg.format(*vals))
             attributes = path['attributes']
 
             edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
@@ -255,8 +260,9 @@ class FamilyTree:
         # There must be no cycles in the tree of members
         try:
             cycle_edges = find_cycle(self.member_subgraph(), orientation='ignore')
+            code = TreeErrorCode.CYCLE
             msg = 'found unexpected cycle in big-little relationships: {!r}'
-            raise TreeError(msg.format(cycle_edges))
+            raise TreeError(code, msg.format(cycle_edges))
         except NetworkXNoCycle:
             pass
 
@@ -362,8 +368,9 @@ class FamilyTree:
 
                 family = self.graph.node[key]['family']
                 if 'color' in family:
+                    code = TreeErrorCode.FAMILY_COLOR_CONFLICT
                     msg = 'family of member {!r} already assigned the color {!r}'
-                    raise TreeError(msg.format(key, color))
+                    raise TreeError(code, msg.format(key, color))
 
                 # Add the used color to the end and remove the first instance of it
                 other_colors.append(color)
@@ -551,8 +558,20 @@ class FamilyTree:
 
         yield from edges
 
+TreeErrorCode = Enum('TreeErrorCode', (
+        'DUPLICATE_ENTITY',
+        'PARENT_UNKNOWN',
+        'PARENT_NOT_PRIOR',
+        'UNKNOWN_EDGE_COMPONENT',
+        'CYCLE',
+        'FAMILY_COLOR_CONFLICT',
+        ))
+
 class TreeError(Exception):
-    pass
+
+    def __init__(self, errno, msg=None):
+        self.errno = errno
+        self.message = msg
 
 def graphviz_colors():
     return deque([
