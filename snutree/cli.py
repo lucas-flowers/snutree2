@@ -56,10 +56,7 @@ def validate_directory_module(ctx, parameter, value):
 @click.option('--verbose', '-v', is_flag=True, default=False)
 @click.option('--quiet', '-q', is_flag=True, default=False)
 @logged
-def cli(*args, **kwargs):
-    return _cli(*args, **kwargs)
-
-def _cli(files, output_path, config_paths, seed, debug, verbose, quiet, schema_module, input_format):
+def cli(files, output_path, config_paths, seed, debug, verbose, quiet, schema_module, input_format):
     '''
     Create a big-little family tree.
     '''
