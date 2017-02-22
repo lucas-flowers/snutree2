@@ -16,29 +16,22 @@ def validate(members):
             members,
             [Candidate, Brother, Knight, Expelled],
             ignored_statuses=['Reaffiliate'],
-            posthook=check_affiliations()
             )
-
-
-def check_affiliations():
-
-    used_affiliations = set()
-
-    def posthook(member, member_types, ignored_statuses):
-
-        for aff in member.affiliations:
-            if aff in used_affiliations:
-                msg = 'found duplicate affiliation: {!r}'
-                raise DirectoryError(msg.format(aff))
-            used_affiliations.add(aff)
-
-    return posthook
 
 class SigmaNuMember(Member):
 
+    # TODO move out of class and into a field or function local
+    used_affiliations = set()
+
     @classmethod
     def from_dict(cls, dct):
-        return cls(**validate_with_humanized_errors(dct, cls.schema))
+        member = cls(**validate_with_humanized_errors(dct, cls.schema))
+        for aff in member.affiliations:
+            if aff in cls.used_affiliations:
+                msg = 'found duplicate affiliation: {!r}'
+                raise DirectoryError(msg.format(aff))
+            cls.used_affiliations.add(aff)
+        return member
 
 class Knight(SigmaNuMember):
 

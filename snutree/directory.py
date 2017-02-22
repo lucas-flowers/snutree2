@@ -2,7 +2,7 @@ from pprint import pformat
 from .utilities import logged
 
 @logged
-def validate_members(member_list, member_types, ignored_statuses=None, prehook=None, posthook=None):
+def validate_members(member_list, member_types, ignored_statuses=None):
 
     ignored_statuses = ignored_statuses or []
 
@@ -13,9 +13,6 @@ def validate_members(member_list, member_types, ignored_statuses=None, prehook=N
 
     members = []
     for member in member_list:
-
-        if prehook:
-            prehook(member, member_types, ignored_statuses)
 
         # Remove the keys pointing to falsy values from each member. This
         # simplifies validation (e.g., we don't have to worry about
@@ -47,10 +44,6 @@ def validate_members(member_list, member_types, ignored_statuses=None, prehook=N
         # TODO rename dict members and object members
         member = allowed_statuses[status].from_dict(member)
         members.append(member)
-
-        # TODO rename dict members and object members
-        if posthook:
-            posthook(member, member_types, ignored_statuses)
 
     return members
 
