@@ -573,6 +573,9 @@ class TreeError(Exception):
         self.errno = errno
         self.message = msg
 
+    def __str__(self):
+        return self.message
+
 def graphviz_colors():
     return deque([
             'limegreen',
