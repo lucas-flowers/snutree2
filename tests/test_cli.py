@@ -77,7 +77,7 @@ class TestCli(TestCliCommon):
     def test_custom_module(self):
 
         # The custom module should be in the same folder this test file is in
-        custom_module = str(Path(__file__).parent/'test_cli_custom_module.py')
+        custom_module = str(Path(__file__).parent/'test_cli/custom_module.py')
         custom_csv = trim('''
             pid,cid,s
             A,B,5
