@@ -1,4 +1,5 @@
 from voluptuous import Schema, Required, Coerce
+from voluptuous.humanize import validate_with_humanized_errors
 from snutree.entity import Member
 from snutree.directory import Directory
 from snutree.semester import Semester
@@ -11,7 +12,7 @@ class KeylessMember(Member):
 
     allowed = {'Initiate'}
 
-    validator = Schema({
+    schema = Schema({
             Required('name') : NonEmptyString,
             'big_name' : NonEmptyString,
             Required('pledge_semester') : Coerce(Semester),
@@ -26,6 +27,10 @@ class KeylessMember(Member):
         self.key = name
         self.semester = pledge_semester
         self.parent = big_name
+
+    @classmethod
+    def from_dict(cls, dct):
+        return cls(**validate_with_humanized_errors(dct, cls.schema))
 
     def get_key(self):
         return self.key

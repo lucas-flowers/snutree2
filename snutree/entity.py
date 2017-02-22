@@ -85,8 +85,9 @@ class Member(TreeEntity, metaclass=ABCMeta):
     '''
 
     @classmethod
+    @abstractmethod
     def from_dict(cls, dct):
-        return cls(**cls.validator(dct))
+        pass
 
     @abstractmethod
     def get_dot_label(self):

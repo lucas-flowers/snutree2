@@ -1,5 +1,6 @@
 import difflib, re
 from voluptuous import Schema, Required, In, Coerce
+from voluptuous.humanize import validate_with_humanized_errors
 from snutree.directory import Directory, DirectoryError
 from snutree.entity import Member
 from snutree.semester import Semester
@@ -7,7 +8,7 @@ from snutree.utilities import NonEmptyString
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 
-# Voluptuous validators
+# Voluptuous schemas
 AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
 
 def directory(members):
@@ -47,11 +48,17 @@ class SigmaNuDirectory(Directory):
 
         super().set_members(check_affiliations())
 
-class Knight(Member):
+class SigmaNuMember(Member):
+
+    @classmethod
+    def from_dict(cls, dct):
+        return cls(**validate_with_humanized_errors(dct, cls.schema))
+
+class Knight(SigmaNuMember):
 
     allowed = {'Active', 'Alumni', 'Left School'}
 
-    validator = Schema({
+    schema = Schema({
         Required('status') : In(allowed),
         Required('badge') : NonEmptyString,
         Required('first_name') : NonEmptyString,
@@ -86,11 +93,11 @@ class Knight(Member):
         affiliation_strings =  [str(s) for s in sorted(self.affiliations)]
         return '{}\\n{}'.format(self.name, ', '.join(affiliation_strings))
 
-class Brother(Member):
+class Brother(SigmaNuMember):
 
     allowed = {'Brother'}
 
-    validator = Schema({
+    schema = Schema({
         Required('status') : In(allowed),
         'first_name' : NonEmptyString,
         'preferred_name' : NonEmptyString,
@@ -129,11 +136,11 @@ class Brother(Member):
         values = self.name, Affiliation.get_primary_chapter()
         return template.format(*values)
 
-class Candidate(Member):
+class Candidate(SigmaNuMember):
 
     allowed = {'Candidate'}
 
-    validator = Schema({
+    schema = Schema({
         Required('status') : In(allowed),
         Required('first_name') : NonEmptyString,
         'preferred_name' : NonEmptyString,
@@ -179,7 +186,7 @@ class Expelled(Knight):
 
     allowed = {'Expelled'}
 
-    validator = Schema({
+    schema = Schema({
         Required('status') : In(allowed),
         Required('badge') : NonEmptyString,
         'first_name' : NonEmptyString,

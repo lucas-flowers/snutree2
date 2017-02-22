@@ -31,3 +31,7 @@ class SubMember(Member):
     def get_dot_label(self):
         return self.key
 
+    @classmethod
+    def from_dict(cls, dct):
+        return cls(**cls.validator(dct))
+
