@@ -1,11 +1,11 @@
 from voluptuous import Schema, Coerce, Required
 from voluptuous.humanize import validate_with_humanized_errors
 from snutree.entity import Member
-from snutree.directory import Directory
+from snutree.directory import validate_members
 from snutree.utilities import NonEmptyString
 
-def directory(members):
-    return Directory(members, [Chapter])
+def validate(members):
+    return validate_members(members, [Chapter])
 
 class Chapter(Member):
 

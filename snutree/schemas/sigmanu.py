@@ -1,7 +1,7 @@
 import difflib, re
 from voluptuous import Schema, Required, In, Coerce
 from voluptuous.humanize import validate_with_humanized_errors
-from snutree.directory import Directory, DirectoryError
+from snutree.directory import validate_members, DirectoryError
 from snutree.entity import Member
 from snutree.semester import Semester
 from snutree.utilities import NonEmptyString
@@ -11,42 +11,28 @@ from snutree.utilities import NonEmptyString
 # Voluptuous schemas
 AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
 
-def directory(members):
-    return SigmaNuDirectory(
+def validate(members):
+    return validate_members(
             members,
             [Candidate, Brother, Knight, Expelled],
-            ignored_statuses=['Reaffiliate']
+            ignored_statuses=['Reaffiliate'],
+            posthook=check_affiliations()
             )
 
-class SigmaNuDirectory(Directory):
 
-    def set_members(self, members):
+def check_affiliations():
 
-        def check_affiliations():
-            '''
-            A generator that iterates of the provided `members` iterable. Uses
-            an excessively clever way to ensure all affiliations are unique.
-            Depends on self._members[-1] containing the most-recently processed
-            member.
+    used_affiliations = set()
 
-            This /could/ be a method, but it is dependent on the innards of
-            super().set_members and set_members is called only once per
-            directory (in expected usage), so I'm leaving it as an inner
-            function.
-            '''
+    def posthook(member, member_types, ignored_statuses):
 
-            used_affiliations = set()
-            for m in members:
-                yield m
-                if m.get('status') not in self.ignored_statuses:
-                    affiliations = self._members[-1].affiliations
-                    for aff in affiliations:
-                        if aff in used_affiliations:
-                            msg = 'found duplicate affiliation: {!r}'
-                            raise DirectoryError(msg.format(aff))
-                        used_affiliations.add(aff)
+        for aff in member.affiliations:
+            if aff in used_affiliations:
+                msg = 'found duplicate affiliation: {!r}'
+                raise DirectoryError(msg.format(aff))
+            used_affiliations.add(aff)
 
-        super().set_members(check_affiliations())
+    return posthook
 
 class SigmaNuMember(Member):
 

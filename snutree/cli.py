@@ -74,14 +74,14 @@ def cli(files, output_path, log_stream, config_paths, seed, debug, verbose, quie
     members = get_from_sources(files, stdin_fmt=input_format)
 
     logging.info('Validating directory')
-    directory = schema_module.directory(members)
+    members = schema_module.validate(members)
 
     logging.info('Loading tree configuration')
     tree_cnf = load_configuration(config_paths)
     tree_cnf['seed'] = seed or tree_cnf.get('seed', 0)
 
     logging.info('Constructing family tree data structure')
-    tree = FamilyTree(directory, tree_cnf)
+    tree = FamilyTree(members, tree_cnf)
 
     logging.info('Creating internal DOT code representation')
     dotgraph = tree.to_dot_graph()

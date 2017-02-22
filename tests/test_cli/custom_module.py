@@ -1,10 +1,10 @@
 from voluptuous import Schema, Required, Coerce
-from snutree.directory import Directory
+from snutree.directory import validate_members
 from snutree.entity import Member
 from snutree.utilities import NonEmptyString
 
-def directory(members):
-    return Directory(members, [SubMember])
+def validate(members):
+    return validate_members(members, [SubMember])
 
 class SubMember(Member):
 

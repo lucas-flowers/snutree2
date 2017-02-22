@@ -120,13 +120,13 @@ class FamilyTree:
 
     })
 
-    def __init__(self, directory, settings=None):
+    def __init__(self, members, settings=None):
 
         self.graph = nx.DiGraph()
         self.settings = validate(self.SETTINGS_VALIDATOR, settings or {})
 
         # Add all the entities in the settings and directory provided
-        self.add_members(directory.get_members())
+        self.add_members(members)
         self.add_custom_nodes()
 
         # Add all the edges in the settings and members provided
