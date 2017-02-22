@@ -1,4 +1,4 @@
-import io
+import io, logging, sys
 from unittest import TestCase
 from pathlib import Path
 from click.testing import CliRunner
@@ -10,7 +10,20 @@ TESTS_ROOT = Path(__file__).parent
 class TestCliCommon(TestCase):
 
     def setUp(self):
+
         self.runner = CliRunner()
+
+        # Allow sending CLI logging output to testing stdout when stdout is not
+        # captured by unittest
+        self.stream_handler = logging.StreamHandler(sys.stdout)
+        self.logger = logging.getLogger()
+        self.logger.level = logging.DEBUG
+        self.logger.addHandler(self.stream_handler)
+
+    def tearDown(self):
+
+        # Clean up logging
+        self.logger.removeHandler(self.stream_handler)
 
     def invoke(self, args, input=None):
         if input:
