@@ -18,7 +18,7 @@ class TestAffiliation(TestCase):
         for greek in Affiliation.ENGLISH_TO_GREEK.values():
             self.assertNotIn(greek, string.ascii_letters)
 
-    def test_Affiliation_constructor_string_success(self):
+    def test_constructor_string_success(self):
 
         # Input designation on the left; canonical designation on the right.
         # NOTE: The right side consists of /only/ Greek letters (i.e., 'Α' not 'A')
@@ -50,7 +50,7 @@ class TestAffiliation(TestCase):
             with self.subTest(i=i, o=o):
                 self.assertEquals(Affiliation(i), Affiliation(o))
 
-    def test_Affiliation_constructor_tuple_success(self):
+    def test_constructor_tuple_success(self):
 
         designations = [
                 ('A', 1),
@@ -66,7 +66,7 @@ class TestAffiliation(TestCase):
                     vals = d, e
                     self.fail(msg.format(*vals))
 
-    def test_Affiliation_constructor_value_failure(self):
+    def test_constructor_value_failure(self):
 
         failed_designations = [
                 'a 5', # 'a' is not Greek, nor a Greek lookalike
@@ -90,7 +90,7 @@ class TestAffiliation(TestCase):
             with self.subTest(f=f):
                 self.assertRaises(ValueError, Affiliation, f)
 
-    def test_Affiliation_constructor_type_failure(self):
+    def test_constructor_type_failure(self):
 
         # Failed constructor types
         failed_types = [
@@ -105,7 +105,7 @@ class TestAffiliation(TestCase):
                 self.assertRaises(TypeError, Affiliation, *f)
 
 
-    def test_Affiliation_sorting(self):
+    def test_sorting(self):
 
         # Sorting. Primary chapter (default is 'ΔΑ') goes first
         a, c, b, d = tuple(Affiliation(s) for s in ('ΔA 1', 'Α 2', 'ΔA 2', 'Ω 1'))
