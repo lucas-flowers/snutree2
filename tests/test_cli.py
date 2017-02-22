@@ -25,22 +25,22 @@ class TestCliCommon(TestCase):
             config,
             schema,
             seed,
-            arguments,
-            expected
+            inputs,
             ):
 
-        root = TESTS_ROOT.parent/'examples'/example_name
+        example_root = TESTS_ROOT.parent/'examples'/example_name
+        example_config = example_root/config
+        example_inputs = [example_root/input_file for input_file in inputs]
 
-        config = root/config
-        paths = [str(root/argument) for argument in arguments]
+        output = (TESTS_ROOT/example_name).with_suffix('.dot')
+        expected = (TESTS_ROOT/(example_name+'-expected')).with_suffix('.dot')
 
         result = self.invoke([
-            # '--output', strx(TESTS_ROOT/expected), # Uncomment to write new expected files
-            # '--output', str(TESTS_ROOT/('new-'+expected)), # Uncomment to write new expected files
-            '--config', str(config),
+            '--config', str(example_config),
             '--schema', schema,
             '--seed', seed,
-            *paths
+            '--output', str(output),
+            *[str(p) for p in example_inputs]
             ])
 
         if result.exception:
@@ -48,7 +48,7 @@ class TestCliCommon(TestCase):
             values = result.exception, result.output
             self.fail(msg.format(*values))
 
-        self.assertEqual(result.output, (TESTS_ROOT/expected).read_text())
+        self.assertEqual(output.read_text(), expected.read_text())
 
 class TestCli(TestCliCommon):
 
@@ -92,8 +92,7 @@ class TestCli(TestCliCommon):
                 config='config.yaml',
                 schema='sigmanu',
                 seed=75,
-                arguments=['directory-brothers_not_knights.csv', 'directory.csv'],
-                expected='test_cli_sigmanu_example_out.dot'
+                inputs=['directory-brothers_not_knights.csv', 'directory.csv'],
                 )
 
     def test_sigmanu_chapters(self):
@@ -103,7 +102,6 @@ class TestCli(TestCliCommon):
                 config='config.yaml',
                 schema='sigmanu_chapter',
                 seed=76,
-                arguments=['directory.csv'],
-                expected='test_cli_chapters_out.dot'
+                inputs=['directory.csv'],
                 )
 
