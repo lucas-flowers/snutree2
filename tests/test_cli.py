@@ -40,7 +40,7 @@ class TestCliCommon(TestCase):
             '--schema', schema,
             '--seed', seed,
             '--output', str(output),
-            '--verbose',
+            '--debug',
             *[str(p) for p in example_inputs]
             ])
 
@@ -48,8 +48,6 @@ class TestCliCommon(TestCase):
             msg = '{}. <<OUTPUT\n{}\nOUTPUT'
             values = result.exception, result.output
             self.fail(msg.format(*values))
-
-        print(result.output)
 
         self.assertEqual(output.read_text(), expected.read_text())
 
