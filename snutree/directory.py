@@ -60,7 +60,7 @@ class Directory(metaclass=ABCMeta):
                 raise DirectoryError(msg.format(*vals))
 
             # TODO error checking
-            self._members.append(self.allowed_statuses[status].from_dict((member)))
+            self._members.append(self.allowed_statuses[status].from_dict(member))
 
     def get_members(self):
         return self._members
