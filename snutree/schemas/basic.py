@@ -1,13 +1,13 @@
 from voluptuous import Schema, Required, Coerce
+from snutree.entity import Member
 from snutree.directory import Directory
-from snutree.entity import Initiate
 from snutree.semester import Semester
 from snutree.utilities import NonEmptyString
 
 def directory(members):
-    return Directory(members, [KeylessInitiate])
+    return Directory(members, [KeylessMember])
 
-class KeylessInitiate(Initiate):
+class KeylessMember(Member):
 
     allowed = {'Initiate'}
 

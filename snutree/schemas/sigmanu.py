@@ -1,7 +1,7 @@
 import difflib, re
 from voluptuous import Schema, Required, In, Coerce
 from snutree.directory import Directory, DirectoryError
-from snutree.entity import Member, Initiate
+from snutree.entity import Member
 from snutree.semester import Semester
 from snutree.utilities import NonEmptyString
 
@@ -47,7 +47,7 @@ class SigmaNuDirectory(Directory):
 
         super().set_members(check_affiliations())
 
-class Knight(Initiate):
+class Knight(Member):
 
     allowed = {'Active', 'Alumni', 'Left School'}
 

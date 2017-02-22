@@ -52,7 +52,7 @@ class Custom(TreeEntity):
     def dot_attributes(self):
         return self.attributes
 
-class UnidentifiedInitiate(Custom):
+class UnidentifiedMember(Custom):
     '''
     All members are assumed to have big brothers. If a member does not have a
     known big brother, this class is used as a placeholder. UnidentifiedKnights
@@ -94,9 +94,6 @@ class Member(TreeEntity, metaclass=ABCMeta):
 
     def dot_attributes(self):
         return {'label' : self.get_dot_label()}
-
-class Initiate(Member, metaclass=ABCMeta):
-    pass
 
 class TreeEntityAttributeError(AttributeError):
     pass

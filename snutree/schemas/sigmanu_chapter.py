@@ -1,12 +1,12 @@
 from voluptuous import Schema, Coerce, Required
-from snutree.entity import Initiate
+from snutree.entity import Member
 from snutree.directory import Directory
 from snutree.utilities import NonEmptyString
 
 def directory(members):
     return Directory(members, [Chapter])
 
-class Chapter(Initiate):
+class Chapter(Member):
 
     allowed = {'Chapter'}
 

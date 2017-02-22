@@ -6,7 +6,7 @@ from networkx.algorithms.components import weakly_connected_components
 from networkx.algorithms.cycles import find_cycle
 from networkx.exception import NetworkXNoCycle
 from . import dot
-from .entity import Member, Custom, UnidentifiedInitiate, Initiate
+from .entity import Member, Custom, UnidentifiedMember
 from .utilities import logged, optional_boolean, nonempty_string, semester_like, validate
 
 flags = [
@@ -189,10 +189,7 @@ class FamilyTree:
 
         parent = self.graph.node[pkey]['entity']
 
-        if not isinstance(parent, Initiate):
-            msg = 'big brother of {!r} must be an initiated member: {!r}'
-            raise TreeError(msg.format(ckey, pkey))
-        elif self.settings['layout']['semesters'] and member.semester < parent.semester:
+        if self.settings['layout']['semesters'] and member.semester < parent.semester:
             msg = 'semester {!r} of member {!r} cannot be prior to semester of big brother {!r}: {!r}'
             vals = member.semester, ckey, pkey, parent.semester
             raise TreeError(msg.format(*vals))
@@ -326,7 +323,7 @@ class FamilyTree:
 
             orphan = self.graph.node[orphan_key]['entity']
 
-            parent = UnidentifiedInitiate(orphan,
+            parent = UnidentifiedMember(orphan,
                     self.settings['node_defaults']['unknown'])
 
             # Set orphan parent

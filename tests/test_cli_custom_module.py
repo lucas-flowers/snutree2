@@ -1,12 +1,12 @@
 from voluptuous import Schema, Required, Coerce
 from snutree.directory import Directory
-from snutree.entity import Initiate
+from snutree.entity import Member
 from snutree.utilities import NonEmptyString
 
 def directory(members):
-    return Directory(members, [SubInitiate])
+    return Directory(members, [SubMember])
 
-class SubInitiate(Initiate):
+class SubMember(Member):
 
     allowed = {'I'}
     validator = Schema({
