@@ -20,28 +20,25 @@ class Directory(metaclass=ABCMeta):
 
         self.ignored_statuses = ignored_statuses or []
 
-        # Remove the keys pointing to falsy values from each member. This
-        # simplifies code in the Directory class (e.g., Directory does not
-        # have to worry about handling values of None or empty strings).
-        members = []
-        for row in member_list:
-            for key, field in list(row.items()):
-                if not field:
-                    del row[key]
-            members.append(row)
-
         self.allowed_statuses = {}
         for typ in member_types:
             for allowed in typ.allowed:
                 self.allowed_statuses[allowed] = typ
 
-        self.set_members(members)
+        self.set_members(member_list)
 
     @logged
     def set_members(self, members):
 
         self._members = []
         for member in members:
+
+            # Remove the keys pointing to falsy values from each member. This
+            # simplifies validation (e.g., we don't have to worry about
+            # handling values of None or empty strings)
+            for key, field in list(member.items()):
+                if not field:
+                    del member[key]
 
             if len(self.allowed_statuses) == 1:
                 # If there is only one type of member, ignore the status field
