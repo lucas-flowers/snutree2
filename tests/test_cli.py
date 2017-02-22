@@ -32,14 +32,15 @@ class TestCliCommon(TestCase):
         example_config = example_root/config
         example_inputs = [example_root/input_file for input_file in inputs]
 
-        output = (TESTS_ROOT/example_name).with_suffix('.dot')
-        expected = (TESTS_ROOT/(example_name+'-expected')).with_suffix('.dot')
+        output = (TESTS_ROOT/'test_cli'/example_name).with_suffix('.dot')
+        expected = (TESTS_ROOT/'test_cli'/(example_name+'-expected')).with_suffix('.dot')
 
         result = self.invoke([
             '--config', str(example_config),
             '--schema', schema,
             '--seed', seed,
             '--output', str(output),
+            '--verbose',
             *[str(p) for p in example_inputs]
             ])
 
@@ -47,6 +48,8 @@ class TestCliCommon(TestCase):
             msg = '{}. <<OUTPUT\n{}\nOUTPUT'
             values = result.exception, result.output
             self.fail(msg.format(*values))
+
+        print(result.output)
 
         self.assertEqual(output.read_text(), expected.read_text())
 
