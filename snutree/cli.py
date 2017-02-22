@@ -48,6 +48,7 @@ def validate_directory_module(ctx, parameter, value):
 @click.command()
 @click.argument('files', nargs=-1, type=click.File('r'))
 @click.option('output_path', '--output', '-o', type=click.Path(), default=None)
+@click.option('log_stream', '--log', '-l', type=click.File('w'), default=sys.stdout)
 @click.option('config_paths', '--config', '-c', type=click.Path(exists=True), multiple=True)
 @click.option('schema_module', '--schema', '-m', callback=validate_directory_module, default='basic')
 @click.option('input_format', '--format', '-f', type=str, default=None)
@@ -56,18 +57,18 @@ def validate_directory_module(ctx, parameter, value):
 @click.option('--verbose', '-v', is_flag=True, default=False)
 @click.option('--quiet', '-q', is_flag=True, default=False)
 @logged
-def cli(files, output_path, config_paths, seed, debug, verbose, quiet, schema_module, input_format):
+def cli(files, output_path, log_stream, config_paths, seed, debug, verbose, quiet, schema_module, input_format):
     '''
     Create a big-little family tree.
     '''
 
-    if output_path is not None:
+    if log_stream is not sys.stdout or output_path:
         if debug:
-            logging.basicConfig(level=logging.DEBUG, stream=sys.stdout, format='%(asctime)s %(levelname)s: %(name)s - %(message)s')
+            logging.basicConfig(level=logging.DEBUG, stream=log_stream, format='%(asctime)s %(levelname)s: %(name)s - %(message)s')
         elif verbose:
-            logging.basicConfig(level=logging.INFO, stream=sys.stdout, format='%(levelname)s: %(message)s')
+            logging.basicConfig(level=logging.INFO, stream=log_stream, format='%(levelname)s: %(message)s')
         elif not quiet:
-            logging.basicConfig(level=logging.WARNING, stream=sys.stdout, format='%(levelname)s: %(message)s')
+            logging.basicConfig(level=logging.WARNING, stream=log_stream, format='%(levelname)s: %(message)s')
 
     logging.info('Retrieving big-little data from data sources')
     members = get_from_sources(files, stdin_fmt=input_format)
