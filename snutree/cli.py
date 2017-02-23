@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 import subprocess, click, logging, sys, yaml, csv, importlib.util
 from pathlib import Path
-from cerberus import Validator
 from . import SnutreeError
 from .readers import sql, dotread
 from .tree import FamilyTree
-from .utilities import logged, nonempty_string, validate
+from .utilities import logged
 
 def main():
 
@@ -92,14 +91,14 @@ def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet,
     logging.info('Writing output')
     write_output(dotcode, output_path)
 
+@logged
 def get_from_sources(files, stdin_fmt=None):
 
-    # TODO get better name
-    table_getters = {
-        'yaml' : get_from_sql_settings,
-        'csv' : get_from_csv,
-        'dot' : get_from_dot
-        }
+    readers = {
+            'yaml' : lambda f : sql.get_table_from_cnf(yaml.safe_load(f)),
+            'csv' : lambda f : list(csv.DictReader(f)),
+            'dot' : lambda f : dotread.get_table(f)
+            }
 
     members = []
     for f in files or []:
@@ -107,7 +106,7 @@ def get_from_sources(files, stdin_fmt=None):
         # Filetype is the path suffix or stdin's format if input is stdin
         filetype = Path(f.name).suffix[1:] if f.name != '<stdin>' else stdin_fmt
 
-        table_getter = table_getters.get(filetype)
+        table_getter = readers.get(filetype)
         if not table_getter:
             msg = 'input filetype {!r} not supported'
             raise SnutreeError(msg.format(filetype))
@@ -115,6 +114,7 @@ def get_from_sources(files, stdin_fmt=None):
 
     return members
 
+@logged
 def load_configuration(paths):
     config = {}
     for path in paths:
@@ -122,6 +122,7 @@ def load_configuration(paths):
             config.update(yaml.safe_load(f))
     return config
 
+@logged
 def write_output(dotcode, path=None):
     '''
     Use the path's extension to determine an output format. Then, compile the
@@ -150,53 +151,6 @@ def write_stream(output, fmt, stream):
         raise SnutreeError(msg.format(fmt))
 
     stream.write(output)
-
-def get_from_dot(f):
-    return dotread.get_table(f)
-
-def get_from_csv(f):
-    return list(csv.DictReader(f))
-
-MYSQL_CNF_VALIDATOR = Validator({
-
-    'query' : nonempty_string,
-
-    'mysql' : {
-        'type' : 'dict',
-        'required' : True,
-        'schema' : {
-            'host' : nonempty_string,
-            'user' : nonempty_string,
-            'passwd' : nonempty_string,
-            'port' : { 'type': 'integer' },
-            'db' : nonempty_string,
-            }
-        },
-
-    # SSH for remote MySQL databases
-    'ssh' : {
-        'type' : 'dict',
-        'required' : False,
-        'schema' : {
-            'host' : nonempty_string,
-            'port' : { 'type' : 'integer' },
-            'user' : nonempty_string,
-            'public_key' : nonempty_string,
-            }
-        }
-
-    })
-
-def get_from_sql_settings(f):
-    return get_from_sql(yaml.safe_load(f))
-
-def get_from_sql(cnf):
-    '''
-    Get the table of members from the SQL database.
-    '''
-
-    cnf = validate(MYSQL_CNF_VALIDATOR, cnf)
-    return sql.get_table(cnf['query'], cnf['mysql'], ssh_cnf=cnf['ssh'])
 
 if __name__ == '__main__':
     main()

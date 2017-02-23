@@ -120,6 +120,7 @@ class FamilyTree:
 
     })
 
+    @logged
     def __init__(self, members, settings=None):
 
         self.graph = nx.DiGraph()
@@ -223,6 +224,27 @@ class FamilyTree:
         for key, value in self.settings['nodes'].items():
             self.add_entity(Custom(key, **value))
 
+    @logged
+    def add_member_relationships(self):
+        '''
+        Connect all Members in the tree, based on the value of their parent
+        field, by adding the edge (parent, member). Parents must also be
+        Members (to add non-Members as parent nodes, use custom edges).
+        '''
+
+        for key, entity in self.nodes_iter('entity'):
+            if isinstance(entity, Member) and entity.parent:
+                self.add_big_relationship(entity)
+
+        # There must be no cycles in the tree of members
+        try:
+            cycle_edges = find_cycle(self.member_subgraph(), orientation='ignore')
+            code = TreeErrorCode.CYCLE
+            msg = 'found unexpected cycle in big-little relationships: {!r}'
+            raise TreeError(code, msg.format(cycle_edges))
+        except NetworkXNoCycle:
+            pass
+
     @option('custom_edges')
     @logged
     def add_custom_edges(self):
@@ -244,27 +266,6 @@ class FamilyTree:
 
             edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
             self.graph.add_edges_from(edges, dot_attributes=attributes)
-
-    @logged
-    def add_member_relationships(self):
-        '''
-        Connect all Members in the tree, based on the value of their parent
-        field, by adding the edge (parent, member). Parents must also be
-        Members (to add non-Members as parent nodes, use custom edges).
-        '''
-
-        for key, entity in self.nodes_iter('entity'):
-            if isinstance(entity, Member) and entity.parent:
-                self.add_big_relationship(entity)
-
-        # There must be no cycles in the tree of members
-        try:
-            cycle_edges = find_cycle(self.member_subgraph(), orientation='ignore')
-            code = TreeErrorCode.CYCLE
-            msg = 'found unexpected cycle in big-little relationships: {!r}'
-            raise TreeError(code, msg.format(cycle_edges))
-        except NetworkXNoCycle:
-            pass
 
     @option('no_singletons')
     @logged
