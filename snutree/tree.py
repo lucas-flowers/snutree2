@@ -165,10 +165,10 @@ class FamilyTree:
                     ((self.graph.node[key],) if node_dict else ())
 
     def member_subgraph(self):
-        return self.graph.subgraph([
-            key for key, node_dict in self.graph.nodes_iter(data=True)
-            if isinstance(node_dict['entity'], Member)
-            ])
+        return self.graph.subgraph(
+                [key for key, member in self.nodes_iter('entity')
+                    if isinstance(member, Member)]
+                )
 
     def add_entity(self, entity):
 
@@ -277,10 +277,7 @@ class FamilyTree:
     def mark_families(self):
 
         # Members-only graph
-        members_only = self.graph.subgraph(
-                [key for key, member in self.nodes_iter('entity')
-                    if isinstance(member, Member)]
-                )
+        members_only = self.member_subgraph()
 
         # Families are weakly connected components of the members-only graph
         families = weakly_connected_components(members_only)
