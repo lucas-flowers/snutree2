@@ -92,31 +92,6 @@ def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet,
     logging.info('Writing output')
     write_output(dotcode, output_path)
 
-def write_output(dotcode, path=None):
-
-    filetype = Path(path).suffix if path is not None else None
-    output = path or sys.stdout
-
-    writers = {
-            '.pdf' : write_pdffile,
-            '.dot' : write_dotfile,
-            None : write_textio
-            }
-
-    write = writers.get(filetype)
-    if not write:
-        msg = 'output filetype "{}" not supported'
-        raise SnutreeError(msg.format(filetype))
-
-    write(dotcode, output)
-
-def load_configuration(paths):
-    config = {}
-    for path in paths:
-        with open(path, 'r') as f:
-            config.update(yaml.safe_load(f))
-    return config
-
 def get_from_sources(files, stdin_fmt=None):
 
     # TODO get better name
@@ -140,19 +115,41 @@ def get_from_sources(files, stdin_fmt=None):
 
     return members
 
-@logged
-def write_textio(dotcode, output):
-    output.write(dotcode)
+def load_configuration(paths):
+    config = {}
+    for path in paths:
+        with open(path, 'r') as f:
+            config.update(yaml.safe_load(f))
+    return config
 
-@logged
-def write_dotfile(dotcode, filename):
-    with open(filename, 'w+') as dotfile:
-        dotfile.write(dotcode)
+def write_output(dotcode, path=None):
+    '''
+    Use the path's extension to determine an output format. Then, compile the
+    DOT code to that format and write into the file at the given path (or
+    stdout, if no path is provided).
+    '''
 
-@logged
-def write_pdffile(dotcode, pdf_filename):
-    subprocess.run(['dot', '-Tpdf', '-o', pdf_filename],
-            check=True, input=dotcode, universal_newlines=True)
+    filetype = Path(path).suffix if path is not None else None
+    if not path:
+        write_stream(dotcode, filetype, sys.stdout)
+    else:
+        with open(path, 'wb+') as f:
+            write_stream(bytes(dotcode, 'utf-8'), filetype, f)
+
+def write_stream(output, fmt, stream):
+    '''
+    Write output of the given format to the streem.
+    '''
+
+    if fmt == '.pdf':
+        result = subprocess.run(['dot', '-Tpdf'], check=True,
+                input=output, stdout=subprocess.PIPE)
+        output = result.stdout
+    elif fmt not in ('.dot', None):
+        msg = 'output filetype "{}" not supported'
+        raise SnutreeError(msg.format(fmt))
+
+    stream.write(output)
 
 def get_from_dot(f):
     return dotread.get_table(f)
