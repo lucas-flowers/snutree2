@@ -97,7 +97,7 @@ def get_from_sources(files, stdin_fmt=None):
     readers = {
             'yaml' : lambda f : sql.get_table_from_cnf(yaml.safe_load(f)),
             'csv' : lambda f : list(csv.DictReader(f)),
-            'dot' : lambda f : dotread.get_table(f)
+            'dot' : lambda f : dotread.get_members(f)
             }
 
     members = []
