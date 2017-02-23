@@ -24,9 +24,6 @@ class SubMember(Member):
         self.semester = s
         self.parent = pid
 
-    def get_key(self):
-        return self.key
-
     def get_dot_label(self):
         return self.key
 

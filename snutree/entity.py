@@ -58,20 +58,16 @@ class TreeEntity(metaclass=ABCMeta):
 
     Entities implement these functions:
 
-        + get_key(self): Returns the key to be used in DOT
-
         + dot_attributes(self): Returns the node attributes to be used in DOT
 
     Entities should also have these fields:
+
+        + key: The key to be used in DOT
 
         + _semester: A private field storing a Semester object, used to
         determine the entity's rank in DOT
 
     '''
-
-    @abstractmethod
-    def get_key(self):
-        pass
 
     @property
     def semester(self):
@@ -79,7 +75,7 @@ class TreeEntity(metaclass=ABCMeta):
             return self._semester
         else:
             msg = 'missing semester value for entity {!r}'
-            raise TreeEntityAttributeError(msg.format(self.get_key()))
+            raise TreeEntityAttributeError(msg.format(self.key))
 
     @semester.setter
     def semester(self, value):
@@ -95,9 +91,6 @@ class Custom(TreeEntity):
         self.semester = semester
         self.attributes = attributes or {}
 
-    def get_key(self):
-        return self.key
-
     def dot_attributes(self):
         return self.attributes
 
@@ -110,7 +103,7 @@ class UnidentifiedMember(Custom):
     '''
 
     def __init__(self, member, attributes=None):
-        self.key = '{} Parent'.format(member.get_key())
+        self.key = '{} Parent'.format(member.key)
         try:
             self.semester = member.semester - 1
         except TreeEntityAttributeError:

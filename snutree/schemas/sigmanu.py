@@ -58,14 +58,11 @@ class Knight(SigmaNuMember):
             affiliations=None,
             ):
 
-        self.badge = badge
+        self.key = badge
         self.name = combine_names(first_name, preferred_name, last_name)
         self.parent = big_badge
         self.semester = pledge_semester
         self.affiliations = set(affiliations or []) | {Affiliation.with_primary(badge)}
-
-    def get_key(self):
-        return self.badge
 
     def get_dot_label(self):
         affiliation_strings =  [str(s) for s in sorted(self.affiliations)]
@@ -105,9 +102,6 @@ class Brother(SigmaNuMember):
         # counter to generate keys.
         self.key = 'Brother {}'.format(Brother.bid)
         Brother.bid += 1
-
-    def get_key(self):
-        return self.key
 
     def get_dot_label(self):
         template = '{}\\n{} Brother'
@@ -149,9 +143,6 @@ class Candidate(SigmaNuMember):
         self.key = 'Candidate {}'.format(Candidate.cid)
         Candidate.cid += 1
 
-    def get_key(self):
-        return self.key
-
     def get_dot_label(self):
         template = '{}\\n{} Candidate'
         values = self.name, Affiliation.get_primary_chapter()
@@ -186,14 +177,14 @@ class Expelled(Knight):
             affiliations=None
             ):
 
-        self.badge = badge
+        self.key = badge
         self.name = 'Member Expelled'
         self.parent = big_badge
         self.semester = pledge_semester
         self.affiliations = affiliations or []
 
     def get_dot_label(self):
-        return '{}\\n{}'.format(self.name, self.badge)
+        return '{}\\n{}'.format(self.name, self.key)
 
 def combine_names(first_name, preferred_name, last_name, threshold=.5):
     '''

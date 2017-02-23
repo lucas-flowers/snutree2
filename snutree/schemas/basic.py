@@ -31,9 +31,6 @@ class KeylessMember(Member):
     def from_dict(cls, dct):
         return cls(**validate_with_humanized_errors(dct, cls.schema))
 
-    def get_key(self):
-        return self.key
-
     def get_dot_label(self):
         return self.key
 

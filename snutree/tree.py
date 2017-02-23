@@ -174,7 +174,7 @@ class FamilyTree:
 
     def add_entity(self, entity):
 
-        key = entity.get_key()
+        key = entity.key
         if key in self.graph:
             code = TreeErrorCode.DUPLICATE_ENTITY
             msg = 'duplicate entity key: {!r}'
@@ -183,7 +183,7 @@ class FamilyTree:
 
     def add_big_relationship(self, member, dot_attributes=None):
 
-        ckey = member.get_key()
+        ckey = member.key
         pkey = member.parent
 
         if pkey not in self.graph:
@@ -334,7 +334,7 @@ class FamilyTree:
                     self.settings['node_defaults']['unknown'])
 
             # Set orphan parent
-            orphan.parent = parent.get_key()
+            orphan.parent = parent.key
 
             self.add_entity(parent)
             self.graph.add_edge(orphan.parent, orphan_key,
