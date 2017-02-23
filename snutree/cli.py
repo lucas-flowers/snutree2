@@ -47,7 +47,7 @@ def validate_directory_module(ctx, parameter, value):
 @click.command()
 @click.argument('files', nargs=-1, type=click.File('r'))
 @click.option('output_path', '--output', '-o', type=click.Path(), default=None)
-@click.option('log_stream', '--log', '-l', type=click.File('w'), default=sys.stdout)
+@click.option('log_path', '--log', '-l', type=click.Path(exists=False), default=None)
 @click.option('config_paths', '--config', '-c', type=click.Path(exists=True), multiple=True)
 @click.option('schema_module', '--schema', '-m', callback=validate_directory_module, default='basic')
 @click.option('input_format', '--format', '-f', type=str, default=None)
@@ -56,12 +56,13 @@ def validate_directory_module(ctx, parameter, value):
 @click.option('--verbose', '-v', is_flag=True, default=False)
 @click.option('--quiet', '-q', is_flag=True, default=False)
 @logged
-def cli(files, output_path, log_stream, config_paths, seed, debug, verbose, quiet, schema_module, input_format):
+def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet, schema_module, input_format):
     '''
     Create a big-little family tree.
     '''
 
-    if log_stream is not sys.stdout or output_path:
+    if log_path or output_path:
+        log_stream = open(log_path, 'w') if log_path else sys.stdout
         if debug:
             logging.basicConfig(level=logging.DEBUG, stream=log_stream, format='%(asctime)s %(levelname)s: %(name)s - %(message)s')
         elif verbose:
