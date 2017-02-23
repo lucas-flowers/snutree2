@@ -2,8 +2,8 @@ import io, logging, sys
 from unittest import TestCase
 from pathlib import Path
 from click.testing import CliRunner
-from snutree.cli import cli
 from inspect import cleandoc as trim
+from snutree.cli import cli
 
 TESTS_ROOT = Path(__file__).parent
 

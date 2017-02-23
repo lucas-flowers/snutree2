@@ -4,9 +4,8 @@ from pathlib import Path
 from cerberus import Validator
 from .readers import sql, dotread
 from .tree import FamilyTree, TreeError
-from .entity import TreeEntityAttributeError
+from .entity import TreeEntityAttributeError, DirectoryError
 from .utilities import logged, SettingsError, nonempty_string, validate
-from .directory import DirectoryError
 
 def main():
 

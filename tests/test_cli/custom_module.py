@@ -1,6 +1,5 @@
 from voluptuous import Schema, Required, Coerce
-from snutree.directory import validate_members
-from snutree.entity import Member
+from snutree.entity import Member, validate_members
 from snutree.utilities import NonEmptyString
 
 def validate(members):

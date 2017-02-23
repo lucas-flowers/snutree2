@@ -1,8 +1,7 @@
 import difflib, re
 from voluptuous import Schema, Required, In, Coerce
 from voluptuous.humanize import validate_with_humanized_errors
-from snutree.directory import validate_members, DirectoryError
-from snutree.entity import Member
+from snutree.entity import Member, validate_members, DirectoryError
 from snutree.semester import Semester
 from snutree.utilities import NonEmptyString
 
