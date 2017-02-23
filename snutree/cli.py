@@ -1,16 +1,17 @@
 #!/usr/bin/env python
-import subprocess, click, logging, sys, yaml, csv, importlib.util
+import subprocess, click, logging, sys, yaml, csv
+from pluginbase import PluginBase
 from pathlib import Path
 from . import SnutreeError
 from .readers import sql, dotread
 from .tree import FamilyTree
 from .utilities import logged
 
-# Default allowable member formats
-STANDARD_MODULES = {'basic', 'sigmanu', 'chapter'}
-
 # The folder this file is located in (used for importing member formats)
 SNUTREE_ROOT = Path(__file__).parent
+
+# Location of all built-in member formats
+PLUGIN_BASE = PluginBase(package='snutree.member', searchpath=[str(SNUTREE_ROOT/'member')])
 
 def main():
     '''
@@ -51,24 +52,25 @@ def get_member_format(_ctx, _parameter, value):
 
     module_file = Path(value)
 
-    # Standard
-    if value in STANDARD_MODULES:
-        module_path = SNUTREE_ROOT/'member'/module_file.with_suffix('.py')
-
-    # Custom
-    elif module_file.exists() and module_file.suffix == '.py':
-        module_path = module_file
-
-    # Give up
+    if module_file.exists() and module_file.suffix == '.py':
+        # Add custom module's directory to plugin path
+        searchpath = [str(module_file.parent)] # pluginbase does not support filenames in the searchpath
+        module_name = module_file.stem
     else:
-        msg = 'must be one of {!r} or the path to a custom Python module'
-        raise click.BadParameter(msg.format(STANDARD_MODULES))
+        # Assume it's  builtin
+        searchpath = []
+        module_name = value
 
-    # Use the module
-    module_name = module_path.stem
-    spec = importlib.util.spec_from_file_location(module_name, str(module_path))
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
+    # Setting persist=True ensures module won't be garbage collected before its
+    # call in cli(). It will stay in memory for the program's duration.
+    plugin_source = PLUGIN_BASE.make_plugin_source(searchpath=searchpath, persist=True)
+
+    try:
+        module = plugin_source.load_plugin(module_name)
+    except ImportError as e:
+        msg = 'must be one of {!r} or the path to a custom Python module'
+        val = plugin_source.list_plugins()
+        raise click.BadParameter(msg.format(val))
 
     return module
 
@@ -98,10 +100,10 @@ def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet,
         elif not quiet:
             logging.basicConfig(level=logging.WARNING, stream=log_stream, format='%(levelname)s: %(message)s')
 
-    logging.info('Retrieving big-little data from data sources')
+    logging.info('Retrieving data from sources')
     members = get_from_sources(files, stdin_fmt=input_format)
 
-    logging.info('Validating directory')
+    logging.info('Validating data')
     members = member_module.validate(members)
 
     logging.info('Loading tree configuration')
@@ -111,7 +113,7 @@ def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet,
     logging.info('Constructing family tree data structure')
     tree = FamilyTree(members, tree_cnf)
 
-    logging.info('Creating internal DOT code representation')
+    logging.info('Creating DOT code representation')
     dotgraph = tree.to_dot_graph()
 
     logging.info('Converting DOT code representation to text')
