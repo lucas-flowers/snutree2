@@ -1,11 +1,17 @@
-import logging, time, pprint
+import logging, time, pprint, re
 from voluptuous import All, Length
 from . import SnutreeError
 from .semester import Semester
 
 # TODO separate validation class?
 
+DIGITS_MATCHER = re.compile('\d+')
 NonEmptyString = All(str, Length(min=1))
+def Digits(s):
+    match = DIGITS_MATCHER.match(s)
+    if match:
+        return match.group(0)
+    raise ValueError
 
 # A required string; must be nonempty and not None
 nonempty_string = {

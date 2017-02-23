@@ -3,7 +3,7 @@ from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.humanize import validate_with_humanized_errors
 from snutree.entity import Member, validate_members, DirectoryError
 from snutree.semester import Semester
-from snutree.utilities import NonEmptyString
+from snutree.utilities import NonEmptyString, Digits
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 
@@ -11,6 +11,9 @@ from snutree.utilities import NonEmptyString
 AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
 
 def validate(members):
+    '''
+    Validate a list of Sigma Nu members.
+    '''
     return validate_members(
             members,
             [Candidate, Brother, Knight, Expelled],
@@ -18,27 +21,26 @@ def validate(members):
             )
 
 class SigmaNuMember(Member):
-
-    # TODO move out of class and into a field or function local
-    used_affiliations = set()
+    '''
+    A member of Sigma Nu. Each member has a full name, a badge (ID) number, a
+    pledge semester, and potentially the badge of the member's big brother.
+    '''
 
     @classmethod
     def from_dict(cls, dct):
-        member = cls(**validate_with_humanized_errors(dct, cls.schema))
-        for aff in member.affiliations:
-            if aff in cls.used_affiliations:
-                msg = 'found duplicate affiliation: {!r}'
-                raise DirectoryError(msg.format(aff))
-            cls.used_affiliations.add(aff)
-        return member
+        return cls(**validate_with_humanized_errors(dct, cls.schema))
 
 class Knight(SigmaNuMember):
+    '''
+    An initiated member of Sigma Nu. In addition to normal fields, such members
+    can have a list of affiliations to other Sigma Nu chapters.
+    '''
 
     allowed = {'Active', 'Alumni', 'Left School'}
 
     schema = Schema({
         Required('status') : In(allowed),
-        Required('badge') : NonEmptyString,
+        Required('badge') : Digits,
         Required('first_name') : NonEmptyString,
         'preferred_name' : NonEmptyString,
         Required('last_name') : NonEmptyString,
@@ -62,13 +64,39 @@ class Knight(SigmaNuMember):
         self.name = combine_names(first_name, preferred_name, last_name)
         self.parent = big_badge
         self.semester = pledge_semester
-        self.affiliations = set(affiliations or []) | {Affiliation.with_primary(badge)}
+        self.affiliations = set(affiliations or []) | {Affiliation.with_primary(int(badge))}
+
+    # Keep track of affiliations used
+    # TODO Move out of class and into a field or function local
+    used_affiliations = set()
+
+    @classmethod
+    def from_dict(cls, dct):
+        '''
+        After normal validation, also make sure no affiliations have been
+        duplicated anywhere.
+        '''
+
+        member = super().from_dict(dct)
+        for aff in member.affiliations:
+            if aff in cls.used_affiliations:
+                msg = 'found duplicate affiliation: {!r}'
+                raise DirectoryError(msg.format(aff))
+            cls.used_affiliations.add(aff)
+
+        return member
 
     def get_dot_label(self):
         affiliation_strings =  [str(s) for s in sorted(self.affiliations)]
         return '{}\\n{}'.format(self.name, ', '.join(affiliation_strings))
 
 class Brother(SigmaNuMember):
+    '''
+    The old Sigma Nu ritual permitted candidates to become brothers /without/
+    being initiated (i.e., without becoming Knights). These members do not have
+    badge numbers or affiliations. They are not in the directory, so only last
+    names are guaranteed to be available.
+    '''
 
     allowed = {'Brother'}
 
@@ -98,8 +126,7 @@ class Brother(SigmaNuMember):
         self.semester = pledge_semester
         self.affiliations = []
 
-        # Brothers who are not Knights do not have badge numbers; use a simple
-        # counter to generate keys.
+        # Without badges, keys need to be generated
         self.key = 'Brother {}'.format(Brother.bid)
         Brother.bid += 1
 
@@ -109,6 +136,9 @@ class Brother(SigmaNuMember):
         return template.format(*values)
 
 class Candidate(SigmaNuMember):
+    '''
+    Candidates of Sigma Nu. They do not have badge numbers.
+    '''
 
     allowed = {'Candidate'}
 
@@ -138,8 +168,7 @@ class Candidate(SigmaNuMember):
         self.semester = pledge_semester
         self.affiliations = []
 
-        # Candidates do not have badge numbers; use a simple counter to
-        # generate keys.
+        # Without badges, keys need to be generated
         self.key = 'Candidate {}'.format(Candidate.cid)
         Candidate.cid += 1
 
@@ -150,14 +179,17 @@ class Candidate(SigmaNuMember):
 
 class Expelled(Knight):
     '''
-    A member that was initiated, but was then expelled.
+    A Sigma Nu that was initiated, but later exxpelled. Such members are kept
+    on the tree and might have had other chapter affiliations, but their names
+    and affiliations will be removed. Only their former badges are rendered,
+    without the name of their chapter.
     '''
 
     allowed = {'Expelled'}
 
     schema = Schema({
         Required('status') : In(allowed),
-        Required('badge') : NonEmptyString,
+        Required('badge') : Digits,
         'first_name' : NonEmptyString,
         'preferred_name' : NonEmptyString,
         'last_name' : NonEmptyString,
@@ -188,26 +220,25 @@ class Expelled(Knight):
 
 def combine_names(first_name, preferred_name, last_name, threshold=.5):
     '''
-    Returns
-    =======
+    This function returns:
 
-    + Either: "[preferred] [last]" if the `preferred` is not too similar to
-    `last`, depending on the threshold
+        EITHER: "<preferred> <last>" if the preferred name is not too similar
+        to the last name, depending on the threshold
 
-    + Or: "[first] [last]" if `preferred` is too similar to `last`
-
-    Notes
-    =====
+        OR: "<first> <last>" if the preferred and last names are too similar
 
     This might provide a marginally incorrect name for those who
-       a. go by something other than their first name that
-       b. is similar to their last name,
+
+        a. go by something other than their first name that
+        b. is similar to their last name,
+
     but otherwise it should almost always[^note] provide something reasonable.
 
     The whole point here is to
-       a. avoid using *only* last names on the tree, while
-       b. using the "first" names brothers actually go by, and while
-       c. avoiding using a first name that is a variant of the last name.
+
+        a. avoid using *only* last names on the tree, while
+        b. using the "first" names brothers actually go by, and while
+        c. avoiding using a first name that is a variant of the last name.
 
     [^note]: I say "almost always" because, for example, someone with the
     last name "Richards" who goes by "Dick" will be listed incorrectly as "Dick
@@ -234,8 +265,8 @@ class Affiliation:
 
             + Latin letters that look like Greek letters, like A and H
 
-            + The strings '(A)' and '(B)', which are used to represent the
-            chapters HM(A) and HM(B)
+            + The strings '(A)' and '(B)' (Latin letters), which are used to
+            represent the chapters HM(A) and HM(B)
 
         2. "Chapter name": A string of words separated by whitespace. The
         allowed words are '(A)', '(B)', and the English names of any Greek
@@ -246,13 +277,13 @@ class Affiliation:
         tree is being generated.
 
     Thus, a chapter name might be "Delta Alpha" or "Eta Mu (A)". The
-    corresponding chapter designations are "ΔA" and "ΗΜ(A)".
-
+    corresponding chapter designations are "ΔA" and "ΗΜ(A)". The constructor
+    for this class will accept either of these forms.
     '''
 
-    # English words to Unicode Greek letters, in titlecaps
+    # English words (titlecaps) to Unicode Greek letters
     ENGLISH_TO_GREEK = {
-            'Alpha' :'Α',
+            'Alpha' :'Α', # This is an *Alpha*, not an A; similar for other lookalikes
             'Beta' :'Β',
             'Gamma' :'Γ',
             'Delta' :'Δ',
@@ -302,7 +333,7 @@ class Affiliation:
             '(B)' : '(B)', # Because of Eta Mu (B) Chapter
             }
 
-    # Initial matcher for affiliations (something, then spaces, then a badge)
+    # Matcher for affiliations (chapter identifer, then spaces, then a badge)
     AFFILIATION_MATCHER = re.compile('(?P<chapter_id>.*)\s+(?P<badge>\d+)')
 
     # Valid tokens for chapter designations
@@ -322,10 +353,10 @@ class Affiliation:
 
             )
 
-    # A pattern for matching a single chapter designation token
+    # A regex pattern for matching a single chapter designation token
     DESIGNATION_TOKEN = '|'.join([re.escape(s) for s in DESIGNATION_TOKENS])
 
-    # Matches a chapter designation
+    # Matches a single Greek-letter chapter designation
     DESIGNATION_MATCHER = re.compile('^({})+$'.format(DESIGNATION_TOKEN))
 
     def __init__(self, *args):
@@ -346,14 +377,11 @@ class Affiliation:
 
         if len(args) == 1 and isinstance(args[0], str):
 
-            # Take out leading and trailing whitespace
-            arg = args[0].strip()
-
-            # Split into the name half and the digit half
-            match = self.AFFILIATION_MATCHER.match(arg)
+            # Split into the name half and the digit half, ignoring whitespace
+            match = self.AFFILIATION_MATCHER.match(args[0].strip())
             if not match:
                 msg = 'expected a chapter name followed by a badge number but got {!r}'
-                raise ValueError(msg.format(arg))
+                raise ValueError(msg.format(args[0]))
 
             designation = self.str_to_designation(match.group('chapter_id'))
             badge = int(match.group('badge'))
@@ -373,31 +401,38 @@ class Affiliation:
         '''
         Create an affiliation to the primary chapter with the given badge.
         '''
-
-        # TODO make badge always an int, but replace the Member field with a
-        # string key
-        return cls(cls.get_primary_chapter(), int(badge))
+        return cls(cls.get_primary_chapter(), badge)
 
     @classmethod
     def get_primary_chapter(cls):
+        '''
+        Get the Greek-letter designation of primary chapter.
+        '''
         return cls._primary_chapter
 
     @classmethod
     def set_primary_chapter(cls, chapter_designation):
+        '''
+        Set the Greek-letter designation of the primary chapter.
+        '''
         cls._primary_chapter = cls.str_to_designation(chapter_designation)
 
     @classmethod
     def str_to_designation(cls, string):
+        '''
+        Convert the string to a Greek-letter chapter designation, and return it
+        as another string.
+        '''
 
-        # See if string is a full chapter name (i.e., English words). Ignore
-        # excessive whitespace and standardize to titlecaps before lookup.
+        # Standardize
         words = [w.title() for w in string.split()]
+
+        # See if string is a full chapter name (i.e., English words).
         greek_letters = [cls.ENGLISH_TO_GREEK[w] for w in words if w in cls.ENGLISH_TO_GREEK]
         if len(greek_letters) == len(words):
             designation = ''.join(greek_letters)
 
-        # If the string's not a chapter name, then see if it's a short chapter
-        # designation (i.e., Greek letters)
+        # See if it's a short chapter designation (i.e., Greek letters)
         elif cls.DESIGNATION_MATCHER.match(string):
 
             # Get a list of chapter designation tokens, capitalized
@@ -409,12 +444,10 @@ class Affiliation:
             designation = ''.join(greek_letters)
 
         else:
-            msg = (
-                    'expected a chapter name in one of the two forms:\n'
+            msg = ('expected a chapter name in one of the two forms:\n'
                     '    1. names of Greek letters separated by spaces (e.g., "Delta Alpha 100")\n'
                     '    2. several actual Greek letters together (e.g., "ΔA 100")\n'
-                    'but got {!r}\n'
-                    )
+                    'but got {!r}\n')
             raise ValueError(msg.format(string))
 
         return designation

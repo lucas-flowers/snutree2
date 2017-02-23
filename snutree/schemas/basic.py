@@ -5,9 +5,15 @@ from snutree.semester import Semester
 from snutree.utilities import NonEmptyString
 
 def validate(members):
+    '''
+    Validate a list of basic members.
+    '''
     return validate_members(members, [KeylessMember])
 
 class KeylessMember(Member):
+    '''
+    A Member keyed by their own name.
+    '''
 
     allowed = {'Initiate'}
 
