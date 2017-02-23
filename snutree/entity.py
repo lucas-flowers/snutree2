@@ -1,5 +1,6 @@
 from pprint import pformat
 from abc import ABCMeta, abstractmethod
+from . import SnutreeError
 from .utilities import logged
 
 @logged
@@ -144,9 +145,9 @@ class Member(TreeEntity, metaclass=ABCMeta):
     def dot_attributes(self):
         return {'label' : self.get_dot_label()}
 
-class DirectoryError(Exception):
+class DirectoryError(SnutreeError):
     pass
 
-class TreeEntityAttributeError(AttributeError):
+class TreeEntityAttributeError(SnutreeError):
     pass
 

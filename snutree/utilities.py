@@ -1,5 +1,6 @@
 import logging, time, pprint
 from voluptuous import All, Length
+from . import SnutreeError
 from .semester import Semester
 
 # TODO separate validation class?
@@ -49,7 +50,7 @@ def validate(validator, obj):
 
     return obj
 
-class SettingsError(Exception):
+class SettingsError(SnutreeError):
     pass
 
 

@@ -6,7 +6,7 @@ from collections import deque
 from networkx.algorithms.components import weakly_connected_components
 from networkx.algorithms.cycles import find_cycle
 from networkx.exception import NetworkXNoCycle
-from . import dot
+from . import dot, SnutreeError
 from .entity import Member, Custom, UnidentifiedMember
 from .utilities import logged, optional_boolean, nonempty_string, semester_like, validate
 
@@ -567,7 +567,7 @@ TreeErrorCode = Enum('TreeErrorCode', (
         'FAMILY_COLOR_CONFLICT',
         ))
 
-class TreeError(Exception):
+class TreeError(SnutreeError):
 
     def __init__(self, errno, msg=None):
         self.errno = errno

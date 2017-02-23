@@ -2,10 +2,10 @@
 import subprocess, click, logging, sys, yaml, csv, importlib.util
 from pathlib import Path
 from cerberus import Validator
+from . import SnutreeError
 from .readers import sql, dotread
-from .tree import FamilyTree, TreeError
-from .entity import TreeEntityAttributeError, DirectoryError
-from .utilities import logged, SettingsError, nonempty_string, validate
+from .tree import FamilyTree
+from .utilities import logged, nonempty_string, validate
 
 def main():
 
@@ -13,7 +13,7 @@ def main():
         cli()
     # except:
     #     import pdb; pdb.post_mortem()
-    except (TreeError, TreeEntityAttributeError, DirectoryError, SettingsError) as e:
+    except SnutreeError as e:
         logging.error(e)
         sys.exit(1)
     except Exception as e:
@@ -104,9 +104,8 @@ def write_output(dotcode, path=None):
 
     write = writers.get(filetype)
     if not write:
-        # TODO subclass NotImplementedError and catch it
-        msg = 'Output filetype "{}" not supported'
-        raise NotImplementedError(msg.format(filetype))
+        msg = 'output filetype "{}" not supported'
+        raise SnutreeError(msg.format(filetype))
 
     write(dotcode, output)
 
@@ -134,9 +133,8 @@ def get_from_sources(files, stdin_fmt=None):
 
         table_getter = table_getters.get(filetype)
         if not table_getter:
-            # TODO subclass NotImplementedError and catch it
             msg = 'input filetype {!r} not supported'
-            raise NotImplementedError(msg.format(filetype))
+            raise SnutreeError(msg.format(filetype))
         members += table_getter(f)
 
     return members
