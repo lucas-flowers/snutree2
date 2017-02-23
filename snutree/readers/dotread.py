@@ -1,4 +1,4 @@
-import re, pydotplus, logging
+import re, pydotplus
 import networkx.drawing.nx_pydot as nx_pydot
 
 def read_pydot(f):
@@ -13,7 +13,6 @@ def pydot_to_nx(pydot):
     graph = nx_pydot.from_pydot(pydot)
     add_member_dicts(graph)
     add_pledge_classes(pydot, graph)
-    remove_reciprocal_relationships(graph)
     return graph
 
 def add_member_dicts(graph):
@@ -72,32 +71,6 @@ def add_pledge_classes(pydot, graph):
     for semester, members in pledge_classes.items():
         for member in members:
             graph.node[member]['pledge_semester'] = semester
-
-def remove_reciprocal_relationships(graph):
-    '''
-    Removes each big/little relationship that has a corresponding big/little
-    relationship between the same members, but in the opposite direction. Print
-    the relationships that were removed, so they can potentially be added to
-    custom edges in settings.
-
-    This is done because there should be no cycles in the tree, except for
-    edges that required special handling.
-    '''
-
-    pairs = set()
-    for parent, child in graph.edges_iter():
-        if (child, parent) in graph.edges():
-            pkey = graph.node[parent]['name']
-            ckey = graph.node[child]['name']
-            pairs.add(frozenset((pkey, ckey)))
-            graph.node[parent]['big_name'] = None
-            graph.node[child]['big_name'] = None
-
-    if pairs:
-        logging.warn('The following paths were removed, add to custom edges:')
-        for pair in pairs:
-            key1, key2 = tuple(pair)
-            logging.warn([key1, key2, key1])
 
 def get_rows(graph):
 

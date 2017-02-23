@@ -61,14 +61,6 @@ class TestTree(TestCase):
                 partial(FamilyTree, self.members, settings=settings)
                 )
 
-    def test_cycle(self):
-
-        self.member1.parent = 'Bob Dole'
-        self.assertRaisesTreeErrorWithCode(
-                TreeErrorCode.CYCLE,
-                partial(FamilyTree, self.members)
-                )
-
     def test_family_color_conflict(self):
 
         settings = {'family_colors' : {

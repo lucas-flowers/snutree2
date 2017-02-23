@@ -4,8 +4,6 @@ from enum import Enum
 from cerberus import Validator
 from collections import deque
 from networkx.algorithms.components import weakly_connected_components
-from networkx.algorithms.cycles import find_cycle
-from networkx.exception import NetworkXNoCycle
 from . import dot, SnutreeError
 from .entity import Member, Custom, UnidentifiedMember
 from .utilities import logged, optional_boolean, nonempty_string, semester_like, validate
@@ -235,15 +233,6 @@ class FamilyTree:
         for key, entity in self.nodes_iter('entity'):
             if isinstance(entity, Member) and entity.parent:
                 self.add_big_relationship(entity)
-
-        # There must be no cycles in the tree of members
-        try:
-            cycle_edges = find_cycle(self.member_subgraph(), orientation='ignore')
-            code = TreeErrorCode.CYCLE
-            msg = 'found unexpected cycle in big-little relationships: {!r}'
-            raise TreeError(code, msg.format(cycle_edges))
-        except NetworkXNoCycle:
-            pass
 
     @option('custom_edges')
     @logged
@@ -564,7 +553,6 @@ TreeErrorCode = Enum('TreeErrorCode', (
         'PARENT_UNKNOWN',
         'PARENT_NOT_PRIOR',
         'UNKNOWN_EDGE_COMPONENT',
-        'CYCLE',
         'FAMILY_COLOR_CONFLICT',
         ))
 
