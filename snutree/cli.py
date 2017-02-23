@@ -101,7 +101,7 @@ def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet,
             logging.basicConfig(level=logging.WARNING, stream=log_stream, format='%(levelname)s: %(message)s')
 
     logging.info('Retrieving data from sources')
-    members = get_from_sources(files, stdin_fmt=input_format)
+    members = read_sources(files, stdin_fmt=input_format)
 
     logging.info('Validating data')
     members = member_module.validate(members)
@@ -123,11 +123,19 @@ def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet,
     write_output(dotcode, output_path)
 
 @logged
-def get_from_sources(files, stdin_fmt=None):
+def read_sources(files, stdin_fmt=None):
+    '''
+    Retrieves a list of members from the provided open files. Using the file
+    extensions to determine what format to interpret the inputs as. Use the
+    provided stdin_fmt if files are coming from stdin.
+    '''
 
     readers = {
+            # SQL query
             'yaml' : lambda f : sql.get_members(yaml.safe_load(f)),
+            # CSV table
             'csv' : lambda f : list(csv.DictReader(f)),
+            # DOT source code
             'dot' : dotread.get_members
             }
 
@@ -137,20 +145,27 @@ def get_from_sources(files, stdin_fmt=None):
         # Filetype is the path suffix or stdin's format if input is stdin
         filetype = Path(f.name).suffix[1:] if f.name != '<stdin>' else stdin_fmt
 
-        table_getter = readers.get(filetype)
-        if not table_getter:
-            msg = 'input filetype {!r} not supported'
-            raise SnutreeError(msg.format(filetype))
-        members += table_getter(f)
+        read = readers.get(filetype)
+        if not read:
+            msg = 'data source filetype {!r} not supported'
+            raise click.BadParameter(msg.format(filetype))
+
+        members += read(f)
 
     return members
 
 @logged
 def load_configuration(paths):
+    '''
+    Load configuration YAML files from the given paths. Later paths override
+    the settings in earlier paths.
+    '''
+
     config = {}
     for path in paths:
         with open(path, 'r') as f:
             config.update(yaml.safe_load(f))
+
     return config
 
 @logged
