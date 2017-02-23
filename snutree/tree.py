@@ -165,10 +165,13 @@ class FamilyTree:
                     ((self.graph.node[key],) if node_dict else ())
 
     def member_subgraph(self):
-        return self.graph.subgraph(
-                [key for key, member in self.nodes_iter('entity')
-                    if isinstance(member, Member)]
-                )
+        member_keys = (k for k, m in self.nodes_iter('entity') if isinstance(m, Member))
+        return self.graph.subgraph(member_keys)
+
+    def orphan_keys(self):
+        in_degrees = self.graph.in_degree().items()
+        return (k for k, in_degree in in_degrees if in_degree == 0
+                and isinstance(self.graph.node[k]['entity'], Member))
 
     def add_entity(self, entity):
 
@@ -305,21 +308,10 @@ class FamilyTree:
         done by add_XXX_attributes.
         '''
 
-        orphan_keys = [key
-                for key, in_degree
-                in self.graph.in_degree().items()
-                if in_degree == 0
-                and isinstance(self.graph.node[key]['entity'], Member)
-                ]
-
-        for orphan_key in orphan_keys:
+        for orphan_key in self.orphan_keys():
 
             orphan = self.graph.node[orphan_key]['entity']
-
-            parent = UnidentifiedMember(orphan,
-                    self.settings['node_defaults']['unknown'])
-
-            # Set orphan parent
+            parent = UnidentifiedMember(orphan, self.settings['node_defaults']['unknown'])
             orphan.parent = parent.key
 
             self.add_entity(parent)
