@@ -376,11 +376,8 @@ class FamilyTree:
 
         tree = self.create_tree_subgraph('members')
 
-        dotgraph = dot.Graph(
-                'family_tree',
-                'digraph',
-                attributes=self.settings['graph_defaults']['all'],
-                )
+        graph_defaults = self.settings['graph_defaults']['all']
+        dotgraph = dot.Graph('family_tree', 'digraph', attributes=graph_defaults)
 
         node_defaults = dot.Defaults('node', self.settings['node_defaults']['all'])
         edge_defaults = dot.Defaults('edge', self.settings['edge_defaults']['all'])
@@ -390,8 +387,7 @@ class FamilyTree:
             dates_left = self.create_date_subgraph('L', min_semester, max_semester)
             dates_right = self.create_date_subgraph('R', min_semester, max_semester)
             ranks = self.create_ranks()
-            dotgraph.children = \
-                    [node_defaults, edge_defaults, dates_left, tree, dates_right] + ranks
+            dotgraph.children = [node_defaults, edge_defaults, dates_left, tree, dates_right] + ranks
 
         else:
             dotgraph.children = [node_defaults, edge_defaults, tree]
@@ -411,10 +407,7 @@ class FamilyTree:
 
     def create_date_subgraph(self, key, min_semester, max_semester):
 
-        subgraph = dot.Graph(
-                'dates{}'.format(key),
-                'subgraph',
-                )
+        subgraph = dot.Graph('dates{}'.format(key), 'subgraph')
 
         node_defaults = dot.Defaults('node', self.settings['node_defaults']['semester'])
         edge_defaults = dot.Defaults('edge', self.settings['edge_defaults']['semester'])
@@ -423,20 +416,14 @@ class FamilyTree:
         edges = []
         sem = min_semester
         while sem <= max_semester:
-            nodes.append(dot.Node(
-                '{}{}'.format(sem, key),
-                {'label' : sem},
-                ))
-            edges.append(dot.Edge(
-                '{}{}'.format(sem, key),
-                '{}{}'.format(sem+1, key),
-                ))
+            this_semester_key = '{}{}'.format(sem, key)
+            next_semester_key = '{}{}'.format(sem+1, key)
+            nodes.append(dot.Node(this_semester_key, {'label' : sem}))
+            edges.append(dot.Edge(this_semester_key, next_semester_key))
             sem += 1
 
-        nodes.append(dot.Node(
-            '{}{}'.format(sem, key),
-            {'label' : sem},
-            ))
+        this_semester_key = '{}{}'.format(sem, key)
+        nodes.append(dot.Node(this_semester_key, {'label' : sem}))
 
         subgraph.children = [node_defaults, edge_defaults] + nodes + edges
 
@@ -444,10 +431,7 @@ class FamilyTree:
 
     def create_tree_subgraph(self, key):
 
-        dotgraph = dot.Graph(
-                key,
-                'subgraph',
-                )
+        dotgraph = dot.Graph(key, 'subgraph')
 
         node_defaults = dot.Defaults('node', self.settings['node_defaults']['member'])
 
@@ -471,11 +455,9 @@ class FamilyTree:
             if semester in ranks:
                 ranks[semester].keys.append(key)
             else:
-                ranks[semester] = dot.Rank([
-                        '{}L'.format(semester),
-                        '{}R'.format(semester),
-                        key,
-                        ])
+                left_semester = '{}L'.format(semester)
+                right_semester = '{}R'.format(semester)
+                ranks[semester] = dot.Rank([left_semester, right_semester, key])
 
         return list(ranks.values())
 
