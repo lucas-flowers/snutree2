@@ -3,10 +3,16 @@ from voluptuous.humanize import validate_with_humanized_errors
 from snutree.entity import Member, validate_members
 from snutree.utilities import NonEmptyString
 
-def validate(members):
-    return validate_members(members, [Chapter])
+def validate(chapters):
+    '''
+    Validate a list of chapters.
+    '''
+    return validate_members(chapters, [Chapter])
 
 class Chapter(Member):
+    '''
+    A chapter, key by its name.
+    '''
 
     allowed = {'Chapter'}
 
