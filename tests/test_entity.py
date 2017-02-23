@@ -1,5 +1,5 @@
 from unittest import TestCase
-import snutree.schemas.sigmanu as sn
+import snutree.member.sigmanu as sn
 
 class TestEntity(TestCase):
 

@@ -1,6 +1,6 @@
 import string
 from unittest import TestCase
-from snutree.schemas.sigmanu import Affiliation
+from snutree.member.sigmanu import Affiliation
 
 class TestAffiliation(TestCase):
 

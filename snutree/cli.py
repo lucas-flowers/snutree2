@@ -6,32 +6,61 @@ from .readers import sql, dotread
 from .tree import FamilyTree
 from .utilities import logged
 
+# Default allowable member formats
+STANDARD_MODULES = {'basic', 'sigmanu', 'chapter'}
+
+# The folder this file is located in (used for importing member formats)
+SNUTREE_ROOT = Path(__file__).parent
+
 def main():
+    '''
+    Run the command-line version of the program.
+    '''
 
     try:
         cli()
+
+    ## Debugging
     # except:
     #     import pdb; pdb.post_mortem()
+
+    # Expected errors
     except SnutreeError as e:
         logging.error(e)
         sys.exit(1)
+
+    # Unexpected errors
     except Exception as e:
         logging.error('Unexpected error.', exc_info=True)
         sys.exit(1)
 
-SNUTREE_ROOT = Path(__file__).parent
-STANDARD_MODULES = {'basic', 'sigmanu', 'sigmanu_chapter'}
+def get_member_format(_ctx, _parameter, value):
+    '''
+    The --member-format option selects the member format used in the input
+    table, based on the value provided to the option. This function is a click
+    callback that validates the provided value and returns the appropriate
+    Python module to import (the other parameters are ignored).
 
-def validate_directory_module(ctx, parameter, value):
+    Example: "--member-format basic" will import and return member.basic
+    Example: "--member-format PATH/plugin.py" will import and return plugin.py
 
-    # Get the path of the custom module
+    Any module imported here is assumed to implement a function called
+    validate(members) that takes a list of member dictionaries, validates it,
+    and returns a list of member objects.
+    '''
+
     module_file = Path(value)
+
+    # Standard
     if value in STANDARD_MODULES:
-        module_path = SNUTREE_ROOT/'schemas'/module_file.with_suffix('.py')
+        module_path = SNUTREE_ROOT/'member'/module_file.with_suffix('.py')
+
+    # Custom
     elif module_file.exists() and module_file.suffix == '.py':
         module_path = module_file
+
+    # Give up
     else:
-        # There is no custom module; giveup and raise an error
         msg = 'must be one of {!r} or the path to a custom Python module'
         raise click.BadParameter(msg.format(STANDARD_MODULES))
 
@@ -48,14 +77,14 @@ def validate_directory_module(ctx, parameter, value):
 @click.option('output_path', '--output', '-o', type=click.Path(), default=None)
 @click.option('log_path', '--log', '-l', type=click.Path(exists=False), default=None)
 @click.option('config_paths', '--config', '-c', type=click.Path(exists=True), multiple=True)
-@click.option('schema_module', '--schema', '-m', callback=validate_directory_module, default='basic')
+@click.option('member_module', '--member-format', '-m', callback=get_member_format, default='basic')
 @click.option('input_format', '--format', '-f', type=str, default=None)
 @click.option('--seed', '-S', default=0)
 @click.option('--debug', '-d', is_flag=True, default=False)
 @click.option('--verbose', '-v', is_flag=True, default=False)
 @click.option('--quiet', '-q', is_flag=True, default=False)
 @logged
-def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet, schema_module, input_format):
+def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet, member_module, input_format):
     '''
     Create a big-little family tree.
     '''
@@ -73,7 +102,7 @@ def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet,
     members = get_from_sources(files, stdin_fmt=input_format)
 
     logging.info('Validating directory')
-    members = schema_module.validate(members)
+    members = member_module.validate(members)
 
     logging.info('Loading tree configuration')
     tree_cnf = load_configuration(config_paths)

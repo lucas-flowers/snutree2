@@ -36,7 +36,7 @@ class TestCliCommon(TestCase):
     def example_template(self,
             example_name,
             config,
-            schema,
+            membertype,
             seed,
             inputs,
             ):
@@ -50,7 +50,7 @@ class TestCliCommon(TestCase):
 
         result = self.invoke([
             '--config', str(example_config),
-            '--schema', schema,
+            '--member-format', membertype,
             '--seed', seed,
             '--output', str(output),
             '--debug',
@@ -104,17 +104,17 @@ class TestCli(TestCliCommon):
         self.example_template(
                 example_name='sigmanu-example',
                 config='config.yaml',
-                schema='sigmanu',
+                membertype='sigmanu',
                 seed=75,
                 inputs=['directory-brothers_not_knights.csv', 'directory.csv'],
                 )
 
-    def test_sigmanu_chapters(self):
+    def test_chapters(self):
 
         self.example_template(
-                example_name='sigmanu-chapters',
+                example_name='chapter',
                 config='config.yaml',
-                schema='sigmanu_chapter',
+                membertype='chapter',
                 seed=76,
                 inputs=['directory.csv'],
                 )
