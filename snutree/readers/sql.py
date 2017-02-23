@@ -4,6 +4,7 @@ from sshtunnel import SSHTunnelForwarder
 from cerberus import Validator
 from ..utilities import validate, nonempty_string
 
+# Validates a configuration YAML file with SQL and ssh options
 MYSQL_CNF_VALIDATOR = Validator({
 
     'query' : nonempty_string,
@@ -34,35 +35,41 @@ MYSQL_CNF_VALIDATOR = Validator({
 
     })
 
-def get_table(query, mysql_cnf, ssh_cnf=None):
-
-    if not ssh_cnf:
-        return get_table_no_tunnel(query, mysql_cnf)
-
-    options = {
-            'ssh_address_or_host' : (ssh_cnf['host'], ssh_cnf['port']),
-            'ssh_username' : ssh_cnf['user'],
-            'ssh_pkey' : ssh_cnf['public_key'],
-            'remote_bind_address' : (mysql_cnf['host'], mysql_cnf['port'])
-            }
-
-    with SSHTunnelForwarder(**options) as tunnel:
-        tunneled_mysql_cnf = mysql_cnf.copy()
-        tunneled_mysql_cnf['port'] = tunnel.local_bind_port
-        return get_table_no_tunnel(query, tunneled_mysql_cnf)
-
-def get_table_from_cnf(cnf):
+def get_members(cnf):
     '''
-    Get the table of members from the SQL database.
+    Validate the configuration file and use it to get and return a table of
+    members from the configuration's SQL database.
     '''
 
     cnf = validate(MYSQL_CNF_VALIDATOR, cnf)
-    return get_table(cnf['query'], cnf['mysql'], ssh_cnf=cnf['ssh'])
+    get = get_members_ssh if cnf['ssh'] else get_members_local
+    return get(**cnf)
 
-def get_table_no_tunnel(query, mysql_cnf):
+def get_members_local(query, mysql_cnf):
+    '''
+    Use the query and MySQL configuration to get a table of members.
+    '''
 
     with closing(MySQLdb.Connection(**mysql_cnf)) as cxn:
         with cxn.cursor(MySQLdb.cursors.DictCursor) as cursor:
             cursor.execute(query)
             return cursor.fetchall()
+
+def get_members_ssh(query, mysql, ssh):
+    '''
+    Use the query, MySQL, and SSH configurations to get a table of members from
+    a database through an SSH tunnel.
+    '''
+
+    options = {
+            'ssh_address_or_host' : (ssh['host'], ssh['port']),
+            'ssh_username' : ssh['user'],
+            'ssh_pkey' : ssh['public_key'],
+            'remote_bind_address' : (mysql['host'], mysql['port'])
+            }
+
+    with SSHTunnelForwarder(**options) as tunnel:
+        tunneled_mysql = mysql.copy()
+        tunneled_mysql['port'] = tunnel.local_bind_port
+        return get_members_local(query, tunneled_mysql)
 

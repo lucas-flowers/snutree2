@@ -95,9 +95,9 @@ def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet,
 def get_from_sources(files, stdin_fmt=None):
 
     readers = {
-            'yaml' : lambda f : sql.get_table_from_cnf(yaml.safe_load(f)),
+            'yaml' : lambda f : sql.get_members(yaml.safe_load(f)),
             'csv' : lambda f : list(csv.DictReader(f)),
-            'dot' : lambda f : dotread.get_members(f)
+            'dot' : dotread.get_members
             }
 
     members = []
