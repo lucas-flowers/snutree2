@@ -1,5 +1,5 @@
 import difflib, re
-from voluptuous import Schema, Required, In, Coerce
+from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.humanize import validate_with_humanized_errors
 from snutree.entity import Member, validate_members, DirectoryError
 from snutree.semester import Semester
@@ -82,7 +82,7 @@ class Brother(SigmaNuMember):
         Required('last_name') : NonEmptyString,
         'big_badge' : NonEmptyString,
         'pledge_semester' : Coerce(Semester),
-        'affiliations' : AffiliationsList,
+        'affiliations' : IsFalse,
         })
 
     bid = 0
@@ -125,7 +125,7 @@ class Candidate(SigmaNuMember):
         Required('last_name') : NonEmptyString,
         'big_badge' : NonEmptyString,
         'pledge_semester' : Coerce(Semester),
-        'affiliations' : AffiliationsList,
+        'affiliations' : IsFalse,
         })
 
     cid = 0
