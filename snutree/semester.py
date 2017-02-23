@@ -25,13 +25,10 @@ class Semester(int):
         elif len(arg) == 2 and isinstance(arg[0], str) and isinstance(arg[1], int):
 
             season, year = arg
-
-            if season == 'Spring':
-                season = 0
-            elif season == 'Fall':
-                season = 1
-            else:
-                raise ValueError('semester seasons must match "Spring" or "Fall"')
+            season = {'Spring' : 0, 'Fall' : 1}.get(season)
+            if not season:
+                msg = 'semester seasons must match "Spring" or "Fall"'
+                raise ValueError(msg)
 
             value = 2 * year + season
 
