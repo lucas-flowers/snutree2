@@ -34,14 +34,18 @@ optional_semester_like = {
         'coerce' : lambda x : Semester(x) if x != None else None,
         }
 
-def validate(validator, obj):
+def validate(validator, dct):
+    '''
+    Validate the dict with the cerberus validator provided. Return the
+    validated dict on success and provided error information on failure.
+    '''
 
-    obj = validator.validated(obj)
-    if not obj:
+    dct = validator.validated(dct)
+    if not dct:
         errors = validator.errors
-        msg = 'Error{} found in options file:\n{}'
+        msg = 'Error{} found in configuration:\n{}'
         vals = '' if len(errors) == 1 else 's', pprint.pformat(errors)
         raise SnutreeError(msg.format(*vals))
 
-    return obj
+    return dct
 
