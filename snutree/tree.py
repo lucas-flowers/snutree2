@@ -53,20 +53,22 @@ dot_defaults = lambda *allowed : {
 class TreeEntity(metaclass=ABCMeta):
     '''
 
-    Analogous to a single row in the directory, except that the fields have
-    been combined appropriately (i.e., first/preferred/last names combined into
-    one field, or semester strings converted to Semester objects).
+    A node on the Family Tree, whether it be the node of an actual member, a
+    rank name, or just decoration.
 
     Entities implement these functions:
-
-        + dot_attributes(self): Returns the node attributes to be used in DOT
 
     Entities should also have these fields:
 
         + key: The key to be used in DOT
 
-        + _semester: A private field storing a Semester object, used to
-        determine the entity's rank in DOT
+        + _semester: A private field storing a rank ID, which is assumed to be
+        some kind of integer-compatible object (e.g., actual integers
+        representing years, a Semester object, or other ordered types that
+        integers can be added to). This field might be allowed to remain
+        unset, though it will raise an error if used before it is set.
+
+        + dot_attributes: The node attributes to be used in DOT
 
     '''
 
@@ -82,6 +84,7 @@ class TreeEntity(metaclass=ABCMeta):
     def semester(self, value):
         self._semester = value
 
+    @property
     def dot_attributes(self):
         return {}
 
@@ -92,6 +95,7 @@ class Custom(TreeEntity):
         self.semester = semester
         self.attributes = attributes or {}
 
+    @property
     def dot_attributes(self):
         return self.attributes
 
@@ -136,6 +140,7 @@ class Member(TreeEntity, metaclass=ABCMeta):
     def get_dot_label(self):
         pass
 
+    @property
     def dot_attributes(self):
         return {'label' : self.get_dot_label()}
 
@@ -291,7 +296,7 @@ class FamilyTree:
             code = TreeErrorCode.DUPLICATE_ENTITY
             msg = 'duplicate entity key: {!r}'
             raise TreeError(code, msg.format(key))
-        self.graph.add_node(key, entity=entity, dot_attributes=entity.dot_attributes())
+        self.graph.add_node(key, entity=entity, dot_attributes=entity.dot_attributes)
 
     def add_big_relationship(self, member, dot_attributes=None):
 
