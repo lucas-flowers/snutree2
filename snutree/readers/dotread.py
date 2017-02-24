@@ -6,12 +6,11 @@ Utilities get members from a DOT file and turn it into a member list. Assumes
 the DOT file is place nice and is friendly. Mainly intended for testing.
 '''
 
-
-def get_members(f):
+def get_table(f):
     '''
     Read a DOT file into a pydotplus graph, convert that graph into an
     intermediate networkx graph (they're easier to deal with), and return a
-    list of member entries from the networkx graph.
+    list of member dictionaries from the networkx graph.
     '''
 
     pydot = pydotplus.parser.parse_dot_data(f.read())

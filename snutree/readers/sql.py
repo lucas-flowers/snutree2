@@ -1,4 +1,4 @@
-import MySQLdb, MySQLdb.cursors
+import MySQLdb, MySQLdb.cursors, yaml
 from contextlib import closing
 from sshtunnel import SSHTunnelForwarder
 from cerberus import Validator
@@ -34,6 +34,13 @@ MYSQL_CNF_VALIDATOR = Validator({
         }
 
     })
+
+def get_table(stream):
+    '''
+    Read a YAML table with query, SQL and, optionally, ssh information. Use the
+    information to get a list of member dictionaries.
+    '''
+    return get_members(yaml.safe_load(stream))
 
 def get_members(cnf):
     '''

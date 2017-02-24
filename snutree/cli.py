@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-import subprocess, click, logging, sys, yaml, csv
+import subprocess, click, logging, sys, yaml
 from pluginbase import PluginBase
 from pathlib import Path
 from . import SnutreeError
-from .readers import sql, dotread
+from .readers import sql, dotread, csv
 from .tree import FamilyTree
 from .utilities import logged
 
@@ -132,11 +132,11 @@ def read_sources(files, stdin_fmt=None):
 
     readers = {
             # SQL query
-            'yaml' : lambda f : sql.get_members(yaml.safe_load(f)),
+            'yaml' : sql.get_table,
             # CSV table
-            'csv' : lambda f : list(csv.DictReader(f)),
+            'csv' : csv.get_table,
             # DOT source code
-            'dot' : dotread.get_members
+            'dot' : dotread.get_table,
             }
 
     members = []
