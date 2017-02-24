@@ -1,5 +1,5 @@
 import pprint
-from . import SettingsError
+from .. import SnutreeError
 from ..semester import Semester
 
 # A required string; must be nonempty and not None
@@ -41,7 +41,7 @@ def validate(validator, obj):
         errors = validator.errors
         msg = 'Error{} found in options file:\n{}'
         vals = '' if len(errors) == 1 else 's', pprint.pformat(errors)
-        raise SettingsError(msg.format(*vals))
+        raise SnutreeError(msg.format(*vals))
 
     return obj
 

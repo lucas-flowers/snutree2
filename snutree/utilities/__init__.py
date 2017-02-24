@@ -1,10 +1,10 @@
 import logging, time, difflib
-from .. import SnutreeError
-
-class SettingsError(SnutreeError):
-    pass
 
 def logged(function):
+    '''
+    Sends timing information to the debug logger on functions this function
+    decorates.
+    '''
 
     logger = logging.getLogger(function.__module__)
 
