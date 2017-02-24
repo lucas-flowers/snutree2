@@ -2,7 +2,7 @@ import MySQLdb, MySQLdb.cursors, yaml
 from contextlib import closing
 from sshtunnel import SSHTunnelForwarder
 from cerberus import Validator
-from ..utilities import validate, nonempty_string
+from ..utilities.cerberus import validate, nonempty_string
 
 # Validates a configuration YAML file with SQL and ssh options
 MYSQL_CNF_VALIDATOR = Validator({

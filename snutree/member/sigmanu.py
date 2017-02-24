@@ -4,7 +4,7 @@ from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.humanize import validate_with_humanized_errors
 from snutree.entity import Member, validate_members, DirectoryError
 from snutree.semester import Semester
-from snutree.utilities import NonEmptyString, Digits
+from snutree.utilities.voluptuous import NonEmptyString, Digits
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 

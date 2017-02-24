@@ -5,7 +5,9 @@ from cerberus import Validator
 from networkx.algorithms.components import weakly_connected_components
 from . import dot, SnutreeError
 from .entity import Member, Custom, UnidentifiedMember
-from .utilities import graphviz_colors, logged, optional_boolean, nonempty_string, semester_like, validate
+from .utilities import logged
+from .utilities.cerberus import optional_boolean, nonempty_string, semester_like, validate
+from .utilities.colors import graphviz_colors
 
 flags = [
         'semesters',
