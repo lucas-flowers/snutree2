@@ -1,10 +1,9 @@
-import difflib, re
-from pprint import pformat
+import difflib, re, pprint
 from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.humanize import validate_with_humanized_errors
+from snutree.utilities.voluptuous import NonEmptyString, Digits
 from snutree.entity import Member, DirectoryError
 from snutree.semester import Semester
-from snutree.utilities.voluptuous import NonEmptyString, Digits
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 
@@ -23,7 +22,7 @@ def dicts_to_members(dicts):
 
         if status not in MemberTypes:
             msg = 'Invalid member status in:\n{}\nStatus must be one of:\n{}'
-            vals = pformat(dct), list(MemberTypes.keys())
+            vals = pprint.pformat(dct), list(MemberTypes.keys())
             raise DirectoryError(msg.format(*vals))
 
         if status == 'Reaffiliate':

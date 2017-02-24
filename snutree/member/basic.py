@@ -1,8 +1,8 @@
 from voluptuous import Schema, Required, Coerce
 from voluptuous.humanize import validate_with_humanized_errors
+from snutree.utilities.voluptuous import NonEmptyString
 from snutree.entity import Member
 from snutree.semester import Semester
-from snutree.utilities.voluptuous import NonEmptyString
 
 def dicts_to_members(dicts):
     '''

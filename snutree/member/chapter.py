@@ -1,7 +1,7 @@
 from voluptuous import Schema, Coerce, Required
 from voluptuous.humanize import validate_with_humanized_errors
-from snutree.entity import Member
 from snutree.utilities.voluptuous import NonEmptyString
+from snutree.entity import Member
 
 def dicts_to_members(dicts):
     '''
