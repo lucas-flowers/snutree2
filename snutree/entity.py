@@ -1,19 +1,5 @@
 from abc import ABCMeta, abstractmethod
 from . import SnutreeError
-from .utilities import logged
-
-@logged
-def validate_members(member_list, member_type):
-
-    members = []
-    for member in member_list:
-
-        # TODO error checking
-        member = member_type.from_dict(member)
-        if member:
-            members.append(member)
-
-    return members
 
 class TreeEntity(metaclass=ABCMeta):
     '''

@@ -1,13 +1,14 @@
 from voluptuous import Schema, Coerce, Required
 from voluptuous.humanize import validate_with_humanized_errors
-from snutree.entity import Member, validate_members
+from snutree.entity import Member
 from snutree.utilities.voluptuous import NonEmptyString
 
-def validate(chapters):
+def validate(rows):
     '''
-    Validate a list of chapters.
+    Validate a table of chapters dictionaries.
     '''
-    return validate_members(chapters, Chapter)
+    for row in rows:
+        yield Chapter.from_dict(row)
 
 class Chapter(Member):
     '''

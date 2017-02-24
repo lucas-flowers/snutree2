@@ -2,7 +2,7 @@ import difflib, re
 from pprint import pformat
 from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.humanize import validate_with_humanized_errors
-from snutree.entity import Member, validate_members, DirectoryError
+from snutree.entity import Member, DirectoryError
 from snutree.semester import Semester
 from snutree.utilities.voluptuous import NonEmptyString, Digits
 
@@ -11,11 +11,26 @@ from snutree.utilities.voluptuous import NonEmptyString, Digits
 # Voluptuous schemas
 AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
 
-def validate(members):
+def validate(rows):
     '''
-    Validate a list of Sigma Nu members.
+    Validate a table of Sigma Nu member dictionaries.
     '''
-    return validate_members(members, SigmaNuMember)
+
+    used_affiliations = set()
+    for row in rows:
+
+        if row.get('status') == 'Reaffiliate':
+            continue
+
+        member = SigmaNuMember.from_dict(row)
+
+        for affiliation in member.affiliations:
+            if affiliation in used_affiliations:
+                msg = 'found duplicate affiliation: {!r}'
+                raise DirectoryError(msg.format(affiliation))
+            used_affiliations.add(affiliation)
+
+        yield member
 
 class SigmaNuMember(Member):
     '''
@@ -35,12 +50,6 @@ class SigmaNuMember(Member):
 
         member_type = member_types[status]
         return member_type(**validate_with_humanized_errors(dct, member_type.schema))
-
-class Reaffiliate:
-    allowed = {'Reaffiliate'}
-    schema = lambda _ : dict()
-    def __new__(self, **ignore):
-        return None
 
 class Knight(SigmaNuMember):
     '''
@@ -489,7 +498,7 @@ class Affiliation:
         return hash((self.designation, self.badge))
 
 member_types = {}
-for member_type in [Candidate, Brother, Knight, Expelled, Reaffiliate]:
+for member_type in [Candidate, Brother, Knight, Expelled]:
     for status in member_type.allowed:
         member_types[status] = member_type
 

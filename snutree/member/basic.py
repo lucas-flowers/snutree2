@@ -1,14 +1,15 @@
 from voluptuous import Schema, Required, Coerce
 from voluptuous.humanize import validate_with_humanized_errors
-from snutree.entity import Member, validate_members
+from snutree.entity import Member
 from snutree.semester import Semester
 from snutree.utilities.voluptuous import NonEmptyString
 
-def validate(members):
+def validate(rows):
     '''
-    Validate a list of basic members.
+    Validate a table of basic member dictionaries.
     '''
-    return validate_members(members, KeylessMember)
+    for row in rows:
+        yield KeylessMember.from_dict(row)
 
 class KeylessMember(Member):
     '''
