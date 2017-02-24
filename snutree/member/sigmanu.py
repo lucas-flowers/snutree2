@@ -2,7 +2,7 @@ import difflib, re, pprint
 from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.humanize import validate_with_humanized_errors
 from snutree.utilities.voluptuous import NonEmptyString, Digits
-from snutree.entity import Member, DirectoryError
+from snutree.tree import Member, DirectoryError
 from snutree.semester import Semester
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.

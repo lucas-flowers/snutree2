@@ -1,10 +1,10 @@
 import random, logging
 import networkx as nx
+from abc import ABCMeta, abstractmethod
 from enum import Enum
 from cerberus import Validator
 from networkx.algorithms.components import weakly_connected_components
 from . import dot, SnutreeError
-from .entity import Member, Custom, UnidentifiedMember
 from .utilities import logged
 from .utilities.cerberus import optional_boolean, nonempty_string, semester_like, validate
 from .utilities.colors import ColorPicker
@@ -37,6 +37,101 @@ dot_defaults = lambda *allowed : {
             },
         'valueschema' : attributes
         }
+
+class TreeEntity(metaclass=ABCMeta):
+    '''
+
+    Analogous to a single row in the directory, except that the fields have
+    been combined appropriately (i.e., first/preferred/last names combined into
+    one field, or semester strings converted to Semester objects).
+
+    Entities implement these functions:
+
+        + dot_attributes(self): Returns the node attributes to be used in DOT
+
+    Entities should also have these fields:
+
+        + key: The key to be used in DOT
+
+        + _semester: A private field storing a Semester object, used to
+        determine the entity's rank in DOT
+
+    '''
+
+    @property
+    def semester(self):
+        if self._semester:
+            return self._semester
+        else:
+            msg = 'missing semester value for entity {!r}'
+            raise TreeEntityAttributeError(msg.format(self.key))
+
+    @semester.setter
+    def semester(self, value):
+        self._semester = value
+
+    def dot_attributes(self):
+        return {}
+
+class Custom(TreeEntity):
+
+    def __init__(self, key, semester=None, attributes=None):
+        self.key = key
+        self.semester = semester
+        self.attributes = attributes or {}
+
+    def dot_attributes(self):
+        return self.attributes
+
+class UnidentifiedMember(Custom):
+    '''
+    All members are assumed to have big brothers. If a member does not have a
+    known big brother, this class is used as a placeholder. UnidentifiedKnights
+    are given pledge semesters a semester before the members they are bigs to,
+    unless the semester is unknown in which case it is left null.
+    '''
+
+    def __init__(self, member, attributes=None):
+        self.key = '{} Parent'.format(member.key)
+        try:
+            self.semester = member.semester - 1
+        except TreeEntityAttributeError:
+            self.semester = None
+        self.attributes = attributes or {}
+
+class Member(TreeEntity, metaclass=ABCMeta):
+    '''
+    A member of the organization. Every member provides these functions:
+
+        + get_validator(cls): Returns a validator used to validate a row in the
+        Directory that might contain this type of member.
+
+        + get_dot_label(self): Returns the DOT label for the member, to be used
+        in the member class's get_dot_attributes function.
+
+    In addition, every member should have these fields:
+
+        + parent: The (key of the) parent node of this member, i.e., the
+        member's big brother.
+    '''
+
+    @classmethod
+    @abstractmethod
+    def from_dict(cls, dct):
+        pass
+
+    @abstractmethod
+    def get_dot_label(self):
+        pass
+
+    def dot_attributes(self):
+        return {'label' : self.get_dot_label()}
+
+class DirectoryError(SnutreeError):
+    pass
+
+class TreeEntityAttributeError(SnutreeError):
+    pass
 
 class FamilyTree:
     '''
