@@ -34,22 +34,22 @@ class TestCliCommon(TestCase):
         return self.runner.invoke(cli, args, input=infile)
 
     def example_template(self,
-            example_name,
-            config,
-            membertype,
-            seed,
-            inputs,
+            example_name=None,
+            config=None,
+            membertype=None,
+            seed=None,
+            inputs=None,
             ):
 
         example_root = TESTS_ROOT.parent/'examples'/example_name
-        example_config = example_root/config
+        example_config = example_root/config if config else None
         example_inputs = [example_root/input_file for input_file in inputs]
 
         output = (TESTS_ROOT/'test_cli'/example_name).with_suffix('.dot')
         expected = (TESTS_ROOT/'test_cli'/(example_name+'-expected')).with_suffix('.dot')
 
         result = self.invoke([
-            '--config', str(example_config),
+            *(['--config', str(example_config)] if example_config else []),
             '--member-format', membertype,
             '--seed', seed,
             '--output', str(output),
@@ -117,5 +117,14 @@ class TestCli(TestCliCommon):
                 membertype='chapter',
                 seed=76,
                 inputs=['directory.csv'],
+                )
+
+    def test_fake(self):
+
+        self.example_template(
+                example_name='fake',
+                membertype='keyed',
+                seed=79,
+                inputs=['fake.csv'],
                 )
 
