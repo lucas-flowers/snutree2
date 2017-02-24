@@ -1,4 +1,6 @@
 import logging, time, difflib
+from .semester import Semester
+from .colors import ColorPicker
 
 def logged(function):
     '''

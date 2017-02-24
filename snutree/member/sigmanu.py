@@ -3,8 +3,8 @@ from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.humanize import validate_with_humanized_errors
 from snutree.utilities.voluptuous import NonEmptyString, Digits
 from snutree import utilities, SnutreeError
+from snutree.utilities import Semester
 from snutree.tree import Member
-from snutree.utilities.semester import Semester
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 

@@ -5,9 +5,8 @@ from enum import Enum
 from cerberus import Validator
 from networkx.algorithms.components import weakly_connected_components
 from . import dot, SnutreeError
-from .utilities import logged
+from .utilities import logged, ColorPicker
 from .utilities.cerberus import optional_boolean, nonempty_string, semester_like, validate
-from .utilities.colors import ColorPicker
 
 flags = [
         'semesters',
