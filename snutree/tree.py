@@ -7,7 +7,7 @@ from . import dot, SnutreeError
 from .entity import Member, Custom, UnidentifiedMember
 from .utilities import logged
 from .utilities.cerberus import optional_boolean, nonempty_string, semester_like, validate
-from .utilities.colors import graphviz_colors
+from .utilities.colors import ColorPicker
 
 flags = [
         'semesters',
@@ -332,7 +332,7 @@ class FamilyTree:
         '''
 
         family_colors = self.settings['family_colors']
-        other_colors = graphviz_colors()
+        color_picker = ColorPicker.from_graphviz()
 
         for key, color in family_colors.items():
 
@@ -342,20 +342,13 @@ class FamilyTree:
 
             else:
 
-                # Add the used color to the end and remove the first instance of it
-                other_colors.append(color)
-                other_colors.remove(color)
-
                 family = self.graph.node[key]['family']
                 if 'color' in family:
                     code = TreeErrorCode.FAMILY_COLOR_CONFLICT
                     msg = 'family of member {!r} already assigned the color {!r}'
                     raise TreeError(code, msg.format(key, color))
 
-                # Add the used color to the end and remove the first instance of it
-                other_colors.append(color)
-                other_colors.remove(color)
-
+                color_picker.use(color)
                 self.graph.node[key]['family']['color'] = color
 
         # The nodes are sorted first, to ensure that the same colors are used
@@ -364,12 +357,7 @@ class FamilyTree:
             if isinstance(node_dict['entity'], Member):
                 family_dict = node_dict['family']
                 if 'color' not in family_dict:
-
-                    # Pop a color, save it, and move it to deque's other end
-                    color = other_colors.popleft()
-                    other_colors.append(color)
-
-                    family_dict['color'] = color
+                    family_dict['color'] = next(color_picker)
 
                 node_dict['dot_attributes']['color'] = family_dict['color']
 
