@@ -47,7 +47,7 @@ def get_member_format(_ctx, _parameter, value):
 
     Any module imported here is assumed to implement a function called
     validate(members) that takes a list of member dictionaries, validates it,
-    and returns a list of member objects.
+    and yields a list of member objects.
     '''
 
     module_file = Path(value)
@@ -91,6 +91,7 @@ def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet,
     Create a big-little family tree.
     '''
 
+    # Set up logging when it won't conflict with stdout
     if log_path or output_path:
         log_stream = open(log_path, 'w') if log_path else sys.stdout
         if debug:
