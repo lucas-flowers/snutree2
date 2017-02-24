@@ -8,12 +8,19 @@ from snutree.semester import Semester
 
 # TODO for SQL, make sure DA affiliations agree with the external ID.
 
-# Voluptuous schemas
+# TODO generalize
+# The chapter whose tree is being printed
+PRIMARY_CHAPTER = 'Delta Alpha'
+
+# Voluptuous schema for a list of chapter affiliations
 AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
 
 def dicts_to_members(dicts):
     '''
-    Validate a table of Sigma Nu member dictionaries.
+    Convert a list of Sigma Nu member dictionaries to a list of member objects.
+    Use the status field to determine which type of member objects are created
+    (or ignored, in the case of Reaffiliates), and make sure there are no
+    duplicate affiliations.
     '''
 
     used_affiliations = set()
@@ -41,8 +48,8 @@ def dicts_to_members(dicts):
 
 class SigmaNuMember(Member):
     '''
-    A member of Sigma Nu. Each member has a full name, a badge (ID) number, a
-    pledge semester, and potentially the badge of the member's big brother.
+    A member of Sigma Nu. Each member has a name, a pledge semester, and
+    potentially the badge of the member's big brother.
     '''
 
     @classmethod
@@ -56,9 +63,12 @@ class SigmaNuMember(Member):
 class Knight(SigmaNuMember):
     '''
     An initiated member of Sigma Nu. In addition to normal fields, such members
-    can have a list of affiliations to other Sigma Nu chapters.
+    have a badge number in the primary chapter as well as a list of
+    affiliations with other chapters (which might, redundantly, include an
+    affiliation for the primary chapter itself).
     '''
 
+    # Statuses interpreted as Knights
     allowed = {'Active', 'Alumni', 'Left School'}
 
     schema = Schema({
@@ -482,7 +492,6 @@ class Affiliation:
 class Reaffiliate:
     allowed = {'Reaffiliate'}
 
-# TODO generalize
 Affiliation.set_primary_chapter('ΔA')
 
 MemberTypes = {}
