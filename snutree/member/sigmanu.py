@@ -19,10 +19,17 @@ def validate(rows):
     used_affiliations = set()
     for row in rows:
 
-        if row.get('status') == 'Reaffiliate':
+        status = row.get('status')
+
+        if status not in MemberTypes:
+            msg = 'Invalid member status in:\n{}\nStatus must be one of:\n{}'
+            vals = pformat(row), list(MemberTypes.keys())
+            raise DirectoryError(msg.format(*vals))
+
+        if status == 'Reaffiliate':
             continue
 
-        member = SigmaNuMember.from_dict(row)
+        member = MemberTypes[status].from_dict(row)
 
         for affiliation in member.affiliations:
             if affiliation in used_affiliations:
@@ -39,17 +46,12 @@ class SigmaNuMember(Member):
     '''
 
     @classmethod
+    def validate_dict(cls, dct):
+        return validate_with_humanized_errors(dct, cls.schema)
+
+    @classmethod
     def from_dict(cls, dct):
-
-        # Make sure the member status field is valid first
-        status = dct.get('status')
-        if status not in member_types:
-            msg = 'Invalid member status in:\n{}\nStatus must be one of:\n{}'
-            vals = pformat(dct), list(member_types.keys())
-            raise DirectoryError(msg.format(*vals))
-
-        member_type = member_types[status]
-        return member_type(**validate_with_humanized_errors(dct, member_type.schema))
+        return cls(**cls.validate_dict(dct))
 
 class Knight(SigmaNuMember):
     '''
@@ -86,26 +88,6 @@ class Knight(SigmaNuMember):
         self.parent = big_badge
         self.semester = pledge_semester
         self.affiliations = set(affiliations or []) | {Affiliation.with_primary(int(badge))}
-
-    # Keep track of affiliations used
-    # TODO Move out of class and into a field or function local
-    used_affiliations = set()
-
-    @classmethod
-    def from_dict(cls, dct):
-        '''
-        After normal validation, also make sure no affiliations have been
-        duplicated anywhere.
-        '''
-
-        member = super().from_dict(dct)
-        for aff in member.affiliations:
-            if aff in cls.used_affiliations:
-                msg = 'found duplicate affiliation: {!r}'
-                raise DirectoryError(msg.format(aff))
-            cls.used_affiliations.add(aff)
-
-        return member
 
     def get_dot_label(self):
         affiliation_strings =  [str(s) for s in sorted(self.affiliations)]
@@ -497,11 +479,14 @@ class Affiliation:
     def __hash__(self):
         return hash((self.designation, self.badge))
 
-member_types = {}
-for member_type in [Candidate, Brother, Knight, Expelled]:
-    for status in member_type.allowed:
-        member_types[status] = member_type
+class Reaffiliate:
+    allowed = {'Reaffiliate'}
 
 # TODO generalize
 Affiliation.set_primary_chapter('ΔA')
+
+MemberTypes = {}
+for MemberType in [Candidate, Brother, Knight, Expelled, Reaffiliate]:
+    for status in MemberType.allowed:
+        MemberTypes[status] = MemberType
 

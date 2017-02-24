@@ -33,8 +33,12 @@ class KeylessMember(Member):
         self.parent = big_name
 
     @classmethod
+    def validate_dict(cls, dct):
+        return validate_with_humanized_errors(dct, cls.schema)
+
+    @classmethod
     def from_dict(cls, dct):
-        return cls(**validate_with_humanized_errors(dct, cls.schema))
+        return cls(**cls.validate_dict(dct))
 
     def get_dot_label(self):
         return self.key

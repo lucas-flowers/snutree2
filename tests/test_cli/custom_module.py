@@ -8,7 +8,7 @@ def validate(rows):
 
 class SubMember(Member):
 
-    validator = Schema({
+    validate = Schema({
         Required('cid') : NonEmptyString,
         'pid' : NonEmptyString,
         Required('s') : Coerce(int)
@@ -29,5 +29,5 @@ class SubMember(Member):
 
     @classmethod
     def from_dict(cls, dct):
-        return cls(**cls.validator(dct))
+        return cls(**cls.validate(dct))
 

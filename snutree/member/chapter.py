@@ -35,6 +35,10 @@ class Chapter(Member):
         return self.key
 
     @classmethod
+    def validate_dict(cls, dct):
+        return validate_with_humanized_errors(dct, cls.schema)
+
+    @classmethod
     def from_dict(cls, dct):
-        return cls(**validate_with_humanized_errors(dct, cls.schema))
+        return cls(**cls.validate_dict(dct))
 
