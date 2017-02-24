@@ -16,13 +16,6 @@ def validate_members(member_list, member_types, ignored_statuses=None):
     members = []
     for member in member_list:
 
-        # Remove the keys pointing to falsy values from each member. This
-        # simplifies validation (e.g., we don't have to worry about
-        # handling values of None or empty strings)
-        for key, field in list(member.items()):
-            if not field:
-                del member[key]
-
         if len(allowed_statuses) == 1:
             # If there is only one type of member, ignore the status field
             #

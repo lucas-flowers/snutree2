@@ -40,7 +40,16 @@ def get_table(stream):
     Read a YAML table with query, SQL and, optionally, ssh information. Use the
     information to get a list of member dictionaries.
     '''
-    return get_members(yaml.safe_load(stream))
+    rows = get_members(yaml.safe_load(stream))
+    for row in rows:
+        # Remove the keys pointing to falsy values from each member. This
+        # simplifies validation (e.g., we don't have to worry about
+        # handling values of None or empty strings)
+        for key, field in list(row.items()):
+            if not field:
+                del row[key]
+        yield row
+
 
 def get_members(cnf):
     '''
