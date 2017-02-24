@@ -6,14 +6,16 @@ from .semester import Semester
 # TODO separate validation class?
 
 DIGITS_MATCHER = re.compile('\d+')
-def NonEmptyString(s):
-    if isinstance(s, str) and len(s) > 0:
-        return s
-    raise ValueError
+
 def Digits(s):
     match = DIGITS_MATCHER.match(s)
     if match:
         return match.group(0)
+    raise ValueError
+
+def NonEmptyString(s):
+    if isinstance(s, str) and len(s) > 0:
+        return s
     raise ValueError
 
 # A required string; must be nonempty and not None
@@ -61,7 +63,6 @@ def validate(validator, obj):
 
 class SettingsError(SnutreeError):
     pass
-
 
 def logged(function):
 
@@ -448,5 +449,4 @@ def graphviz_colors():
             'mediumturquoise',
             'palegreen2',
             ])
-
 
