@@ -231,6 +231,16 @@ class Expelled(Knight):
     def get_dot_label(self):
         return '{}\\n{}'.format(self.name, self.key)
 
+class Reaffiliate:
+    '''
+    Some brothers have joined one chapter, got a badge number, transferred,
+    transfered back, and reaffiliated with the original chapter under a
+    /different/ badge number. Some versions of the directory just include these
+    under affiliations, but others add a dummy row for the new badge number
+    with the status "Reaffiliate". These are ignored when making the tree.
+    '''
+    allowed = {'Reaffiliate'}
+
 class Affiliation:
     '''
     A chapter affiliation. Two definitions should be made clear here:
@@ -437,8 +447,8 @@ class Affiliation:
 
     def __lt__(self, other):
         '''
-        Affiliations are sorted by chapter, then badge. The primary chapter
-        always goes first.
+        Affiliations are sorted by whether the chapter is the primary chapter,
+        then by the chapter itself, and then the badge.
         '''
         if not isinstance(other, Affiliation):
             return NotImplemented
@@ -452,9 +462,6 @@ class Affiliation:
 
     def __hash__(self):
         return hash((self.designation, self.badge))
-
-class Reaffiliate:
-    allowed = {'Reaffiliate'}
 
 Affiliation.set_primary_chapter('ΔA')
 
