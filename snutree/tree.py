@@ -56,11 +56,11 @@ class TreeEntity(metaclass=ABCMeta):
     A node on the Family Tree, whether it be the node of an actual member, a
     rank name, or just decoration.
 
-    Entities implement these functions:
-
-    Entities should also have these fields:
+    Entities should have these fields:
 
         + key: The key to be used in DOT
+
+        + parent: The key of the entity's parent node
 
         + _semester: A private field storing a rank ID, which is assumed to be
         some kind of integer-compatible object (e.g., actual integers
@@ -89,6 +89,9 @@ class TreeEntity(metaclass=ABCMeta):
         return {}
 
 class Custom(TreeEntity):
+    '''
+    TreeEntities used for decoration.
+    '''
 
     def __init__(self, key, semester=None, attributes=None):
         self.key = key
@@ -101,10 +104,10 @@ class Custom(TreeEntity):
 
 class UnidentifiedMember(Custom):
     '''
-    All members are assumed to have big brothers. If a member does not have a
-    known big brother, this class is used as a placeholder. UnidentifiedKnights
-    are given pledge semesters a semester before the members they are bigs to,
-    unless the semester is unknown in which case it is left null.
+    All members are assumed to have parents. If a member does not have a known
+    parent. UnidentifiedMembers are given ranks one rank before the members
+    they are parents to, unless the rank is unknown, in which case it is left
+    null. (Assuming the "unknowns" option is selected.)
     '''
 
     def __init__(self, member, attributes=None):
@@ -117,24 +120,8 @@ class UnidentifiedMember(Custom):
 
 class Member(TreeEntity, metaclass=ABCMeta):
     '''
-    A member of the organization. Every member provides these functions:
-
-        + get_validator(cls): Returns a validator used to validate a row in the
-        Directory that might contain this type of member.
-
-        + get_dot_label(self): Returns the DOT label for the member, to be used
-        in the member class's get_dot_attributes function.
-
-    In addition, every member should have these fields:
-
-        + parent: The (key of the) parent node of this member, i.e., the
-        member's big brother.
+    A member of the organization.
     '''
-
-    @classmethod
-    @abstractmethod
-    def from_dict(cls, dct):
-        pass
 
     @abstractmethod
     def get_dot_label(self):
