@@ -4,12 +4,12 @@ from snutree.entity import Member
 from snutree.semester import Semester
 from snutree.utilities.voluptuous import NonEmptyString
 
-def validate(rows):
+def dicts_to_members(dicts):
     '''
-    Validate a table of basic member dictionaries.
+    Convert member dictionaries to member objects.
     '''
-    for row in rows:
-        yield KeylessMember.from_dict(row)
+    for d in dicts:
+        yield KeylessMember.from_dict(d)
 
 class KeylessMember(Member):
     '''

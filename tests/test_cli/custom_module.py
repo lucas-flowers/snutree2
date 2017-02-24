@@ -2,9 +2,9 @@ from voluptuous import Schema, Required, Coerce
 from snutree.entity import Member
 from snutree.utilities.voluptuous import NonEmptyString
 
-def validate(rows):
-    for row in rows:
-        yield SubMember.from_dict(row)
+def dicts_to_members(dicts):
+    for d in dicts:
+        yield SubMember.from_dict(d)
 
 class SubMember(Member):
 

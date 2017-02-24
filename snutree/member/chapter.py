@@ -3,12 +3,12 @@ from voluptuous.humanize import validate_with_humanized_errors
 from snutree.entity import Member
 from snutree.utilities.voluptuous import NonEmptyString
 
-def validate(rows):
+def dicts_to_members(dicts):
     '''
     Validate a table of chapters dictionaries.
     '''
-    for row in rows:
-        yield Chapter.from_dict(row)
+    for d in dicts:
+        yield Chapter.from_dict(d)
 
 class Chapter(Member):
     '''

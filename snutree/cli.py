@@ -101,10 +101,10 @@ def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet,
             logging.basicConfig(level=logging.WARNING, stream=log_stream, format='%(levelname)s: %(message)s')
 
     logging.info('Retrieving data from sources')
-    members = read_sources(files, stdin_fmt=input_format)
+    member_dicts = read_sources(files, stdin_fmt=input_format)
 
     logging.info('Validating data')
-    members = member_module.validate(members)
+    members = member_module.dicts_to_members(member_dicts)
 
     logging.info('Loading tree configuration')
     tree_cnf = load_configuration(config_paths)

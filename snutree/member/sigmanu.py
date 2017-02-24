@@ -11,25 +11,25 @@ from snutree.utilities.voluptuous import NonEmptyString, Digits
 # Voluptuous schemas
 AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
 
-def validate(rows):
+def dicts_to_members(dicts):
     '''
     Validate a table of Sigma Nu member dictionaries.
     '''
 
     used_affiliations = set()
-    for row in rows:
+    for dct in dicts:
 
-        status = row.get('status')
+        status = dct.get('status')
 
         if status not in MemberTypes:
             msg = 'Invalid member status in:\n{}\nStatus must be one of:\n{}'
-            vals = pformat(row), list(MemberTypes.keys())
+            vals = pformat(dct), list(MemberTypes.keys())
             raise DirectoryError(msg.format(*vals))
 
         if status == 'Reaffiliate':
             continue
 
-        member = MemberTypes[status].from_dict(row)
+        member = MemberTypes[status].from_dict(dct)
 
         for affiliation in member.affiliations:
             if affiliation in used_affiliations:
