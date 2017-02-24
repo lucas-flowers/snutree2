@@ -1,6 +1,11 @@
 import re
 
 class Semester(int):
+    '''
+    Represents a semester such as "Fall 1950" or "Spring 2015". Integer values
+    can be added or subtracted from semesters, which increments/decrements them
+    by one semester per unit.
+    '''
 
     matcher = re.compile('(Spring|Fall) (\d+)')
 

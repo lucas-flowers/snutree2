@@ -1,6 +1,10 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 
+'''
+Tools used to print the tree to DOT code.
+'''
+
 TABSTOP = 4
 
 def indent(indent_level):
@@ -16,8 +20,10 @@ def dict_to_attr(attributes_dict, sep=','):
 
     dot_attributes = []
     for key, value in sorted(attributes_dict.items()):
+
         # If the value is a string bracketed by '<' and '>', use those instead
         bracketed = type(value) == str and len(value) > 1 and value[0::len(value)-1] == '<>'
+
         template = '{}="{}"' if not bracketed else '{}={}'
         dot_attributes.append(template.format(key, value))
 
