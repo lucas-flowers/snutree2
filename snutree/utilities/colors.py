@@ -2,11 +2,12 @@ from collections import deque
 
 class ColorPicker:
     '''
-    A queue of colors. Calling next will get the immediate next color and put
-    it back on the end of the queue. If specific colors are desired, they can
-    be used with the used() function, which places the color used at the end
-    of the queue. (Colors that aren't in the queue can still be used with
-    used(), but they will not be added to the queue.)
+    A queue of the colors provided to the constructor. Calling next will get
+    the immediate next color and put it back on the end of the queue. If
+    specific colors are desired, they can be used with the used() function,
+    which places the color used at the end of the queue. (Colors that aren't in
+    the queue can still be used with used(), but they will not be added to the
+    queue.)
     '''
 
     def __init__(self, colors):
