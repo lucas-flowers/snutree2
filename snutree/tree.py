@@ -8,6 +8,7 @@ from . import dot, SnutreeError
 from .utilities import logged, ColorPicker
 from .utilities.cerberus import optional_boolean, nonempty_string, semester_like, validate
 
+# Option flag names
 flags = [
         'semesters',
         'custom_edges',
@@ -16,6 +17,12 @@ flags = [
         'family_colors',
         'unknowns',
         ]
+
+###############################################################################
+###############################################################################
+#### Cerberus Schemas                                                      ####
+###############################################################################
+###############################################################################
 
 # Graphviz attributes
 attributes = {
@@ -36,6 +43,12 @@ dot_defaults = lambda *allowed : {
             },
         'valueschema' : attributes
         }
+
+###############################################################################
+###############################################################################
+#### Entities on the Tree                                                  ####
+###############################################################################
+###############################################################################
 
 class TreeEntity(metaclass=ABCMeta):
     '''
@@ -126,11 +139,14 @@ class Member(TreeEntity, metaclass=ABCMeta):
     def dot_attributes(self):
         return {'label' : self.get_dot_label()}
 
-class DirectoryError(SnutreeError):
-    pass
-
 class TreeEntityAttributeError(SnutreeError):
     pass
+
+###############################################################################
+###############################################################################
+#### Family Tree                                                           ####
+###############################################################################
+###############################################################################
 
 class FamilyTree:
     '''
@@ -602,6 +618,12 @@ class FamilyTree:
 
         yield from edges
 
+###############################################################################
+###############################################################################
+#### Errors                                                                ####
+###############################################################################
+###############################################################################
+
 TreeErrorCode = Enum('TreeErrorCode', (
         'DUPLICATE_ENTITY',
         'PARENT_UNKNOWN',
@@ -618,4 +640,3 @@ class TreeError(SnutreeError):
 
     def __str__(self):
         return self.message
-
