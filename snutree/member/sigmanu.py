@@ -1,4 +1,5 @@
 import difflib, re
+from pprint import pformat
 from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.humanize import validate_with_humanized_errors
 from snutree.entity import Member, validate_members, DirectoryError
@@ -14,11 +15,7 @@ def validate(members):
     '''
     Validate a list of Sigma Nu members.
     '''
-    return validate_members(
-            members,
-            [Candidate, Brother, Knight, Expelled],
-            ignored_statuses=['Reaffiliate'],
-            )
+    return validate_members(members, SigmaNuMember)
 
 class SigmaNuMember(Member):
     '''
@@ -28,7 +25,22 @@ class SigmaNuMember(Member):
 
     @classmethod
     def from_dict(cls, dct):
-        return cls(**validate_with_humanized_errors(dct, cls.schema))
+
+        # Make sure the member status field is valid first
+        status = dct.get('status')
+        if status not in member_types:
+            msg = 'Invalid member status in:\n{}\nStatus must be one of:\n{}'
+            vals = pformat(dct), list(member_types.keys())
+            raise DirectoryError(msg.format(*vals))
+
+        member_type = member_types[status]
+        return member_type(**validate_with_humanized_errors(dct, member_type.schema))
+
+class Reaffiliate:
+    allowed = {'Reaffiliate'}
+    schema = lambda _ : dict()
+    def __new__(self, **ignore):
+        return None
 
 class Knight(SigmaNuMember):
     '''
@@ -475,6 +487,11 @@ class Affiliation:
 
     def __hash__(self):
         return hash((self.designation, self.badge))
+
+member_types = {}
+for member_type in [Candidate, Brother, Knight, Expelled, Reaffiliate]:
+    for status in member_type.allowed:
+        member_types[status] = member_type
 
 # TODO generalize
 Affiliation.set_primary_chapter('ΔA')

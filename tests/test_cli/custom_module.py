@@ -3,11 +3,10 @@ from snutree.entity import Member, validate_members
 from snutree.utilities import NonEmptyString
 
 def validate(members):
-    return validate_members(members, [SubMember])
+    return validate_members(members, SubMember)
 
 class SubMember(Member):
 
-    allowed = {'I'}
     validator = Schema({
         Required('cid') : NonEmptyString,
         'pid' : NonEmptyString,

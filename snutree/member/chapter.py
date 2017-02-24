@@ -7,14 +7,12 @@ def validate(chapters):
     '''
     Validate a list of chapters.
     '''
-    return validate_members(chapters, [Chapter])
+    return validate_members(chapters, Chapter)
 
 class Chapter(Member):
     '''
     A chapter, key by its name.
     '''
-
-    allowed = {'Chapter'}
 
     schema = Schema({
         'mother' : NonEmptyString,
