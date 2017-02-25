@@ -44,7 +44,7 @@ class TestTree(TestCase):
 
     def test_parent_not_prior(self):
 
-        self.member1.semester += 1000
+        self.member1.rank += 1000
         self.assertRaisesTreeErrorWithCode(
                 TreeErrorCode.PARENT_NOT_PRIOR,
                 partial(FamilyTree, self.members)

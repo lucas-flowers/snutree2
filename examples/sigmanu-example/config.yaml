@@ -16,15 +16,15 @@ seed: 6584
 layout:
 
   # Put pledge classes on their own rows corresponding to their pledge class
-  # semester. Use False for a traditional tree layout.
-  semesters: True
+  # rank. Use False for a traditional tree layout.
+  ranks: True
 
   # Include the custom nodes and edges in this settings file.
   custom_nodes: True
   custom_edges: True
 
   # Exclude brothers with no bigs or littles. NOTE: Not all brothers have a
-  # pledge class semester set in this directory, so setting this to False will
+  # pledge class rank set in this directory, so setting this to False will
   # likely cause problems.
   no_singletons: True
 
@@ -95,8 +95,8 @@ node_defaults:
   member:
     fillcolor: .11 .71 1. # A goldish color
 
-  # Defaults for semester labels
-  semester:
+  # Defaults for rank labels
+  rank:
     color: none
     fontsize: 20
     fontname: dejavu serif
@@ -114,8 +114,8 @@ edge_defaults:
   all:
     arrowhead: none
 
-  # Defaults for the edges connecting semester labels
-  semester:
+  # Defaults for the edges connecting rank labels
+  rank:
     style: invis
 
   # Defaults for edges connecting unknown big brothers to their littles
@@ -135,15 +135,15 @@ nodes:
 
   # Chapter's reorganization
   'Reorganization':
-    semester: 'Spring 1989'
+    rank: 'Spring 1989'
     attributes:
       height: .6
       label: 'Reorganization'
       shape: oval
 
-  # Make the Reorganization semester larger with an invisible, tall node
+  # Make the Reorganization rank larger with an invisible, tall node
   'Spacer':
-    semester: 'Spring 1989'
+    rank: 'Spring 1989'
     attributes:
       height: 1.5
       style: invis
@@ -151,7 +151,7 @@ nodes:
 
   # The home chapter of ΔA 986, who transferred to CWRU from Duquesne
   'Kappa Delta':
-    semester: 'Fall 1982'
+    rank: 'Fall 1982'
     attributes:
       label: 'Kappa Delta Chapter\nDuquesne University'
       color: none

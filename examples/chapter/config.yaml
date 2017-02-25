@@ -18,7 +18,7 @@ node_defaults:
     fontname: dejavu sans
   member:
     fillcolor: .11 .71 1. # A goldish color
-  semester:
+  rank:
     color: none
     fontsize: 20
     fontname: georgia
@@ -31,13 +31,13 @@ node_defaults:
 edge_defaults:
   all:
     arrowhead: none
-  semester:
+  rank:
     style: invis
   unknown:
     style: dotted
 
 layout:
-  semesters: True
+  ranks: True
   custom_nodes: True
   custom_edges: True
   no_singletons: False

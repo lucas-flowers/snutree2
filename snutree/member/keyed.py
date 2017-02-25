@@ -36,7 +36,7 @@ class KeyedMember(Member):
 
         self.key = key
         self.name = name
-        self.semester = pledge_semester
+        self.rank = pledge_semester
         self.parent = big_key
 
     @classmethod

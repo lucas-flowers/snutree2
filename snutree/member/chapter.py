@@ -32,7 +32,7 @@ class Chapter(Member):
             ):
 
         self.key = child
-        self.semester = founded
+        self.rank = founded
         self.parent = mother
 
     def get_dot_label(self):

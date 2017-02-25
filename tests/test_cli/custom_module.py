@@ -21,7 +21,7 @@ class SubMember(Member):
             ):
 
         self.key = cid
-        self.semester = s
+        self.rank = s
         self.parent = pid
 
     def get_dot_label(self):

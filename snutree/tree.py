@@ -8,8 +8,6 @@ from . import dot, SnutreeError
 from .utilities import logged, ColorPicker
 from .utilities.cerberus import optional_boolean, nonempty_string, semester_like, validate
 
-# TODO replace "semester" with "rank" everywhere
-
 ###############################################################################
 ###############################################################################
 #### Cerberus Schemas                                                      ####
@@ -54,7 +52,7 @@ class TreeEntity(metaclass=ABCMeta):
 
         + parent: The key of the entity's parent node
 
-        + _semester: A private field storing a rank ID, which is assumed to be
+        + _rank: A private field storing a rank ID, which is assumed to be
         some kind of integer-compatible object (e.g., actual integers
         representing years, a Semester object, or other ordered types that
         integers can be added to). This field might be allowed to remain
@@ -65,16 +63,16 @@ class TreeEntity(metaclass=ABCMeta):
     '''
 
     @property
-    def semester(self):
-        if self._semester:
-            return self._semester
+    def rank(self):
+        if self._rank:
+            return self._rank
         else:
-            msg = 'missing semester value for entity {!r}'
+            msg = 'missing rank value for entity {!r}'
             raise TreeEntityAttributeError(msg.format(self.key))
 
-    @semester.setter
-    def semester(self, value):
-        self._semester = value
+    @rank.setter
+    def rank(self, value):
+        self._rank = value
 
     @property
     def dot_attributes(self):
@@ -85,9 +83,9 @@ class Custom(TreeEntity):
     TreeEntities used for decoration.
     '''
 
-    def __init__(self, key, semester=None, attributes=None):
+    def __init__(self, key, rank=None, attributes=None):
         self.key = key
-        self.semester = semester
+        self.rank = rank
         self.attributes = attributes or {}
 
     @property
@@ -105,9 +103,9 @@ class UnidentifiedMember(Custom):
     def __init__(self, member, attributes=None):
         self.key = '{} Parent'.format(member.key)
         try:
-            self.semester = member.semester - 1
+            self.rank = member.rank - 1
         except TreeEntityAttributeError:
-            self.semester = None
+            self.rank = None
         self.attributes = attributes or {}
 
 class Member(TreeEntity, metaclass=ABCMeta):
@@ -150,7 +148,7 @@ class FamilyTree:
 
     # Option flag names
     flags = [
-            'semesters',
+            'ranks',
             'custom_edges',
             'custom_nodes',
             'no_singletons',
@@ -169,8 +167,8 @@ class FamilyTree:
 
         # Default attributes for graphs, nodes, edges, and their subcategories
         'graph_defaults' : dot_defaults('all'),
-        'node_defaults' : dot_defaults('all', 'semester', 'unknown', 'member'),
-        'edge_defaults' : dot_defaults('all', 'semester', 'unknown'),
+        'node_defaults' : dot_defaults('all', 'rank', 'unknown', 'member'),
+        'edge_defaults' : dot_defaults('all', 'rank', 'unknown'),
 
         # A mapping of node keys to colors
         'family_colors' : {
@@ -180,7 +178,7 @@ class FamilyTree:
             'valueschema' : nonempty_string,
             },
 
-        # Custom nodes, each with Graphviz attributes and a semester
+        # Custom nodes, each with Graphviz attributes and a rank
         'nodes' : {
             'type' : 'dict',
             'default' : {},
@@ -188,7 +186,7 @@ class FamilyTree:
             'valueschema' : {
                 'type' : 'dict',
                 'schema' : {
-                    'semester' : semester_like,
+                    'rank' : semester_like, # TODO the type doesn't actually need to be semester
                     'attributes' : attributes,
                     }
                 }
@@ -323,10 +321,10 @@ class FamilyTree:
 
         parent = self.graph.node[pkey]['entity']
 
-        if self.settings['layout']['semesters'] and member.semester < parent.semester:
+        if self.settings['layout']['ranks'] and member.rank < parent.rank:
             code = TreeErrorCode.PARENT_NOT_PRIOR
-            msg = 'semester {!r} of member {!r} cannot be prior to semester of big brother {!r}: {!r}'
-            vals = member.semester, ckey, pkey, parent.semester
+            msg = 'rank {!r} of member {!r} cannot be prior to rank of parent {!r}: {!r}'
+            vals = member.rank, ckey, pkey, parent.rank
             raise TreeError(code, msg.format(*vals))
 
         self.graph.add_edge(pkey, ckey, dot_attributes=dot_attributes or {})
@@ -432,12 +430,12 @@ class FamilyTree:
 
         Note: This must occur after edges are generated in order to determine
         degrees. But it must also occur after singletons are removed, because
-        many singletons do not have well-formed pledge class semester values in
-        the directory (and determining pledge class semester values accurately
-        is not simple enough for me to bother doing). If every pledge class
-        semesters were filled in, this could occur before add_edges and we can
-        remove some of the extra code in this function that would normally be
-        done by add_XXX_attributes.
+        many singletons do not have well-formed pledge class rank values in the
+        actual Sigma Nu directory directory (and determining pledge class
+        semesters values accurately is not simple enough for me to bother
+        doing). If every pledge class semester filled in, this could occur
+        before add_edges and we can remove some of the extra code in this
+        function that would normally be done by add_XXX_attributes.
         '''
 
         for orphan_key in self.orphan_keys():
@@ -507,10 +505,10 @@ class FamilyTree:
         node_defaults = dot.Defaults('node', self.settings['node_defaults']['all'])
         edge_defaults = dot.Defaults('edge', self.settings['edge_defaults']['all'])
 
-        if self.settings['layout']['semesters']:
-            min_semester, max_semester = self.get_semester_bounds()
-            dates_left = self.create_date_subgraph('L', min_semester, max_semester)
-            dates_right = self.create_date_subgraph('R', min_semester, max_semester)
+        if self.settings['layout']['ranks']:
+            min_rank, max_rank = self.get_rank_bounds()
+            dates_left = self.create_date_subgraph('L', min_rank, max_rank)
+            dates_right = self.create_date_subgraph('R', min_rank, max_rank)
             ranks = self.create_ranks()
             dotgraph.children = [node_defaults, edge_defaults, dates_left, tree, dates_right] + ranks
 
@@ -519,21 +517,21 @@ class FamilyTree:
 
         return dotgraph
 
-    def get_semester_bounds(self):
+    def get_rank_bounds(self):
         '''
         Find and return the values of the highest and lowest ranks.
         '''
 
-        min_sem, max_sem = float('inf'), float('-inf')
+        min_rank, max_rank = float('inf'), float('-inf')
         for key, entity in self.nodes_iter('entity'):
-            semester = entity.semester
-            if semester and min_sem > semester:
-                min_sem = semester
-            if semester and max_sem < semester:
-                max_sem = semester
-        return min_sem, max_sem
+            rank = entity.rank
+            if rank and min_rank > rank:
+                min_rank = rank
+            if rank and max_rank < rank:
+                max_rank = rank
+        return min_rank, max_rank
 
-    def create_date_subgraph(self, key, min_semester, max_semester):
+    def create_date_subgraph(self, key, min_rank, max_rank):
         '''
         Return a DOT subgraph containing the labels for each rank. The `key`
         variable adds an additional identifier for the subgraph and its rank
@@ -542,21 +540,21 @@ class FamilyTree:
 
         subgraph = dot.Graph('dates{}'.format(key), 'subgraph')
 
-        node_defaults = dot.Defaults('node', self.settings['node_defaults']['semester'])
-        edge_defaults = dot.Defaults('edge', self.settings['edge_defaults']['semester'])
+        node_defaults = dot.Defaults('node', self.settings['node_defaults']['rank'])
+        edge_defaults = dot.Defaults('edge', self.settings['edge_defaults']['rank'])
 
         nodes = []
         edges = []
-        sem = min_semester
-        while sem <= max_semester:
-            this_semester_key = '{}{}'.format(sem, key)
-            next_semester_key = '{}{}'.format(sem+1, key)
-            nodes.append(dot.Node(this_semester_key, {'label' : sem}))
-            edges.append(dot.Edge(this_semester_key, next_semester_key))
-            sem += 1
+        rank = min_rank
+        while rank <= max_rank:
+            this_rank_key = '{}{}'.format(rank, key)
+            next_rank_key = '{}{}'.format(rank+1, key)
+            nodes.append(dot.Node(this_rank_key, {'label' : rank}))
+            edges.append(dot.Edge(this_rank_key, next_rank_key))
+            rank += 1
 
-        this_semester_key = '{}{}'.format(sem, key)
-        nodes.append(dot.Node(this_semester_key, {'label' : sem}))
+        this_rank_key = '{}{}'.format(rank, key)
+        nodes.append(dot.Node(this_rank_key, {'label' : rank}))
 
         subgraph.children = [node_defaults, edge_defaults] + nodes + edges
 
@@ -591,13 +589,13 @@ class FamilyTree:
 
         ranks = {}
         for key, node_dict in self.graph.nodes(data=True):
-            semester = node_dict['entity'].semester
-            if semester in ranks:
-                ranks[semester].keys.append(key)
+            rank = node_dict['entity'].rank
+            if rank in ranks:
+                ranks[rank].keys.append(key)
             else:
-                left_semester = '{}L'.format(semester)
-                right_semester = '{}R'.format(semester)
-                ranks[semester] = dot.Rank([left_semester, right_semester, key])
+                left_rank = '{}L'.format(rank)
+                right_rank = '{}R'.format(rank)
+                ranks[rank] = dot.Rank([left_rank, right_rank, key])
 
         return list(ranks.values())
 

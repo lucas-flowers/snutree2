@@ -33,7 +33,7 @@ class KeylessMember(Member):
             ):
 
         self.key = name
-        self.semester = pledge_semester
+        self.rank = pledge_semester
         self.parent = big_name
 
     @classmethod

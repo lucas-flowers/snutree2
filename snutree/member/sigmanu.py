@@ -102,7 +102,7 @@ class Knight(SigmaNuMember):
         self.key = badge
         self.name = utilities.combine_names(first_name, preferred_name, last_name)
         self.parent = big_badge
-        self.semester = pledge_semester
+        self.rank = pledge_semester
         self.affiliations = set(affiliations or []) | {Affiliation.with_primary(int(badge))}
 
     def get_dot_label(self):
@@ -142,7 +142,7 @@ class Brother(SigmaNuMember):
 
         self.name = last_name
         self.parent = big_badge
-        self.semester = pledge_semester
+        self.rank = pledge_semester
         self.affiliations = []
 
         # Without badges, keys need to be generated
@@ -184,7 +184,7 @@ class Candidate(SigmaNuMember):
 
         self.name = utilities.combine_names(first_name, preferred_name, last_name)
         self.parent = big_badge
-        self.semester = pledge_semester
+        self.rank = pledge_semester
         self.affiliations = []
 
         # Without badges, keys need to be generated
@@ -231,7 +231,7 @@ class Expelled(Knight):
         self.key = badge
         self.name = 'Member Expelled'
         self.parent = big_badge
-        self.semester = pledge_semester
+        self.rank = pledge_semester
         self.affiliations = affiliations or []
 
     def get_dot_label(self):
