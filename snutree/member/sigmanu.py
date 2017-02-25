@@ -1,6 +1,7 @@
 import re, pprint
 from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.humanize import validate_with_humanized_errors
+from voluptuous.error import Error
 from snutree.utilities.voluptuous import NonEmptyString, Digits
 from snutree import utilities, SnutreeError
 from snutree.utilities import Semester
@@ -23,28 +24,35 @@ def dicts_to_members(dicts):
     duplicate affiliations.
     '''
 
-    used_affiliations = set()
-    for dct in dicts:
+    try:
 
-        status = dct.get('status')
+        used_affiliations = set()
+        for dct in dicts:
 
-        if status not in MemberTypes:
-            msg = 'Invalid member status in:\n{}\nStatus must be one of:\n{}'
-            vals = pprint.pformat(dct), list(MemberTypes.keys())
-            raise SnutreeError(msg.format(*vals))
+            status = dct.get('status')
 
-        if status == 'Reaffiliate':
-            continue
+            if status not in MemberTypes:
+                msg = 'Invalid member status in:\n{}\nStatus must be one of:\n{}'
+                vals = pprint.pformat(dct), list(MemberTypes.keys())
+                raise SnutreeError(msg.format(*vals))
 
-        member = MemberTypes[status].from_dict(dct)
+            if status == 'Reaffiliate':
+                continue
 
-        for affiliation in member.affiliations:
-            if affiliation in used_affiliations:
-                msg = 'found duplicate affiliation: {!r}'
-                raise SnutreeError(msg.format(affiliation))
-            used_affiliations.add(affiliation)
+            member = MemberTypes[status].from_dict(dct)
 
-        yield member
+            for affiliation in member.affiliations:
+                if affiliation in used_affiliations:
+                    msg = 'found duplicate affiliation: {!r}'
+                    raise SnutreeError(msg.format(affiliation))
+                used_affiliations.add(affiliation)
+
+            yield member
+
+    except Error as e:
+        msg = '{}. In:\n{}'
+        values = e.message, pprint.pformat(dct)
+        raise SnutreeError(msg.format(*values))
 
 class SigmaNuMember(Member):
     '''

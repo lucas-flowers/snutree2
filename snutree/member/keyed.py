@@ -1,15 +1,20 @@
 from voluptuous import Schema, Required, Coerce
 from voluptuous.humanize import validate_with_humanized_errors
+from voluptuous.error import Error
 from snutree.utilities.voluptuous import NonEmptyString
 from snutree.utilities import Semester
 from snutree.tree import Member
+from snutree import SnutreeError
 
 def dicts_to_members(dicts):
     '''
     Validate a table of keyed member dictionaries.
     '''
-    for d in dicts:
-        yield KeyedMember.from_dict(d)
+    try:
+        for d in dicts:
+            yield KeyedMember.from_dict(d)
+    except Error:
+        raise SnutreeError('Error in {}'.format(d))
 
 class KeyedMember(Member):
     '''

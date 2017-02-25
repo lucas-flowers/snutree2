@@ -1,14 +1,19 @@
 from voluptuous import Schema, Required, Coerce
 from voluptuous.humanize import validate_with_humanized_errors
+from voluptuous.error import Error
 from snutree.utilities.voluptuous import NonEmptyString
 from snutree.tree import Member
+from snutree import SnutreeError
 
 def dicts_to_members(dicts):
     '''
     Validate a table of chapters dictionaries.
     '''
-    for d in dicts:
-        yield Chapter.from_dict(d)
+    try:
+        for d in dicts:
+            yield Chapter.from_dict(d)
+    except Error:
+        raise SnutreeError('Error in {}'.format(d))
 
 class Chapter(Member):
     '''

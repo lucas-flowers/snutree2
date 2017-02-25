@@ -58,15 +58,15 @@ def get_members(cnf):
     '''
 
     cnf = validate(MYSQL_CNF_VALIDATOR, cnf)
-    get = get_members_ssh if cnf['ssh'] else get_members_local
+    get = get_members_ssh if cnf.get('ssh') else get_members_local
     return get(**cnf)
 
-def get_members_local(query, mysql_cnf):
+def get_members_local(query, mysql):
     '''
     Use the query and MySQL configuration to get a table of members.
     '''
 
-    with closing(MySQLdb.Connection(**mysql_cnf)) as cxn:
+    with closing(MySQLdb.Connection(**mysql)) as cxn:
         with cxn.cursor(MySQLdb.cursors.DictCursor) as cursor:
             cursor.execute(query)
             return cursor.fetchall()
