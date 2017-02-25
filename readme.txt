@@ -62,6 +62,36 @@ query: <SQL_QUERY>
 
 ~~~
 
+Architecture
+============
 
+~~~
+snutree.readers:
+    list: csv, sql, dot
+    entry: get_table(stream)
+    input: file streams
+    output: list of dictionaries
+snutree.member:
+    list: basic, chapter, keyed, sigmanu
+    entry: dicts_to_members(dicts)
+    input: list of dictionaries
+    output: list of Member objects
+snutree.tree:
+    list: FamilyTree
+    entry: FamilyTree(members, settings)
+    input: list of Member objects
+    output: FamilyTree object
+~~~
 
+The tree object then can run its to_dot_graph() method to convert into a DOT
+code representation, which can run to_dot() to convert into a string
+representation, and finally:
+
+~~~
+snutree.???
+    list: pdf, dot
+    entry: write_output(dotcode, output_path)
+    input: DOT code and path to output to
+    output: desired output format
+~~~
 
