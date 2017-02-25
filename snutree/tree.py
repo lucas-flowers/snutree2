@@ -534,6 +534,11 @@ class FamilyTree:
         return min_sem, max_sem
 
     def create_date_subgraph(self, key, min_semester, max_semester):
+        '''
+        Return a DOT subgraph containing the labels for each rank. The `key`
+        variable adds an additional identifier for the subgraph and its rank
+        labels.
+        '''
 
         subgraph = dot.Graph('dates{}'.format(key), 'subgraph')
 
@@ -558,6 +563,10 @@ class FamilyTree:
         return subgraph
 
     def create_tree_subgraph(self, key):
+        '''
+        Create and return the DOT subgraph that will contain the member nodes
+        and their relatinshiops.
+        '''
 
         dotgraph = dot.Graph(key, 'subgraph')
 
@@ -576,6 +585,9 @@ class FamilyTree:
         return dotgraph
 
     def create_ranks(self):
+        '''
+        Create and return the DOT ranks
+        '''
 
         ranks = {}
         for key, node_dict in self.graph.nodes(data=True):
