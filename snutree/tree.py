@@ -651,12 +651,11 @@ class FamilyTree:
 
         edges = self.graph.edges(data=True)
 
-        # t[0]: parent key
-        # t[1]: child key
-        # t[2]: edge attribute dictionary
-        edges = sorted(edges, key = lambda t : (t[0], t[1], map(str, t[2])))
+        def sort_key(arg):
+            parent_key, child_key, edge_dict = arg
+            return (parent_key, child_key, str(edge_dict))
 
-        yield from edges
+        yield from sorted(edges, key=sort_key)
 
 ###############################################################################
 ###############################################################################
