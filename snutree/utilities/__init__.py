@@ -1,4 +1,5 @@
 import logging, time, difflib
+from functools import wraps
 from .semester import Semester
 from .colors import ColorPicker
 
@@ -10,6 +11,7 @@ def logged(function):
 
     logger = logging.getLogger(function.__module__)
 
+    @wraps(function)
     def wrapped(*args, **kwargs):
         logger.debug('%s started . . .', function.__name__)
         t0 = time.time()
