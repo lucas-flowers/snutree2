@@ -663,6 +663,19 @@ class FamilyTree:
 ###############################################################################
 ###############################################################################
 
+class TreeError(SnutreeError):
+    '''
+    Raised after any tree-related errors occur. The errno should be filled with
+    one of the TreeErrorCodes, which makes testing errors easier.
+    '''
+
+    def __init__(self, errno, msg=None):
+        self.errno = errno
+        self.message = msg
+
+    def __str__(self):
+        return self.message
+
 TreeErrorCode = Enum('TreeErrorCode', (
         'DUPLICATE_ENTITY',
         'PARENT_UNKNOWN',
@@ -671,11 +684,3 @@ TreeErrorCode = Enum('TreeErrorCode', (
         'FAMILY_COLOR_CONFLICT',
         ))
 
-class TreeError(SnutreeError):
-
-    def __init__(self, errno, msg=None):
-        self.errno = errno
-        self.message = msg
-
-    def __str__(self):
-        return self.message
