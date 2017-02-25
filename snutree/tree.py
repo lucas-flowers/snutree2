@@ -8,15 +8,7 @@ from . import dot, SnutreeError
 from .utilities import logged, ColorPicker
 from .utilities.cerberus import optional_boolean, nonempty_string, semester_like, validate
 
-# Option flag names
-flags = [
-        'semesters',
-        'custom_edges',
-        'custom_nodes',
-        'no_singletons',
-        'family_colors',
-        'unknowns',
-        ]
+# TODO replace "semester" with "rank" everywhere
 
 ###############################################################################
 ###############################################################################
@@ -145,16 +137,26 @@ class FamilyTree:
     Representation of the family tree. The tree is made of nodes connected by
     edges (duh). Every node must store a TreeEntity object in node['entity'],
     and TreeEntities may either be Members or non-Members. All entities must
-    have a valid semester field when the tree is printed (unless semesters are
-    ignored in the settings dictionary).
+    have a valid rank field when the tree is printed (unless ranks are ignored
+    in the settings dictionary).
 
     Members have big-little relationships, determined by the parent field. This
-    relationship determines the edges between them. Non-members do *not* have
+    relationship determines the edges between them. Non-Members do *not* have
     such relationships, though they may have edges in the tree provided from
     outside the directory (either through custom edges or special code).
     '''
 
     # TODO shouldn't defaults be immutables?
+
+    # Option flag names
+    flags = [
+            'semesters',
+            'custom_edges',
+            'custom_nodes',
+            'no_singletons',
+            'family_colors',
+            'unknowns',
+            ]
 
     SETTINGS_VALIDATOR = Validator({
 
@@ -227,7 +229,7 @@ class FamilyTree:
         self.graph = nx.DiGraph()
         self.settings = validate(self.SETTINGS_VALIDATOR, settings or {})
 
-        # Add all the entities in the settings and directory provided
+        # Add all the entities in the settings and member list provided
         self.add_members(members)
         self.add_custom_nodes()
 
@@ -235,6 +237,7 @@ class FamilyTree:
         self.add_member_relationships()
         self.add_custom_edges()
 
+        # Decorations
         self.remove_singleton_members()
         self.mark_families()
         self.add_colors()
@@ -245,8 +248,16 @@ class FamilyTree:
     ###########################################################################
 
     class option:
+        '''
+        Decorates methods that can be toggled through options in the tree's
+        settings dictionary. For example, @option('custom_edges') will enable
+        the function it decorates if the 'custom_edges' option in the
+        settings dictionary is True---and disable it otherwise.
+        '''
+
         def __init__(self, option_name):
             self.option_name = option_name
+
         def __call__(self, function):
             def wrapped(tree_self):
                 if tree_self.settings['layout'][self.option_name]:
@@ -268,15 +279,24 @@ class FamilyTree:
                     ((self.graph.node[key],) if node_dict else ())
 
     def member_subgraph(self):
+        '''
+        Returns a subgraph consisting only of members.
+        '''
         member_keys = (k for k, m in self.nodes_iter('entity') if isinstance(m, Member))
         return self.graph.subgraph(member_keys)
 
     def orphan_keys(self):
+        '''
+        Returns the keys of all orphaned members in the tree.
+        '''
         in_degrees = self.graph.in_degree().items()
         return (k for k, in_degree in in_degrees if in_degree == 0
                 and isinstance(self.graph.node[k]['entity'], Member))
 
     def add_entity(self, entity):
+        '''
+        Add the TreeEntity to the tree, catching any duplicates.
+        '''
 
         key = entity.key
         if key in self.graph:
@@ -286,6 +306,12 @@ class FamilyTree:
         self.graph.add_node(key, entity=entity, dot_attributes=entity.dot_attributes)
 
     def add_big_relationship(self, member, dot_attributes=None):
+        '''
+        Add an edge for the member and its parent to the tree, with any
+        provided DOT edge attributes. Ensure that the parent actually exists in
+        the tree already and that the parent is on the same rank or on a rank
+        before the member.
+        '''
 
         ckey = member.key
         pkey = member.parent
@@ -302,8 +328,8 @@ class FamilyTree:
             msg = 'semester {!r} of member {!r} cannot be prior to semester of big brother {!r}: {!r}'
             vals = member.semester, ckey, pkey, parent.semester
             raise TreeError(code, msg.format(*vals))
-        else:
-            self.graph.add_edge(pkey, ckey, dot_attributes=dot_attributes or {})
+
+        self.graph.add_edge(pkey, ckey, dot_attributes=dot_attributes or {})
 
     ###########################################################################
     #### Decoration                                                        ####
@@ -344,7 +370,7 @@ class FamilyTree:
     @logged
     def add_custom_edges(self):
         '''
-        Add all custom edges loaded from settings.
+        Add all custom edges loaded from settings. All nodes in the edge list m
         '''
 
         for path in self.settings['edges']:
@@ -357,6 +383,7 @@ class FamilyTree:
                     msg = 'custom {} {!r} has undefined node: {!r}'
                     vals = path_type, path['nodes'], key
                     raise TreeError(code, msg.format(*vals))
+
             attributes = path['attributes']
 
             edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
@@ -381,11 +408,13 @@ class FamilyTree:
     @option('family_colors')
     @logged
     def mark_families(self):
-
-        # Members-only graph
-        members_only = self.member_subgraph()
+        '''
+        Mark all families in the tree by adding a 'family' attribute to each
+        Member node, containing the key of the family's root.
+        '''
 
         # Families are weakly connected components of the members-only graph
+        members_only = self.member_subgraph()
         families = weakly_connected_components(members_only)
 
         # Add a pointer to each member's family subgraph
@@ -414,12 +443,12 @@ class FamilyTree:
         for orphan_key in self.orphan_keys():
 
             orphan = self.graph.node[orphan_key]['entity']
-            parent = UnidentifiedMember(orphan, self.settings['node_defaults']['unknown'])
-            orphan.parent = parent.key
 
+            parent = UnidentifiedMember(orphan, self.settings['node_defaults']['unknown'])
+
+            orphan.parent = parent.key
             self.add_entity(parent)
-            self.graph.add_edge(orphan.parent, orphan_key,
-                    dot_attributes=self.settings['edge_defaults']['unknown'])
+            self.graph.add_edge(orphan.parent, orphan_key, dot_attributes=self.settings['edge_defaults']['unknown'])
 
     ###########################################################################
     #### Convert to DOT                                                    ####
@@ -465,6 +494,10 @@ class FamilyTree:
 
     @logged
     def to_dot_graph(self):
+        '''
+        Convert the tree into an object representing a DOT file, then return
+        that object.
+        '''
 
         tree = self.create_tree_subgraph('members')
 
