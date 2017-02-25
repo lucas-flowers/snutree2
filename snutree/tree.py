@@ -520,10 +520,13 @@ class FamilyTree:
         return dotgraph
 
     def get_semester_bounds(self):
-        min_sem = float('inf')
-        max_sem = float('-inf')
-        for _, node_dict in self.graph.nodes_iter(data=True):
-            semester = node_dict['entity'].semester
+        '''
+        Find and return the values of the highest and lowest ranks.
+        '''
+
+        min_sem, max_sem = float('inf'), float('-inf')
+        for key, entity in self.nodes_iter('entity'):
+            semester = entity.semester
             if semester and min_sem > semester:
                 min_sem = semester
             if semester and max_sem < semester:
