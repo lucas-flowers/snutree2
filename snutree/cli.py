@@ -76,15 +76,15 @@ def get_member_format(_ctx, _parameter, value):
 
 @click.command()
 @click.argument('files', nargs=-1, type=click.File('r'))
-@click.option('output_path', '--output', '-o', type=click.Path(), default=None)
-@click.option('log_path', '--log', '-l', type=click.Path(exists=False), default=None)
-@click.option('config_paths', '--config', '-c', type=click.Path(exists=True), multiple=True)
-@click.option('member_module', '--member-format', '-m', callback=get_member_format, default='basic')
-@click.option('input_format', '--format', '-f', type=str, default=None)
-@click.option('--seed', '-S', default=0)
-@click.option('--debug', '-d', is_flag=True, default=False)
-@click.option('--verbose', '-v', is_flag=True, default=False)
-@click.option('--quiet', '-q', is_flag=True, default=False)
+@click.option('output_path', '--output', '-o', type=click.Path(), default=None, help='PDF or DOT file')
+@click.option('log_path', '--log', '-l', type=click.Path(exists=False), default=None, help='Log location')
+@click.option('config_paths', '--config', '-c', type=click.Path(exists=True), multiple=True, help='Tree configuration file')
+@click.option('member_module', '--member-format', '-m', callback=get_member_format, default='basic', help='Expected member format')
+@click.option('input_format','--format', '-f', type=str, default=None, help='Input format for stdin')
+@click.option('--seed', '-S', default=0, help='Use a different seed to move tree nodes around')
+@click.option('--verbose', '-v', is_flag=True, default=False, help='Print progress')
+@click.option('--debug', '-d', is_flag=True, default=False, help='Print debug information')
+@click.option('--quiet', '-q', is_flag=True, default=False, help="Don't print anything, including warnings")
 @logged
 def cli(files, output_path, log_path, config_paths, seed, debug, verbose, quiet, member_module, input_format):
     '''
