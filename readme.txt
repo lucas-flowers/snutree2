@@ -62,8 +62,8 @@ query: <SQL_QUERY>
 
 ~~~
 
-Architecture
-============
+Data Flow
+=========
 
 ~~~
 snutree.readers:
