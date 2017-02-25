@@ -2,7 +2,7 @@ import re, pprint
 from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.humanize import validate_with_humanized_errors
 from voluptuous.error import Error
-from snutree.utilities.voluptuous import NonEmptyString, Digits
+from snutree.utilities.voluptuous import NonEmptyString, Digits, SnutreeValidationError
 from snutree import utilities, SnutreeError
 from snutree.utilities import Semester
 from snutree.tree import Member
@@ -50,9 +50,7 @@ def dicts_to_members(dicts):
             yield member
 
     except Error as e:
-        msg = '{}. In:\n{}'
-        values = e.message, pprint.pformat(dct)
-        raise SnutreeError(msg.format(*values))
+        raise SnutreeValidationError(e, dct)
 
 class SigmaNuMember(Member):
     '''
