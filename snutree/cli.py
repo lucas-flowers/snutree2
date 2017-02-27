@@ -2,7 +2,7 @@
 import logging
 import sys
 import click
-from . import snutree, SnutreeError
+from . import gui, snutree, SnutreeError
 from .utilities import logged
 
 def main():
@@ -27,8 +27,14 @@ def main():
         logging.error('Unexpected error.', exc_info=True)
         sys.exit(1)
 
+def gui_main(ctx, param, value):
+    if value or not ctx.resilient_parsing:
+        gui.main()
+        ctx.exit()
+
 @click.command()
 @click.argument('files', nargs=-1, type=click.File('r'))
+@click.option('--gui', '-g', callback=gui_main, is_flag=True, expose_value=False, is_eager=True)
 @click.option('output_path', '--output', '-o', type=click.Path(), default=None, help='PDF or DOT file')
 @click.option('log_path', '--log', '-l', type=click.Path(exists=False), default=None, help='Log location')
 @click.option('config_paths', '--config', '-c', type=click.Path(exists=True), multiple=True, help='Tree configuration file')
