@@ -10,10 +10,10 @@ build-clean:
 clean-all: py-clean build-clean
 
 test: py-clean
-	nosetests --verbose
-
-pub-test: py-clean
 	nosetests --verbose --exclude=private
+
+priv-test: py-clean
+	nosetests --verbose
 
 compile: build-clean py-clean
 	pyinstaller __main__.spec
