@@ -7,7 +7,7 @@ build-clean:
 	rm --force --recursive build/
 	rm --force --recursive dist/
 
-clean-all: py-clean build-clean
+clean: py-clean build-clean
 
 test: py-clean
 	nosetests --verbose --exclude=private
@@ -15,6 +15,6 @@ test: py-clean
 priv-test: py-clean
 	nosetests --verbose
 
-compile: build-clean py-clean
+snutree: build-clean py-clean
 	pyinstaller __main__.spec
 
