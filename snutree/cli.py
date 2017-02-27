@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 import logging
 import sys
 import click
@@ -28,7 +27,7 @@ def main():
         sys.exit(1)
 
 def gui_main(ctx, param, value):
-    if value or not ctx.resilient_parsing:
+    if value and not ctx.resilient_parsing:
         gui.main()
         ctx.exit()
 
@@ -47,7 +46,4 @@ def gui_main(ctx, param, value):
 @logged
 def cli(*args, **kwargs):
     return snutree.generate(*args, **kwargs)
-
-if __name__ == '__main__':
-    main()
 

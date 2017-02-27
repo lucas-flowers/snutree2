@@ -2,7 +2,7 @@ import random
 import logging
 from enum import Enum
 from abc import ABCMeta, abstractmethod
-import networkx as nx
+from networkx import DiGraph
 from networkx.algorithms.components import weakly_connected_components
 from cerberus import Validator
 from . import dot, SnutreeError
@@ -229,7 +229,7 @@ class FamilyTree:
     @logged
     def __init__(self, members, settings=None):
 
-        self.graph = nx.DiGraph()
+        self.graph = DiGraph()
         self.settings = validate(self.SETTINGS_VALIDATOR, settings or {})
 
         # Add all the entities in the settings and member list provided
