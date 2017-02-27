@@ -18,4 +18,3 @@ pub-test: py-clean
 compile: build-clean py-clean
 	pyinstaller __main__.spec
 
-
