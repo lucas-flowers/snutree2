@@ -1,9 +1,10 @@
-import random, logging
-import networkx as nx
-from abc import ABCMeta, abstractmethod
+import random
+import logging
 from enum import Enum
-from cerberus import Validator
+from abc import ABCMeta, abstractmethod
+import networkx as nx
 from networkx.algorithms.components import weakly_connected_components
+from cerberus import Validator
 from . import dot, SnutreeError
 from .utilities import logged, ColorPicker
 from .utilities.cerberus import optional_boolean, nonempty_string, semester_like, validate
@@ -15,7 +16,7 @@ from .utilities.cerberus import optional_boolean, nonempty_string, semester_like
 ###############################################################################
 
 # Graphviz attributes
-attributes = {
+graphviz_attributes = {
         'type' : 'dict',
         'default' : {},
         'valueschema' : {
@@ -31,7 +32,7 @@ dot_defaults = lambda *allowed : {
         'keyschema' : {
             'allowed' : allowed,
             },
-        'valueschema' : attributes
+        'valueschema' : graphviz_attributes
         }
 
 ###############################################################################
@@ -61,6 +62,10 @@ class TreeEntity(metaclass=ABCMeta):
         + dot_attributes: The node attributes to be used in DOT
 
     '''
+
+    def __init__(self, key, rank=None):
+        self.key = key
+        self._rank = rank
 
     @property
     def rank(self):
@@ -187,7 +192,7 @@ class FamilyTree:
                 'type' : 'dict',
                 'schema' : {
                     'rank' : semester_like, # TODO the type doesn't actually need to be semester
-                    'attributes' : attributes,
+                    'attributes' : graphviz_attributes,
                     }
                 }
             },
@@ -208,7 +213,7 @@ class FamilyTree:
                         'minlength' : 2,
                         'schema' : nonempty_string,
                         },
-                    'attributes' : attributes,
+                    'attributes' : graphviz_attributes,
                     }
                 },
             },
@@ -360,7 +365,7 @@ class FamilyTree:
         Members (to add non-Members as parent nodes, use custom edges).
         '''
 
-        for key, entity in self.nodes_iter('entity'):
+        for _, entity in self.nodes_iter('entity'):
             if isinstance(entity, Member) and entity.parent:
                 self.add_big_relationship(entity)
 
@@ -467,7 +472,7 @@ class FamilyTree:
 
             if key not in self.graph.node:
                 msg = 'warning: family color map includes nonexistent member: {!r}'
-                logging.warn(msg.format(key))
+                logging.warning(msg.format(key))
 
             else:
 
@@ -523,7 +528,7 @@ class FamilyTree:
         '''
 
         min_rank, max_rank = float('inf'), float('-inf')
-        for key, entity in self.nodes_iter('entity'):
+        for _, entity in self.nodes_iter('entity'):
             rank = entity.rank
             if rank and min_rank > rank:
                 min_rank = rank

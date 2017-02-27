@@ -10,10 +10,10 @@ def dicts_to_members(dicts):
     Convert member dictionaries to member objects.
     '''
     try:
-        for d in dicts:
-            yield KeylessMember.from_dict(d)
-    except Error as e:
-        raise SnutreeValidationError(e, d)
+        for dct in dicts:
+            yield KeylessMember.from_dict(dct)
+    except Error as exc:
+        raise SnutreeValidationError(exc, dct)
 
 class KeylessMember(Member):
     '''
@@ -21,10 +21,10 @@ class KeylessMember(Member):
     '''
 
     schema = Schema({
-            Required('name') : NonEmptyString,
-            'big_name' : NonEmptyString,
-            Required('pledge_semester') : Coerce(Semester),
-            })
+        Required('name') : NonEmptyString,
+        'big_name' : NonEmptyString,
+        Required('pledge_semester') : Coerce(Semester),
+        })
 
     def __init__(self,
             name=None,

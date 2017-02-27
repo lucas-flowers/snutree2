@@ -1,4 +1,5 @@
-import re, pydotplus
+import re
+import pydotplus
 import networkx.drawing.nx_pydot as nx_pydot
 
 '''
@@ -47,7 +48,7 @@ def add_pledge_classes(pydot, graph):
     appropriately.
     '''
 
-    semester_matcher = re.compile('((Fall|Spring) \d\d\d\d)')
+    semester_matcher = re.compile(r'((Fall|Spring) \d\d\d\d)')
 
     pledge_classes = {}
     subgraphs = (s for s in pydot.get_subgraphs() if s.get_rank() == 'same')

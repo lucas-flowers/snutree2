@@ -1,8 +1,10 @@
-import io, logging, sys
+import io
+import logging
+import sys
+from inspect import cleandoc as trim
 from unittest import TestCase
 from pathlib import Path
 from click.testing import CliRunner
-from inspect import cleandoc as trim
 from snutree.cli import cli
 
 TESTS_ROOT = Path(__file__).parent
@@ -25,9 +27,9 @@ class TestCliCommon(TestCase):
         # Clean up logging
         self.logger.removeHandler(self.stream_handler)
 
-    def invoke(self, args, input=None):
-        if input:
-            infile = io.BytesIO(bytes(input, 'utf-8'))
+    def invoke(self, args, infile=None):
+        if infile:
+            infile = io.BytesIO(bytes(infile, 'utf-8'))
             infile.name = '<stdin>'
         else:
             infile = None

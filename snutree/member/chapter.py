@@ -9,10 +9,10 @@ def dicts_to_members(dicts):
     Validate a table of chapters dictionaries.
     '''
     try:
-        for d in dicts:
-            yield Chapter.from_dict(d)
-    except Error as e:
-        raise SnutreeValidationError(e, d)
+        for dct in dicts:
+            yield Chapter.from_dict(dct)
+    except Error as exc:
+        raise SnutreeValidationError(exc, dct)
 
 class Chapter(Member):
     '''

@@ -10,10 +10,10 @@ def dicts_to_members(dicts):
     Validate a table of keyed member dictionaries.
     '''
     try:
-        for d in dicts:
-            yield KeyedMember.from_dict(d)
-    except Error as e:
-        raise SnutreeValidationError(e, d)
+        for dct in dicts:
+            yield KeyedMember.from_dict(dct)
+    except Error as exc:
+        raise SnutreeValidationError(exc, dct)
 
 class KeyedMember(Member):
     '''

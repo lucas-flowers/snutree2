@@ -1,5 +1,7 @@
-import MySQLdb, MySQLdb.cursors, yaml
 from contextlib import closing
+import MySQLdb
+import MySQLdb.cursors
+import yaml
 from sshtunnel import SSHTunnelForwarder
 from cerberus import Validator
 from ..utilities.cerberus import validate, nonempty_string

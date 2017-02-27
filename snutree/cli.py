@@ -1,5 +1,7 @@
 #!/usr/bin/env python
-import click, logging, sys
+import logging
+import sys
+import click
 from . import snutree, SnutreeError
 from .utilities import logged
 

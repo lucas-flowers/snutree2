@@ -7,7 +7,7 @@ class Semester(int):
     by one semester per unit.
     '''
 
-    matcher = re.compile('(Spring|Fall) (\d+)')
+    matcher = re.compile(r'(Spring|Fall) (\d+)')
 
     def __new__(cls, *arg):
 

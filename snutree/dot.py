@@ -22,7 +22,7 @@ def dict_to_attr(attributes_dict, sep=','):
     for key, value in sorted(attributes_dict.items()):
 
         # If the value is a string bracketed by '<' and '>', use those instead
-        bracketed = type(value) == str and len(value) > 1 and value[0::len(value)-1] == '<>'
+        bracketed = isinstance(value, str) and len(value) > 1 and value[0::len(value)-1] == '<>'
 
         template = '{}="{}"' if not bracketed else '{}={}'
         dot_attributes.append(template.format(key, value))
@@ -36,7 +36,7 @@ class DotCommon(metaclass=ABCMeta):
         self.attributes = attributes or {}
 
     @abstractmethod
-    def to_dot(self, indent=0):
+    def to_dot(self, indent_level=0):
         pass
 
 class Graph(DotCommon):

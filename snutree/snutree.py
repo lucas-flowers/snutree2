@@ -1,6 +1,9 @@
-import subprocess, logging, sys, yaml
-from pluginbase import PluginBase
+import subprocess
+import logging
+import sys
 from pathlib import Path
+import yaml
+from pluginbase import PluginBase
 from . import SnutreeError
 from .readers import sql, dotread, csv
 from .tree import FamilyTree
@@ -42,7 +45,7 @@ def get_member_format(value):
 
     try:
         module = plugin_source.load_plugin(module_name)
-    except ImportError as e:
+    except ImportError:
         msg = 'must be one of {!r} or the path to a custom Python module'
         val = plugin_source.list_plugins()
         raise SnutreeError(msg.format(val))

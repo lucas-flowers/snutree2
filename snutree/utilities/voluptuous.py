@@ -1,7 +1,7 @@
 import re
 from .. import SnutreeError
 
-DIGITS_MATCHER = re.compile('\d+')
+DIGITS_MATCHER = re.compile(r'\d+')
 
 def Digits(s):
     '''

@@ -1,4 +1,6 @@
-import logging, time, difflib
+import logging
+import time
+import difflib
 from functools import wraps
 
 def logged(function):

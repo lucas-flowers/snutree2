@@ -20,6 +20,6 @@ class TestColors(TestCase):
 
     def test_use_all(self):
         colors = ColorPicker.from_graphviz()
-        for i in range(2 * len(colors)):
+        for _ in range(2 * len(colors)):
             next(colors)
 

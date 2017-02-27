@@ -48,7 +48,7 @@ class TestAffiliation(TestCase):
 
         for i, o in designations:
             with self.subTest(i=i, o=o):
-                self.assertEquals(Affiliation(i), Affiliation(o))
+                self.assertEqual(Affiliation(i), Affiliation(o))
 
     def test_constructor_tuple_success(self):
 
@@ -109,5 +109,5 @@ class TestAffiliation(TestCase):
 
         # Sorting. Primary chapter (default is 'ΔΑ') goes first
         a, c, b, d = tuple(Affiliation(s) for s in ('ΔA 1', 'Α 2', 'ΔA 2', 'Ω 1'))
-        self.assertEquals(sorted([a, c, b, d]), [a, b, c, d])
+        self.assertEqual(sorted([a, c, b, d]), [a, b, c, d])
 
