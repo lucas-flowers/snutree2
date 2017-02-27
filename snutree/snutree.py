@@ -1,6 +1,7 @@
 import subprocess
 import logging
 import sys
+from typing import Any, List, IO
 from pathlib import Path
 import yaml
 from pluginbase import PluginBase
@@ -52,7 +53,17 @@ def get_member_format(value):
 
     return module
 
-def generate(files, output_path, log_path, config_paths, seed, debug, verbose, quiet, member_module, input_format):
+def generate(files : List[IO[Any]],
+        output_path : str,
+        log_path : str,
+        config_paths : List[str],
+        seed : int,
+        debug : bool,
+        verbose : bool,
+        quiet : bool,
+        member_module,
+        input_format : str
+        ):
     '''
     Create a big-little family tree.
     '''
