@@ -29,6 +29,14 @@ from . import snutree
 # Log
 # Save
 
+def fancy_join(lst):
+    stream = StringIO()
+    csv.writer(stream).writerow(lst)
+    return stream.getvalue().strip()
+
+def fancy_split(string):
+    return next(csv.reader(StringIO(string)))
+
 class SnutreeGUI(QWidget):
 
     def __init__(self):
@@ -89,6 +97,9 @@ class SnutreeGUI(QWidget):
         textbox = QLineEdit()
         label = QLabel(label)
         button = QPushButton('Browse...')
+        row.addWidget(label)
+        row.addWidget(textbox)
+        row.addWidget(button)
 
         def browse():
 
@@ -104,15 +115,9 @@ class SnutreeGUI(QWidget):
                 except ValueError:
                     paths.append(Path(filename))
 
-            filenames_stream = StringIO()
-            csv.writer(filenames_stream).writerow(paths)
-            textbox.setText(filenames_stream.getvalue())
+            textbox.setText(fancy_join(paths))
 
         button.clicked.connect(browse)
-
-        row.addWidget(label)
-        row.addWidget(textbox)
-        row.addWidget(button)
 
         return row, textbox
 
@@ -125,7 +130,7 @@ class SnutreeGUI(QWidget):
 
     def generate(self):
 
-        files = next(csv.reader(StringIO(self.inputs_box.text())))
+        files = fancy_split(self.inputs_box.text())
 
         output_name, _filter = QFileDialog.getSaveFileName(self, 'Find', '',
                 'PDF (*.pdf);;Graphviz source (*.dot)', 'PDF (*.pdf)')
