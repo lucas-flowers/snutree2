@@ -11,6 +11,7 @@ from .tree import FamilyTree
 from .utilities import logged
 
 if getattr(sys, 'frozen', False):
+    # pylint: disable=no-member,protected-access
     SNUTREE_ROOT = Path(sys._MEIPASS)
 else:
     # The folder this file is located in (used for importing member formats)
@@ -56,7 +57,8 @@ def get_member_format(value):
 
     return module
 
-def generate(files : List[IO[Any]],
+def generate(
+        files : List[IO[Any]],
         output_path : str,
         log_path : str,
         config_paths : List[str],
