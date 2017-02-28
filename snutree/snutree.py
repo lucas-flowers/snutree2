@@ -58,16 +58,16 @@ def get_member_format(value):
     return module
 
 def generate(
-        files:List[IO[Any]]=None,
-        output_path:str=None,
-        log_path:str=None,
-        config_paths:List[str]=None,
-        member_format:str='basic',
-        input_format:str=None,
-        seed:int=0,
-        debug:bool=False,
-        verbose:bool=False,
-        quiet:bool=False,
+        files:List[IO[Any]],
+        output_path:str,
+        log_path:str,
+        config_paths:List[str],
+        member_format:str,
+        input_format:str,
+        seed:int,
+        debug:bool,
+        verbose:bool,
+        quiet:bool,
         ):
     '''
     Create a big-little family tree.
