@@ -142,16 +142,16 @@ class SnutreeGUI(QWidget):
             return
 
         snutree.generate(
-                files,
-                output_name,
-                None,
-                configs,
-                0,
-                False,
-                True,
-                False,
-                snutree.get_member_format('sigmanu'),
-                None
+                files=files,
+                output_path=output_name,
+                log_path=None,
+                config_paths=configs,
+                member_format='sigmanu',
+                input_format=None,
+                seed=0,
+                debug=False,
+                verbose=True,
+                quiet=False,
                 )
 
 def main():
