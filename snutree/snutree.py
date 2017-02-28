@@ -10,8 +10,11 @@ from .readers import sql, dotread, csv
 from .tree import FamilyTree
 from .utilities import logged
 
-# The folder this file is located in (used for importing member formats)
-SNUTREE_ROOT = Path(__file__).parent
+if getattr(sys, 'frozen', False):
+    SNUTREE_ROOT = Path(sys._MEIPASS)/'snutree'
+else:
+    # The folder this file is located in (used for importing member formats)
+    SNUTREE_ROOT = Path(__file__).parent
 
 # Location of all built-in member formats
 PLUGIN_BASE = PluginBase(package='snutree.member', searchpath=[str(SNUTREE_ROOT/'member')])
