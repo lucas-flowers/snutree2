@@ -11,7 +11,7 @@ from .tree import FamilyTree
 from .utilities import logged
 
 if getattr(sys, 'frozen', False):
-    SNUTREE_ROOT = Path(sys._MEIPASS)/'snutree'
+    SNUTREE_ROOT = Path(sys._MEIPASS)
 else:
     # The folder this file is located in (used for importing member formats)
     SNUTREE_ROOT = Path(__file__).parent

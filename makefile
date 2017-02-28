@@ -1,6 +1,6 @@
 
 snutree: build-clean py-clean
-	pyinstaller __main__.spec
+	pyinstaller snutree.spec
 
 py-clean:
 	find . -name '*.pyc'       -exec rm --force --recursive {} +

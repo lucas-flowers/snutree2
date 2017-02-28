@@ -6,7 +6,7 @@ block_cipher = None
 a = Analysis(['snutree/__main__.py'],
         pathex=['***REMOVED***'],
         binaries=[],
-        datas=[('snutree/member', 'snutree/member')],
+        datas=[('snutree/member', 'member')],
         hiddenimports=['voluptuous', 'voluptuous.humanize', 'snutree.utilities.voluptuous'],
         hookspath=[],
         runtime_hooks=[],
@@ -21,7 +21,7 @@ pyz = PYZ(a.pure, a.zipped_data,
 exe = EXE(pyz,
         a.scripts,
         exclude_binaries=True,
-        name='__main__',
+        name='snutree',
         debug=False,
         strip=False,
         upx=True,
@@ -33,6 +33,6 @@ coll = COLLECT(exe,
         a.datas,
         strip=False,
         upx=True,
-        name='__main__')
+        name='snutree')
 
 # vim: filetype=python
