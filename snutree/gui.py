@@ -109,6 +109,9 @@ class SnutreeGUI(QWidget):
         filename, _filter = QFileDialog.getOpenFileName(self, 'Find', '',
                 'All supported filetypes (*.yaml);;All files (*.*)')
 
+        if not filename:
+            return
+
         try:
             path = Path(filename).relative_to(Path.cwd())
         except ValueError:
@@ -129,13 +132,20 @@ class SnutreeGUI(QWidget):
         for i in range(items.count()):
             files.append(Path(items.item(i).text()).open())
 
-        output_name, _filter = QFileDialog.getSaveFileName(self, 'Find')
+        output_name, _filter = QFileDialog.getSaveFileName(self, 'Find', '',
+                'PDF (*.pdf);;Graphviz source (*.dot)', 'PDF (*.pdf)')
+
+        config = self.config_box.text() or None
+        configs = [config] if config else []
+
+        if not output_name:
+            return
 
         snutree.generate(
                 files,
                 output_name,
                 None,
-                [self.config_box.text()],
+                configs,
                 0,
                 False,
                 True,
