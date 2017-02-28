@@ -15,7 +15,8 @@ from PyQt5.QtWidgets import (
         QListWidget,
         QAbstractItemView,
         QLineEdit,
-        QDesktopWidget
+        QDesktopWidget,
+        QComboBox,
         )
 from . import snutree
 
@@ -74,6 +75,12 @@ class SnutreeGUI(QWidget):
                 'Supported filetypes (*.csv *.yaml *.dot);;All files (*.*)'
                 )
 
+        member_format, self.member_format_box = self.member_format_select(
+                'Member Format:',
+                'Select custom member format',
+                'Supported filetypes (*.py);;All files (*.*)'
+                )
+
         buttons = QHBoxLayout()
         gen_button = QPushButton('Generate')
         gen_button.clicked.connect(self.generate)
@@ -82,6 +89,7 @@ class SnutreeGUI(QWidget):
         layout = QVBoxLayout()
         layout.addLayout(config)
         layout.addLayout(inputs)
+        layout.addLayout(member_format)
         layout.addLayout(buttons)
 
         self.setLayout(layout)
@@ -121,6 +129,40 @@ class SnutreeGUI(QWidget):
 
         return row, textbox
 
+    def member_format_select(self, label, title, filetypes):
+
+        row = QHBoxLayout()
+        combobox = QComboBox(editable=True)
+        label = QLabel(label)
+        button = QPushButton('Browse...')
+        row.addWidget(label)
+        row.addWidget(combobox)
+        row.addWidget(button)
+
+        # TODO automate
+        combobox.addItem('basic')
+        combobox.addItem('keyed')
+        combobox.addItem('sigmanu')
+        combobox.addItem('chapter')
+
+        def browse():
+
+            filename, _filter = QFileDialog.getOpenFileName(self, title, '', filetypes)
+
+            if not filename:
+                return
+
+            try:
+                path = Path(filename).relative_to(Path.cwd())
+            except ValueError:
+                path = Path(filename)
+
+            combobox.insertItem(0, str(path))
+
+        button.clicked.connect(browse)
+
+        return row, combobox
+
     def center(self):
 
         qr = self.frameGeometry()
@@ -131,12 +173,10 @@ class SnutreeGUI(QWidget):
     def generate(self):
 
         files = fancy_split(self.inputs_box.text())
+        configs = fancy_split(self.config_box.text())
 
         output_name, _filter = QFileDialog.getSaveFileName(self, 'Find', '',
                 'PDF (*.pdf);;Graphviz source (*.dot)', 'PDF (*.pdf)')
-
-        config = self.config_box.text() or None
-        configs = [config] if config else []
 
         if not output_name:
             return
