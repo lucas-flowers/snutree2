@@ -1,5 +1,7 @@
 import sys
 import os
+import csv
+from io import StringIO
 from pathlib import Path
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
@@ -42,36 +44,38 @@ class SnutreeGUI(QWidget):
         inputs = QListWidget()
         inputs.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
-        config = QHBoxLayout()
-        config_label = QLabel('Configuration File:')
-        config_browse = QPushButton('Browse...')
-        config_browse.clicked.connect(self.config_browse)
-        config_box = QLineEdit()
-        config.addWidget(config_label)
-        config.addWidget(config_box)
-        config.addWidget(config_browse)
+        # config = QHBoxLayout()
+        # config_label = QLabel('Configuration File:')
+        # config_browse = QPushButton('Browse...')
+        # config_browse.clicked.connect(self.config_browse)
+        # config_box = QLineEdit()
+        # config.addWidget(config_label)
+        # config.addWidget(config_box)
+        # config.addWidget(config_browse)
 
-        gen_Button = QPushButton('Generate')
-        gen_Button.clicked.connect(self.generate)
-        add_button = QPushButton('Add...')
-        add_button.clicked.connect(self.add_files)
-        rem_button = QPushButton('Remove')
-        rem_button.clicked.connect(self.rem_files)
+        inputs = QHBoxLayout()
+        inputs_label = QLabel('Input Files:')
+        inputs_browse = QPushButton('Browse...')
+        inputs_browse.clicked.connect(self.inputs_browse)
+        inputs_box = QLineEdit()
+        inputs.addWidget(inputs_label)
+        inputs.addWidget(inputs_box)
+        inputs.addWidget(inputs_browse)
 
         buttons = QHBoxLayout()
-        buttons.addWidget(gen_Button)
-        buttons.addWidget(add_button)
-        buttons.addWidget(rem_button)
+        gen_button = QPushButton('Generate')
+        gen_button.clicked.connect(self.generate)
+        buttons.addWidget(gen_button)
 
         layout = QVBoxLayout()
-        layout.addLayout(config)
-        layout.addWidget(inputs)
+        # layout.addLayout(config)
+        layout.addLayout(inputs)
         layout.addLayout(buttons)
 
         self.setLayout(layout)
 
-        self.config_box = config_box
-        self.inputs = inputs
+        # self.config_box = config_box
+        self.inputs_box = inputs_box
 
         self.resize(600, 150)
         self.center()
@@ -92,32 +96,39 @@ class SnutreeGUI(QWidget):
         if key == Qt.Key_Delete:
             self.rem_files()
 
-    def add_files(self):
+    def inputs_browse(self):
 
         filenames, _filter = QFileDialog.getOpenFileNames(self, 'Find', '',
                 'All supported filetypes (*.csv *.yaml *.dot);;All files (*.*)')
 
-        for filename in filenames:
-            try:
-                path = Path(filename).relative_to(Path.cwd())
-            except ValueError:
-                path = Path(filename)
-            self.inputs.addItem(str(path))
-
-    def config_browse(self):
-
-        filename, _filter = QFileDialog.getOpenFileName(self, 'Find', '',
-                'All supported filetypes (*.yaml);;All files (*.*)')
-
-        if not filename:
+        if not filenames:
             return
 
-        try:
-            path = Path(filename).relative_to(Path.cwd())
-        except ValueError:
-            path = Path(filename)
+        paths = []
+        for filename in filenames:
+            try:
+                paths.append(Path(filename).relative_to(Path.cwd()))
+            except ValueError:
+                paths.append(Path(filename))
 
-        self.config_box.setText(str(path))
+        filenames_stream = StringIO()
+        csv.writer(filenames_stream, delimiter=';').writerow(paths)
+        self.inputs_box.setText(filenames_stream.getvalue())
+
+    # def config_browse(self):
+    #
+    #     filename, _filter = QFileDialog.getOpenFileName(self, 'Find', '',
+    #             'All supported filetypes (*.yaml);;All files (*.*)')
+    #
+    #     if not filename:
+    #         return
+    #
+    #     try:
+    #         path = Path(filename).relative_to(Path.cwd())
+    #     except ValueError:
+    #         path = Path(filename)
+    #
+    #     self.config_box.setText(str(path))
 
 
     def rem_files(self):
@@ -127,10 +138,7 @@ class SnutreeGUI(QWidget):
 
     def generate(self):
 
-        items = self.inputs
-        files = []
-        for i in range(items.count()):
-            files.append(Path(items.item(i).text()).open())
+        files = next(csv.reader(StringIO(self.inputs_box.text()), delimiter=';'))
 
         output_name, _filter = QFileDialog.getSaveFileName(self, 'Find', '',
                 'PDF (*.pdf);;Graphviz source (*.dot)', 'PDF (*.pdf)')
