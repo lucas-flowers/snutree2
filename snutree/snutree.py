@@ -58,20 +58,23 @@ def get_member_format(value):
     return module
 
 def generate(
-        files : List[IO[Any]],
-        output_path : str,
-        log_path : str,
-        config_paths : List[str],
-        seed : int,
-        debug : bool,
-        verbose : bool,
-        quiet : bool,
-        member_format : str,
-        input_format : str
+        files:List[IO[Any]]=None,
+        output_path:str=None,
+        log_path:str=None,
+        config_paths:List[str]=None,
+        member_format:str='basic',
+        input_format:str=None,
+        seed:int=0,
+        debug:bool=False,
+        verbose:bool=False,
+        quiet:bool=False,
         ):
     '''
     Create a big-little family tree.
     '''
+
+    files = files or []
+    config_paths = config_paths or []
 
     # Set up logging when it won't conflict with stdout
     if log_path or output_path:
