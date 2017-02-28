@@ -1,4 +1,5 @@
 import sys
+import os
 from pathlib import Path
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
@@ -10,8 +11,9 @@ from PyQt5.QtWidgets import (
         QVBoxLayout,
         QFileDialog,
         QListWidget,
-        QListWidgetItem,
-        QAbstractItemView
+        QAbstractItemView,
+        QLineEdit,
+        QDesktopWidget
         )
 from . import snutree
 
@@ -40,6 +42,15 @@ class SnutreeGUI(QWidget):
         inputs = QListWidget()
         inputs.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
+        config = QHBoxLayout()
+        config_label = QLabel('Configuration File:')
+        config_browse = QPushButton('Browse...')
+        config_browse.clicked.connect(self.config_browse)
+        config_box = QLineEdit()
+        config.addWidget(config_label)
+        config.addWidget(config_box)
+        config.addWidget(config_browse)
+
         gen_Button = QPushButton('Generate')
         gen_Button.clicked.connect(self.generate)
         add_button = QPushButton('Add...')
@@ -53,14 +64,27 @@ class SnutreeGUI(QWidget):
         buttons.addWidget(rem_button)
 
         layout = QVBoxLayout()
+        layout.addLayout(config)
         layout.addWidget(inputs)
         layout.addLayout(buttons)
 
-
-        self.inputs = inputs
         self.setLayout(layout)
 
+        self.config_box = config_box
+        self.inputs = inputs
+
+        self.resize(600, 150)
+        self.center()
+
         self.show()
+
+    def center(self):
+
+        qr = self.frameGeometry()
+        cp = QDesktopWidget().availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
+
 
     def keyPressEvent(self, event):
 
@@ -70,13 +94,8 @@ class SnutreeGUI(QWidget):
 
     def add_files(self):
 
-        # TODO are these the conventional names to assign?
-        filenames, _ = QFileDialog.getOpenFileNames(
-                self,
-                'Find',
-                '',
-                'All supported filetypes (*.csv *.yaml *.dot);;All files (*.*)'
-                )
+        filenames, _filter = QFileDialog.getOpenFileNames(self, 'Find', '',
+                'All supported filetypes (*.csv *.yaml *.dot);;All files (*.*)')
 
         for filename in filenames:
             try:
@@ -84,6 +103,19 @@ class SnutreeGUI(QWidget):
             except ValueError:
                 path = Path(filename)
             self.inputs.addItem(str(path))
+
+    def config_browse(self):
+
+        filename, _filter = QFileDialog.getOpenFileName(self, 'Find', '',
+                'All supported filetypes (*.yaml);;All files (*.*)')
+
+        try:
+            path = Path(filename).relative_to(Path.cwd())
+        except ValueError:
+            path = Path(filename)
+
+        self.config_box.setText(str(path))
+
 
     def rem_files(self):
 
@@ -97,11 +129,13 @@ class SnutreeGUI(QWidget):
         for i in range(items.count()):
             files.append(Path(items.item(i).text()).open())
 
+        output_name, _filter = QFileDialog.getSaveFileName(self, 'Find')
+
         snutree.generate(
                 files,
-                'out.pdf',
+                output_name,
                 None,
-                [],
+                [self.config_box.text()],
                 0,
                 False,
                 True,
