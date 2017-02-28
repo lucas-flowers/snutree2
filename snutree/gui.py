@@ -52,15 +52,19 @@ class SnutreeGUI(QWidget):
         # config.addWidget(config_label)
         # config.addWidget(config_box)
         # config.addWidget(config_browse)
+        # self.config_box = config_box
 
-        inputs = QHBoxLayout()
-        inputs_label = QLabel('Input Files:')
-        inputs_browse = QPushButton('Browse...')
-        inputs_browse.clicked.connect(self.inputs_browse)
-        inputs_box = QLineEdit()
-        inputs.addWidget(inputs_label)
-        inputs.addWidget(inputs_box)
-        inputs.addWidget(inputs_browse)
+        config, self.config_box = self.file_select(
+                'Configuration File:',
+                'Select configuration file',
+                'Supported filetypes (*.yaml);;All files (*.*)'
+                )
+
+        inputs, self.inputs_box = self.file_select(
+                'Input Files:',
+                'Select input files',
+                'Supported filetypes (*.csv *.yaml *.dot);;All files (*.*)'
+                )
 
         buttons = QHBoxLayout()
         gen_button = QPushButton('Generate')
@@ -68,19 +72,49 @@ class SnutreeGUI(QWidget):
         buttons.addWidget(gen_button)
 
         layout = QVBoxLayout()
-        # layout.addLayout(config)
+        layout.addLayout(config)
         layout.addLayout(inputs)
         layout.addLayout(buttons)
 
         self.setLayout(layout)
 
-        # self.config_box = config_box
-        self.inputs_box = inputs_box
-
         self.resize(600, 150)
         self.center()
 
         self.show()
+
+    def file_select(self, label, title, filetypes):
+
+        row = QHBoxLayout()
+        textbox = QLineEdit()
+        label = QLabel(label)
+        button = QPushButton('Browse...')
+
+        def browse():
+
+            filenames, _filter = QFileDialog.getOpenFileNames(self, title, '', filetypes)
+
+            if not filenames:
+                return
+
+            paths = []
+            for filename in filenames:
+                try:
+                    paths.append(Path(filename).relative_to(Path.cwd()))
+                except ValueError:
+                    paths.append(Path(filename))
+
+            filenames_stream = StringIO()
+            csv.writer(filenames_stream).writerow(paths)
+            textbox.setText(filenames_stream.getvalue())
+
+        button.clicked.connect(browse)
+
+        row.addWidget(label)
+        row.addWidget(textbox)
+        row.addWidget(button)
+
+        return row, textbox
 
     def center(self):
 
@@ -89,56 +123,9 @@ class SnutreeGUI(QWidget):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
-
-    def keyPressEvent(self, event):
-
-        key = event.key()
-        if key == Qt.Key_Delete:
-            self.rem_files()
-
-    def inputs_browse(self):
-
-        filenames, _filter = QFileDialog.getOpenFileNames(self, 'Find', '',
-                'All supported filetypes (*.csv *.yaml *.dot);;All files (*.*)')
-
-        if not filenames:
-            return
-
-        paths = []
-        for filename in filenames:
-            try:
-                paths.append(Path(filename).relative_to(Path.cwd()))
-            except ValueError:
-                paths.append(Path(filename))
-
-        filenames_stream = StringIO()
-        csv.writer(filenames_stream, delimiter=';').writerow(paths)
-        self.inputs_box.setText(filenames_stream.getvalue())
-
-    # def config_browse(self):
-    #
-    #     filename, _filter = QFileDialog.getOpenFileName(self, 'Find', '',
-    #             'All supported filetypes (*.yaml);;All files (*.*)')
-    #
-    #     if not filename:
-    #         return
-    #
-    #     try:
-    #         path = Path(filename).relative_to(Path.cwd())
-    #     except ValueError:
-    #         path = Path(filename)
-    #
-    #     self.config_box.setText(str(path))
-
-
-    def rem_files(self):
-
-        for item in self.inputs.selectedItems():
-            self.inputs.takeItem(self.inputs.row(item))
-
     def generate(self):
 
-        files = next(csv.reader(StringIO(self.inputs_box.text()), delimiter=';'))
+        files = next(csv.reader(StringIO(self.inputs_box.text())))
 
         output_name, _filter = QFileDialog.getSaveFileName(self, 'Find', '',
                 'PDF (*.pdf);;Graphviz source (*.dot)', 'PDF (*.pdf)')
