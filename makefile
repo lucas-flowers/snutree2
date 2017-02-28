@@ -1,4 +1,7 @@
 
+snutree: build-clean py-clean
+	pyinstaller __main__.spec
+
 py-clean:
 	find . -name '*.pyc'       -exec rm --force --recursive {} +
 	find . -name '__pycache__' -exec rm --force --recursive {} +
@@ -14,7 +17,4 @@ test: py-clean
 
 priv-test: py-clean
 	nosetests --verbose
-
-snutree: build-clean py-clean
-	pyinstaller __main__.spec
 
