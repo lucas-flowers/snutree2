@@ -66,7 +66,7 @@ def generate(
         debug : bool,
         verbose : bool,
         quiet : bool,
-        member_module,
+        member_format : str,
         input_format : str
         ):
     '''
@@ -85,6 +85,7 @@ def generate(
 
     logging.info('Retrieving data from sources')
     member_dicts = read_sources(files, stdin_fmt=input_format)
+    member_module = get_member_format(member_format)
 
     logging.info('Validating data')
     members = member_module.dicts_to_members(member_dicts)
