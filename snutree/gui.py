@@ -1,92 +1,120 @@
-import tkinter as tk
-import tkinter.ttk as ttk
-import tkinter.filedialog as tkf
+import sys
 from pathlib import Path
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
+        QApplication,
+        QWidget,
+        QLabel,
+        QPushButton,
+        QHBoxLayout,
+        QVBoxLayout,
+        QFileDialog,
+        QListWidget,
+        QListWidgetItem,
+        QAbstractItemView
+        )
 from . import snutree
 
-class SnutreeGUI(ttk.Frame):
+# Click icon
+# Select member type from one of:
+#   + Selector
+#   + Path
+# Select input file
+# See list of input files and select more
+# Execute (reading from 'config.yaml')
+# Log
+# Save
 
-    def __init__(self, parent, *args, **kwargs):
+class SnutreeGUI(QWidget):
 
-        super().__init__(parent, *args, **kwargs)
+    def __init__(self):
 
-        self.root = parent
+        super().__init__()
 
-        self.member_module = None
-        self.path_entries = {}
+        self.member_type = 'sigmanu'
 
-        self.init_gui()
+        self.initUI()
 
-    def init_gui(self):
+    def initUI(self):
 
-        self.path_input('Input', 'input_path', row=0, column=0)
-        self.path_input('Output', 'output_path', row=1, column=0, save=True)
-        self.path_input('Configuration', 'config_path', row=2, column=0)
-        self.member_module_select()
-        self.execute_button()
+        inputs = QListWidget()
+        inputs.setSelectionMode(QAbstractItemView.ExtendedSelection)
+
+        gen_Button = QPushButton('Generate')
+        gen_Button.clicked.connect(self.generate)
+        add_button = QPushButton('Add...')
+        add_button.clicked.connect(self.add_files)
+        rem_button = QPushButton('Remove')
+        rem_button.clicked.connect(self.rem_files)
+
+        buttons = QHBoxLayout()
+        buttons.addWidget(gen_Button)
+        buttons.addWidget(add_button)
+        buttons.addWidget(rem_button)
+
+        layout = QVBoxLayout()
+        layout.addWidget(inputs)
+        layout.addLayout(buttons)
 
 
-    def path_input(self, name, cli_name, row=0, column=0, save=False):
+        self.inputs = inputs
+        self.setLayout(layout)
 
-        label = tk.StringVar()
-        label.set(name)
-        label_container = tk.Label(self.root, textvariable=label)
-        label_container.grid(row=row, column=column)
+        self.show()
 
-        entry = ttk.Entry(self.root)
-        entry['width'] = 60
-        entry.grid(row=row, column=column+1)
-        self.path_entries[cli_name] = entry
+    def keyPressEvent(self, event):
 
-        def command():
-            filename = tkf.asksaveasfilename() if save else tkf.askopenfilename()
-            self.path_entries[cli_name].delete(0, tk.END)
-            self.path_entries[cli_name].insert(0, filename)
+        key = event.key()
+        if key == Qt.Key_Delete:
+            self.rem_files()
 
-        button = ttk.Button(self.root, text='Browse...', command=command)
-        button.grid(row=row, column=column+2)
+    def add_files(self):
 
-    def member_module_select(self):
+        # TODO are these the conventional names to assign?
+        filenames, _ = QFileDialog.getOpenFileNames(
+                self,
+                'Find',
+                '',
+                'All supported filetypes (*.csv *.yaml *.dot);;All files (*.*)'
+                )
 
-        default = tk.StringVar()
-        default.set('basic')
-        menu = ttk.OptionMenu(self.root, default,
-                'basic', 'keyed', 'sigmanu', 'chapter',
-                command=self.member_module_validate)
-        menu.grid(row=3, column=0)
+        for filename in filenames:
+            try:
+                path = Path(filename).relative_to(Path.cwd())
+            except ValueError:
+                path = Path(filename)
+            self.inputs.addItem(str(path))
 
-    def member_module_validate(self, value):
-        self.member_module = snutree.get_member_format(value)
+    def rem_files(self):
 
-    def execute_button(self):
+        for item in self.inputs.selectedItems():
+            self.inputs.takeItem(self.inputs.row(item))
 
-        button = ttk.Button(self.root, text='Execute', command=self.execute)
-        button.grid(row=4, column=0)
+    def generate(self):
 
-    def execute(self):
-
-        input_file = Path(self.path_entries['input_path'].get()).open()
-        output_path = self.path_entries['output_path'].get()
-        config_path = self.path_entries['config_path'].get()
+        items = self.inputs
+        files = []
+        for i in range(items.count()):
+            files.append(Path(items.item(i).text()).open())
 
         snutree.generate(
-                [input_file],
-                output_path,
+                files,
+                'out.pdf',
                 None,
-                [config_path],
+                [],
                 0,
                 False,
-                False,
                 True,
-                self.member_module,
-                None,
+                False,
+                snutree.get_member_format('sigmanu'),
+                None
                 )
 
 def main():
 
-    root = tk.Tk()
-    root.style = tk.ttk.Style()
-    root.style.theme_use('clam')
-    SnutreeGUI(root)
-    root.mainloop()
+    app = QApplication(sys.argv)
+    _ = SnutreeGUI()
+    sys.exit(app.exec_())
+
+
 
