@@ -1,6 +1,12 @@
 
-snutree: build-clean py-clean
-	pyinstaller snutree.spec
+CC = pyinstaller
+TEST = nosetests --verbose
+
+snutree: clean
+	$(CC) snutree.spec
+
+snutree-onefile: clean
+	$(CC) --onefile snutree.spec
 
 py-clean:
 	find . -name '*.pyc'       -exec rm --force --recursive {} +
@@ -13,8 +19,8 @@ build-clean:
 clean: py-clean build-clean
 
 test: py-clean
-	nosetests --verbose --exclude=private
+	$(TEST) --exclude=private
 
 priv-test: py-clean
-	nosetests --verbose
+	$(TEST)
 
