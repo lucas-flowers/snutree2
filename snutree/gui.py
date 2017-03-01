@@ -167,9 +167,10 @@ class SnutreeGUI(QWidget):
 
     def generate(self):
 
-        files = fancy_split(self.inputs_box.text())
+        files = [Path(f).open() for f in fancy_split(self.inputs_box.text())]
         configs = fancy_split(self.config_box.text())
         member_format = self.member_format_box.currentData()
+        seed = int(self.seed_box.text())
 
         output_name, _filter = QFileDialog.getSaveFileName(self, 'Find', '',
                 'PDF (*.pdf);;Graphviz source (*.dot)', 'PDF (*.pdf)')
@@ -178,13 +179,13 @@ class SnutreeGUI(QWidget):
             return
 
         snutree.generate(
-                files=[Path(f).open() for f in files],
+                files=files,
                 output_path=output_name,
                 log_path=None,
                 config_paths=configs,
                 member_format=member_format,
                 input_format=None,
-                seed=0,
+                seed=seed,
                 debug=False,
                 verbose=True,
                 quiet=False,
