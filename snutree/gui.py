@@ -2,10 +2,15 @@ import sys
 import os
 import csv
 from io import StringIO
+from contextlib import contextmanager
 from pathlib import Path
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIntValidator
+from PyQt5.QtGui import (
+    QIntValidator,
+    )
 from PyQt5.QtWidgets import (
+        QProgressDialog,
+        QProgressBar,
         QApplication,
         QWidget,
         QLabel,
@@ -77,17 +82,18 @@ class SnutreeGUI(QWidget):
 
         seed, self.seed_box = self.seed_select('Seed:')
 
-        buttons = QHBoxLayout()
+        action = QHBoxLayout()
         gen_button = QPushButton('Generate')
         gen_button.clicked.connect(self.generate)
-        buttons.addWidget(gen_button)
+        action.addWidget(gen_button)
+        self.gen_button = gen_button
 
         layout = QVBoxLayout()
         layout.addLayout(config)
         layout.addLayout(inputs)
         layout.addLayout(member_format)
         layout.addLayout(seed)
-        layout.addLayout(buttons)
+        layout.addLayout(action)
 
         self.setLayout(layout)
 
@@ -165,12 +171,29 @@ class SnutreeGUI(QWidget):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
+    @contextmanager
+    def progress(self):
+
+        # dialog = QProgressDialog('Running...', 'Cancel', 0, 0, self)
+        # dialog.show()
+        # dialog.setMinimumDuration(0)
+        # dialog.setModal(True)
+        # dialog.setAutoClose(False)
+        # dialog.setAutoReset(False)
+
+        self.setEnabled(False)
+        yield
+        self.setEnabled(True)
+
+        # dialog.setMaximum(1)
+        # dialog.setValue(1)
+
     def generate(self):
 
         files = [Path(f).open() for f in fancy_split(self.inputs_box.text())]
         configs = fancy_split(self.config_box.text())
         member_format = self.member_format_box.currentData()
-        seed = int(self.seed_box.text())
+        seed = int(self.seed_box.text()) if self.seed_box.text() else 0
 
         output_name, _filter = QFileDialog.getSaveFileName(self, 'Find', '',
                 'PDF (*.pdf);;Graphviz source (*.dot)', 'PDF (*.pdf)')
@@ -178,18 +201,20 @@ class SnutreeGUI(QWidget):
         if not output_name:
             return
 
-        snutree.generate(
-                files=files,
-                output_path=output_name,
-                log_path=None,
-                config_paths=configs,
-                member_format=member_format,
-                input_format=None,
-                seed=seed,
-                debug=False,
-                verbose=True,
-                quiet=False,
-                )
+        with self.progress():
+            snutree.generate(
+                    files=files,
+                    output_path=output_name,
+                    log_path=None,
+                    config_paths=configs,
+                    member_format=member_format,
+                    input_format=None,
+                    seed=seed,
+                    debug=False,
+                    verbose=True,
+                    quiet=False,
+                    )
+
 
 def main():
 
