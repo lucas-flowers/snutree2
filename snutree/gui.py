@@ -175,19 +175,9 @@ class SnutreeGUI(QWidget):
     @contextmanager
     def progress(self):
 
-        # dialog = QProgressDialog('Running...', 'Cancel', 0, 0, self)
-        # dialog.show()
-        # dialog.setMinimumDuration(0)
-        # dialog.setModal(True)
-        # dialog.setAutoClose(False)
-        # dialog.setAutoReset(False)
-
         self.setEnabled(False)
         yield
         self.setEnabled(True)
-
-        # dialog.setMaximum(1)
-        # dialog.setValue(1)
 
     def generate(self):
 
