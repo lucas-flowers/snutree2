@@ -1,5 +1,4 @@
 import sys
-import os
 import csv
 from io import StringIO
 from contextlib import contextmanager
@@ -15,6 +14,7 @@ from PyQt5.QtWidgets import (
         QWidget,
         QLabel,
         QPushButton,
+        QGridLayout,
         QHBoxLayout,
         QVBoxLayout,
         QFileDialog,
@@ -56,61 +56,64 @@ class SnutreeGUI(QWidget):
 
         super().__init__()
 
-        self.member_type = 'sigmanu'
-
+        self.__row = 0
         self.initUI()
+
+    @property
+    def next_row(self):
+        result = self.__row
+        self.__row += 1
+        return result
+
+    @property
+    def current_row(self):
+        return self.__row
 
     def initUI(self):
 
-        config, self.config_box = self.file_select(
+        self.setLayout(QGridLayout())
+
+        self.config_box = self.file_select(
+                self.next_row,
                 'Configuration File:',
                 'Select configuration file',
                 'Supported filetypes (*.yaml);;All files (*)'
                 )
 
-        inputs, self.inputs_box = self.file_select(
+        self.inputs_box = self.file_select(
+                self.next_row,
                 'Input Files:',
                 'Select input files',
                 'Supported filetypes (*.csv *.yaml *.dot);;All files (*)'
                 )
 
-        member_format, self.member_format_box = self.member_format_select(
+        self.member_format_box = self.member_format_select(
+                self.next_row,
                 'Member Format:',
                 'Select custom member format',
                 'Supported filetypes (*.py);;All files (*)'
                 )
 
-        seed, self.seed_box = self.seed_select('Seed:')
+        self.seed_box = self.seed_select(self.next_row, 'Seed:')
 
-        action = QHBoxLayout()
         gen_button = QPushButton('Generate')
         gen_button.clicked.connect(self.generate)
-        action.addWidget(gen_button)
+        self.layout().addWidget(gen_button, self.next_row, 0)
         self.gen_button = gen_button
-
-        layout = QVBoxLayout()
-        layout.addLayout(config)
-        layout.addLayout(inputs)
-        layout.addLayout(member_format)
-        layout.addLayout(seed)
-        layout.addLayout(action)
-
-        self.setLayout(layout)
 
         self.resize(600, 150)
         self.center()
 
         self.show()
 
-    def file_select(self, label, title, filetypes):
+    def file_select(self, row, label, title, filetypes):
 
-        row = QHBoxLayout()
         textbox = QLineEdit()
-        label = QLabel(label)
+        label = QLabel(label, alignment=Qt.AlignRight)
         button = QPushButton('Browse...')
-        row.addWidget(label)
-        row.addWidget(textbox)
-        row.addWidget(button)
+        self.layout().addWidget(label, row, 0)
+        self.layout().addWidget(textbox, row, 1)
+        self.layout().addWidget(button, row, 2)
 
         def browse():
 
@@ -121,17 +124,16 @@ class SnutreeGUI(QWidget):
 
         button.clicked.connect(browse)
 
-        return row, textbox
+        return textbox
 
-    def member_format_select(self, label, title, filetypes):
+    def member_format_select(self, row, label, title, filetypes):
 
-        row = QHBoxLayout()
         combobox = QComboBox()
-        label = QLabel(label)
+        label = QLabel(label, alignment=Qt.AlignRight)
         button = QPushButton('Browse...')
-        row.addWidget(label)
-        row.addWidget(combobox)
-        row.addWidget(button)
+        self.layout().addWidget(label, row, 0)
+        self.layout().addWidget(combobox, row, 1)
+        self.layout().addWidget(button, row, 2)
 
         # Populate default formats
         formats = snutree.PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
@@ -150,19 +152,18 @@ class SnutreeGUI(QWidget):
 
         button.clicked.connect(browse)
 
-        return row, combobox
+        return combobox
 
-    def seed_select(self, label):
+    def seed_select(self, row, label):
 
-        row = QHBoxLayout()
-        label = QLabel(label)
+        label = QLabel(label, alignment=Qt.AlignRight)
         textbox = QLineEdit()
-        row.addWidget(label)
-        row.addWidget(textbox)
+        self.layout().addWidget(label, row, 0)
+        self.layout().addWidget(textbox, row, 1)
 
         textbox.setValidator(QIntValidator())
 
-        return row, textbox
+        return textbox
 
     def center(self):
 
