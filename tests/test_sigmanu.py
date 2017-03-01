@@ -1,13 +1,25 @@
 import string
 from unittest import TestCase
-from snutree.member.sigmanu import Affiliation
+import snutree.member.sigmanu as sn
+
+class TestSigmaNu(TestCase):
+
+    def test_schema_agreement(self):
+
+        for MemberType in set(sn.MemberTypes.values()) - {sn.Reaffiliate}:
+            schema = MemberType.schema
+            with self.subTest(schema=schema):
+                type_keys = set((s if isinstance(s, str) else s.schema)
+                    for s in schema.schema.keys())
+                expected_keys = set(sn.schema_information().keys())
+                self.assertTrue(type_keys <= expected_keys)
 
 class TestAffiliation(TestCase):
 
     def test_unicode_latin(self):
 
         # Make sure the lookalike dict is set right (it's hard to tell)
-        for latin, greek in Affiliation.LATIN_TO_GREEK.items():
+        for latin, greek in sn.Affiliation.LATIN_TO_GREEK.items():
             if latin not in ('(A)', '(B)'):
                 self.assertIn(latin, string.ascii_letters)
                 self.assertNotIn(greek, string.ascii_letters)
@@ -15,7 +27,7 @@ class TestAffiliation(TestCase):
     def test_unicode_english(self):
 
         # Make sure the mapping dict is also set right
-        for greek in Affiliation.ENGLISH_TO_GREEK.values():
+        for greek in sn.Affiliation.ENGLISH_TO_GREEK.values():
             self.assertNotIn(greek, string.ascii_letters)
 
     def test_constructor_string_success(self):
@@ -48,7 +60,7 @@ class TestAffiliation(TestCase):
 
         for i, o in designations:
             with self.subTest(i=i, o=o):
-                self.assertEqual(Affiliation(i), Affiliation(o))
+                self.assertEqual(sn.Affiliation(i), sn.Affiliation(o))
 
     def test_constructor_tuple_success(self):
 
@@ -60,7 +72,7 @@ class TestAffiliation(TestCase):
         for d in designations:
             with self.subTest(d=d):
                 try:
-                    Affiliation(*d)
+                    sn.Affiliation(*d)
                 except Exception as e:
                     msg = 'Unexpected exception for {!r}: {}'
                     vals = d, e
@@ -88,7 +100,7 @@ class TestAffiliation(TestCase):
 
         for f in failed_designations:
             with self.subTest(f=f):
-                self.assertRaises(ValueError, Affiliation, f)
+                self.assertRaises(ValueError, sn.Affiliation, f)
 
     def test_constructor_type_failure(self):
 
@@ -102,12 +114,11 @@ class TestAffiliation(TestCase):
                 ]
         for f in failed_types:
             with self.subTest(f=f):
-                self.assertRaises(TypeError, Affiliation, *f)
-
+                self.assertRaises(TypeError, sn.Affiliation, *f)
 
     def test_sorting(self):
 
         # Sorting. Primary chapter (default is 'ΔΑ') goes first
-        a, c, b, d = tuple(Affiliation(s) for s in ('ΔA 1', 'Α 2', 'ΔA 2', 'Ω 1'))
+        a, c, b, d = tuple(sn.Affiliation(s) for s in ('ΔA 1', 'Α 2', 'ΔA 2', 'Ω 1'))
         self.assertEqual(sorted([a, c, b, d]), [a, b, c, d])
 

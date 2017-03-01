@@ -50,6 +50,23 @@ def dicts_to_members(dicts):
     except Error as e:
         raise SnutreeValidationError(e, dct)
 
+def schema_information():
+    '''
+    Return a representation of the expected schema for this member type, for
+    users.
+    '''
+    schema = [
+            ('status', 'Status (one of {})'.format(MemberTypes.keys())),
+            ('badge', 'Badge number'),
+            ('first_name', 'First name'),
+            ('preferred_name', 'Preferred name'),
+            ('last_name', 'Last name'),
+            ('big_badge', "Big brother's badge number"),
+            ('pledge_semester', 'The brother\'s semester of candicacy (e.g., "Fall 2000" or "Spring 1999")'),
+            ('affiliations', 'Comma-separated list of chapter badges (e.g., "Alpha 5, Ω 15, HM(A)"'),
+            ]
+    return {k : d for k, d in schema}
+
 class Affiliation:
     '''
     A chapter affiliation. Two definitions should be made clear here:
