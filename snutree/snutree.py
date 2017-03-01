@@ -175,8 +175,13 @@ def write_stream(output, fmt, stream):
     Write output of the given format to the streem.
     '''
 
+    # TODO catch errors when dot does not exist
+    # TODO bundle DOT?
+
     if fmt == '.pdf':
-        result = subprocess.run(['dot', '-Tpdf'], check=True,
+        # `shell=True` is necessary for Windows, but not for Linux. The
+        # program arguments are constants, so shell=True should be fine
+        result = subprocess.run(['dot', '-Tpdf'], check=True, shell=True,
                 input=output, stdout=subprocess.PIPE)
         output = result.stdout
     elif fmt not in ('.dot', None):

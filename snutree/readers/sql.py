@@ -6,6 +6,8 @@ from sshtunnel import SSHTunnelForwarder
 from cerberus import Validator
 from ..utilities.cerberus import validate, nonempty_string
 
+# TODO catch bad connections (i.e., SSHTunnelForwarderError, SQL errors, etc.)
+
 # Validates a configuration YAML file with SQL and ssh options
 MYSQL_CNF_VALIDATOR = Validator({
 
