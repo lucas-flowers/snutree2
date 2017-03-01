@@ -4,6 +4,7 @@ import csv
 from io import StringIO
 from pathlib import Path
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIntValidator
 from PyQt5.QtWidgets import (
         QApplication,
         QWidget,
@@ -36,7 +37,7 @@ def fancy_join(lst):
     return stream.getvalue().strip()
 
 def fancy_split(string):
-    return next(csv.reader(StringIO(string)))
+    return next(csv.reader(StringIO(string))) if string != '' else ''
 
 def relative_path(path):
     try:
@@ -59,33 +60,25 @@ class SnutreeGUI(QWidget):
         inputs = QListWidget()
         inputs.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
-        # config = QHBoxLayout()
-        # config_label = QLabel('Configuration File:')
-        # config_browse = QPushButton('Browse...')
-        # config_browse.clicked.connect(self.config_browse)
-        # config_box = QLineEdit()
-        # config.addWidget(config_label)
-        # config.addWidget(config_box)
-        # config.addWidget(config_browse)
-        # self.config_box = config_box
-
         config, self.config_box = self.file_select(
                 'Configuration File:',
                 'Select configuration file',
-                'Supported filetypes (*.yaml);;All files (*.*)'
+                'Supported filetypes (*.yaml);;All files (*)'
                 )
 
         inputs, self.inputs_box = self.file_select(
                 'Input Files:',
                 'Select input files',
-                'Supported filetypes (*.csv *.yaml *.dot);;All files (*.*)'
+                'Supported filetypes (*.csv *.yaml *.dot);;All files (*)'
                 )
 
         member_format, self.member_format_box = self.member_format_select(
                 'Member Format:',
                 'Select custom member format',
-                'Supported filetypes (*.py);;All files (*.*)'
+                'Supported filetypes (*.py);;All files (*)'
                 )
+
+        seed, self.seed_box = self.seed_select('Seed:')
 
         buttons = QHBoxLayout()
         gen_button = QPushButton('Generate')
@@ -96,6 +89,7 @@ class SnutreeGUI(QWidget):
         layout.addLayout(config)
         layout.addLayout(inputs)
         layout.addLayout(member_format)
+        layout.addLayout(seed)
         layout.addLayout(buttons)
 
         self.setLayout(layout)
@@ -136,6 +130,7 @@ class SnutreeGUI(QWidget):
         row.addWidget(combobox)
         row.addWidget(button)
 
+        # Populate default formats
         formats = snutree.PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
         for f in formats:
             combobox.addItem(f)
@@ -145,11 +140,26 @@ class SnutreeGUI(QWidget):
             filename, _filter = QFileDialog.getOpenFileName(self, title, '', filetypes)
             if filename:
                 path = relative_path(filename)
-                combobox.insertItem(0, str(path))
+                if len(formats) < combobox.count():
+                    combobox.removeItem(combobox.count()-1)
+                combobox.addItem(str(path))
+                combobox.setCurrentIndex(combobox.count()-1)
 
         button.clicked.connect(browse)
 
         return row, combobox
+
+    def seed_select(self, label):
+
+        row = QHBoxLayout()
+        label = QLabel(label)
+        textbox = QLineEdit()
+        row.addWidget(label)
+        row.addWidget(textbox)
+
+        textbox.setValidator(QIntValidator())
+
+        return row, textbox
 
     def center(self):
 
@@ -162,6 +172,7 @@ class SnutreeGUI(QWidget):
 
         files = fancy_split(self.inputs_box.text())
         configs = fancy_split(self.config_box.text())
+        member_format = self.member_format_box.currentText()
 
         output_name, _filter = QFileDialog.getSaveFileName(self, 'Find', '',
                 'PDF (*.pdf);;Graphviz source (*.dot)', 'PDF (*.pdf)')
@@ -174,7 +185,7 @@ class SnutreeGUI(QWidget):
                 output_path=output_name,
                 log_path=None,
                 config_paths=configs,
-                member_format='sigmanu',
+                member_format=member_format,
                 input_format=None,
                 seed=0,
                 debug=False,
