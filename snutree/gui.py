@@ -57,9 +57,6 @@ class SnutreeGUI(QWidget):
 
     def initUI(self):
 
-        inputs = QListWidget()
-        inputs.setSelectionMode(QAbstractItemView.ExtendedSelection)
-
         config, self.config_box = self.file_select(
                 'Configuration File:',
                 'Select configuration file',
@@ -132,8 +129,8 @@ class SnutreeGUI(QWidget):
 
         # Populate default formats
         formats = snutree.PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
-        for f in formats:
-            combobox.addItem(f)
+        for fmt in formats:
+            combobox.addItem(fmt, fmt)
 
         def browse():
 
@@ -142,7 +139,7 @@ class SnutreeGUI(QWidget):
                 path = relative_path(filename)
                 if len(formats) < combobox.count():
                     combobox.removeItem(combobox.count()-1)
-                combobox.addItem(str(path))
+                combobox.addItem(str(path.name), str(path))
                 combobox.setCurrentIndex(combobox.count()-1)
 
         button.clicked.connect(browse)
@@ -172,7 +169,7 @@ class SnutreeGUI(QWidget):
 
         files = fancy_split(self.inputs_box.text())
         configs = fancy_split(self.config_box.text())
-        member_format = self.member_format_box.currentText()
+        member_format = self.member_format_box.currentData()
 
         output_name, _filter = QFileDialog.getSaveFileName(self, 'Find', '',
                 'PDF (*.pdf);;Graphviz source (*.dot)', 'PDF (*.pdf)')
@@ -181,7 +178,7 @@ class SnutreeGUI(QWidget):
             return
 
         snutree.generate(
-                files=files,
+                files=[Path(f).open() for f in files],
                 output_path=output_name,
                 log_path=None,
                 config_paths=configs,
