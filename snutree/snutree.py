@@ -175,14 +175,17 @@ def write_stream(output, fmt, stream):
     Write output of the given format to the streem.
     '''
 
-    # TODO catch errors when dot does not exist
-    # TODO bundle DOT?
-
     if fmt == '.pdf':
-        # `shell=True` is necessary for Windows, but not for Linux. The
-        # program arguments are constants, so shell=True should be fine
-        result = subprocess.run(['dot', '-Tpdf'], check=True, shell=True,
-                input=output, stdout=subprocess.PIPE)
+
+        try:
+            # `shell=True` is necessary for Windows, but not for Linux. The
+            # program arguments are constants, so shell=True should be fine
+            result = subprocess.run(['dot', '-Tpdf'], check=True, shell=True,
+                    input=output, stdout=subprocess.PIPE)
+        except OSError as e:
+            msg = 'had a problem compiling to PDF:\n{}'
+            raise SnutreeError(msg.format(e))
+
         output = result.stdout
     elif fmt not in ('.dot', None):
         msg = 'output filetype "{}" not supported'
