@@ -1,5 +1,6 @@
 import sys
 import csv
+import logging
 from io import StringIO
 from contextlib import contextmanager
 from pathlib import Path
@@ -8,49 +9,50 @@ from PyQt5.QtGui import (
     QIntValidator,
     )
 from PyQt5.QtWidgets import (
-        QProgressDialog,
-        QProgressBar,
         QApplication,
-        QWidget,
-        QLabel,
-        QPushButton,
-        QGridLayout,
-        QHBoxLayout,
-        QVBoxLayout,
-        QFileDialog,
-        QListWidget,
-        QAbstractItemView,
-        QLineEdit,
-        QDesktopWidget,
         QComboBox,
+        QDesktopWidget,
+        QErrorMessage,
+        QFileDialog,
+        QGridLayout,
+        QLabel,
+        QLineEdit,
+        QPushButton,
+        QWidget,
         )
 from . import snutree
 
-# Click icon
-# Select member type from one of:
-#   + Selector
-#   + Path
-# Select input file
-# See list of input files and select more
-# Execute (reading from 'config.yaml')
-# Log
-# Save
-
 def fancy_join(lst):
+    '''
+    Join the strings in the provided list in style of a CSV file (to avoid the
+    hassle of escaping delimiters, etc.). Return the resulting string.
+    '''
     stream = StringIO()
     csv.writer(stream).writerow(lst)
     return stream.getvalue().strip()
 
 def fancy_split(string):
+    '''
+    Split the string as if it were a CSV file row. Return the resulting list.
+    '''
     return next(csv.reader(StringIO(string))) if string != '' else ''
 
 def relative_path(path):
+    '''
+    Return the path as it is represented relative to the current working
+    directory. If that is not possible (i.e., the path is not under the current
+    working directory), return path.
+    '''
     try:
         return Path(path).relative_to(Path.cwd())
     except ValueError:
         return Path(path)
 
 class SnutreeGUI(QWidget):
+    '''
+    A simple GUI for the snutree program. Advanced features are available in
+    the CLI version of the program.
+    '''
 
     def __init__(self):
 
@@ -107,6 +109,11 @@ class SnutreeGUI(QWidget):
         self.show()
 
     def file_select(self, row, label, title, filetypes):
+        '''
+        Create a file selector in the given row of the GUI's grid. The selector
+        has a label, a title (for the file selection dialog), and supported
+        filetypes.
+        '''
 
         textbox = QLineEdit()
         label = QLabel(label, alignment=Qt.AlignRight)
@@ -116,6 +123,10 @@ class SnutreeGUI(QWidget):
         self.layout().addWidget(button, row, 2)
 
         def browse():
+            '''
+            Have the user select multiple files. Store the files as a
+            comma-delimited list in the GUI's textbox.
+            '''
 
             filenames, _filter = QFileDialog.getOpenFileNames(self, title, '', filetypes)
             if filenames:
@@ -127,6 +138,11 @@ class SnutreeGUI(QWidget):
         return textbox
 
     def member_format_select(self, row, label, title, filetypes):
+        '''
+        Create a member format selector. Have the builtins already selectable
+        from a drop-down, and allow the possibility for a custom Python module
+        to be selected instead of the builtins.
+        '''
 
         combobox = QComboBox()
         label = QLabel(label, alignment=Qt.AlignRight)
@@ -141,11 +157,17 @@ class SnutreeGUI(QWidget):
             combobox.addItem(fmt, fmt)
 
         def browse():
+            '''
+            Have the user select a single file to provide the member format.
+            Add the file's name as an option in the dropdown (and remove any
+            previous custom modules that were selected).
+            '''
 
             filename, _filter = QFileDialog.getOpenFileName(self, title, '', filetypes)
             if filename:
                 path = relative_path(filename)
                 if len(formats) < combobox.count():
+                    # Remove the last custom module selected
                     combobox.removeItem(combobox.count()-1)
                 combobox.addItem(str(path.name), str(path))
                 combobox.setCurrentIndex(combobox.count()-1)
@@ -155,6 +177,9 @@ class SnutreeGUI(QWidget):
         return combobox
 
     def seed_select(self, row, label):
+        '''
+        Create the textbox to enter the seed in.
+        '''
 
         label = QLabel(label, alignment=Qt.AlignRight)
         textbox = QLineEdit()
@@ -166,7 +191,9 @@ class SnutreeGUI(QWidget):
         return textbox
 
     def center(self):
-
+        '''
+        Center this widget on the screen.
+        '''
         qr = self.frameGeometry()
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
@@ -175,11 +202,16 @@ class SnutreeGUI(QWidget):
     @contextmanager
     def progress(self):
 
+
         self.setEnabled(False)
         yield
         self.setEnabled(True)
 
     def generate(self):
+        '''
+        Run the snutree program by calling snutree.generate. Catch recoverable
+        errors.
+        '''
 
         files = [Path(f).open() for f in fancy_split(self.inputs_box.text())]
         configs = fancy_split(self.config_box.text())
@@ -193,25 +225,38 @@ class SnutreeGUI(QWidget):
             return
 
         with self.progress():
-            snutree.generate(
-                    files=files,
-                    output_path=output_name,
-                    log_path=None,
-                    config_paths=configs,
-                    member_format=member_format,
-                    input_format=None,
-                    seed=seed,
-                    debug=False,
-                    verbose=True,
-                    quiet=False,
-                    )
 
+            try:
+
+                snutree.generate(
+                        files=files,
+                        output_path=output_name,
+                        log_path=None,
+                        config_paths=configs,
+                        member_format=member_format,
+                        input_format=None,
+                        seed=seed,
+                        debug=False,
+                        verbose=True,
+                        quiet=False,
+                        )
+
+            except snutree.SnutreeError as e:
+                logging.error(e)
+                error = QErrorMessage()
+                error.showMessage(str(e).replace('\n', '<br>'))
+                error.exec_()
 
 def main():
 
-    app = QApplication(sys.argv)
-    _ = SnutreeGUI()
-    sys.exit(app.exec_())
-
+    try:
+        app = QApplication(sys.argv)
+        _ = SnutreeGUI()
+        sys.exit(app.exec_())
+    except Exception:
+        logging.error('Unexpected error.', exc_info=True)
+        error = QErrorMessage()
+        error.showMessage('Unexpected error. See log for details.')
+        sys.exit(error.exec_())
 
 
