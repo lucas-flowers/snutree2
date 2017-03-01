@@ -257,6 +257,5 @@ def main():
         logging.error('Unexpected error.', exc_info=True)
         error = QErrorMessage()
         error.showMessage('Unexpected error. See log for details.')
-        sys.exit(error.exec_())
-
+        error.exec_()
 
