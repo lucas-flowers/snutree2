@@ -38,6 +38,12 @@ def fancy_join(lst):
 def fancy_split(string):
     return next(csv.reader(StringIO(string)))
 
+def relative_path(path):
+    try:
+        return Path(path).relative_to(Path.cwd())
+    except ValueError:
+        return Path(path)
+
 class SnutreeGUI(QWidget):
 
     def __init__(self):
@@ -112,18 +118,9 @@ class SnutreeGUI(QWidget):
         def browse():
 
             filenames, _filter = QFileDialog.getOpenFileNames(self, title, '', filetypes)
-
-            if not filenames:
-                return
-
-            paths = []
-            for filename in filenames:
-                try:
-                    paths.append(Path(filename).relative_to(Path.cwd()))
-                except ValueError:
-                    paths.append(Path(filename))
-
-            textbox.setText(fancy_join(paths))
+            if filenames:
+                paths = [relative_path(f) for f in filenames]
+                textbox.setText(fancy_join(paths))
 
         button.clicked.connect(browse)
 
@@ -132,32 +129,23 @@ class SnutreeGUI(QWidget):
     def member_format_select(self, label, title, filetypes):
 
         row = QHBoxLayout()
-        combobox = QComboBox(editable=True)
+        combobox = QComboBox()
         label = QLabel(label)
         button = QPushButton('Browse...')
         row.addWidget(label)
         row.addWidget(combobox)
         row.addWidget(button)
 
-        # TODO automate
-        combobox.addItem('basic')
-        combobox.addItem('keyed')
-        combobox.addItem('sigmanu')
-        combobox.addItem('chapter')
+        formats = snutree.PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
+        for f in formats:
+            combobox.addItem(f)
 
         def browse():
 
             filename, _filter = QFileDialog.getOpenFileName(self, title, '', filetypes)
-
-            if not filename:
-                return
-
-            try:
-                path = Path(filename).relative_to(Path.cwd())
-            except ValueError:
-                path = Path(filename)
-
-            combobox.insertItem(0, str(path))
+            if filename:
+                path = relative_path(filename)
+                combobox.insertItem(0, str(path))
 
         button.clicked.connect(browse)
 
