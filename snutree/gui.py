@@ -241,7 +241,7 @@ class SnutreeGUI(QWidget):
                         quiet=False,
                         )
 
-            except snutree.SnutreeError as e:
+            except Exception as e:
                 logging.error(e)
                 error = QErrorMessage()
                 error.showMessage(str(e).replace('\n', '<br>'))
@@ -249,13 +249,7 @@ class SnutreeGUI(QWidget):
 
 def main():
 
-    try:
-        app = QApplication(sys.argv)
-        _ = SnutreeGUI()
-        sys.exit(app.exec_())
-    except Exception:
-        logging.error('Unexpected error.', exc_info=True)
-        error = QErrorMessage()
-        error.showMessage('Unexpected error. See log for details.')
-        error.exec_()
+    app = QApplication(sys.argv)
+    _ = SnutreeGUI()
+    sys.exit(app.exec_())
 
