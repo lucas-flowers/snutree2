@@ -1,6 +1,7 @@
 import sys
 import csv
 import logging
+from itertools import count
 from functools import wraps
 from io import StringIO
 from pathlib import Path
@@ -101,30 +102,22 @@ class SnutreeGUI(QWidget):
         self.__row = 0
         self.initUI()
 
-    @property
-    def next_row(self):
-        result = self.__row
-        self.__row += 1
-        return result
-
-    @property
-    def current_row(self):
-        return self.__row
-
     def initUI(self):
+
+        row = count(start=0)
 
         font_height = self.fontMetrics().height()
         self.setLayout(QGridLayout())
 
         self.config_box = self.file_select(
-                self.next_row,
+                next(row),
                 'Configuration File:',
                 'Select configuration file',
                 'Supported filetypes (*.yaml);;All files (*)'
                 )
 
         self.inputs_box = self.file_select(
-                self.next_row,
+                next(row),
                 'Input Files:',
                 'Select input files',
                 'Supported filetypes (*.csv *.yaml *.dot);;All files (*)'
@@ -142,18 +135,18 @@ class SnutreeGUI(QWidget):
         self.table.setMinimumWidth(40 * font_height)
         self.table.setMinimumHeight(10 * font_height)
         self.member_format_box = self.member_format_select(
-                self.next_row,
+                next(row),
                 'Member Format:',
                 'Select custom member format',
                 'Supported filetypes (*.py);;All files (*)'
                 )
-        self.layout().addWidget(self.table, self.next_row, 1)
+        self.layout().addWidget(self.table, next(row), 1)
 
-        self.seed_box = self.seed_select(self.next_row, 'Seed:')
+        self.seed_box = self.seed_select(next(row), 'Seed:')
 
         gen_button = QPushButton('Generate')
         gen_button.clicked.connect(lambda checked : self.generate())
-        self.layout().addWidget(gen_button, self.next_row, 0)
+        self.layout().addWidget(gen_button, next(row), 0)
         self.gen_button = gen_button
 
         self.center()
