@@ -1,9 +1,11 @@
 import sys
 import csv
+import io
 import logging
+import tempfile
 from functools import wraps
 from io import StringIO
-from contextlib import contextmanager
+from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import (
@@ -251,14 +253,6 @@ class SnutreeGUI(QWidget):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
-    @contextmanager
-    def progress(self):
-
-
-        self.setEnabled(False)
-        yield
-        self.setEnabled(True)
-
     @recoverable
     def generate(self):
         '''
@@ -271,17 +265,12 @@ class SnutreeGUI(QWidget):
         member_format = self.member_format_box.currentData()
         seed = int(self.seed_box.text()) if self.seed_box.text() else 0
 
-        output_name, _filter = QFileDialog.getSaveFileName(self, 'Find', '',
-                'PDF (*.pdf);;Graphviz source (*.dot)', 'PDF (*.pdf)')
-
-        if not output_name:
-            return
-
-        with self.progress():
+        temp = io.StringIO()
+        with redirect_stdout(temp):
 
             snutree.generate(
                     files=files,
-                    output_path=output_name,
+                    output_path=None,
                     log_path=None,
                     config_paths=configs,
                     member_format=member_format,
@@ -291,6 +280,14 @@ class SnutreeGUI(QWidget):
                     verbose=True,
                     quiet=False,
                     )
+
+        output_name, _filter = QFileDialog.getSaveFileName(self, 'Find', '',
+                'PDF (*.pdf);;Graphviz source (*.dot)', 'PDF (*.pdf)')
+
+        if not output_name:
+            return
+
+        snutree.write_output(temp.getvalue(), output_name)
 
 def main():
 
