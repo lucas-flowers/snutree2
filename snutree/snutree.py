@@ -52,8 +52,14 @@ def get_member_format(value):
         module = plugin_source.load_plugin(module_name)
     except ImportError:
         msg = 'must be one of {!r} or the path to a custom Python module'
-        val = plugin_source.list_plugins()
+        val = PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
         raise SnutreeError(msg.format(val))
+
+    expected_functions = ['dicts_to_members', 'schema_information']
+    if not all([hasattr(module, attr) for attr in expected_functions]):
+        msg = 'member module {!r} must implement: {!r}'
+        vals = module_name, expected_functions
+        raise SnutreeError(msg.format(*vals))
 
     return module
 
