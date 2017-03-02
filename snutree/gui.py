@@ -111,6 +111,14 @@ class SnutreeGUI(QWidget):
                 'Supported filetypes (*.csv *.yaml *.dot);;All files (*)'
                 )
 
+        self.output_box = self.file_select(
+                self.next_row,
+                'Output File:',
+                'Select output file',
+                'PDF (*.pdf);;Graphviz source (*.dot)',
+                save=True,
+                )
+
         self.table = QTableWidget()
         self.table.setRowCount(2)
         self.table.setColumnCount(2)
@@ -141,7 +149,7 @@ class SnutreeGUI(QWidget):
 
         self.show()
 
-    def file_select(self, row, label, title, filetypes):
+    def file_select(self, row, label, title, filetypes, save=False):
         '''
         Create a file selector in the given row of the GUI's grid. The selector
         has a label, a title (for the file selection dialog), and supported
@@ -155,13 +163,18 @@ class SnutreeGUI(QWidget):
         self.layout().addWidget(textbox, row, 1)
         self.layout().addWidget(button, row, 2)
 
+        if save:
+            file_getter = lambda *args, **kwargs : [QFileDialog.getSaveFileName(*args, **kwargs)[0]]
+        else:
+            file_getter = lambda *args, **kwargs : QFileDialog.getOpenFileNames(*args, **kwargs)[0]
+
         def browse():
             '''
             Have the user select multiple files. Store the files as a
             comma-delimited list in the GUI's textbox.
             '''
 
-            filenames, _filter = QFileDialog.getOpenFileNames(self, title, '', filetypes)
+            filenames = file_getter(self, title, '', filetypes)
             if filenames:
                 paths = [relative_path(f) for f in filenames]
                 textbox.setText(fancy_join(paths))
@@ -263,31 +276,21 @@ class SnutreeGUI(QWidget):
         files = [Path(f).open() for f in fancy_split(self.inputs_box.text())]
         configs = fancy_split(self.config_box.text())
         member_format = self.member_format_box.currentData()
+        output_path = self.output_box.text()
         seed = int(self.seed_box.text()) if self.seed_box.text() else 0
 
-        temp = io.StringIO()
-        with redirect_stdout(temp):
-
-            snutree.generate(
-                    files=files,
-                    output_path=None,
-                    log_path=None,
-                    config_paths=configs,
-                    member_format=member_format,
-                    input_format=None,
-                    seed=seed,
-                    debug=False,
-                    verbose=True,
-                    quiet=False,
-                    )
-
-        output_name, _filter = QFileDialog.getSaveFileName(self, 'Find', '',
-                'PDF (*.pdf);;Graphviz source (*.dot)', 'PDF (*.pdf)')
-
-        if not output_name:
-            return
-
-        snutree.write_output(temp.getvalue(), output_name)
+        snutree.generate(
+                files=files,
+                output_path=output_path,
+                log_path=None,
+                config_paths=configs,
+                member_format=member_format,
+                input_format=None,
+                seed=seed,
+                debug=False,
+                verbose=True,
+                quiet=False,
+                )
 
 def main():
 

@@ -175,19 +175,18 @@ def write_output(dotcode, filename=None):
     filetype = path.suffix if path else '.dot'
 
     if filetype == '.dot':
-        mode = 'w+'
-        dot_compile = lambda x : x
+        dot_compile = lambda x : bytes(x, sys.getdefaultencoding())
     elif filetype == '.pdf':
-        mode = 'wb+'
         dot_compile = compile_pdf
     else:
         msg = 'output filetype "{}" not supported'
         raise SnutreeError(msg.format(filetype))
 
     if path:
-        stream_open = lambda : path.open(mode)
+        stream_open = lambda : path.open('wb+')
     else:
-        stream_open = contextmanager(lambda : (yield sys.stdout))
+        # Buffer since we are writing binary
+        stream_open = contextmanager(lambda : (yield sys.stdout.buffer))
 
     with stream_open() as f:
         f.write(dot_compile(dotcode))
@@ -205,10 +204,16 @@ def compile_pdf(source):
                 # subprocess.run requires they both be str or both be binary.
                 # So, use binary and send the source in as binary (with default
                 # encoding).
-                input=bytes(source, sys.getdefaultencoding()), stdout=subprocess.PIPE)
+                input=bytes(source, sys.getdefaultencoding()),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
+                )
     except OSError as e:
         msg = 'had a problem compiling to PDF:\n{}'
         raise SnutreeError(msg.format(e))
+
+    if result.stderr:
+        logging.error(result.stderr)
 
     return result.stdout
 
