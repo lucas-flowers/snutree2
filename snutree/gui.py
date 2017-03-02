@@ -114,6 +114,23 @@ class SchemaTable(QTableWidget):
         self.setMinimumWidth(40 * font_height)
         self.setMinimumHeight(10 * font_height)
 
+    @catched
+    def show_module_schema(self, module_name):
+
+        module = snutree.get_member_format(module_name)
+        self.setRowCount(0)
+
+        for i, (k, d) in enumerate(sorted(module.schema_information().items())):
+            self.insertRow(i)
+            self.setItem(i, 0, QTableWidgetItem(k))
+            description = QTableWidgetItem(d)
+            description.setToolTip(d)
+            self.setItem(i, 1, description)
+
+        self.horizontalHeader().setStretchLastSection(True)
+        self.horizontalHeader().stretchLastSection()
+
+
 class SnutreeGUI(QWidget):
     '''
     A simple GUI for the snutree program. Advanced features are available in
@@ -234,29 +251,10 @@ class SnutreeGUI(QWidget):
                 combobox.addItem(str(path.name), str(path))
                 combobox.setCurrentIndex(combobox.count()-1)
 
-        @catched
-        def show_module_schema(index):
-            module = snutree.get_member_format(combobox.currentData())
-            table.setRowCount(0)
-            for i, (k, d) in enumerate(sorted(module.schema_information().items())):
-
-
-                table.insertRow(i)
-                table.setItem(i, 0, QTableWidgetItem(k))
-
-                description = QTableWidgetItem(d)
-                description.setToolTip(d)
-                table.setItem(i, 1, description)
-            # table.resizeColumnsToContents()
-            table.horizontalHeader().setStretchLastSection(True)
-            table.horizontalHeader().stretchLastSection()
-
-
-
         button.clicked.connect(browse)
-        combobox.currentIndexChanged.connect(show_module_schema)
-        show_module_schema(0)
+        combobox.currentIndexChanged.connect(lambda index : table.show_module_schema(combobox.currentData()))
 
+        table.show_module_schema(combobox.currentData())
         self.layout().addWidget(table, next(row_counter), 1)
 
         return combobox
