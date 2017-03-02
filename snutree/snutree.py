@@ -114,7 +114,7 @@ def generate(
     dotcode = dotgraph.to_dot()
 
     logging.info('Writing output')
-    write_output(dotcode, output_path)
+    write_output(dotcode, str(output_path))
 
 @logged
 def read_sources(files, stdin_fmt=None):

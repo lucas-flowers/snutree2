@@ -1,11 +1,8 @@
 import sys
 import csv
-import io
 import logging
-import tempfile
 from functools import wraps
 from io import StringIO
-from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import (
@@ -69,6 +66,28 @@ def recoverable(function):
 
     return wrapped
 
+class LazyPath:
+    '''
+    A placeholder for some path. Waits until the very last minute (i.e., when
+    self.__str__() is called) to determine an actual value. It determines the
+    value by asking the user using a save file dialog box created from the
+    arguments provided to the LazyPath constructor.
+
+    This allows snutree.generate to be called without knowing the output path
+    beforehand, saving time if the generation fails.
+
+    NOTE: Replace __str__ with __fspath__ in Python 3.6
+    '''
+
+    def __init__(self, parent, caption, dir_, filter_):
+        self.parent = parent
+        self.caption = caption
+        self.dir = dir_
+        self.filter = filter_
+
+    def __str__(self):
+        return QFileDialog.getSaveFileName(self.parent, self.caption, self.dir, self.filter)[0]
+
 class SnutreeGUI(QWidget):
     '''
     A simple GUI for the snutree program. Advanced features are available in
@@ -111,14 +130,6 @@ class SnutreeGUI(QWidget):
                 'Supported filetypes (*.csv *.yaml *.dot);;All files (*)'
                 )
 
-        self.output_box = self.file_select(
-                self.next_row,
-                'Output File:',
-                'Select output file',
-                'PDF (*.pdf);;Graphviz source (*.dot)',
-                save=True,
-                )
-
         self.table = QTableWidget()
         self.table.setRowCount(2)
         self.table.setColumnCount(2)
@@ -149,7 +160,7 @@ class SnutreeGUI(QWidget):
 
         self.show()
 
-    def file_select(self, row, label, title, filetypes, save=False):
+    def file_select(self, row, label, title, filetypes):
         '''
         Create a file selector in the given row of the GUI's grid. The selector
         has a label, a title (for the file selection dialog), and supported
@@ -163,18 +174,13 @@ class SnutreeGUI(QWidget):
         self.layout().addWidget(textbox, row, 1)
         self.layout().addWidget(button, row, 2)
 
-        if save:
-            file_getter = lambda *args, **kwargs : [QFileDialog.getSaveFileName(*args, **kwargs)[0]]
-        else:
-            file_getter = lambda *args, **kwargs : QFileDialog.getOpenFileNames(*args, **kwargs)[0]
-
         def browse():
             '''
             Have the user select multiple files. Store the files as a
             comma-delimited list in the GUI's textbox.
             '''
 
-            filenames = file_getter(self, title, '', filetypes)
+            filenames, _filter = QFileDialog.getOpenFileNames(self, title, '', filetypes)
             if filenames:
                 paths = [relative_path(f) for f in filenames]
                 textbox.setText(fancy_join(paths))
@@ -276,7 +282,7 @@ class SnutreeGUI(QWidget):
         files = [Path(f).open() for f in fancy_split(self.inputs_box.text())]
         configs = fancy_split(self.config_box.text())
         member_format = self.member_format_box.currentData()
-        output_path = self.output_box.text()
+        output_path = LazyPath(self, 'Select output file', '', 'PDF (*.pdf);;Graphviz source (*.dot)')
         seed = int(self.seed_box.text()) if self.seed_box.text() else 0
 
         snutree.generate(
