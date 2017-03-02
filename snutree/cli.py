@@ -33,13 +33,6 @@ def gui_main(ctx, param, value):
         ctx.exit()
 
 options = [
-        ('--gui', '-g', {
-            'callback' : gui_main,
-            'is_flag' : True,
-            'expose_value' : False,
-            'is_eager' : True,
-            'help' : 'Use the GUI (ignores other options and parameters)'
-            }),
         ('output_path', '--output', '-o', {
             'type' : click.Path(),
             'default' : None,
