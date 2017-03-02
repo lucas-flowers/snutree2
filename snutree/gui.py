@@ -1,6 +1,7 @@
 import sys
 import csv
 import logging
+from functools import wraps
 from io import StringIO
 from contextlib import contextmanager
 from pathlib import Path
@@ -9,6 +10,7 @@ from PyQt5.QtGui import (
     QIntValidator,
     )
 from PyQt5.QtWidgets import (
+        QAbstractItemView,
         QApplication,
         QComboBox,
         QDesktopWidget,
@@ -19,6 +21,8 @@ from PyQt5.QtWidgets import (
         QLineEdit,
         QPushButton,
         QWidget,
+        QTableWidget,
+        QTableWidgetItem,
         )
 from . import snutree
 
@@ -48,6 +52,21 @@ def relative_path(path):
     except ValueError:
         return Path(path)
 
+def recoverable(function):
+
+    @wraps(function)
+    def wrapped(*args, **kwargs):
+        try:
+            return function(*args, **kwargs)
+        except Exception as e:
+            logging.error(e)
+            error = QErrorMessage()
+            error.resize(700, 400)
+            error.showMessage(str(e).replace('\n', '<br>'))
+            error.exec_()
+
+    return wrapped
+
 class SnutreeGUI(QWidget):
     '''
     A simple GUI for the snutree program. Advanced features are available in
@@ -73,6 +92,7 @@ class SnutreeGUI(QWidget):
 
     def initUI(self):
 
+        font_height = self.fontMetrics().height()
         self.setLayout(QGridLayout())
 
         self.config_box = self.file_select(
@@ -89,21 +109,32 @@ class SnutreeGUI(QWidget):
                 'Supported filetypes (*.csv *.yaml *.dot);;All files (*)'
                 )
 
+        self.table = QTableWidget()
+        self.table.setRowCount(2)
+        self.table.setColumnCount(2)
+        self.table.setShowGrid(False)
+        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.table.verticalHeader().hide()
+        self.table.verticalHeader().setDefaultSectionSize(font_height * 1.2)
+        self.table.setHorizontalHeaderLabels(['Header', 'Description'])
+        self.table.setSelectionMode(QAbstractItemView.NoSelection)
+        self.table.setMinimumWidth(40 * font_height)
+        self.table.setMinimumHeight(10 * font_height)
         self.member_format_box = self.member_format_select(
                 self.next_row,
                 'Member Format:',
                 'Select custom member format',
                 'Supported filetypes (*.py);;All files (*)'
                 )
+        self.layout().addWidget(self.table, self.next_row, 1)
 
         self.seed_box = self.seed_select(self.next_row, 'Seed:')
 
         gen_button = QPushButton('Generate')
-        gen_button.clicked.connect(self.generate)
+        gen_button.clicked.connect(lambda checked : self.generate())
         self.layout().addWidget(gen_button, self.next_row, 0)
         self.gen_button = gen_button
 
-        self.resize(600, 150)
         self.center()
 
         self.show()
@@ -172,7 +203,28 @@ class SnutreeGUI(QWidget):
                 combobox.addItem(str(path.name), str(path))
                 combobox.setCurrentIndex(combobox.count()-1)
 
+        @recoverable
+        def show_module_schema(index):
+            module = snutree.get_member_format(combobox.currentData())
+            self.table.setRowCount(0)
+            for i, (k, d) in enumerate(sorted(module.schema_information().items())):
+
+
+                self.table.insertRow(i)
+                self.table.setItem(i, 0, QTableWidgetItem(k))
+
+                description = QTableWidgetItem(d)
+                description.setToolTip(d)
+                self.table.setItem(i, 1, description)
+            # self.table.resizeColumnsToContents()
+            self.table.horizontalHeader().setStretchLastSection(True)
+            self.table.horizontalHeader().stretchLastSection()
+
+
+
         button.clicked.connect(browse)
+        combobox.currentIndexChanged.connect(show_module_schema)
+        show_module_schema(0)
 
         return combobox
 
@@ -207,6 +259,7 @@ class SnutreeGUI(QWidget):
         yield
         self.setEnabled(True)
 
+    @recoverable
     def generate(self):
         '''
         Run the snutree program by calling snutree.generate. Catch recoverable
@@ -226,30 +279,23 @@ class SnutreeGUI(QWidget):
 
         with self.progress():
 
-            try:
-
-                snutree.generate(
-                        files=files,
-                        output_path=output_name,
-                        log_path=None,
-                        config_paths=configs,
-                        member_format=member_format,
-                        input_format=None,
-                        seed=seed,
-                        debug=False,
-                        verbose=True,
-                        quiet=False,
-                        )
-
-            except Exception as e:
-                logging.error(e)
-                error = QErrorMessage()
-                error.showMessage(str(e).replace('\n', '<br>'))
-                error.exec_()
+            snutree.generate(
+                    files=files,
+                    output_path=output_name,
+                    log_path=None,
+                    config_paths=configs,
+                    member_format=member_format,
+                    input_format=None,
+                    seed=seed,
+                    debug=False,
+                    verbose=True,
+                    quiet=False,
+                    )
 
 def main():
 
     app = QApplication(sys.argv)
+    app.setAttribute(Qt.AA_EnableHighDpiScaling)
     _ = SnutreeGUI()
     sys.exit(app.exec_())
 

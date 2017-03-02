@@ -56,7 +56,7 @@ def schema_information():
     users.
     '''
     schema = [
-            ('status', 'Status (one of {})'.format(MemberTypes.keys())),
+            ('status', "One of '{}'".format("', '".join(MemberTypes.keys()))),
             ('badge', 'Badge number'),
             ('first_name', 'First name'),
             ('preferred_name', 'Preferred name'),
