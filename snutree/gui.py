@@ -45,14 +45,18 @@ def relative_path(path):
     '''
     Return the path as it is represented relative to the current working
     directory. If that is not possible (i.e., the path is not under the current
-    working directory), return path.
+    working directory), return the path.
     '''
     try:
         return Path(path).relative_to(Path.cwd())
     except ValueError:
         return Path(path)
 
-def recoverable(function):
+def catched(function):
+    '''
+    Surround the function with a try-catch block wherever it is called. When
+    exceptions occur, they are displayed as error messages to the user.
+    '''
 
     @wraps(function)
     def wrapped(*args, **kwargs):
@@ -89,6 +93,27 @@ class LazyPath:
     def __str__(self):
         return QFileDialog.getSaveFileName(self.parent, self.caption, self.dir, self.filter)[0]
 
+class SchemaTable(QTableWidget):
+
+    def __init__(self):
+        super().__init__()
+        self.init_ui()
+
+    def init_ui(self):
+
+        font_height = self.fontMetrics().height()
+
+        self.setRowCount(2)
+        self.setColumnCount(2)
+        self.setShowGrid(False)
+        self.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.verticalHeader().hide()
+        self.verticalHeader().setDefaultSectionSize(font_height * 1.2)
+        self.setHorizontalHeaderLabels(['Header', 'Description'])
+        self.setSelectionMode(QAbstractItemView.NoSelection)
+        self.setMinimumWidth(40 * font_height)
+        self.setMinimumHeight(10 * font_height)
+
 class SnutreeGUI(QWidget):
     '''
     A simple GUI for the snutree program. Advanced features are available in
@@ -96,53 +121,40 @@ class SnutreeGUI(QWidget):
     '''
 
     def __init__(self):
-
         super().__init__()
+        self.init_ui()
 
-        self.__row = 0
-        self.initUI()
-
-    def initUI(self):
+    def init_ui(self):
 
         row = count(start=0)
 
-        font_height = self.fontMetrics().height()
         self.setLayout(QGridLayout())
 
+        # Configuration
         self.config_box = self.file_select(
-                next(row),
+                row,
                 'Configuration File:',
                 'Select configuration file',
                 'Supported filetypes (*.yaml);;All files (*)'
                 )
 
+        # Data sources (e.g., DOT, CSV, and SQL credential files)
         self.inputs_box = self.file_select(
-                next(row),
+                row,
                 'Input Files:',
                 'Select input files',
                 'Supported filetypes (*.csv *.yaml *.dot);;All files (*)'
                 )
 
-        self.table = QTableWidget()
-        self.table.setRowCount(2)
-        self.table.setColumnCount(2)
-        self.table.setShowGrid(False)
-        self.table.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.table.verticalHeader().hide()
-        self.table.verticalHeader().setDefaultSectionSize(font_height * 1.2)
-        self.table.setHorizontalHeaderLabels(['Header', 'Description'])
-        self.table.setSelectionMode(QAbstractItemView.NoSelection)
-        self.table.setMinimumWidth(40 * font_height)
-        self.table.setMinimumHeight(10 * font_height)
+        # Member format dropdown, custom browse button, and schema information
         self.member_format_box = self.member_format_select(
-                next(row),
+                row,
                 'Member Format:',
                 'Select custom member format',
                 'Supported filetypes (*.py);;All files (*)'
                 )
-        self.layout().addWidget(self.table, next(row), 1)
 
-        self.seed_box = self.seed_select(next(row), 'Seed:')
+        self.seed_box = self.seed_select(row, 'Seed:')
 
         gen_button = QPushButton('Generate')
         gen_button.clicked.connect(lambda checked : self.generate())
@@ -153,12 +165,14 @@ class SnutreeGUI(QWidget):
 
         self.show()
 
-    def file_select(self, row, label, title, filetypes):
+    def file_select(self, row_counter, label, title, filetypes):
         '''
         Create a file selector in the given row of the GUI's grid. The selector
         has a label, a title (for the file selection dialog), and supported
         filetypes.
         '''
+
+        row = next(row_counter)
 
         textbox = QLineEdit()
         label = QLabel(label, alignment=Qt.AlignRight)
@@ -182,13 +196,16 @@ class SnutreeGUI(QWidget):
 
         return textbox
 
-    def member_format_select(self, row, label, title, filetypes):
+    def member_format_select(self, row_counter, label, title, filetypes):
         '''
         Create a member format selector. Have the builtins already selectable
         from a drop-down, and allow the possibility for a custom Python module
         to be selected instead of the builtins.
         '''
 
+        row = next(row_counter)
+
+        table = SchemaTable()
         combobox = QComboBox()
         label = QLabel(label, alignment=Qt.AlignRight)
         button = QPushButton('Browse...')
@@ -217,22 +234,22 @@ class SnutreeGUI(QWidget):
                 combobox.addItem(str(path.name), str(path))
                 combobox.setCurrentIndex(combobox.count()-1)
 
-        @recoverable
+        @catched
         def show_module_schema(index):
             module = snutree.get_member_format(combobox.currentData())
-            self.table.setRowCount(0)
+            table.setRowCount(0)
             for i, (k, d) in enumerate(sorted(module.schema_information().items())):
 
 
-                self.table.insertRow(i)
-                self.table.setItem(i, 0, QTableWidgetItem(k))
+                table.insertRow(i)
+                table.setItem(i, 0, QTableWidgetItem(k))
 
                 description = QTableWidgetItem(d)
                 description.setToolTip(d)
-                self.table.setItem(i, 1, description)
-            # self.table.resizeColumnsToContents()
-            self.table.horizontalHeader().setStretchLastSection(True)
-            self.table.horizontalHeader().stretchLastSection()
+                table.setItem(i, 1, description)
+            # table.resizeColumnsToContents()
+            table.horizontalHeader().setStretchLastSection(True)
+            table.horizontalHeader().stretchLastSection()
 
 
 
@@ -240,12 +257,16 @@ class SnutreeGUI(QWidget):
         combobox.currentIndexChanged.connect(show_module_schema)
         show_module_schema(0)
 
+        self.layout().addWidget(table, next(row_counter), 1)
+
         return combobox
 
-    def seed_select(self, row, label):
+    def seed_select(self, row_counter, label):
         '''
         Create the textbox to enter the seed in.
         '''
+
+        row = next(row_counter)
 
         label = QLabel(label, alignment=Qt.AlignRight)
         textbox = QLineEdit()
@@ -265,11 +286,10 @@ class SnutreeGUI(QWidget):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
 
-    @recoverable
+    @catched
     def generate(self):
         '''
-        Run the snutree program by calling snutree.generate. Catch recoverable
-        errors.
+        Run the snutree program by calling snutree.generate.
         '''
 
         files = [Path(f).open() for f in fancy_split(self.inputs_box.text())]
