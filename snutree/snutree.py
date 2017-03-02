@@ -3,6 +3,7 @@ import logging
 import sys
 from typing import Any, List, IO
 from pathlib import Path
+from contextlib import contextmanager
 import yaml
 from pluginbase import PluginBase
 from . import SnutreeError
@@ -162,40 +163,52 @@ def load_configuration(paths):
     return config
 
 @logged
-def write_output(dotcode, path=None):
+def write_output(dotcode, filename=None):
     '''
-    Use the path's extension to determine an output format. Then, compile the
-    DOT code to that format and write into the file at the given path (or
-    stdout, if no path is provided).
+    If a filename is provided: Use the filename to determine the output format,
+    then compile the DOT code to the target format and write to the file.
+
+    If no filename is provided: Write the DOT code directly to sys.stdout.
     '''
 
-    filetype = Path(path).suffix if path is not None else None
-    if not path:
-        write_stream(dotcode, filetype, sys.stdout)
+    path = Path(filename) if filename else None
+    filetype = path.suffix if path else '.dot'
+
+    if filetype == '.dot':
+        mode = 'w+'
+        dot_compile = lambda x : x
+    elif filetype == '.pdf':
+        mode = 'wb+'
+        dot_compile = compile_pdf
     else:
-        with open(path, 'wb+') as f:
-            write_stream(bytes(dotcode, 'utf-8'), filetype, f)
-
-def write_stream(output, fmt, stream):
-    '''
-    Write output of the given format to the streem.
-    '''
-
-    if fmt == '.pdf':
-
-        try:
-            # `shell=True` is necessary for Windows, but not for Linux. The
-            # program arguments are constants, so shell=True should be fine
-            result = subprocess.run(['dot', '-Tpdf'], check=True, shell=True,
-                    input=output, stdout=subprocess.PIPE)
-        except OSError as e:
-            msg = 'had a problem compiling to PDF:\n{}'
-            raise SnutreeError(msg.format(e))
-
-        output = result.stdout
-    elif fmt not in ('.dot', None):
         msg = 'output filetype "{}" not supported'
-        raise SnutreeError(msg.format(fmt))
+        raise SnutreeError(msg.format(filetype))
 
-    stream.write(output)
+    if path:
+        stream_open = lambda : path.open(mode)
+    else:
+        stream_open = contextmanager(lambda : (yield sys.stdout))
+
+    with stream_open() as f:
+        f.write(dot_compile(dotcode))
+
+def compile_pdf(source):
+    '''
+    Use dot to convert the DOT source code into a PDF, then return the result.
+    '''
+
+    try:
+        # `shell=True` is necessary for Windows, but not for Linux. The command
+        # string is constant, so shell=True should be fine
+        result = subprocess.run('dot -Tpdf', check=True, shell=True,
+                # The input will be a str and the output will be binary, but
+                # subprocess.run requires they both be str or both be binary.
+                # So, use binary and send the source in as binary (with default
+                # encoding).
+                input=bytes(source, sys.getdefaultencoding()), stdout=subprocess.PIPE)
+    except OSError as e:
+        msg = 'had a problem compiling to PDF:\n{}'
+        raise SnutreeError(msg.format(e))
+
+    return result.stdout
 
