@@ -1,13 +1,20 @@
 # -*- mode: python -*-
 # pylint: disable=E0602
 
+from pathlib import Path
+
 block_cipher = None
+
+pathex = ['snutree']
+if os.name == 'nt':
+    # Workaround for QT on Windows; might be fixed in newer versions of QT,
+    # making this unecessary
+    qt_path = Path(os.environ['VIRTUAL_ENV'])/'Lib/site-packages/PyQt5/Qt/bin'
+    pathex.append(str(qt_path))
 
 a = Analysis(
         ['snutree/__main__.py'],
-        pathex=[
-            '***REMOVED***'
-            ],
+        pathex=pathex,
         binaries=[],
         datas=[
             ('snutree/member', 'member')
