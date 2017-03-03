@@ -27,11 +27,6 @@ def main():
         logging.error('Unexpected error.', exc_info=True)
         sys.exit(1)
 
-def gui_main(ctx, param, value):
-    if value and not ctx.resilient_parsing:
-        gui.main()
-        ctx.exit()
-
 options = [
         ('output_path', '--output', '-o', {
             'type' : click.Path(),

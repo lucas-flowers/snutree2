@@ -2,7 +2,7 @@ import sys
 import csv
 import logging
 from itertools import count
-from functools import wraps
+from contextlib import ExitStack
 from io import StringIO
 from pathlib import Path
 from PyQt5.QtCore import Qt
@@ -52,24 +52,19 @@ def relative_path(path):
     except ValueError:
         return Path(path)
 
-def catched(function):
+class SnutreeErrorMessage(QErrorMessage):
     '''
-    Surround the function with a try-catch block wherever it is called. When
-    exceptions occur, they are displayed as error messages to the user.
+    Error message for the Snutree GUI.
     '''
 
-    @wraps(function)
-    def wrapped(*args, **kwargs):
-        try:
-            return function(*args, **kwargs)
-        except Exception as e:
-            logging.error(e)
-            error = QErrorMessage()
-            error.resize(700, 400)
-            error.showMessage(str(e).replace('\n', '<br>'))
-            error.exec_()
+    def __init__(self, exc, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.exception = exc
+        self.init_ui()
 
-    return wrapped
+    def init_ui(self):
+        self.resize(700, 400)
+        self.showMessage(str(self.exception).replace('\n', '<br>'))
 
 class LazyPath:
     '''
@@ -94,15 +89,19 @@ class LazyPath:
         return QFileDialog.getSaveFileName(self.parent, self.caption, self.dir, self.filter)[0]
 
 class SchemaTable(QTableWidget):
+    '''
+    A subclass of QTableWidget that displays information on member format
+    schemas. The first column consists of the expected field names for a given
+    member format, and the second column consists of the corresponding
+    field descriptions.
+    '''
 
     def __init__(self):
         super().__init__()
         self.init_ui()
 
     def init_ui(self):
-
         font_height = self.fontMetrics().height()
-
         self.setRowCount(2)
         self.setColumnCount(2)
         self.setShowGrid(False)
@@ -114,22 +113,38 @@ class SchemaTable(QTableWidget):
         self.setMinimumWidth(40 * font_height)
         self.setMinimumHeight(10 * font_height)
 
-    @catched
     def show_module_schema(self, module_name):
+        '''
+        Update the table with schema information on the given module.
+        '''
 
-        module = snutree.get_member_format(module_name)
-        self.setRowCount(0)
+        try:
+            module = snutree.get_member_format(module_name)
+        except snutree.SnutreeError as e:
+            logging.error(e)
+            SnutreeErrorMessage(e).exec_()
+            return # Abort table update
+        finally:
+            # Clear the table before adding new information (or aborting)
+            self.setRowCount(0)
 
-        for i, (k, d) in enumerate(sorted(module.schema_information().items())):
+        rows = sorted(module.schema_information().items())
+        for i, (fieldname, description) in enumerate(rows):
+
             self.insertRow(i)
-            self.setItem(i, 0, QTableWidgetItem(k))
-            description = QTableWidgetItem(d)
-            description.setToolTip(d)
-            self.setItem(i, 1, description)
 
+            # Add field name
+            fieldname_item = QTableWidgetItem(fieldname)
+            self.setItem(i, 0, fieldname_item)
+
+            # Add field description
+            description_item = QTableWidgetItem(description)
+            description_item.setToolTip(description) # For long descriptions
+            self.setItem(i, 1, description_item)
+
+        # Fill all horizontal space
         self.horizontalHeader().setStretchLastSection(True)
         self.horizontalHeader().stretchLastSection()
-
 
 class SnutreeGUI(QWidget):
     '''
@@ -137,56 +152,48 @@ class SnutreeGUI(QWidget):
     the CLI version of the program.
     '''
 
+    ###########################################################################
+    #### Initialization                                                    ####
+    ###########################################################################
+
     def __init__(self):
         super().__init__()
         self.init_ui()
 
     def init_ui(self):
 
-        row = count(start=0)
-
         self.setLayout(QGridLayout())
+        row_counter = count(start=0)
 
-        # Configuration
-        self.config_box = self.file_select(
-                row,
-                'Configuration File:',
-                'Select configuration file',
-                'Supported filetypes (*.yaml);;All files (*)'
-                )
+        # Get configuration files
+        self.box_config = self.render_box_file(row_counter, 'Configuration File:',
+                'Select configuration file', 'Supported filetypes (*.yaml);;All files (*)')
 
-        # Data sources (e.g., DOT, CSV, and SQL credential files)
-        self.inputs_box = self.file_select(
-                row,
-                'Input Files:',
-                'Select input files',
-                'Supported filetypes (*.csv *.yaml *.dot);;All files (*)'
-                )
+        # Get data sources (e.g., DOT, CSV, and SQL credential files)
+        self.box_inputs = self.render_box_file(row_counter, 'Input Files:',
+                'Select input files', 'Supported filetypes (*.csv *.yaml *.dot);;All files (*)')
 
         # Member format dropdown, custom browse button, and schema information
-        self.member_format_box = self.member_format_select(
-                row,
-                'Member Format:',
-                'Select custom member format',
-                'Supported filetypes (*.py);;All files (*)'
-                )
+        self.box_member_format = self.render_box_member_format(row_counter)
 
-        self.seed_box = self.seed_select(row, 'Seed:')
+        # Get tree generation seed
+        self.box_seed = self.render_box_seed(row_counter)
 
-        gen_button = QPushButton('Generate')
-        gen_button.clicked.connect(lambda checked : self.generate())
-        self.layout().addWidget(gen_button, next(row), 0)
-        self.gen_button = gen_button
+        # Generation button
+        self.button_generate = self.render_button_generate(row_counter)
 
         self.center()
-
         self.show()
 
-    def file_select(self, row_counter, label, title, filetypes):
+    ###########################################################################
+    #### Main Widgets                                                      ####
+    ###########################################################################
+
+    def render_box_file(self, row_counter, label, caption, filter_):
         '''
-        Create a file selector in the given row of the GUI's grid. The selector
-        has a label, a title (for the file selection dialog), and supported
-        filetypes.
+        Render a file selector in the given row of the GUI's grid. The selector
+        has a label, a caption (for the file selection dialog), and a filetypes
+        filter.
         '''
 
         row = next(row_counter)
@@ -194,125 +201,173 @@ class SnutreeGUI(QWidget):
         textbox = QLineEdit()
         label = QLabel(label, alignment=Qt.AlignRight)
         button = QPushButton('Browse...')
+
+        # Browse button action
+        button.clicked.connect(lambda : self.fill_textbox(textbox, caption, '', filter_))
+
         self.layout().addWidget(label, row, 0)
         self.layout().addWidget(textbox, row, 1)
         self.layout().addWidget(button, row, 2)
 
-        def browse():
-            '''
-            Have the user select multiple files. Store the files as a
-            comma-delimited list in the GUI's textbox.
-            '''
-
-            filenames, _filter = QFileDialog.getOpenFileNames(self, title, '', filetypes)
-            if filenames:
-                paths = [relative_path(f) for f in filenames]
-                textbox.setText(fancy_join(paths))
-
-        button.clicked.connect(browse)
-
         return textbox
 
-    def member_format_select(self, row_counter, label, title, filetypes):
+    def render_box_member_format(self, row_counter):
         '''
-        Create a member format selector. Have the builtins already selectable
-        from a drop-down, and allow the possibility for a custom Python module
-        to be selected instead of the builtins.
+        Render the member format selector. Have the builtin member formats
+        already selectable from a drop-down, and allow the possibility for a
+        custom Python module to be selected instead of the builtins.
         '''
 
         row = next(row_counter)
 
-        table = SchemaTable()
         combobox = QComboBox()
-        label = QLabel(label, alignment=Qt.AlignRight)
+        label = QLabel('Member Format:', alignment=Qt.AlignRight)
         button = QPushButton('Browse...')
-        self.layout().addWidget(label, row, 0)
-        self.layout().addWidget(combobox, row, 1)
-        self.layout().addWidget(button, row, 2)
+        table = SchemaTable()
 
-        # Populate default formats
+        # Populate builtin member formats
         formats = snutree.PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
         for fmt in formats:
             combobox.addItem(fmt, fmt)
 
-        def browse():
-            '''
-            Have the user select a single file to provide the member format.
-            Add the file's name as an option in the dropdown (and remove any
-            previous custom modules that were selected).
-            '''
+        # Browse button (for custom member modules)
+        button.clicked.connect(lambda : self.fill_member_textbox(combobox, formats))
 
-            filename, _filter = QFileDialog.getOpenFileName(self, title, '', filetypes)
-            if filename:
-                path = relative_path(filename)
-                if len(formats) < combobox.count():
-                    # Remove the last custom module selected
-                    combobox.removeItem(combobox.count()-1)
-                combobox.addItem(str(path.name), str(path))
-                combobox.setCurrentIndex(combobox.count()-1)
-
-        button.clicked.connect(browse)
+        # Update table whenever the selected format changes
         combobox.currentIndexChanged.connect(lambda index : table.show_module_schema(combobox.currentData()))
+        table.show_module_schema(combobox.currentData()) # Show initial table
 
-        table.show_module_schema(combobox.currentData())
+        self.layout().addWidget(label, row, 0)
+        self.layout().addWidget(combobox, row, 1)
+        self.layout().addWidget(button, row, 2)
         self.layout().addWidget(table, next(row_counter), 1)
 
         return combobox
 
-    def seed_select(self, row_counter, label):
+    def render_box_seed(self, row_counter):
         '''
-        Create the textbox to enter the seed in.
+        Render the textbox in which the seed is entered.
         '''
 
         row = next(row_counter)
 
-        label = QLabel(label, alignment=Qt.AlignRight)
         textbox = QLineEdit()
-        self.layout().addWidget(label, row, 0)
-        self.layout().addWidget(textbox, row, 1)
+        label = QLabel('Seed:', alignment=Qt.AlignRight)
 
         textbox.setValidator(QIntValidator())
 
+        self.layout().addWidget(label, row, 0)
+        self.layout().addWidget(textbox, row, 1)
+
         return textbox
+
+    def render_button_generate(self, row_counter):
+        '''
+        Render the tree generation button in the next row.
+        '''
+
+        row = next(row_counter)
+
+        button = QPushButton('Generate')
+
+        button.clicked.connect(lambda checked : self.generate())
+
+        self.layout().addWidget(button, row, 0)
+
+        return button
+
+    ###########################################################################
+    #### The Meat                                                          ####
+    ###########################################################################
+
+    def generate(self):
+        '''
+        Run the snutree program by calling snutree.generate on the arguments
+        that have already been provided by the user to the GUI.
+        '''
+
+        try:
+
+            with ExitStack() as stack:
+
+                filenames = fancy_split(self.box_inputs.text())
+                files = [stack.enter_context(open(f)) for f in filenames]
+                output_path = LazyPath(self, 'Select output file', '', 'PDF (*.pdf);;Graphviz source (*.dot)')
+                configs = fancy_split(self.box_config.text())
+                member_format = self.box_member_format.currentData()
+                seed = int(self.box_seed.text()) if self.box_seed.text() else 0
+
+                snutree.generate(
+                        files=files,
+                        output_path=output_path,
+                        log_path=None,
+                        config_paths=configs,
+                        member_format=member_format,
+                        input_format=None,
+                        seed=seed,
+                        debug=False,
+                        verbose=True,
+                        quiet=False,
+                        )
+
+        except Exception as e:
+            logging.error(e)
+            SnutreeErrorMessage(e).exec_()
+
+    ###########################################################################
+    #### Tools                                                             ####
+    ###########################################################################
+
+    def fill_textbox(self, textbox, caption, dir_, filter_):
+        '''
+        Have the user select multiple files, and store the filenames in the
+        textbox, delimited appropriately. The final arguments are arguments for
+        the getOpenFileNames dialog.
+        '''
+        filenames, _filter = QFileDialog.getOpenFileNames(self, caption, dir_, filter_)
+        if filenames:
+            paths = [relative_path(f) for f in filenames]
+            textbox.setText(fancy_join(paths))
+
+    def fill_member_textbox(self, combobox, formats):
+        '''
+        Have the user select on file to use as the custom member plugin. Store
+        the filename in the combobox (and remove any custom modules that were
+        previously in the combobox, by checking the provided list of builtin
+        formats).
+        '''
+
+        filename, _filter = QFileDialog.getOpenFileName(self, 'Select custom member format',
+                '', 'Supported filetypes (*.py);;All files (*)')
+
+        if filename:
+
+            # Remove the last custom module selected, if applicable
+            if len(formats) < combobox.count():
+                combobox.removeItem(combobox.count() - 1)
+
+            # Add the name and path of the custom module file to the combobox
+            path = relative_path(filename)
+            combobox.addItem(str(path.name), str(path))
+
+            # Select the module
+            combobox.setCurrentIndex(combobox.count() - 1)
 
     def center(self):
         '''
         Center this widget on the screen.
         '''
-        qr = self.frameGeometry()
-        cp = QDesktopWidget().availableGeometry().center()
-        qr.moveCenter(cp)
-        self.move(qr.topLeft())
-
-    @catched
-    def generate(self):
-        '''
-        Run the snutree program by calling snutree.generate.
-        '''
-
-        files = [Path(f).open() for f in fancy_split(self.inputs_box.text())]
-        configs = fancy_split(self.config_box.text())
-        member_format = self.member_format_box.currentData()
-        output_path = LazyPath(self, 'Select output file', '', 'PDF (*.pdf);;Graphviz source (*.dot)')
-        seed = int(self.seed_box.text()) if self.seed_box.text() else 0
-
-        snutree.generate(
-                files=files,
-                output_path=output_path,
-                log_path=None,
-                config_paths=configs,
-                member_format=member_format,
-                input_format=None,
-                seed=seed,
-                debug=False,
-                verbose=True,
-                quiet=False,
-                )
+        geo = self.frameGeometry()
+        center_point = QDesktopWidget().availableGeometry().center()
+        geo.moveCenter(center_point)
+        self.move(geo.topLeft())
 
 def main():
+    '''
+    Run the snutree GUI.
+    '''
 
     app = QApplication(sys.argv)
-    app.setAttribute(Qt.AA_EnableHighDpiScaling)
     _ = SnutreeGUI()
     sys.exit(app.exec_())
 
