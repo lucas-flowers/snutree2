@@ -109,6 +109,7 @@ class SchemaTable(QTableWidget):
         self.verticalHeader().hide()
         self.verticalHeader().setDefaultSectionSize(font_height * 1.2)
         self.setHorizontalHeaderLabels(['Header', 'Description'])
+        self.horizontalHeader().setDefaultAlignment(Qt.AlignLeft)
         self.setSelectionMode(QAbstractItemView.NoSelection)
         self.setMinimumWidth(40 * font_height)
         self.setMinimumHeight(10 * font_height)
@@ -288,9 +289,9 @@ class SnutreeGUI(QWidget):
 
         try:
 
+            filenames = fancy_split(self.box_inputs.text())
             with ExitStack() as stack:
 
-                filenames = fancy_split(self.box_inputs.text())
                 files = [stack.enter_context(open(f)) for f in filenames]
                 output_path = LazyPath(self, 'Select output file', '', 'PDF (*.pdf);;Graphviz source (*.dot)')
                 configs = fancy_split(self.box_config.text())
