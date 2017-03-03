@@ -2,7 +2,7 @@ import logging
 import sys
 from functools import wraps
 import click
-from . import gui, snutree, SnutreeError
+from . import snutree, SnutreeError
 from .utilities import logged
 
 def main():

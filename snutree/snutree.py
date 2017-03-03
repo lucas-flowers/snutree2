@@ -114,7 +114,7 @@ def generate(
     dotcode = dotgraph.to_dot()
 
     logging.info('Writing output')
-    write_output(dotcode, str(output_path))
+    write_output(dotcode, output_path)
 
 @logged
 def read_sources(files, stdin_fmt=None):
@@ -171,7 +171,9 @@ def write_output(dotcode, filename=None):
     If no filename is provided: Write the DOT code directly to sys.stdout.
     '''
 
-    path = Path(filename) if filename else None
+    # NOTE: str(filename) can be replaced with "filename" when Python 3.6 comes
+    # around. See the LazyPath class in GUI for the reason why.
+    path = Path(str(filename)) if filename is not None else None
     filetype = path.suffix if path else '.dot'
 
     if filetype == '.dot':
@@ -211,9 +213,6 @@ def compile_pdf(source):
     except OSError as e:
         msg = 'had a problem compiling to PDF:\n{}'
         raise SnutreeError(msg.format(e))
-
-    if result.stderr:
-        logging.error(result.stderr)
 
     return result.stdout
 
