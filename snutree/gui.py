@@ -85,7 +85,7 @@ class LazyPath:
         self.dir = dir_
         self.filter = filter_
 
-    def __str__(self):
+    def __fspath__(self):
         return QFileDialog.getSaveFileName(self.parent, self.caption, self.dir, self.filter)[0]
 
 class SchemaTable(QTableWidget):

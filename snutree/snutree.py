@@ -171,9 +171,7 @@ def write_output(dotcode, filename=None):
     If no filename is provided: Write the DOT code directly to sys.stdout.
     '''
 
-    # NOTE: str(filename) can be replaced with "filename" when Python 3.6 comes
-    # around. See the LazyPath class in GUI for the reason why.
-    path = Path(str(filename)) if filename is not None else None
+    path = Path(filename) if filename is not None else None
     filetype = path.suffix if path else '.dot'
 
     if filetype == '.dot':
