@@ -69,14 +69,13 @@ class SnutreeErrorMessage(QErrorMessage):
 class LazyPath:
     '''
     A placeholder for some path. Waits until the very last minute (i.e., when
-    self.__str__() is called) to determine an actual value. It determines the
-    value by asking the user using a save file dialog box created from the
-    arguments provided to the LazyPath constructor.
+    self.__fspath__() is called when interpreting this object as a path) to
+    determine an actual value. It determines the value by asking the user using
+    a save file dialog box created from the arguments provided to the LazyPath
+    constructor.
 
     This allows snutree.generate to be called without knowing the output path
     beforehand, saving time if the generation fails.
-
-    NOTE: Replace __str__ with __fspath__ in Python 3.6
     '''
 
     def __init__(self, parent, caption, dir_, filter_):
