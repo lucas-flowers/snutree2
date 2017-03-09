@@ -14,7 +14,8 @@ class DotCommon(metaclass=ABCMeta):
 
     def to_dot(self, indent=None):
         indent = indent or Indent()
-        return f'{indent}{self}'
+        self_dot = str(self)
+        return f'{indent}{self_dot}' if self_dot else ''
 
     def attributes_to_dot(self, sep=','):
         '''
@@ -58,7 +59,9 @@ class Graph(DotCommon):
                 attributes = self.attributes_to_dot(sep=f';\n{indent}')
                 lines.append(f'{indent}{attributes};')
             for child in self.children:
-                lines.append(child.to_dot(indent))
+                line = child.to_dot(indent)
+                if line: # some children might represent empty strings
+                    lines.append(line)
         lines.append(f'{indent}}}')
 
         return '\n'.join(lines)
@@ -74,9 +77,8 @@ class Defaults(DotCommon):
         super().__init__(key, attributes)
 
     def __str__(self):
-        # TODO remove empty brackets
-        attributes = self.attributes_to_dot() or ''
-        return f'{self.key} [{attributes}];'
+        kv_pairs = self.attributes_to_dot()
+        return f'{self.key} [{kv_pairs}];' if kv_pairs else ''
 
 class Node(DotCommon):
 
