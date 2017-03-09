@@ -30,9 +30,9 @@ def dicts_to_members(dicts):
             status = dct.get('status')
 
             if status not in MemberTypes:
-                msg = 'Invalid member status in:\n{}\nStatus must be one of:\n{}'
-                vals = pprint.pformat(dct), list(MemberTypes.keys())
-                raise SnutreeError(msg.format(*vals))
+                valid_statuses, member = list(MemberTypes.keys()), pprint.pformat(dct)
+                msg = f'status must be one of {valid_statuses}, in:\n{member}'
+                raise SnutreeError(msg)
 
             if status == 'Reaffiliate':
                 continue
@@ -41,8 +41,8 @@ def dicts_to_members(dicts):
 
             for affiliation in member.affiliations:
                 if affiliation in used_affiliations:
-                    msg = 'found duplicate affiliation: {!r}'
-                    raise SnutreeError(msg.format(affiliation))
+                    msg = f'found duplicate affiliation: {affiliation!r}'
+                    raise SnutreeError(msg)
                 used_affiliations.add(affiliation)
 
             yield member
@@ -170,7 +170,7 @@ class Affiliation:
     DESIGNATION_TOKEN = '|'.join([re.escape(s) for s in DESIGNATION_TOKENS])
 
     # Matches a single Greek-letter chapter designation
-    DESIGNATION_MATCHER = re.compile('^({})+$'.format(DESIGNATION_TOKEN))
+    DESIGNATION_MATCHER = re.compile(f'^({DESIGNATION_TOKEN})+$')
 
     def __init__(self, *args):
         '''
@@ -193,8 +193,8 @@ class Affiliation:
             # Split into the name half and the digit half, ignoring whitespace
             match = self.AFFILIATION_MATCHER.match(args[0].strip())
             if not match:
-                msg = 'expected a chapter name followed by a badge number but got {!r}'
-                raise ValueError(msg.format(args[0]))
+                msg = f'expected a chapter name followed by a badge number but got {args[0]!r}'
+                raise ValueError(msg)
 
             designation = self.str_to_designation(match.group('chapter_id'))
             badge = int(match.group('badge'))
@@ -203,8 +203,8 @@ class Affiliation:
             designation, badge = args
 
         else:
-            msg = 'expected *(str,) or *(str, int) but got *{}'
-            raise TypeError(msg.format(args))
+            msg = f'expected *(str,) or *(str, int) but got *{args}'
+            raise TypeError(msg)
 
         self.designation = designation
         self.badge = badge
@@ -260,13 +260,13 @@ class Affiliation:
             msg = ('expected a chapter name in one of the two forms:\n'
                     '    1. names of Greek letters separated by spaces (e.g., "Delta Alpha 100")\n'
                     '    2. several actual Greek letters together (e.g., "ΔA 100")\n'
-                    'but got {!r}\n')
-            raise ValueError(msg.format(string))
+                    f'but got {string!r}\n')
+            raise ValueError(msg)
 
         return designation
 
     def __str__(self):
-        return '{} {}'.format(self.designation, self.badge)
+        return f'{self.designation} {self.badge}'
 
     def __repr__(self):
         return str(self)
@@ -348,8 +348,8 @@ class Knight(SigmaNuMember):
         self.affiliations = set(affiliations or []) | {Affiliation.with_primary(int(badge))}
 
     def get_dot_label(self):
-        affiliation_strings =  [str(s) for s in sorted(self.affiliations)]
-        return '{}\\n{}'.format(self.name, ', '.join(affiliation_strings))
+        affiliations = ', '.join([str(s) for s in sorted(self.affiliations)])
+        return f'{self.name}\\n{affiliations}'
 
 class Brother(SigmaNuMember):
     '''
@@ -388,13 +388,12 @@ class Brother(SigmaNuMember):
         self.affiliations = []
 
         # Without badges, keys need to be generated
-        self.key = 'Brother {}'.format(Brother.bid)
+        self.key = f'Brother {Brother.bid}'
         Brother.bid += 1
 
     def get_dot_label(self):
-        template = '{}\\n{} Brother'
-        values = self.name, Affiliation.get_primary_chapter()
-        return template.format(*values)
+        chapter = Affiliation.get_primary_chapter()
+        return f'{self.name}\\n{chapter} Brother'
 
 class Candidate(SigmaNuMember):
     '''
@@ -430,13 +429,12 @@ class Candidate(SigmaNuMember):
         self.affiliations = []
 
         # Without badges, keys need to be generated
-        self.key = 'Candidate {}'.format(Candidate.cid)
+        self.key = f'Candidate {Candidate.cid}'
         Candidate.cid += 1
 
     def get_dot_label(self):
-        template = '{}\\n{} Candidate'
-        values = self.name, Affiliation.get_primary_chapter()
-        return template.format(*values)
+        chapter = Affiliation.get_primary_chapter()
+        return f'{self.name}\\n{chapter} Candidate'
 
 class Expelled(Knight):
     '''
@@ -477,7 +475,7 @@ class Expelled(Knight):
         self.affiliations = affiliations or []
 
     def get_dot_label(self):
-        return '{}\\n{}'.format(self.name, self.key)
+        return f'{self.name}\\n{self.key}'
 
 class Reaffiliate:
     '''

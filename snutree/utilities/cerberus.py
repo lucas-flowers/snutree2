@@ -42,10 +42,10 @@ def validate(validator, dct):
 
     dct = validator.validated(dct)
     if not dct:
-        errors = validator.errors
-        msg = 'Error{} found in configuration:\n{}'
-        vals = '' if len(errors) == 1 else 's', pprint.pformat(errors)
-        raise SnutreeError(msg.format(*vals))
+        errors = pprint.pformat(validator.errors)
+        s = 's' if len(errors) != 1 else ''
+        msg = f'Error{s} found in configuration:\n{errors}'
+        raise SnutreeError(msg)
 
     return dct
 

@@ -33,7 +33,5 @@ class SnutreeValidationError(SnutreeError):
         self.data = data
 
     def __str__(self):
-        msg = '{}. In:\n{}'
-        values = self.err, self.data
-        return msg.format(*values)
+        return f'{self.err}. In:\n{self.data}'
 

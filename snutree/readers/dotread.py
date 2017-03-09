@@ -68,8 +68,8 @@ def add_pledge_classes(pydot, graph):
 
                 # I don't want to bother with these case
                 if semester_name in pledge_classes:
-                    msg = 'two pledge classes in the same semester: {}'
-                    raise ValueError(msg.format(semester_name))
+                    msg = f'two pledge classes in the same semester: {semester_name}'
+                    raise ValueError(msg)
 
                 pledge_classes[semester_name] = pledge_class_members
 

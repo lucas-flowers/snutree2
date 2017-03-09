@@ -55,5 +55,5 @@ def combine_names(first_name, preferred_name, last_name, threshold=.5):
     elif difflib.SequenceMatcher(None, preferred_name, last_name).ratio() < threshold:
         first_name = preferred_name
 
-    return '{} {}'.format(first_name, last_name)
+    return f'{first_name} {last_name}'
 
