@@ -535,29 +535,28 @@ class FamilyTree:
                 max_rank = rank
         return min_rank, max_rank
 
-    def create_date_subgraph(self, key, min_rank, max_rank):
+    def create_date_subgraph(self, suffix, min_rank, max_rank):
         '''
-        Return a DOT subgraph containing the labels for each rank. The `key`
-        variable adds an additional identifier for the subgraph and its rank
-        labels.
+        Return a DOT subgraph containing the labels for each rank. The `suffix`
+        is appended to the end of the keys of the subgraph's labels, so more
+        than one subgraph can be made, using different suffixes.
         '''
 
-        subgraph = dot.Graph(f'dates{key}', 'subgraph')
+        subgraph = dot.Graph(f'dates{suffix}', 'subgraph')
 
         node_defaults = dot.Defaults('node', self.settings['node_defaults']['rank'])
         edge_defaults = dot.Defaults('edge', self.settings['edge_defaults']['rank'])
 
-        nodes = []
-        edges = []
+        nodes, edges = [], []
         rank = min_rank
         while rank < max_rank:
-            this_rank_key = f'{rank}{key}'
-            next_rank_key = f'{rank+1}{key}'
+            this_rank_key = f'{rank}{suffix}'
+            next_rank_key = f'{rank+1}{suffix}'
             nodes.append(dot.Node(this_rank_key, {'label' : rank}))
             edges.append(dot.Edge(this_rank_key, next_rank_key))
             rank += 1
 
-        nodes.append(dot.Node(f'{rank}{key}', {'label' : rank}))
+        nodes.append(dot.Node(f'{rank}{suffix}', {'label' : rank}))
 
         subgraph.children = [node_defaults, edge_defaults] + nodes + edges
 
