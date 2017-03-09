@@ -69,14 +69,13 @@ class TestAffiliation(TestCase):
                 ('Beta Beta', 1234)
                 ]
 
-        for d in designations:
-            with self.subTest(d=d):
+        for designation in designations:
+            with self.subTest(designation=designation):
                 try:
-                    sn.Affiliation(*d)
-                except Exception as e:
-                    msg = 'Unexpected exception for {!r}: {}'
-                    vals = d, e
-                    self.fail(msg.format(*vals))
+                    sn.Affiliation(*designation)
+                except Exception as exception:
+                    msg = f'Unexpected exception for {designation!r}: {exception}'
+                    self.fail(msg)
 
     def test_constructor_value_failure(self):
 

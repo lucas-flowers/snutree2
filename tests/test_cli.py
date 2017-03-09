@@ -60,9 +60,8 @@ class TestCliCommon(TestCase):
             ])
 
         if result.exception:
-            msg = '{}. <<OUTPUT\n{}\nOUTPUT'
-            values = result.exception, result.output
-            self.fail(msg.format(*values))
+            msg = f'{result.exception}. <<OUTPUT\n{result.output}\nOUTPUT'
+            self.fail(msg)
 
         self.assertEqual(output.read_text(), expected.read_text())
 
