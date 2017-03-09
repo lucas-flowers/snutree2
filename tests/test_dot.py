@@ -1,24 +1,29 @@
 from unittest import TestCase
 from inspect import cleandoc as trim
 from snutree.dot import Defaults, Node, Edge, Rank, Graph
+from snutree.utilities import Indent
 
 class TestDot(TestCase):
+
+    maxDiff = None
 
     def test_Defaults(self):
 
         self.assertRaises(ValueError, Defaults, 'key', attributes={'label': 'A label'})
 
         defaults = Defaults('node', attributes={'label': 'A label'})
-        self.assertEqual(defaults.to_dot(), 'node [label="A label"];')
-        self.assertEqual(defaults.to_dot(3), '            node [label="A label"];')
+        self.assertEqual(str(defaults), 'node [label="A label"];')
+        indent = Indent(3)
+        indent.indent()
+        self.assertEqual(defaults.to_dot(indent), '   node [label="A label"];')
 
     def test_Node(self):
 
         node = Node('A Key', {'label' : 'A Key Label'})
-        self.assertEqual(node.to_dot(), '"A Key" [label="A Key Label"];')
+        self.assertEqual(str(node), '"A Key" [label="A Key Label"];')
 
         node = Node('A Key')
-        self.assertEqual(node.to_dot(), '"A Key";')
+        self.assertEqual(str(node), '"A Key";')
 
     def test_Edge(self):
 
@@ -26,15 +31,15 @@ class TestDot(TestCase):
         node2 = Node('Key Two')
 
         edge = Edge(node1.key, node2.key)
-        self.assertEqual(edge.to_dot(), '"Key One" -> "Key Two";')
+        self.assertEqual(str(edge), '"Key One" -> "Key Two";')
 
         edge = Edge(node1.key, node2.key, {'color' : 'white'})
-        self.assertEqual(edge.to_dot(), '"Key One" -> "Key Two" [color="white"];')
+        self.assertEqual(str(edge), '"Key One" -> "Key Two" [color="white"];')
 
     def test_Rank(self):
 
         rank = Rank(['a', 'b', 'c d'])
-        self.assertEqual(rank.to_dot(), '{rank=same "a" "b" "c d"};')
+        self.assertEqual(str(rank), '{rank=same "a" "b" "c d"};')
 
     def test_Graph(self):
 
@@ -42,7 +47,7 @@ class TestDot(TestCase):
         node2 = Node('Key Two')
 
         edge = Edge(node1.key, node2.key)
-        self.assertEqual(edge.to_dot(), '"Key One" -> "Key Two";')
+        self.assertEqual(str(edge), '"Key One" -> "Key Two";')
 
         rank = Rank([node.key for node in (node1, node2)])
 
