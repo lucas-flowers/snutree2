@@ -512,9 +512,10 @@ class FamilyTree:
 
         if self.settings['layout']['ranks']:
             min_rank, max_rank = self.get_rank_bounds()
+            max_rank += 1 # always include one extra, blank rank at the end
             dates_left = self.create_date_subgraph('L', min_rank, max_rank)
             dates_right = self.create_date_subgraph('R', min_rank, max_rank)
-            ranks = self.create_ranks()
+            ranks = self.create_ranks(min_rank, max_rank)
             dotgraph.children = [node_defaults, edge_defaults, dates_left, tree, dates_right] + ranks
 
         else:
@@ -524,7 +525,7 @@ class FamilyTree:
 
     def get_rank_bounds(self):
         '''
-        Find and return the values of the highest and lowest ranks.
+        Find and return the values of the highest and lowest ranks in use.
         '''
 
         min_rank, max_rank = float('inf'), float('-inf')
@@ -551,7 +552,7 @@ class FamilyTree:
         nodes = []
         edges = []
         rank = min_rank
-        while rank <= max_rank:
+        while rank < max_rank:
             this_rank_key = '{}{}'.format(rank, key)
             next_rank_key = '{}{}'.format(rank+1, key)
             nodes.append(dot.Node(this_rank_key, {'label' : rank}))
@@ -568,7 +569,7 @@ class FamilyTree:
     def create_tree_subgraph(self, key):
         '''
         Create and return the DOT subgraph that will contain the member nodes
-        and their relatinshiops.
+        and their relationships.
         '''
 
         dotgraph = dot.Graph(key, 'subgraph')
@@ -587,22 +588,22 @@ class FamilyTree:
 
         return dotgraph
 
-    def create_ranks(self):
+    def create_ranks(self, min_rank, max_rank):
         '''
         Create and return the DOT ranks
         '''
 
-        ranks = {}
-        for key, node_dict in self.graph.nodes(data=True):
-            rank = node_dict['entity'].rank
-            if rank in ranks:
-                ranks[rank].keys.append(key)
-            else:
-                left_rank = '{}L'.format(rank)
-                right_rank = '{}R'.format(rank)
-                ranks[rank] = dot.Rank([left_rank, right_rank, key])
+        # `while` instead of `range` because ranks might not be true integers
+        ranks = []
+        i = min_rank
+        while i < max_rank:
+            ranks.append(dot.Rank([f'{i}L', f'{i}R']))
+            i += 1
 
-        return list(ranks.values())
+        for key, entity in self.nodes_iter('entity'):
+            ranks[entity.rank - min_rank].keys.append(key)
+
+        return ranks
 
     ###########################################################################
     #### Ordering                                                          ####

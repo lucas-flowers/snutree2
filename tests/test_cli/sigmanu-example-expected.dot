@@ -2327,7 +2327,9 @@ digraph "family_tree" {
     {rank=same "566" "Brother 6" "Fall 1958L" "Fall 1958R"};
     {rank=same "569" "585 Parent" "Spring 1959L" "Spring 1959R"};
     {rank=same "573" "585" "Fall 1959L" "Fall 1959R"};
+    {rank=same "Spring 1960L" "Spring 1960R"};
     {rank=same "599" "Brother 1" "Fall 1960L" "Fall 1960R"};
+    {rank=same "Spring 1961L" "Spring 1961R"};
     {rank=same "620" "Fall 1961L" "Fall 1961R"};
     {rank=same "629 Parent" "634 Parent" "Spring 1962L" "Spring 1962R"};
     {rank=same "629" "634" "635" "640" "642 Parent" "643 Parent" "Fall 1962L" "Fall 1962R"};
@@ -2348,13 +2350,17 @@ digraph "family_tree" {
     {rank=same "768" "769" "771" "772" "Spring 1970L" "Spring 1970R"};
     {rank=same "773" "774" "775" "Fall 1970L" "Fall 1970R"};
     {rank=same "776" "777" "778" "779" "780" "781" "Brother 23" "Spring 1971L" "Spring 1971R"};
+    {rank=same "Fall 1971L" "Fall 1971R"};
     {rank=same "783" "784" "785" "787" "788" "789" "790" "791" "Brother 12" "Brother 20" "Brother 25" "Brother 29" "Brother 5" "Spring 1972L" "Spring 1972R"};
+    {rank=same "Fall 1972L" "Fall 1972R"};
     {rank=same "792" "793" "794" "795" "796" "797" "798" "799" "800" "801" "802" "803" "804" "806" "Brother 18" "Brother 21" "Spring 1973L" "Spring 1973R"};
+    {rank=same "Fall 1973L" "Fall 1973R"};
     {rank=same "807" "808" "809" "810" "811" "812" "813" "814" "815" "816" "817" "818" "819" "820" "Brother 4" "Spring 1974L" "Spring 1974R"};
     {rank=same "821" "Brother 7" "Fall 1974L" "Fall 1974R"};
     {rank=same "822" "823" "824" "825" "826" "827" "828" "829" "830" "831" "832" "833" "834" "835" "836" "837" "838" "839" "840" "841" "842" "843" "Brother 26" "Spring 1975L" "Spring 1975R"};
     {rank=same "844" "Fall 1975L" "Fall 1975R"};
     {rank=same "845" "846" "847" "848" "849" "850" "851" "852" "853" "854" "855" "856" "857" "Spring 1976L" "Spring 1976R"};
+    {rank=same "Fall 1976L" "Fall 1976R"};
     {rank=same "858" "859" "860" "861" "862" "863" "864" "865" "866" "867" "868" "869" "870" "871" "872" "873" "874" "875" "876" "877" "878" "879" "Brother 17" "Brother 2" "Spring 1977L" "Spring 1977R"};
     {rank=same "880" "881" "882" "883" "884" "885" "Fall 1977L" "Fall 1977R"};
     {rank=same "886" "887" "888" "889" "890" "891" "892" "893" "894" "895" "896" "897" "898" "899" "Brother 13" "Brother 14" "Brother 27" "Brother 8" "Spring 1978L" "Spring 1978R"};
@@ -2362,6 +2368,7 @@ digraph "family_tree" {
     {rank=same "904" "905" "906" "907" "908" "909" "910" "Spring 1979L" "Spring 1979R"};
     {rank=same "911" "Fall 1979L" "Fall 1979R"};
     {rank=same "912" "913" "914" "915" "916" "917" "918" "919" "920" "921" "922" "923" "924" "925" "926" "Spring 1980L" "Spring 1980R"};
+    {rank=same "Fall 1980L" "Fall 1980R"};
     {rank=same "927" "928" "929" "930" "931" "932" "933" "934" "935" "936" "937" "938" "939" "940" "941" "942" "943" "944" "945" "946" "947" "948" "949" "950" "951" "Spring 1981L" "Spring 1981R"};
     {rank=same "952" "953" "954" "955" "956" "957" "958" "959" "Fall 1981L" "Fall 1981R"};
     {rank=same "960" "961" "962" "963" "964" "965" "Spring 1982L" "Spring 1982R"};
@@ -2380,8 +2387,11 @@ digraph "family_tree" {
     {rank=same "1035" "1036" "1037" "1038" "1039" "1040" "1041" "1042" "Fall 1988L" "Fall 1988R"};
     {rank=same "Reorganization" "Spacer" "Spring 1989L" "Spring 1989R"};
     {rank=same "1043" "1044" "1045" "1046" "1047" "1048" "1049" "1050" "1051" "Fall 1989L" "Fall 1989R"};
+    {rank=same "Spring 1990L" "Spring 1990R"};
     {rank=same "1052" "1053" "1054" "1055" "1056" "1057" "1058" "1059" "Fall 1990L" "Fall 1990R"};
+    {rank=same "Spring 1991L" "Spring 1991R"};
     {rank=same "1060" "1061" "1062" "1063" "1064" "1065" "1066" "1067" "Fall 1991L" "Fall 1991R"};
+    {rank=same "Spring 1992L" "Spring 1992R"};
     {rank=same "1068" "1069" "1070" "1071" "1072" "1073" "1074" "1075" "Fall 1992L" "Fall 1992R"};
     {rank=same "1076" "1077" "Spring 1993L" "Spring 1993R"};
     {rank=same "1078" "1079" "1080" "Fall 1993L" "Fall 1993R"};
@@ -2389,6 +2399,7 @@ digraph "family_tree" {
     {rank=same "1089" "Fall 1994L" "Fall 1994R"};
     {rank=same "1090" "1091" "Spring 1995L" "Spring 1995R"};
     {rank=same "1092" "1093" "1094" "1095" "1096" "1097" "1098" "1099" "Fall 1995L" "Fall 1995R"};
+    {rank=same "Spring 1996L" "Spring 1996R"};
     {rank=same "1100" "1101" "1102" "1103" "1104" "1105" "1106" "1107" "1108" "1109" "Fall 1996L" "Fall 1996R"};
     {rank=same "1110" "1111" "1112" "1113" "Spring 1997L" "Spring 1997R"};
     {rank=same "1114" "1115" "1116" "1117" "1118" "1119" "1120" "1121" "1122" "1123" "1124" "1125" "1126" "Fall 1997L" "Fall 1997R"};
