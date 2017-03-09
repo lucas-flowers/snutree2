@@ -26,12 +26,10 @@ class DotCommon(metaclass=ABCMeta):
 
         dot_attributes = []
         for key, value in sorted(self.attributes.items()):
-
             # If the value is a string bracketed by '<' and '>', use those instead
             bracketed = isinstance(value, str) and len(value) > 1 and value[0::len(value)-1] == '<>'
-
-            template = '{}="{}"' if not bracketed else '{}={}'
-            dot_attributes.append(template.format(key, value))
+            kv_pair = f'{key}="{value}"' if not bracketed else f'{key}={value}'
+            dot_attributes.append(kv_pair)
 
         return sep.join(dot_attributes)
 
@@ -42,9 +40,8 @@ class Graph(DotCommon):
     def __init__(self, key, graph_type, attributes=None, children=None):
 
         if graph_type not in Graph.graph_types:
-            msg = 'Expected graph type in {}, but received: {}'
-            vals = Graph.graph_types, graph_type
-            raise ValueError(msg.format(*vals))
+            msg = f'Expected graph type in {Graph.graph_types}, but received: {graph_type}'
+            raise ValueError(msg)
 
         self.graph_type = graph_type
         self.children = children or []
@@ -55,25 +52,14 @@ class Graph(DotCommon):
         lines = []
         indent = indent or Indent()
 
-        template = '{}{} "{}" {{'
-        values = indent, self.graph_type, self.key
-        lines.append(template.format(*values))
-
+        lines.append(f'{indent}{self.graph_type} "{self.key}" {{')
         with indent.indented():
-
             if self.attributes:
-                sep = ';\n{}'.format(indent)
-                attributes = self.attributes_to_dot(sep=sep)
-                template = '{}{};'
-                values = indent, attributes
-                lines.append(template.format(*values))
-
+                attributes = self.attributes_to_dot(sep=f';\n{indent}')
+                lines.append(f'{indent}{attributes};')
             for child in self.children:
                 lines.append(child.to_dot(indent))
-
-        template = '{}}}'
-        value = indent
-        lines.append(template.format(value))
+        lines.append(f'{indent}}}')
 
         return '\n'.join(lines)
 
@@ -82,31 +68,22 @@ class Defaults(DotCommon):
     defaults_types = ('node', 'edge')
 
     def __init__(self, key, attributes=None):
-
         if key not in Defaults.defaults_types:
-            msg = 'Expected defaults type in {}, but received: {}'
-            vals = Defaults.defaults_types, key
-            raise ValueError(msg.format(*vals))
-
+            msg = f'Expected defaults type in {Defaults.defaults_types}, but received: {key}'
+            raise ValueError(msg)
         super().__init__(key, attributes)
 
     def __str__(self):
+        # TODO remove empty brackets
         attributes = self.attributes_to_dot() or ''
-        template = '{} [{}];'
-        values = self.key, attributes
-        return template.format(*values)
+        return f'{self.key} [{attributes}];'
 
 class Node(DotCommon):
 
     def __str__(self):
-
-        template = ' [{}]'
-        value = self.attributes_to_dot()
-        attributes = template.format(value) if value else ''
-
-        template = '"{}"{};'
-        values = self.key, attributes
-        return template.format(*values)
+        kv_pairs = self.attributes_to_dot()
+        attributes = f' [{kv_pairs}]' if kv_pairs else ''
+        return f'"{self.key}"{attributes};'
 
 class Edge(DotCommon):
 
@@ -116,14 +93,9 @@ class Edge(DotCommon):
         super().__init__(Edge.EdgeKey(parent_key, child_key), attributes)
 
     def __str__(self):
-
-        template = ' [{}]'
-        value = self.attributes_to_dot()
-        attributes = template.format(value) if value else ''
-
-        template =  '"{}" -> "{}"{};'
-        values = self.key.parent, self.key.child, attributes
-        return template.format(*values)
+        kv_pairs = self.attributes_to_dot()
+        attributes = f' [{kv_pairs}]' if kv_pairs else ''
+        return f'"{self.key.parent}" -> "{self.key.child}"{attributes};'
 
 class Rank(DotCommon):
 
@@ -131,8 +103,6 @@ class Rank(DotCommon):
         self.keys = keys or []
 
     def __str__(self):
-        keys = ' '.join(['"{}"'.format(k) for k in sorted(self.keys, key=str)])
-        template =  '{{rank=same {}}};'
-        values = keys,
-        return template.format(*values)
+        keys = ' '.join([f'"{key}"' for key in sorted(self.keys, key=str)])
+        return f'{{rank=same {keys}}};';
 
