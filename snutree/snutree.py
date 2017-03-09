@@ -52,15 +52,14 @@ def get_member_format(value):
     try:
         module = plugin_source.load_plugin(module_name)
     except ImportError:
-        msg = 'must be one of {!r} or the path to a custom Python module'
-        val = PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
-        raise SnutreeError(msg.format(val))
+        builtins = PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
+        msg = f'must be one of {builtins!r} or the path to a custom Python module'
+        raise SnutreeError(msg)
 
     expected_functions = ['dicts_to_members', 'schema_information']
     if not all([hasattr(module, attr) for attr in expected_functions]):
-        msg = 'member module {!r} must implement: {!r}'
-        vals = module_name, expected_functions
-        raise SnutreeError(msg.format(*vals))
+        msg = f'member module {module_name!r} must implement: {expected_functions!r}'
+        raise SnutreeError(msg)
 
     return module
 
@@ -141,8 +140,8 @@ def read_sources(files, stdin_fmt=None):
 
         read = readers.get(filetype)
         if not read:
-            msg = 'data source filetype {!r} not supported'
-            raise SnutreeError(msg.format(filetype))
+            msg = f'data source filetype {filetype!r} not supported'
+            raise SnutreeError(msg)
 
         members += read(f)
 
@@ -179,8 +178,8 @@ def write_output(dotcode, filename=None):
     elif filetype == '.pdf':
         dot_compile = compile_pdf
     else:
-        msg = 'output filetype "{}" not supported'
-        raise SnutreeError(msg.format(filetype))
+        msg = f'output filetype {filetype!r} not supported'
+        raise SnutreeError(msg)
 
     if path:
         stream_open = lambda : path.open('wb+')
@@ -208,9 +207,9 @@ def compile_pdf(source):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
                 )
-    except OSError as e:
-        msg = 'had a problem compiling to PDF:\n{}'
-        raise SnutreeError(msg.format(e))
+    except OSError as exception:
+        msg = f'had a problem compiling to PDF:\n{exception}'
+        raise SnutreeError(exception)
 
     return result.stdout
 
