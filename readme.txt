@@ -10,6 +10,31 @@ brothers or big sisters) to new members. This script visualizes such
 relationships using Graphviz. It was originally developed for use by the Delta
 Alpha Chapter of Sigma Nu Fraternity.
 
+Installation
+============
+
+Python
+------
+
+#. Install Python and add it to the `PATH` if it is not already
+
+#. Download or clone this repository to some folder
+
+#. Navigate to the folder in a terminal, and enter `pip install -r requirements.txt`
+
+Windows
+-------
+
+#. Download and install Graphviz (TODO link)
+
+#. Add `dot.exe` to the Windows `PATH` variable (TODO how-to link)
+
+#. Download the `snutree.exe` or `snutree-gui.exe` binary
+
+Linux
+-----
+
+
 Basic Example
 =============
 
