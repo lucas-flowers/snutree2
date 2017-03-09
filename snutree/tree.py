@@ -72,8 +72,8 @@ class TreeEntity(metaclass=ABCMeta):
         if self._rank:
             return self._rank
         else:
-            msg = 'missing rank value for entity {!r}'
-            raise TreeEntityAttributeError(msg.format(self.key))
+            msg = f'missing rank value for entity {self.key!r}'
+            raise TreeEntityAttributeError(msg)
 
     @rank.setter
     def rank(self, value):
@@ -106,7 +106,7 @@ class UnidentifiedMember(Custom):
     '''
 
     def __init__(self, member, attributes=None):
-        self.key = '{} Parent'.format(member.key)
+        self.key = f'{member.key} Parent'
         try:
             self.rank = member.rank - 1
         except TreeEntityAttributeError:
@@ -304,8 +304,8 @@ class FamilyTree:
         key = entity.key
         if key in self.graph:
             code = TreeErrorCode.DUPLICATE_ENTITY
-            msg = 'duplicate entity key: {!r}'
-            raise TreeError(code, msg.format(key))
+            msg = f'duplicate entity key: {key!r}'
+            raise TreeError(code, msg)
         self.graph.add_node(key, entity=entity, dot_attributes=entity.dot_attributes)
 
     def add_big_relationship(self, member, dot_attributes=None):
@@ -321,16 +321,15 @@ class FamilyTree:
 
         if pkey not in self.graph:
             code = TreeErrorCode.PARENT_UNKNOWN
-            msg = 'member {!r} has unknown parent: {!r}'
-            raise TreeError(code, msg.format(ckey, pkey))
+            msg = f'member {ckey!r} has unknown parent: {pkey!r}'
+            raise TreeError(code, msg)
 
         parent = self.graph.node[pkey]['entity']
 
         if self.settings['layout']['ranks'] and member.rank < parent.rank:
             code = TreeErrorCode.PARENT_NOT_PRIOR
-            msg = 'rank {!r} of member {!r} cannot be prior to rank of parent {!r}: {!r}'
-            vals = member.rank, ckey, pkey, parent.rank
-            raise TreeError(code, msg.format(*vals))
+            msg = f'rank {member.rank!r} of member {ckey!r} cannot be prior to rank of parent {pkey!r}: {parent.rank!r}'
+            raise TreeError(code, msg)
 
         self.graph.add_edge(pkey, ckey, dot_attributes=dot_attributes or {})
 
@@ -381,11 +380,10 @@ class FamilyTree:
             nodes = path['nodes']
             for key in nodes:
                 if key not in self.graph:
-                    path_type = 'path' if len(nodes) > 2 else 'edge'
                     code = TreeErrorCode.UNKNOWN_EDGE_COMPONENT
-                    msg = 'custom {} {!r} has undefined node: {!r}'
-                    vals = path_type, path['nodes'], key
-                    raise TreeError(code, msg.format(*vals))
+                    path_or_edge = 'path' if len(nodes) > 2 else 'edge'
+                    msg = f'custom {path_or_edge} {nodes} has undefined node: {key!r}'
+                    raise TreeError(code, msg)
 
             attributes = path['attributes']
 
@@ -471,16 +469,16 @@ class FamilyTree:
         for key, color in family_colors.items():
 
             if key not in self.graph.node:
-                msg = 'warning: family color map includes nonexistent member: {!r}'
-                logging.warning(msg.format(key))
+                msg = f'family color map includes nonexistent member: {key!r}'
+                logging.warning(msg)
 
             else:
 
                 family = self.graph.node[key]['family']
                 if 'color' in family:
                     code = TreeErrorCode.FAMILY_COLOR_CONFLICT
-                    msg = 'family of member {!r} already assigned the color {!r}'
-                    raise TreeError(code, msg.format(key, color))
+                    msg = f'family of member {key!r} already assigned the color {color!r}'
+                    raise TreeError(code, msg)
 
                 color_picker.use(color)
                 self.graph.node[key]['family']['color'] = color
@@ -544,7 +542,7 @@ class FamilyTree:
         labels.
         '''
 
-        subgraph = dot.Graph('dates{}'.format(key), 'subgraph')
+        subgraph = dot.Graph(f'dates{key}', 'subgraph')
 
         node_defaults = dot.Defaults('node', self.settings['node_defaults']['rank'])
         edge_defaults = dot.Defaults('edge', self.settings['edge_defaults']['rank'])
@@ -553,14 +551,13 @@ class FamilyTree:
         edges = []
         rank = min_rank
         while rank < max_rank:
-            this_rank_key = '{}{}'.format(rank, key)
-            next_rank_key = '{}{}'.format(rank+1, key)
+            this_rank_key = f'{rank}{key}'
+            next_rank_key = f'{rank+1}{key}'
             nodes.append(dot.Node(this_rank_key, {'label' : rank}))
             edges.append(dot.Edge(this_rank_key, next_rank_key))
             rank += 1
 
-        this_rank_key = '{}{}'.format(rank, key)
-        nodes.append(dot.Node(this_rank_key, {'label' : rank}))
+        nodes.append(dot.Node(f'{rank}{key}', {'label' : rank}))
 
         subgraph.children = [node_defaults, edge_defaults] + nodes + edges
 
