@@ -128,7 +128,7 @@ class SchemaTable(QTableWidget):
             # Clear the table before adding new information (or aborting)
             self.setRowCount(0)
 
-        rows = sorted(module.schema_information().items())
+        rows = sorted(module.schema_information.items())
         for i, (fieldname, description) in enumerate(rows):
 
             self.insertRow(i)

@@ -30,7 +30,7 @@ def dicts_to_members(dicts):
             status = dct.get('status')
 
             if status not in MemberTypes:
-                valid_statuses, member = list(MemberTypes.keys()), pprint.pformat(dct)
+                valid_statuses, member = VALID_STATUSES, pprint.pformat(dct)
                 msg = f'status must be one of {valid_statuses}, in:\n{member}'
                 raise SnutreeError(msg)
 
@@ -49,23 +49,6 @@ def dicts_to_members(dicts):
 
     except Error as e:
         raise SnutreeValidationError(e, dct)
-
-def schema_information():
-    '''
-    Return a representation of the expected schema for this member type, for
-    users.
-    '''
-    valid_statuses = '", "'.join(MemberTypes.keys())
-    return {
-            'status' : f'One of "{valid_statuses}"',
-            'badge' : 'Badge number',
-            'first_name' : 'First name',
-            'preferred_name' : 'Preferred name',
-            'last_name' : 'Last name',
-            'big_badge' : "Big brother's badge number",
-            'pledge_semester' : '''The brother's semester of candicacy (e.g., "Fall 2000" or "Spring 1999")''',
-            'affiliations' : '''Comma-separated list of chapter badges (e.g., "Alpha 5, Ω 15, HM(A)")''',
-            }
 
 class Affiliation:
     '''
@@ -493,4 +476,17 @@ MemberTypes = {}
 for MemberType in [Candidate, Brother, Knight, Expelled, Reaffiliate]:
     for allowed in MemberType.allowed:
         MemberTypes[allowed] = MemberType
+
+VALID_STATUSES = MemberTypes.keys()
+
+schema_information = {
+        'status' : (lambda valid_statuses : f'One of "{valid_statuses}"')('", "'.join(VALID_STATUSES)),
+        'badge' : 'Badge number',
+        'first_name' : 'First name',
+        'preferred_name' : 'Preferred name',
+        'last_name' : 'Last name',
+        'big_badge' : "Big brother's badge number",
+        'pledge_semester' : '''The brother's semester of candicacy (e.g., "Fall 2000" or "Spring 1999")''',
+        'affiliations' : '''Comma-separated list of chapter badges (e.g., "Alpha 5, Ω 15, HM(A)")''',
+        }
 

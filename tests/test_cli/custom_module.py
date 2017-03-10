@@ -6,12 +6,11 @@ def dicts_to_members(dicts):
     for d in dicts:
         yield SubMember.from_dict(d)
 
-def schema_information():
-    return {
-            'cid' : 'Member ID',
-            'pid' : 'Parent ID',
-            's' : 'Rank ID',
-            }
+schema_information = {
+        'cid' : 'Member ID',
+        'pid' : 'Parent ID',
+        's' : 'Rank ID',
+        }
 
 class SubMember(Member):
 

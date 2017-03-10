@@ -15,17 +15,12 @@ def dicts_to_members(dicts):
     except Error as exc:
         raise SnutreeValidationError(exc, dct)
 
-def schema_information():
-    '''
-    Return a representation of the expected schema for this member type, for
-    users.
-    '''
-    return {
-            'key' : "Member ID",
-            'name' : "Member name",
-            'big_key' : "ID of member's big",
-            'pledge_semester' : 'Semester the member joined (e.g., "Fall 2000" or "Spring 1999")',
-            }
+schema_information = {
+        'key' : "Member ID",
+        'name' : "Member name",
+        'big_key' : "ID of member's big",
+        'pledge_semester' : 'Semester the member joined (e.g., "Fall 2000" or "Spring 1999")',
+        }
 
 class KeyedMember(Member):
     '''

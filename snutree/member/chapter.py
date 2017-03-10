@@ -14,16 +14,11 @@ def dicts_to_members(dicts):
     except Error as exc:
         raise SnutreeValidationError(exc, dct)
 
-def schema_information():
-    '''
-    Return a representation of the expected schema for this member type, for
-    users.
-    '''
-    return {
-            'child' : 'Chapter name',
-            'mother' : "Name of the chapter's mother chapter",
-            'founded' : 'Year the chapter was founded',
-            }
+schema_information = {
+        'child' : 'Chapter name',
+        'mother' : "Name of the chapter's mother chapter",
+        'founded' : 'Year the chapter was founded',
+        }
 
 class Chapter(Member):
     '''
