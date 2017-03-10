@@ -7,12 +7,11 @@ def dicts_to_members(dicts):
         yield SubMember.from_dict(d)
 
 def schema_information():
-    schema = [
-            ('cid', 'Member ID'),
-            ('pid', 'Parent ID'),
-            ('s', 'Rank ID'),
-            ]
-    return {k : d for k, d in schema}
+    return {
+            'cid' : 'Member ID',
+            'pid' : 'Parent ID',
+            's' : 'Rank ID',
+            }
 
 class SubMember(Member):
 

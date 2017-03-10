@@ -19,12 +19,11 @@ def schema_information():
     Return a representation of the expected schema for this member type, for
     users.
     '''
-    schema = [
-            ('child', 'Chapter name'),
-            ('mother', "Name of the chapter's mother chapter"),
-            ('founded', 'Year the chapter was founded'),
-            ]
-    return {k : d for k, d in schema}
+    return {
+            'child' : 'Chapter name',
+            'mother' : "Name of the chapter's mother chapter",
+            'founded' : 'Year the chapter was founded',
+            }
 
 class Chapter(Member):
     '''

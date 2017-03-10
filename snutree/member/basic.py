@@ -20,12 +20,11 @@ def schema_information():
     Return a representation of the expected schema for this member type, for
     users.
     '''
-    schema = [
-            ('name', 'Member name'),
-            ('big_name', "Name of member's big"),
-            ('pledge_semester', 'Semester the member joined (e.g., "Fall 2000" or "Spring 1999")'),
-            ]
-    return {k : d for k, d in schema}
+    return {
+            'name' : 'Member name',
+            'big_name' : "Name of member's big",
+            'pledge_semester' : 'Semester the member joined (e.g., "Fall 2000" or "Spring 1999")',
+            }
 
 class KeylessMember(Member):
     '''
