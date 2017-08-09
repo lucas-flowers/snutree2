@@ -209,7 +209,7 @@ def compile_pdf(source):
                 )
     except OSError as exception:
         msg = f'had a problem compiling to PDF:\n{exception}'
-        raise SnutreeError(exception)
+        raise SnutreeError(msg)
 
     return result.stdout
 

@@ -1,5 +1,6 @@
 import re
 import pprint
+from abc import ABCMeta, abstractmethod
 from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.humanize import validate_with_humanized_errors
 from voluptuous.error import Error
@@ -275,13 +276,17 @@ class Affiliation:
 # Voluptuous schema for a list of chapter affiliations
 AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
 
-class SigmaNuMember(Member):
+class SigmaNuMember(Member, metaclass=ABCMeta):
     '''
     A member of Sigma Nu. Each member has a name, a pledge semester, and
     potentially the badge of the member's big brother.
     '''
 
     schema = NotImplemented
+
+    @abstractmethod
+    def get_dot_label(self):
+        pass
 
     @classmethod
     def validate_dict(cls, dct):

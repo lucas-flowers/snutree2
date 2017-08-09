@@ -562,13 +562,13 @@ class FamilyTree:
 
         return subgraph
 
-    def create_tree_subgraph(self, key):
+    def create_tree_subgraph(self, subgraph_key):
         '''
         Create and return the DOT subgraph that will contain the member nodes
         and their relationships.
         '''
 
-        dotgraph = dot.Graph(key, 'subgraph')
+        dotgraph = dot.Graph(subgraph_key, 'subgraph')
 
         node_defaults = dot.Defaults('node', self.settings['node_defaults']['member'])
 
