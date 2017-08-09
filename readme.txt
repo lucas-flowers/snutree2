@@ -10,6 +10,11 @@ brothers or big sisters) to new members. This script visualizes such
 relationships using Graphviz. It was originally developed for use by the Delta
 Alpha Chapter of Sigma Nu Fraternity.
 
+Dependencies
+============
+
+mysqlclient graphviz
+
 Installation
 ============
 
