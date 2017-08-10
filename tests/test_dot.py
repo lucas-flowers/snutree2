@@ -7,6 +7,25 @@ class TestDot(TestCase):
 
     maxDiff = None
 
+    def test_attributes(self):
+        '''
+        DOT attributes should be (shallow) copies of the attributes parameter,
+        not just pointers.
+        '''
+
+        for attributes in ({'blah' : 999}, {}, None):
+
+            attributes = {'blah' : 999}
+            graph = Graph(1, 'graph', attributes)
+            defaults = Defaults('node', attributes)
+            node = Node(2, attributes)
+            edge = Edge(3, 4, attributes)
+
+            for obj in (graph, defaults, node, edge):
+                with self.subTest(attributes=attributes, obj=obj):
+                    self.assertIsNot(obj.attributes, attributes)
+
+
     def test_Defaults(self):
 
         self.assertRaises(ValueError, Defaults, 'key', attributes={'label': 'A label'})

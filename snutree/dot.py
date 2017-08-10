@@ -10,7 +10,7 @@ class DotCommon(metaclass=ABCMeta):
 
     def __init__(self, key, attributes=None):
         self.key = key
-        self.attributes = attributes or {}
+        self.attributes = attributes.copy() if attributes else {}
 
     def to_dot(self, indent=None):
         indent = indent or Indent()

@@ -91,7 +91,7 @@ class Custom(TreeEntity):
     def __init__(self, key, rank=None, attributes=None):
         self.key = key
         self.rank = rank
-        self.attributes = attributes or {}
+        self.attributes = attributes.copy() if attributes else {}
 
     @property
     def dot_attributes(self):
@@ -106,12 +106,12 @@ class UnidentifiedMember(Custom):
     '''
 
     def __init__(self, member, attributes=None):
-        self.key = f'{member.key} Parent'
+        key = f'{member.key} Parent'
         try:
-            self.rank = member.rank - 1
+            rank = member.rank - 1
         except TreeEntityAttributeError:
-            self.rank = None
-        self.attributes = attributes or {}
+            rank = None
+        super().__init__(key, rank, attributes)
 
 class Member(TreeEntity, metaclass=ABCMeta):
     '''
@@ -234,8 +234,6 @@ class FamilyTree:
     outside the directory (either through custom edges or special code).
     '''
 
-    # TODO shouldn't defaults be immutables?
-
     @logged
     def __init__(self, members, RankType=int, settings=None):
 
@@ -342,7 +340,7 @@ class FamilyTree:
             msg = f'rank {member.rank!r} of member {ckey!r} cannot be prior to rank of parent {pkey!r}: {parent.rank!r}'
             raise TreeError(code, msg)
 
-        self.graph.add_edge(pkey, ckey, dot_attributes=dot_attributes or {})
+        self.graph.add_edge(pkey, ckey, dot_attributes=dot_attributes)
 
     ###########################################################################
     #### Decoration                                                        ####
