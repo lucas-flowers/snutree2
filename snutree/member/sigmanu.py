@@ -9,8 +9,6 @@ from snutree import utilities, SnutreeError
 from snutree.utilities import Semester
 from snutree.tree import Member
 
-# TODO for SQL, make sure DA affiliations agree with the external ID.
-
 # TODO generalize
 # The chapter whose tree is being printed
 PRIMARY_CHAPTER = 'Delta Alpha'
