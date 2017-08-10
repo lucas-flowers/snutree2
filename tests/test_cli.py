@@ -103,7 +103,7 @@ class TestCli(TestCliCommon):
     def test_sigmanu_example(self):
 
         self.example_template(
-                example_name='sigmanu-example',
+                example_name='sigmanu-cwru-old',
                 config='config.yaml',
                 membertype='sigmanu',
                 seed=75,
@@ -113,7 +113,7 @@ class TestCli(TestCliCommon):
     def test_chapters(self):
 
         self.example_template(
-                example_name='chapter',
+                example_name='fake-chapter',
                 config='config.yaml',
                 membertype='chapter',
                 seed=76,
