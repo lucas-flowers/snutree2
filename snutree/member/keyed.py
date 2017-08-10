@@ -5,6 +5,8 @@ from snutree.tree import Member
 from snutree.utilities.voluptuous import NonEmptyString, SnutreeValidationError
 from snutree.utilities import Semester
 
+RankType = Semester
+
 def dicts_to_members(dicts):
     '''
     Validate a table of keyed member dictionaries.
@@ -31,7 +33,7 @@ class KeyedMember(Member):
             Required('key') : NonEmptyString,
             Required('name') : NonEmptyString,
             'big_key' : NonEmptyString,
-            Required('pledge_semester') : Coerce(Semester),
+            Required('pledge_semester') : Coerce(RankType),
             })
 
     def __init__(self,

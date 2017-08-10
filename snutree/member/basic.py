@@ -5,6 +5,8 @@ from snutree.tree import Member
 from snutree.utilities.voluptuous import NonEmptyString, SnutreeValidationError
 from snutree.utilities import Semester
 
+RankType = Semester
+
 def dicts_to_members(dicts):
     '''
     Convert member dictionaries to member objects.
@@ -29,7 +31,7 @@ class KeylessMember(Member):
     schema = Schema({
         Required('name') : NonEmptyString,
         'big_name' : NonEmptyString,
-        Required('pledge_semester') : Coerce(Semester),
+        Required('pledge_semester') : Coerce(RankType),
         })
 
     def __init__(self,

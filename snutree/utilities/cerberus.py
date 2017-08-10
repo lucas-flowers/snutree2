@@ -24,16 +24,6 @@ optional_boolean = {
         'default' : True,
         }
 
-# Is a string coerceable to a semester
-semester_like = {
-        'coerce' : Semester
-        }
-
-# Optional version of semester_like that defaults to None
-optional_semester_like = {
-        'coerce' : lambda x : Semester(x) if x != None else None,
-        }
-
 def validate(validator, dct):
     '''
     Validate the dict with the cerberus validator provided. Return the

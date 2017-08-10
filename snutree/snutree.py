@@ -29,9 +29,15 @@ def get_member_format(value):
     Example: "get_member_format('basic')" will import and return member.basic
     Example: "get_member_format(PATH/'plugin.py')" will import and return plugin.py
 
-    Any module imported here is assumed to implement a function called
-    validate(members) that takes a list of member dictionaries, validates it,
-    and yields a list of member objects.
+    Any module imported here is assumed to implement these two functions:
+
+    + validate(members): Takes a list of member dictionaries, validates it, and
+    yields a list of member objects.
+
+    + RankType(string): Converts a string to RankType, where RankType is a type
+    like int or Semester representing the value of each rank (such as a year or
+    year/season combination) and implementing integer addition.
+
     '''
 
     module_file = Path(value)
@@ -104,7 +110,7 @@ def generate(
     tree_cnf['seed'] = seed or tree_cnf.get('seed', 0)
 
     logging.info('Constructing family tree data structure')
-    tree = FamilyTree(members, tree_cnf)
+    tree = FamilyTree(members, member_module.RankType, tree_cnf)
 
     logging.info('Creating DOT code representation')
     dotgraph = tree.to_dot_graph()

@@ -15,6 +15,8 @@ from snutree.tree import Member
 # The chapter whose tree is being printed
 PRIMARY_CHAPTER = 'Delta Alpha'
 
+RankType = Semester
+
 def dicts_to_members(dicts):
     '''
     Convert a list of Sigma Nu member dictionaries to a list of member objects.
@@ -314,7 +316,7 @@ class Knight(SigmaNuMember):
         'preferred_name' : NonEmptyString,
         Required('last_name') : NonEmptyString,
         'big_badge' : NonEmptyString,
-        'pledge_semester' : Coerce(Semester),
+        'pledge_semester' : Coerce(RankType),
         'affiliations' : AffiliationsList,
         })
 
@@ -355,7 +357,7 @@ class Brother(SigmaNuMember):
         'preferred_name' : NonEmptyString,
         Required('last_name') : NonEmptyString,
         'big_badge' : NonEmptyString,
-        'pledge_semester' : Coerce(Semester),
+        'pledge_semester' : Coerce(RankType),
         'affiliations' : IsFalse,
         })
 
@@ -396,7 +398,7 @@ class Candidate(SigmaNuMember):
         'preferred_name' : NonEmptyString,
         Required('last_name') : NonEmptyString,
         'big_badge' : NonEmptyString,
-        'pledge_semester' : Coerce(Semester),
+        'pledge_semester' : Coerce(RankType),
         'affiliations' : IsFalse,
         })
 
@@ -441,7 +443,7 @@ class Expelled(Knight):
         'preferred_name' : NonEmptyString,
         'last_name' : NonEmptyString,
         'big_badge' : NonEmptyString,
-        'pledge_semester' : Coerce(Semester),
+        'pledge_semester' : Coerce(RankType),
         'affiliations' : AffiliationsList,
         })
 

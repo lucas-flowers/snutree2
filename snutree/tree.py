@@ -7,7 +7,7 @@ from networkx.algorithms.components import weakly_connected_components
 from cerberus import Validator
 from . import dot, SnutreeError
 from .utilities import logged, ColorPicker
-from .utilities.cerberus import optional_boolean, nonempty_string, semester_like, validate
+from .utilities.cerberus import optional_boolean, nonempty_string, validate
 
 ###############################################################################
 ###############################################################################
@@ -135,33 +135,23 @@ class TreeEntityAttributeError(SnutreeError):
 ###############################################################################
 ###############################################################################
 
-class FamilyTree:
+# Option flag names
+flags = [
+        'ranks',
+        'custom_edges',
+        'custom_nodes',
+        'no_singletons',
+        'family_colors',
+        'unknowns',
+        ]
+
+def create_settings_validator(RankType):
     '''
-    Representation of the family tree. The tree is made of nodes connected by
-    edges (duh). Every node must store a TreeEntity object in node['entity'],
-    and TreeEntities may either be Members or non-Members. All entities must
-    have a valid rank field when the tree is printed (unless ranks are ignored
-    in the settings dictionary).
-
-    Members have big-little relationships, determined by the parent field. This
-    relationship determines the edges between them. Non-Members do *not* have
-    such relationships, though they may have edges in the tree provided from
-    outside the directory (either through custom edges or special code).
+    Returns new validator for family tree settings which uses RankType to
+    validate the type of rank values.
     '''
 
-    # TODO shouldn't defaults be immutables?
-
-    # Option flag names
-    flags = [
-            'ranks',
-            'custom_edges',
-            'custom_nodes',
-            'no_singletons',
-            'family_colors',
-            'unknowns',
-            ]
-
-    SETTINGS_VALIDATOR = Validator({
+    return Validator({
 
         # Layout options
         'layout' : {
@@ -191,7 +181,9 @@ class FamilyTree:
             'valueschema' : {
                 'type' : 'dict',
                 'schema' : {
-                    'rank' : semester_like, # TODO the type doesn't actually need to be semester
+                    'rank' : {
+                        'coerce' : RankType
+                        },
                     'attributes' : graphviz_attributes,
                     }
                 }
@@ -224,13 +216,32 @@ class FamilyTree:
                 'default' : 71,
                 }
 
-    })
+        })
+
+
+class FamilyTree:
+    '''
+    Representation of the family tree. The tree is made of nodes connected by
+    edges (duh). Every node must store a TreeEntity object in node['entity'],
+    and TreeEntities may either be Members or non-Members. All entities must
+    have a valid rank field when the tree is printed (unless ranks are ignored
+    in the settings dictionary). The type of the rank field (such as int,
+    Semester, or a custom type) is provided to the constructor.
+
+    Members have big-little relationships, determined by the parent field. This
+    relationship determines the edges between them. Non-Members do *not* have
+    such relationships, though they may have edges in the tree provided from
+    outside the directory (either through custom edges or special code).
+    '''
+
+    # TODO shouldn't defaults be immutables?
 
     @logged
-    def __init__(self, members, settings=None):
+    def __init__(self, members, RankType=int, settings=None):
 
         self.graph = DiGraph()
-        self.settings = validate(self.SETTINGS_VALIDATOR, settings or {})
+        settings_validator = create_settings_validator(RankType)
+        self.settings = validate(settings_validator, settings or {})
 
         # Add all the entities in the settings and member list provided
         self.add_members(members)

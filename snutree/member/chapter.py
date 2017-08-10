@@ -4,6 +4,8 @@ from voluptuous.error import Error
 from snutree.tree import Member
 from snutree.utilities.voluptuous import NonEmptyString, SnutreeValidationError
 
+RankType = int
+
 def dicts_to_members(dicts):
     '''
     Validate a table of chapters dictionaries.
@@ -28,7 +30,7 @@ class Chapter(Member):
     schema = Schema({
         'mother' : NonEmptyString,
         Required('child') : NonEmptyString,
-        Required('founded') : Coerce(int)
+        Required('founded') : Coerce(RankType)
         })
 
     def __init__(self,
