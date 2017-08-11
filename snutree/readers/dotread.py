@@ -1,4 +1,6 @@
 import re
+from io import StringIO
+from contextlib import redirect_stdout
 import pydotplus
 import networkx.drawing.nx_pydot as nx_pydot
 from . import SnutreeReaderError
@@ -15,9 +17,22 @@ def get_table(f):
     list of member dictionaries from the networkx graph.
     '''
 
-    pydot = pydotplus.parser.parse_dot_data(f.read())
-    graph = pydot_to_nx(pydot)
-    return [node_dict for _, node_dict in graph.nodes_iter(data=True)]
+    # Pydotplus catches all of its ParseExceptions at the end of parse_dot_data
+    # and doesn't bother to rethrow them or store the messages in a log.
+    # Instead, it prints the messages directly to stdout. So, we have to
+    # capture stdout from parse_dot_data if there are any problems (indicated
+    # by a return value of None).
+    dot_code = f.read()
+    captured_stderr = StringIO()
+    with redirect_stdout(captured_stderr):
+        pydot = pydotplus.parser.parse_dot_data(dot_code)
+
+    if pydot is None:
+        error_message = captured_stderr.getvalue()
+        raise SnutreeReaderError(f'could not read DOT file:\n{error_message}')
+    else:
+        graph = pydot_to_nx(pydot)
+        return [node_dict for _, node_dict in graph.nodes_iter(data=True)]
 
 def pydot_to_nx(pydot):
     '''
@@ -59,7 +74,7 @@ def add_pledge_classes(pydot, graph):
         pledge_class_members = set()
         for node in subgraph.get_nodes():
 
-            # Pydot names include the quotes for some reason; remove them
+            # Pydot names include the quotes; remove them
             name = node.get_name().strip('"')
 
             semester_match = semester_matcher.match(name)
