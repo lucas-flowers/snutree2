@@ -163,7 +163,14 @@ def load_configuration(paths):
     config = {}
     for path in paths:
         with open(path, 'r') as f:
-            config.update(yaml.safe_load(f)) # TODO catch yaml errors
+
+            try:
+                dct = yaml.safe_load(f) or {}
+            except yaml.YAMLError as e:
+                msg = f'problem reading configuration:\n{e}'
+                raise SnutreeError(msg)
+
+            config.update(dct)
 
     return config
 
