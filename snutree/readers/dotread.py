@@ -1,10 +1,11 @@
 import re
 import pydotplus
 import networkx.drawing.nx_pydot as nx_pydot
+from . import SnutreeReaderError
 
 '''
 Utilities get members from a DOT file and turn it into a member list. Assumes
-the DOT file is place nice and is friendly. Mainly intended for testing.
+the DOT file is place nice and is friendly, as this is mainly for testing.
 '''
 
 def get_table(f):
@@ -66,7 +67,7 @@ def add_pledge_classes(pydot, graph):
 
                 semester_name = semester_match.group(1)
 
-                # I don't want to bother with these case
+                # I don't want to bother with these cases
                 if semester_name in pledge_classes:
                     msg = f'two pledge classes in the same semester: {semester_name}'
                     raise ValueError(msg)

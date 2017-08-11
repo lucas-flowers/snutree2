@@ -1,10 +1,16 @@
 import csv
+from . import SnutreeReaderError
 
 def get_table(stream):
     '''
     Read a CSV from the stream and return a list of member dictionaries.
     '''
-    rows = list(csv.DictReader(stream))
+
+    try:
+        rows = list(csv.DictReader(stream, strict=True))
+    except csv.Error as e:
+        raise SnutreeReaderError(f'could not read csv:\n{e}')
+
     for row in rows:
         # Remove the keys pointing to falsy values from each member. This
         # simplifies validation (e.g., we don't have to worry about
