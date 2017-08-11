@@ -59,7 +59,8 @@ def get_configuration(stream):
     try:
         return yaml.safe_load(stream) or {}
     except yaml.YAMLError as e:
-        raise SnutreeReaderError(f'problem reading database configuration:\n{e}')
+        msg = f'problem reading database configuration:\n{e}'
+        raise SnutreeReaderError(msg)
 
 def get_members(cnf):
     '''
