@@ -98,16 +98,19 @@ def generate(
         elif not quiet:
             logging.basicConfig(level=logging.WARNING, stream=log_stream, format='%(levelname)s: %(message)s')
 
+    logging.info('Loading configuration')
+    cnf = load_configuration(config_paths)
+    tree_cnf = cnf.get('output', {})
+    tree_cnf['seed'] = seed or tree_cnf.get('seed', 0)
+    input_cnf = cnf.get('input', {})
+    input_cnf['format'] = member_format or input_cnf.get('format', 'basic')
+
     logging.info('Retrieving data from sources')
     member_dicts = read_sources(files, stdin_fmt=input_format)
-    member_module = get_member_format(member_format)
+    member_module = get_member_format(input_cnf['format'])
 
     logging.info('Validating data')
     members = member_module.dicts_to_members(member_dicts)
-
-    logging.info('Loading tree configuration')
-    tree_cnf = load_configuration(config_paths)
-    tree_cnf['seed'] = seed or tree_cnf.get('seed', 0)
 
     logging.info('Constructing family tree data structure')
     tree = FamilyTree(members, member_module.RankType, tree_cnf)

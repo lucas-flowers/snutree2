@@ -38,7 +38,6 @@ class TestCliCommon(TestCase):
     def example_template(self,
             example_name=None,
             config=None,
-            membertype=None,
             seed=None,
             inputs=None,
             ):
@@ -52,7 +51,6 @@ class TestCliCommon(TestCase):
 
         result = self.invoke([
             *(['--config', str(example_config)] if example_config else []),
-            '--member-format', membertype,
             '--seed', seed,
             '--output', str(output),
             '--debug',
@@ -105,7 +103,6 @@ class TestCli(TestCliCommon):
         self.example_template(
                 example_name='sigmanu-cwru-old',
                 config='config.yaml',
-                membertype='sigmanu',
                 seed=75,
                 inputs=['directory-brothers_not_knights.csv', 'directory.csv'],
                 )
@@ -115,7 +112,6 @@ class TestCli(TestCliCommon):
         self.example_template(
                 example_name='fake-chapter',
                 config='config.yaml',
-                membertype='chapter',
                 seed=76,
                 inputs=['directory.csv'],
                 )
@@ -124,7 +120,7 @@ class TestCli(TestCliCommon):
 
         self.example_template(
                 example_name='fake',
-                membertype='keyed',
+                config='config.yaml',
                 seed=79,
                 inputs=['fake.csv'],
                 )

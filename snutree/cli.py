@@ -44,7 +44,7 @@ options = [
             'help' : 'Tree configuration file'
             }),
         ('--member-format', '-m', {
-            'default' : 'basic',
+            'default' : None,
             'help' : 'Expected member format'
             }),
         ('input_format','--format', '-f', {

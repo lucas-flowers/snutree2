@@ -1,49 +1,54 @@
 
-# Defaults style for Graphviz graphs and subgraphs
-graph_defaults:
-  all:
-    ratio: compress
-    pad: .5, .5
-    ranksep: .3
-    concentrate: false
+input:
+  format: chapter
 
-# Default style for Graphviz nodes
-node_defaults:
-  all:
-    style: filled
-    shape: box
-    penwidth: 2
-    width: 2
-    height: .45
-    fontname: dejavu sans
-  member:
-    fillcolor: .11 .71 1. # A goldish color
-  rank:
-    color: none
-    fontsize: 20
-    fontname: georgia
-  unknown:
-    height: 0
-    width: 0
-    style: invis
+output:
 
-# Default style for Graphviz edges
-edge_defaults:
-  all:
-    arrowhead: none
-  rank:
-    style: invis
-  unknown:
-    style: dotted
+  # Defaults style for Graphviz graphs and subgraphs
+  graph_defaults:
+    all:
+      ratio: compress
+      pad: .5, .5
+      ranksep: .3
+      concentrate: false
 
-layout:
-  ranks: True
-  custom_nodes: True
-  custom_edges: True
-  no_singletons: False
-  family_colors: False
-  unknowns: True
+  # Default style for Graphviz nodes
+  node_defaults:
+    all:
+      style: filled
+      shape: box
+      penwidth: 2
+      width: 2
+      height: .45
+      fontname: dejavu sans
+    member:
+      fillcolor: .11 .71 1. # A goldish color
+    rank:
+      color: none
+      fontsize: 20
+      fontname: georgia
+    unknown:
+      height: 0
+      width: 0
+      style: invis
 
-# Random seed for ordering family placement
-seed: 54
+  # Default style for Graphviz edges
+  edge_defaults:
+    all:
+      arrowhead: none
+    rank:
+      style: invis
+    unknown:
+      style: dotted
+
+  layout:
+    ranks: True
+    custom_nodes: True
+    custom_edges: True
+    no_singletons: False
+    family_colors: False
+    unknowns: True
+
+  # Random seed for ordering family placement
+  seed: 54
 
