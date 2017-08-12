@@ -117,7 +117,8 @@ class TestAffiliation(TestCase):
 
     def test_sorting(self):
 
-        # Sorting. Primary chapter (default is 'ΔΑ') goes first
+        # Sorting. Primary chapter goes first
+        sn.SigmaNuMember.chapter = sn.Affiliation.str_to_designation('ΔA')
         a, c, b, d = tuple(sn.Affiliation(s) for s in ('ΔA 1', 'Α 2', 'ΔA 2', 'Ω 1'))
         self.assertEqual(sorted([a, c, b, d]), [a, b, c, d])
 

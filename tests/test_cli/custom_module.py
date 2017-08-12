@@ -4,7 +4,7 @@ from snutree.tree import Member
 
 RankType = int
 
-def dicts_to_members(dicts):
+def dicts_to_members(dicts, conf=None):
     for d in dicts:
         yield SubMember.from_dict(d)
 

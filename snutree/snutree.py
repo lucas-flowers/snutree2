@@ -110,7 +110,7 @@ def generate(
     member_module = get_member_type(input_cnf['member_type'])
 
     logging.info('Validating data')
-    members = member_module.dicts_to_members(member_dicts)
+    members = member_module.dicts_to_members(member_dicts, input_cnf)
 
     logging.info('Constructing family tree data structure')
     tree = FamilyTree(members, member_module.RankType, tree_cnf)

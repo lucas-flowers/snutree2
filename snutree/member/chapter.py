@@ -6,7 +6,7 @@ from snutree.utilities.voluptuous import NonEmptyString, SnutreeValidationError
 
 RankType = int
 
-def dicts_to_members(dicts):
+def dicts_to_members(dicts, conf=None):
     '''
     Validate a table of chapters dictionaries.
     '''

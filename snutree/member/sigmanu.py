@@ -9,19 +9,24 @@ from snutree import utilities, SnutreeError
 from snutree.utilities import Semester
 from snutree.tree import Member
 
-# TODO generalize
-# The chapter whose tree is being printed
-PRIMARY_CHAPTER = 'Delta Alpha'
-
 RankType = Semester
 
-def dicts_to_members(dicts):
+def dicts_to_members(dicts, conf=None):
     '''
     Convert a list of Sigma Nu member dictionaries to a list of member objects.
     Use the status field to determine which type of member objects are created
     (or ignored, in the case of Reaffiliates), and make sure there are no
-    duplicate affiliations.
+    duplicate affiliations. The name of the chapter the family tree will be
+    made for should be in conf['chapter'].
     '''
+
+    try:
+        chapter = conf.get('chapter') if conf else None
+        if not chapter:
+            raise ValueError('missing the chapter name for this family tree')
+        SigmaNuMember.chapter = Affiliation.str_to_designation(chapter)
+    except ValueError as e:
+        raise SnutreeValidationError(e, conf)
 
     try:
 
@@ -194,27 +199,6 @@ class Affiliation:
         self.badge = badge
 
     @classmethod
-    def with_primary(cls, badge):
-        '''
-        Create an affiliation to the primary chapter with the given badge.
-        '''
-        return cls(cls.get_primary_chapter(), badge)
-
-    @classmethod
-    def get_primary_chapter(cls):
-        '''
-        Get the Greek-letter designation of primary chapter.
-        '''
-        return cls._primary_chapter
-
-    @classmethod
-    def set_primary_chapter(cls, chapter_designation):
-        '''
-        Set the Greek-letter designation of the primary chapter.
-        '''
-        cls._primary_chapter = cls.str_to_designation(chapter_designation)
-
-    @classmethod
     def str_to_designation(cls, string):
         '''
         Convert the string to a Greek-letter chapter designation, and return it
@@ -262,8 +246,8 @@ class Affiliation:
         '''
         if not isinstance(other, Affiliation):
             return NotImplemented
-        key_self = (self.designation != self._primary_chapter, self.designation, self.badge)
-        key_other = (other.designation != self._primary_chapter, other.designation, other.badge)
+        key_self = (self.designation != SigmaNuMember.chapter, self.designation, self.badge)
+        key_other = (other.designation != SigmaNuMember.chapter, other.designation, other.badge)
         return  key_self < key_other
 
     def __eq__(self, other):
@@ -282,6 +266,7 @@ class SigmaNuMember(Member, metaclass=ABCMeta):
     potentially the badge of the member's big brother.
     '''
 
+    chapter = NotImplemented
     schema = NotImplemented
 
     @abstractmethod
@@ -333,7 +318,7 @@ class Knight(SigmaNuMember):
         self.name = utilities.combine_names(first_name, preferred_name, last_name)
         self.parent = big_badge
         self.rank = pledge_semester
-        self.affiliations = set(affiliations or []) | {Affiliation.with_primary(int(badge))}
+        self.affiliations = set(affiliations or []) | {Affiliation(self.chapter, int(badge))}
 
     def get_dot_label(self):
         affiliations = ', '.join([str(s) for s in sorted(self.affiliations)])
@@ -380,8 +365,7 @@ class Brother(SigmaNuMember):
         Brother.bid += 1
 
     def get_dot_label(self):
-        chapter = Affiliation.get_primary_chapter()
-        return f'{self.name}\\n{chapter} Brother'
+        return f'{self.name}\\n{self.chapter} Brother'
 
 class Candidate(SigmaNuMember):
     '''
@@ -421,8 +405,7 @@ class Candidate(SigmaNuMember):
         Candidate.cid += 1
 
     def get_dot_label(self):
-        chapter = Affiliation.get_primary_chapter()
-        return f'{self.name}\\n{chapter} Candidate'
+        return f'{self.name}\\n{self.chapter} Candidate'
 
 class Expelled(Knight):
     '''
@@ -474,8 +457,6 @@ class Reaffiliate:
     with the status "Reaffiliate". These are ignored when making the tree.
     '''
     allowed = {'Reaffiliate'}
-
-Affiliation.set_primary_chapter('ΔA')
 
 MemberTypes = {}
 for MemberType in [Candidate, Brother, Knight, Expelled, Reaffiliate]:
