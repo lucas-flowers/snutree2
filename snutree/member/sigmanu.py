@@ -1,13 +1,23 @@
 import re
 import pprint
 from abc import ABCMeta, abstractmethod
+from cerberus import Validator
 from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.humanize import validate_with_humanized_errors
 from voluptuous.error import Error
 from snutree.utilities.voluptuous import NonEmptyString, Digits, SnutreeValidationError
+from snutree.utilities.cerberus import nonempty_string, validate
 from snutree import utilities, SnutreeError
 from snutree.utilities import Semester
 from snutree.tree import Member
+
+SIGMANU_VALIDATOR = Validator({
+    'member_type' : {
+        'type' : 'string',
+        'regex' : 'sigmanu',
+        },
+    'chapter' : nonempty_string,
+    })
 
 RankType = Semester
 
@@ -20,10 +30,8 @@ def dicts_to_members(dicts, conf=None):
     made for should be in conf['chapter'].
     '''
 
+    chapter = validate(SIGMANU_VALIDATOR, conf or {})['chapter']
     try:
-        chapter = conf.get('chapter') if conf else None
-        if not chapter:
-            raise ValueError('missing the chapter name for this family tree')
         SigmaNuMember.chapter = Affiliation.str_to_designation(chapter)
     except ValueError as e:
         raise SnutreeValidationError(e, conf)
