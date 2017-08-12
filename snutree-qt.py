@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from snutree.gui import main
+from snutree.qt import main
 
 '''
 Wrapper for running the fmaily tree program through a simple GUI.

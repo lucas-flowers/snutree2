@@ -119,7 +119,7 @@ class SchemaTable(QTableWidget):
         '''
 
         try:
-            module = snutree.get_member_format(module_name)
+            module = snutree.get_member_type(module_name)
         except snutree.SnutreeError as e:
             logging.error(e)
             SnutreeErrorMessage(e).exec_()
@@ -171,10 +171,10 @@ class SnutreeGUI(QWidget):
 
         # Get data sources (e.g., DOT, CSV, and SQL credential files)
         self.box_inputs = self.render_box_file(row_counter, 'Input Files:',
-                'Select input files', 'Supported filetypes (*.csv *.yaml *.dot);;All files (*)')
+                'Select input files', 'Supported filetypes (*.csv *.sql *.dot);;All files (*)')
 
         # Member format dropdown, custom browse button, and schema information
-        self.box_member_format = self.render_box_member_format(row_counter)
+        self.box_member_type = self.render_box_member_type(row_counter)
 
         # Get tree generation seed
         self.box_seed = self.render_box_seed(row_counter)
@@ -211,7 +211,7 @@ class SnutreeGUI(QWidget):
 
         return textbox
 
-    def render_box_member_format(self, row_counter):
+    def render_box_member_type(self, row_counter):
         '''
         Render the member format selector. Have the builtin member formats
         already selectable from a drop-down, and allow the possibility for a
@@ -294,7 +294,7 @@ class SnutreeGUI(QWidget):
                 files = [stack.enter_context(open(f)) for f in filenames]
                 output_path = LazyPath(self, 'Select output file', '', 'PDF (*.pdf);;Graphviz source (*.dot)')
                 configs = fancy_split(self.box_config.text())
-                member_format = self.box_member_format.currentData()
+                member_type = self.box_member_type.currentData()
                 seed = int(self.box_seed.text()) if self.box_seed.text() else 0
 
                 snutree.generate(
@@ -302,7 +302,7 @@ class SnutreeGUI(QWidget):
                         output_path=output_path,
                         log_path=None,
                         config_paths=configs,
-                        member_format=member_format,
+                        member_type=member_type,
                         input_format=None,
                         seed=seed,
                         debug=False,
