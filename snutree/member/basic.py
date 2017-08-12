@@ -7,7 +7,7 @@ from snutree.utilities import Semester
 
 RankType = Semester
 
-def dicts_to_members(dicts, conf=None):
+def dicts_to_members(dicts, **conf):
     '''
     Convert member dictionaries to member objects.
     '''

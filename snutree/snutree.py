@@ -100,17 +100,18 @@ def generate(
 
     logging.info('Loading configuration')
     cnf = load_configuration(config_paths)
+    input_cnf = cnf.get('data_source', {})
+    member_cnf = cnf.get('member_schema', {})
+    member_cnf['type'] = member_type or member_cnf.get('type', 'basic')
     tree_cnf = cnf.get('output', {})
     tree_cnf['seed'] = seed or tree_cnf.get('seed', 0)
-    input_cnf = cnf.get('input', {})
-    input_cnf['member_type'] = member_type or input_cnf.get('member_type', 'basic')
 
     logging.info('Retrieving data from sources')
     member_dicts = read_sources(files, input_cnf, stdin_fmt=input_format)
-    member_module = get_member_type(input_cnf['member_type'])
+    member_module = get_member_type(member_cnf['type'])
 
     logging.info('Validating data')
-    members = member_module.dicts_to_members(member_dicts, input_cnf)
+    members = member_module.dicts_to_members(member_dicts, **member_cnf)
 
     logging.info('Constructing family tree data structure')
     tree = FamilyTree(members, member_module.RankType, tree_cnf)
@@ -153,7 +154,7 @@ def read_sources(files, input_cnf, stdin_fmt=None):
             msg = f'data source filetype {filetype!r} not supported'
             raise SnutreeError(msg)
 
-        members += read(f, input_cnf)
+        members += read(f, **input_cnf)
 
     return members
 

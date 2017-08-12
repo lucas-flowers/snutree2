@@ -1,7 +1,6 @@
 from contextlib import closing
 import MySQLdb
 import MySQLdb.cursors
-import yaml
 from sshtunnel import SSHTunnelForwarder, BaseSSHTunnelForwarderError
 from cerberus import Validator
 from . import SnutreeReaderError
@@ -34,15 +33,15 @@ MYSQL_CNF_VALIDATOR = Validator({
             }
         }
 
-    }, allow_unknown=True)
+    })
 
-def get_table(query_stream, cnf):
+def get_table(query_stream, **config):
     '''
     Read a YAML table with query, SQL and, optionally, ssh information. Use the
     information to get a list of member dictionaries.
     '''
 
-    rows = get_members(query_stream.read(), cnf)
+    rows = get_members(query_stream.read(), config)
     for row in rows:
         # Remove the keys pointing to falsy values from each member. This
         # simplifies validation (e.g., we don't have to worry about
@@ -52,25 +51,25 @@ def get_table(query_stream, cnf):
                 del row[key]
         yield row
 
-def get_members(query, cnf):
+def get_members(query, config):
     '''
     Validate the configuration file and use it to get and return a table of
     members from the configuration's SQL database.
     '''
 
-    cnf = validate(MYSQL_CNF_VALIDATOR, cnf)
-    if cnf.get('ssh'):
-        return get_members_ssh(query, cnf['mysql'], cnf['ssh'])
+    config = validate(MYSQL_CNF_VALIDATOR, config)
+    if config.get('ssh'):
+        return get_members_ssh(query, config['mysql'], config['ssh'])
     else:
-        return get_members_local(query, cnf['mysql'])
+        return get_members_local(query, config['mysql'])
 
-def get_members_local(query, mysql):
+def get_members_local(query, mysql_config):
     '''
     Use the query and MySQL configuration to get a table of members.
     '''
 
     try:
-        with closing(MySQLdb.Connection(**mysql)) as cxn:
+        with closing(MySQLdb.Connection(**mysql_config)) as cxn:
             with cxn.cursor(MySQLdb.cursors.DictCursor) as cursor:
                 cursor.execute(query)
                 return cursor.fetchall()

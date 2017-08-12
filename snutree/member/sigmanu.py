@@ -12,7 +12,7 @@ from snutree.utilities import Semester
 from snutree.tree import Member
 
 SIGMANU_VALIDATOR = Validator({
-    'member_type' : {
+    'type' : {
         'type' : 'string',
         'regex' : 'sigmanu',
         },
@@ -21,7 +21,7 @@ SIGMANU_VALIDATOR = Validator({
 
 RankType = Semester
 
-def dicts_to_members(dicts, conf=None):
+def dicts_to_members(dicts, **conf):
     '''
     Convert a list of Sigma Nu member dictionaries to a list of member objects.
     Use the status field to determine which type of member objects are created

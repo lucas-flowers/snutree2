@@ -7,7 +7,7 @@ from snutree.utilities import Semester
 
 RankType = Semester
 
-def dicts_to_members(dicts, conf=None):
+def dicts_to_members(dicts, **conf):
     '''
     Validate a table of keyed member dictionaries.
     '''

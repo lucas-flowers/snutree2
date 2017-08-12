@@ -1,4 +1,4 @@
 
-input:
-  member_type: keyed
+member_schema:
+  type: keyed
 
