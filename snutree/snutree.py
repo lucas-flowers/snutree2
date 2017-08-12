@@ -21,13 +21,13 @@ else:
 # Location of all built-in member formats
 PLUGIN_BASE = PluginBase(package='snutree.member', searchpath=[str(SNUTREE_ROOT/'member')])
 
-def get_member_format(value):
+def get_member_type(value):
     '''
     Validates the provided member module and returns the appropriate Python
     module to import.
 
-    Example: "get_member_format('basic')" will import and return member.basic
-    Example: "get_member_format(PATH/'plugin.py')" will import and return plugin.py
+    Example: "get_member_type('basic')" will import and return member.basic
+    Example: "get_member_type(PATH/'plugin.py')" will import and return plugin.py
 
     Any module imported here is assumed to implement these two functions:
 
@@ -74,7 +74,7 @@ def generate(
         output_path:str,
         log_path:str,
         config_paths:List[str],
-        member_format:str,
+        member_type:str,
         input_format:str,
         seed:int,
         debug:bool,
@@ -103,11 +103,11 @@ def generate(
     tree_cnf = cnf.get('output', {})
     tree_cnf['seed'] = seed or tree_cnf.get('seed', 0)
     input_cnf = cnf.get('input', {})
-    input_cnf['format'] = member_format or input_cnf.get('format', 'basic')
+    input_cnf['member_type'] = member_type or input_cnf.get('member_type', 'basic')
 
     logging.info('Retrieving data from sources')
     member_dicts = read_sources(files, stdin_fmt=input_format)
-    member_module = get_member_format(input_cnf['format'])
+    member_module = get_member_type(input_cnf['member_type'])
 
     logging.info('Validating data')
     members = member_module.dicts_to_members(member_dicts)

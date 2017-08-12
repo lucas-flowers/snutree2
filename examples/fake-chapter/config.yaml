@@ -1,6 +1,6 @@
 
 input:
-  format: chapter
+  member_type: chapter
 
 output:
 
