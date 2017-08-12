@@ -100,14 +100,14 @@ def generate(
 
     logging.info('Loading configuration')
     cnf = load_configuration(config_paths)
-    input_cnf = cnf.get('data_source', {})
+    data_format_cnf = cnf.get('data_formats', {})
     member_cnf = cnf.get('member_schema', {})
     member_cnf['type'] = member_type or member_cnf.get('type', 'basic')
     tree_cnf = cnf.get('output', {})
     tree_cnf['seed'] = seed or tree_cnf.get('seed', 0)
 
     logging.info('Retrieving data from sources')
-    member_dicts = read_sources(files, input_cnf, stdin_fmt=input_format)
+    member_dicts = read_sources(files, data_format_cnf, stdin_fmt=input_format)
     member_module = get_member_type(member_cnf['type'])
 
     logging.info('Validating data')
@@ -126,12 +126,12 @@ def generate(
     write_output(dotcode, output_path)
 
 @logged
-def read_sources(files, input_cnf, stdin_fmt=None):
+def read_sources(files, data_format_cnf, stdin_fmt=None):
     '''
     Retrieves a list of members from the provided open files. Using the file
     extensions to determine what format to interpret the inputs as. Use the
-    provided stdin_fmt if files are coming from stdin and use the input_cnf
-    dictionary to provide any needed configuration.
+    provided stdin_fmt if files are coming from stdin and use the
+    data_format_cnf dictionary to provide any needed configuration.
     '''
 
     readers = {
@@ -154,7 +154,7 @@ def read_sources(files, input_cnf, stdin_fmt=None):
             msg = f'data source filetype {filetype!r} not supported'
             raise SnutreeError(msg)
 
-        members += read(f, **input_cnf)
+        members += read(f, **data_format_cnf)
 
     return members
 
