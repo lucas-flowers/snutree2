@@ -10,7 +10,7 @@ Utilities get members from a DOT file and turn it into a member list. Assumes
 the DOT file is place nice and is friendly, as this is mainly for testing.
 '''
 
-def get_table(f):
+def get_table(f, input_cnf=None):
     '''
     Read a DOT file into a pydotplus graph, convert that graph into an
     intermediate networkx graph (they're easier to deal with), and return a

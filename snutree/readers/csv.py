@@ -1,7 +1,7 @@
 import csv
 from . import SnutreeReaderError
 
-def get_table(stream):
+def get_table(stream, input_cnf=None):
     '''
     Read a CSV from the stream and return a list of member dictionaries.
     '''

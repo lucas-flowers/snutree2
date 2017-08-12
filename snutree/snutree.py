@@ -106,7 +106,7 @@ def generate(
     input_cnf['member_type'] = member_type or input_cnf.get('member_type', 'basic')
 
     logging.info('Retrieving data from sources')
-    member_dicts = read_sources(files, stdin_fmt=input_format)
+    member_dicts = read_sources(files, input_cnf, stdin_fmt=input_format)
     member_module = get_member_type(input_cnf['member_type'])
 
     logging.info('Validating data')
@@ -125,16 +125,17 @@ def generate(
     write_output(dotcode, output_path)
 
 @logged
-def read_sources(files, stdin_fmt=None):
+def read_sources(files, input_cnf, stdin_fmt=None):
     '''
     Retrieves a list of members from the provided open files. Using the file
     extensions to determine what format to interpret the inputs as. Use the
-    provided stdin_fmt if files are coming from stdin.
+    provided stdin_fmt if files are coming from stdin and use the input_cnf
+    dictionary to provide any needed configuration.
     '''
 
     readers = {
             # SQL query
-            'yaml' : sql.get_table,
+            'sql' : sql.get_table,
             # CSV table
             'csv' : csv.get_table,
             # DOT source code
@@ -152,7 +153,7 @@ def read_sources(files, stdin_fmt=None):
             msg = f'data source filetype {filetype!r} not supported'
             raise SnutreeError(msg)
 
-        members += read(f)
+        members += read(f, input_cnf)
 
     return members
 

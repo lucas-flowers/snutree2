@@ -10,8 +10,6 @@ from ..utilities.cerberus import validate, nonempty_string
 # Validates a configuration YAML file with SQL and ssh options
 MYSQL_CNF_VALIDATOR = Validator({
 
-    'query' : nonempty_string,
-
     'mysql' : {
         'type' : 'dict',
         'required' : True,
@@ -36,16 +34,15 @@ MYSQL_CNF_VALIDATOR = Validator({
             }
         }
 
-    })
+    }, allow_unknown=True)
 
-def get_table(stream):
+def get_table(query_stream, cnf):
     '''
     Read a YAML table with query, SQL and, optionally, ssh information. Use the
     information to get a list of member dictionaries.
     '''
 
-    cnf = get_configuration(stream)
-    rows = get_members(cnf)
+    rows = get_members(query_stream.read(), cnf)
     for row in rows:
         # Remove the keys pointing to falsy values from each member. This
         # simplifies validation (e.g., we don't have to worry about
@@ -55,22 +52,17 @@ def get_table(stream):
                 del row[key]
         yield row
 
-def get_configuration(stream):
-    try:
-        return yaml.safe_load(stream) or {}
-    except yaml.YAMLError as e:
-        msg = f'problem reading database configuration:\n{e}'
-        raise SnutreeReaderError(msg)
-
-def get_members(cnf):
+def get_members(query, cnf):
     '''
     Validate the configuration file and use it to get and return a table of
     members from the configuration's SQL database.
     '''
 
     cnf = validate(MYSQL_CNF_VALIDATOR, cnf)
-    get = get_members_ssh if cnf.get('ssh') else get_members_local
-    return get(**cnf)
+    if cnf.get('ssh'):
+        return get_members_ssh(query, cnf['mysql'], cnf['ssh'])
+    else:
+        return get_members_local(query, cnf['mysql'])
 
 def get_members_local(query, mysql):
     '''

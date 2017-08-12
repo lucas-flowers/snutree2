@@ -1,6 +1,7 @@
 import io
 import logging
 import sys
+from functools import reduce
 from inspect import cleandoc as trim
 from unittest import TestCase
 from pathlib import Path
@@ -37,20 +38,24 @@ class TestCliCommon(TestCase):
 
     def example_template(self,
             example_name=None,
-            config=None,
+            configs=None,
             seed=None,
             inputs=None,
             ):
 
         example_root = TESTS_ROOT.parent/'examples'/example_name
-        example_config = example_root/config if config else None
-        example_inputs = [example_root/input_file for input_file in inputs]
+        example_configs = [example_root/config for config in configs] if configs else []
+        example_inputs = [example_root/input_file for input_file in inputs] if inputs else []
 
         output = (TESTS_ROOT/'test_cli'/example_name).with_suffix('.dot')
         expected = (TESTS_ROOT/'test_cli'/(example_name+'-expected')).with_suffix('.dot')
 
-        result = self.invoke([
-            *(['--config', str(example_config)] if example_config else []),
+        config_params = []
+        for config in example_configs:
+            config_params.append('--config')
+            config_params.append(str(config))
+
+        result = self.invoke(config_params + [
             '--seed', seed,
             '--output', str(output),
             '--debug',
@@ -102,7 +107,7 @@ class TestCli(TestCliCommon):
 
         self.example_template(
                 example_name='sigmanu-cwru-old',
-                config='config.yaml',
+                configs=['config-input.yaml', 'config.yaml'],
                 seed=75,
                 inputs=['directory-brothers_not_knights.csv', 'directory.csv'],
                 )
@@ -111,7 +116,7 @@ class TestCli(TestCliCommon):
 
         self.example_template(
                 example_name='fake-chapter',
-                config='config.yaml',
+                configs=['config.yaml'],
                 seed=76,
                 inputs=['directory.csv'],
                 )
@@ -120,7 +125,7 @@ class TestCli(TestCliCommon):
 
         self.example_template(
                 example_name='fake',
-                config='config.yaml',
+                configs=['config.yaml'],
                 seed=79,
                 inputs=['fake.csv'],
                 )

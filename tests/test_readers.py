@@ -22,21 +22,6 @@ class TestReaders(TestCase):
         row_generator = read_csv.get_table(csv_stream)
         self.assertRaises(SnutreeReaderError, next, row_generator)
 
-    def test_sql_config_no_error(self):
-
-        try:
-            yaml_stream = StringIO('a:\n  b:\n     c:\nx:')
-            read_sql.get_configuration(yaml_stream)
-        except Exception as e:
-            self.fail(f'unexpected SQL read failure:\n{e}')
-
-    def test_sql_config_error(self):
-
-        yaml_stream = StringIO('a:\n  b: "\n   c:')
-        self.assertRaises(SnutreeReaderError,
-                read_sql.get_configuration, yaml_stream
-                )
-
     def test_sql_mysql_error(self):
 
         self.assertRaises(SnutreeReaderError,
