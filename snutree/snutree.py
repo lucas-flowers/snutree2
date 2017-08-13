@@ -131,9 +131,6 @@ def generate(
     Create a big-little family tree.
     '''
 
-    files = files or []
-    config_paths = config_paths or []
-
     # Parameters for this function that can also be included in config files
     config_params = denullified({
             'data_formats' : {
