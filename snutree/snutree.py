@@ -21,6 +21,9 @@ else:
 # Location of all built-in member formats
 PLUGIN_BASE = PluginBase(package='snutree.member', searchpath=[str(SNUTREE_ROOT/'member')])
 
+# Default member schema used in reading tables
+DEFAULT_MEMBER_TYPE = 'basic'
+
 def get_member_type(value):
     '''
     Validates the provided member module and returns the appropriate Python
@@ -102,9 +105,9 @@ def generate(
     cnf = load_configuration(config_paths)
     data_format_cnf = cnf.get('data_formats', {})
     member_cnf = cnf.get('member_schema', {})
-    member_cnf['type'] = member_type or member_cnf.get('type', 'basic')
+    member_cnf['type'] = member_type or member_cnf.get('type', DEFAULT_MEMBER_TYPE)
     tree_cnf = cnf.get('output', {})
-    tree_cnf['seed'] = seed or tree_cnf.get('seed', 0)
+    tree_cnf['seed'] = seed or tree_cnf.get('seed')
 
     logging.info('Retrieving data from sources')
     member_dicts = read_sources(files, data_format_cnf, stdin_fmt=input_format)
