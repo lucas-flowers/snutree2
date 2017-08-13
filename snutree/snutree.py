@@ -11,18 +11,15 @@ from .readers import sql, dotread, csv
 from .tree import FamilyTree
 from .utilities import logged
 
+# The folder this file is located in (used for importing member formats)
 if getattr(sys, 'frozen', False):
     # pylint: disable=no-member,protected-access
     SNUTREE_ROOT = Path(sys._MEIPASS)
 else:
-    # The folder this file is located in (used for importing member formats)
     SNUTREE_ROOT = Path(__file__).parent
 
 # Location of all built-in member formats
 PLUGIN_BASE = PluginBase(package='snutree.member', searchpath=[str(SNUTREE_ROOT/'member')])
-
-# Default member schema used in reading tables
-DEFAULT_MEMBER_TYPE = 'basic'
 
 def get_member_type(value):
     '''
@@ -32,27 +29,29 @@ def get_member_type(value):
     Example: "get_member_type('basic')" will import and return member.basic
     Example: "get_member_type(PATH/'plugin.py')" will import and return plugin.py
 
-    Any module imported here is assumed to implement these two functions:
+    Any module imported here is assumed to implement these two variables:
 
-    + validate(members): Takes a list of member dictionaries, validates it, and
-    yields a list of member objects.
+    + dicts_to_members(members): Takes a list of member dictionaries, validates
+    it, and yields a list of member objects.
 
     + RankType(string): Converts a string to RankType, where RankType is a type
     like int or Semester representing the value of each rank (such as a year or
     year/season combination) and implementing integer addition.
 
+    + schema_information: A dictionary whose keys are column names and whose
+    values are written descriptions of those columns.
+
     '''
 
-    module_file = Path(value)
-
-    if module_file.exists() and module_file.suffix == '.py':
+    module_file = Path(value) if value else None
+    if module_file and module_file.exists() and module_file.suffix == '.py':
         # Add custom module's directory to plugin path
         searchpath = [str(module_file.parent)] # pluginbase does not support filenames in the searchpath
         module_name = module_file.stem
     else:
-        # Assume it's  builtin
+        # Assume it's a built-in schema
         searchpath = []
-        module_name = value
+        module_name = value or 'basic' # fall back to basic schema if none provided
 
     # Setting persist=True ensures module won't be garbage collected before its
     # call in cli(). It will stay in memory for the program's duration.
@@ -65,7 +64,7 @@ def get_member_type(value):
         msg = f'must be one of {builtins!r} or the path to a custom Python module'
         raise SnutreeError(msg)
 
-    expected_functions = ['dicts_to_members', 'schema_information']
+    expected_functions = ['RankType', 'dicts_to_members', 'schema_information']
     if not all([hasattr(module, attr) for attr in expected_functions]):
         msg = f'member module {module_name!r} must implement: {expected_functions!r}'
         raise SnutreeError(msg)
@@ -105,7 +104,7 @@ def generate(
     cnf = load_configuration(config_paths)
     data_format_cnf = cnf.get('data_formats', {})
     member_cnf = cnf.get('member_schema', {})
-    member_cnf['type'] = member_type or member_cnf.get('type', DEFAULT_MEMBER_TYPE)
+    member_cnf['type'] = member_type or member_cnf.get('type')
     tree_cnf = cnf.get('output', {})
     tree_cnf['seed'] = seed or tree_cnf.get('seed')
 
