@@ -2,7 +2,7 @@ from unittest import TestCase
 from types import MappingProxyType
 from snutree.snutree import deep_update
 
-class TestDeepMergeDicts(TestCase):
+class TestDeepUpdate(TestCase):
 
     def test_empty(self):
 
@@ -15,9 +15,9 @@ class TestDeepMergeDicts(TestCase):
 
         dict1 = {'b' : {}}
         dict2 = {'a' : {}}
-        merged = {'a' : {}, 'b' : {}}
+        updated = {'a' : {}, 'b' : {}}
         deep_update(dict1, dict2)
-        self.assertEqual(dict1, merged)
+        self.assertEqual(dict1, updated)
 
     def test_immutable_sequence(self):
 
@@ -59,7 +59,7 @@ class TestDeepMergeDicts(TestCase):
                     )
                 )
 
-        merged = dict(
+        updated = dict(
                 a=1,
                 b=2,
                 c=None,
@@ -72,5 +72,5 @@ class TestDeepMergeDicts(TestCase):
                 )
 
         deep_update(dict1, dict2)
-        self.assertEqual(dict1, merged)
+        self.assertEqual(dict1, updated)
 
