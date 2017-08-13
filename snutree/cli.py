@@ -30,12 +30,10 @@ def main():
 options = [
         ('output_path', '--output', '-o', {
             'type' : click.Path(),
-            'default' : None,
             'help' : 'PDF or DOT file'
             }),
         ('log_path', '--log', '-l', {
             'type' : click.Path(exists=False),
-            'default' : None,
             'help' : 'Log location'
             }),
         ('config_paths', '--config', '-c', {
@@ -44,31 +42,27 @@ options = [
             'help' : 'Tree configuration file'
             }),
         ('member_type', '--member-type', '-m', {
-            'default' : None,
+            'type' : str,
             'help' : 'Expected member type'
             }),
         ('input_format','--format', '-f', {
             'type' : str,
-            'default' : None,
             'help' : 'Input format for stdin'
             }),
         ('--seed', '-S', {
-            'default' : 0,
+            'type' : int,
             'help' : 'Use a different seed to move tree nodes around'
             }),
         ('--verbose', '-v', {
             'is_flag' : True,
-            'default' : False,
             'help' : 'Print progress'
             }),
         ('--debug', '-d', {
             'is_flag' : True,
-            'default' : False,
             'help' : 'Print debug information'
             }),
         ('--quiet', '-q', {
             'is_flag' : True,
-            'default' : False,
             'help' : "Don't print anything, including warnings"
             }),
         ]
