@@ -101,23 +101,26 @@ def generate(
         elif not quiet:
             logging.basicConfig(level=logging.WARNING, stream=log_stream, format='%(levelname)s: %(message)s')
 
+    # TODO move code to separate function
     logging.info('Loading configuration')
-    cnf = load_configuration(config_paths)
-    data_format_cnf = cnf.get('data_formats', {})
-    member_cnf = cnf.get('member_schema', {})
-    member_cnf['type'] = member_type or member_cnf.get('type')
-    tree_cnf = cnf.get('output', {})
-    tree_cnf['seed'] = seed or tree_cnf.get('seed')
+    configs = load_configuration(config_paths) + [{
+        'data_formats' : {},
+        'member_schema' : { 'type' : member_type } if member_type else {},
+        'output' : { 'seed' : seed } if seed else {}
+        }]
+    config = {}
+    for c in configs:
+        deep_update(config, c)
 
     logging.info('Retrieving data from sources')
-    member_dicts = read_sources(files, data_format_cnf, stdin_fmt=input_format)
-    member_module = get_member_type(member_cnf['type'])
+    member_dicts = read_sources(files, config['data_formats'], stdin_fmt=input_format)
+    member_module = get_member_type(config['member_schema'].get('type'))
 
     logging.info('Validating data')
-    members = member_module.dicts_to_members(member_dicts, **member_cnf)
+    members = member_module.dicts_to_members(member_dicts, **config['member_schema'])
 
     logging.info('Constructing family tree data structure')
-    tree = FamilyTree(members, member_module.RankType, tree_cnf)
+    tree = FamilyTree(members, member_module.RankType, config['output'])
 
     logging.info('Creating DOT code representation')
     dotgraph = tree.to_dot_graph()
@@ -164,24 +167,23 @@ def read_sources(files, data_format_cnf, stdin_fmt=None):
 @logged
 def load_configuration(paths):
     '''
-    Load configuration YAML files from the given paths. Later paths override
-    the settings in earlier paths.
+    Load configuration YAML files from the given paths. Returns a list of
+    dictionaries representing each configuraton file.
     '''
 
-    config = {}
+    configs = []
     for path in paths:
         with open(path, 'r') as f:
 
             try:
-                dct = yaml.safe_load(f) or {}
+                config = yaml.safe_load(f) or {}
             except yaml.YAMLError as e:
                 msg = f'problem reading configuration:\n{e}'
                 raise SnutreeError(msg)
 
-            # TODO rename dct
-            deep_update(config, dct)
+            configs.append(config)
 
-    return config
+    return configs
 
 def deep_update(original, update):
     '''
