@@ -72,6 +72,35 @@ def get_member_type(value):
 
     return module
 
+def deep_update(original, update):
+    '''
+    Recursively updates the original dictionary with the update dictionary. The
+    update dictionary overwrites keys that are also in the original dictionary,
+    except for lists, which are extended with the elements in the update
+    dictionary.
+    '''
+
+    for key, new_value in update.items():
+        old_value = original.get(key)
+        if isinstance(old_value, MutableMapping) and isinstance(new_value, MutableMapping):
+            deep_update(old_value, new_value)
+        elif isinstance(old_value, MutableSequence) and isinstance(new_value, MutableSequence):
+            original[key].extend(new_value)
+        else:
+            original[key] = new_value
+
+def denullified(mapping):
+    '''
+    Recursively remove all keys in the mapping whose values are None.
+    '''
+    new_mapping = {}
+    for key, value in list(mapping.items()):
+        if isinstance(value, MutableMapping):
+            new_mapping[key] = denullified(value)
+        elif value is not None:
+            new_mapping[key] = value
+    return new_mapping
+
 def generate(
         files:List[IO[Any]],
         output_path:str,
@@ -91,6 +120,19 @@ def generate(
     files = files or []
     config_paths = config_paths or []
 
+    # Parameters for this function that can also be included in config files
+    config_params = denullified({
+            'data_formats' : {
+                'stdin' : input_format,
+                },
+            'member_schema' : {
+                'type' : member_type,
+                },
+            'output' : {
+                'seed' : seed,
+                }
+            })
+
     # Set up logging when it won't conflict with stdout
     if log_path or output_path:
         log_stream = open(log_path, 'w') if log_path else sys.stdout
@@ -101,19 +143,13 @@ def generate(
         elif not quiet:
             logging.basicConfig(level=logging.WARNING, stream=log_stream, format='%(levelname)s: %(message)s')
 
-    # TODO move code to separate function
     logging.info('Loading configuration')
-    configs = load_configuration(config_paths) + [{
-        'data_formats' : {},
-        'member_schema' : { 'type' : member_type } if member_type else {},
-        'output' : { 'seed' : seed } if seed else {}
-        }]
     config = {}
-    for c in configs:
-        deep_update(config, c)
+    for config_file in load_configuration(config_paths) + [config_params]:
+        deep_update(config, config_file)
 
     logging.info('Retrieving data from sources')
-    member_dicts = read_sources(files, config['data_formats'], stdin_fmt=input_format)
+    member_dicts = read_sources(files, config['data_formats'])
     member_module = get_member_type(config['member_schema'].get('type'))
 
     logging.info('Validating data')
@@ -132,7 +168,7 @@ def generate(
     write_output(dotcode, output_path)
 
 @logged
-def read_sources(files, data_format_cnf, stdin_fmt=None):
+def read_sources(files, data_format_cnf):
     '''
     Retrieves a list of members from the provided open files. Using the file
     extensions to determine what format to interpret the inputs as. Use the
@@ -153,7 +189,13 @@ def read_sources(files, data_format_cnf, stdin_fmt=None):
     for f in files or []:
 
         # Filetype is the path suffix or stdin's format if input is stdin
-        filetype = Path(f.name).suffix[1:] if f.name != '<stdin>' else stdin_fmt
+        if f.name == '<stdin>':
+            filetype = data_format_cnf.get('stdin')
+            if not filetype:
+                msg = f'data from stdin requires an input format'
+                raise SnutreeError(msg)
+        else:
+            filetype = Path(f.name).suffix[1:] # ignore first element (a dot)
 
         read = readers.get(filetype)
         if not read:
@@ -184,23 +226,6 @@ def load_configuration(paths):
             configs.append(config)
 
     return configs
-
-def deep_update(original, update):
-    '''
-    Recursively updates the original dictionary with the update dictionary. The
-    update dictionary overwrites keys that are also in the original dictionary,
-    except for lists, which are extended with the elements in the update
-    dictionary.
-    '''
-
-    for key, new_value in update.items():
-        old_value = original.get(key)
-        if isinstance(old_value, MutableMapping) and isinstance(new_value, MutableMapping):
-            deep_update(old_value, new_value)
-        elif isinstance(old_value, MutableSequence) and isinstance(new_value, MutableSequence):
-            original[key].extend(new_value)
-        else:
-            original[key] = new_value
 
 @logged
 def write_output(dotcode, filename=None):
