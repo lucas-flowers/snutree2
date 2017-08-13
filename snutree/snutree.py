@@ -4,6 +4,7 @@ import sys
 from typing import Any, List, IO
 from pathlib import Path
 from contextlib import contextmanager
+from collections import MutableSequence, MutableMapping
 import yaml
 from pluginbase import PluginBase
 from . import SnutreeError
@@ -177,9 +178,27 @@ def load_configuration(paths):
                 msg = f'problem reading configuration:\n{e}'
                 raise SnutreeError(msg)
 
-            config.update(dct)
+            # TODO rename dct
+            deep_update(config, dct)
 
     return config
+
+def deep_update(original, update):
+    '''
+    Recursively updates the original dictionary with the update dictionary. The
+    update dictionary overwrites keys that are also in the original dictionary,
+    except for lists, which are extended with the elements in the update
+    dictionary.
+    '''
+
+    for key, new_value in update.items():
+        old_value = original.get(key)
+        if isinstance(old_value, MutableMapping) and isinstance(new_value, MutableMapping):
+            deep_update(old_value, new_value)
+        elif isinstance(old_value, MutableSequence) and isinstance(new_value, MutableSequence):
+            original[key].extend(new_value)
+        else:
+            original[key] = new_value
 
 @logged
 def write_output(dotcode, filename=None):
