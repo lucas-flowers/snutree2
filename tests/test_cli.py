@@ -6,6 +6,8 @@ from inspect import cleandoc as trim
 from unittest import TestCase
 from pathlib import Path
 from click.testing import CliRunner
+from snutree import SnutreeError
+from snutree.utilities.voluptuous import SnutreeValidationError
 from snutree.cli import cli
 
 TESTS_ROOT = Path(__file__).parent
@@ -63,8 +65,8 @@ class TestCliCommon(TestCase):
             ])
 
         if result.exception:
-            msg = f'{result.exception}. <<OUTPUT\n{result.output}\nOUTPUT'
-            self.fail(msg)
+            raise result.exception
+            # msg = f'{result.exception}. <<OUTPUT\n{result.output}\nOUTPUT'
 
         self.assertEqual(output.read_text(), expected.read_text())
 
@@ -81,13 +83,16 @@ class TestCli(TestCliCommon):
         if result.exception:
             raise result.exception
 
+        result = self.invoke(['-'], good_csv)
+        self.assertIsInstance(result.exception, SnutreeError)
+
         bad_csv = trim('''
             name,big_name,pledge_semester
             ,Sue,Fall 1967
             Sue,,Spring 1965
             ''')
         result = self.invoke(['-f', 'csv', '-'], bad_csv)
-        self.assertTrue(result.exception)
+        self.assertIsInstance(result.exception, SnutreeValidationError)
 
     def test_custom_module(self):
 
