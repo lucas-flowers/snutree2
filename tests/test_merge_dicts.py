@@ -1,4 +1,5 @@
 from unittest import TestCase
+from types import MappingProxyType
 from snutree.snutree import deep_update
 
 class TestDeepMergeDicts(TestCase):
@@ -18,7 +19,7 @@ class TestDeepMergeDicts(TestCase):
         deep_update(dict1, dict2)
         self.assertEqual(dict1, merged)
 
-    def test_mutability(self):
+    def test_immutable_sequence(self):
 
         # Strings with the same path in both dictionaries should not be
         # appended (i.e., only actual lists---or, more specifically, mutable
@@ -27,6 +28,14 @@ class TestDeepMergeDicts(TestCase):
         dict2 = {1 : 'def'}
         deep_update(dict1, dict2)
         self.assertEqual(dict1, dict2)
+
+    def test_immutable_mapping(self):
+
+        # The same should apply to immutable mappings
+        dict3 = {1 : MappingProxyType({2 : 3})}
+        dict4 = {1 : MappingProxyType({3 : 2})}
+        deep_update(dict3, dict4)
+        self.assertEqual(dict3, dict4)
 
     def test_simple(self):
 
