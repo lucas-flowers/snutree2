@@ -15,10 +15,10 @@ SQL_CNF_VALIDATOR = Validator({
         'required' : True,
         'schema' : {
 
-            'host' : nonempty_string,
-            'user' : nonempty_string,
+            'host' : { 'type' : 'string', 'default' : '127.0.0.1' },
+            'user' : { 'type' : 'string', 'default' : 'root' },
             'passwd' : nonempty_string,
-            'port' : { 'type': 'integer' },
+            'port' : { 'type': 'integer', 'default' : 3306 },
             'db' : nonempty_string,
 
             # SSH for remote SQL databases
@@ -27,7 +27,7 @@ SQL_CNF_VALIDATOR = Validator({
                 'required' : False,
                 'schema' : {
                     'host' : nonempty_string,
-                    'port' : { 'type' : 'integer' },
+                    'port' : { 'type' : 'integer', 'default' : 22 },
                     'user' : nonempty_string,
                     'public_key' : nonempty_string,
                     }
