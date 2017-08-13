@@ -14,6 +14,12 @@ from .tree import FamilyTree
 from .utilities import logged
 from .utilities.cerberus import validate
 
+###############################################################################
+###############################################################################
+#### Cerberus Schemas                                                      ####
+###############################################################################
+###############################################################################
+
 CONFIG_VALIDATOR = Validator({
     'data_formats' : {
         'type' : 'dict',
@@ -25,6 +31,12 @@ CONFIG_VALIDATOR = Validator({
         'type' : 'dict',
         }
     })
+
+###############################################################################
+###############################################################################
+#### Member Plugin Modules Setup                                           ####
+###############################################################################
+###############################################################################
 
 # The folder this file is located in (used for importing member formats)
 if getattr(sys, 'frozen', False):
@@ -86,34 +98,11 @@ def get_member_type(value):
 
     return module
 
-def deep_update(original, update):
-    '''
-    Recursively updates the original dictionary with the update dictionary. The
-    update dictionary overwrites keys that are also in the original dictionary,
-    except for lists, which are extended with the elements in the update
-    dictionary.
-    '''
-
-    for key, new_value in update.items():
-        old_value = original.get(key)
-        if isinstance(old_value, MutableMapping) and isinstance(new_value, MutableMapping):
-            deep_update(old_value, new_value)
-        elif isinstance(old_value, MutableSequence) and isinstance(new_value, MutableSequence):
-            original[key].extend(new_value)
-        else:
-            original[key] = new_value
-
-def denullified(mapping):
-    '''
-    Recursively remove all keys in the mapping whose values are None.
-    '''
-    new_mapping = {}
-    for key, value in list(mapping.items()):
-        if isinstance(value, MutableMapping):
-            new_mapping[key] = denullified(value)
-        elif value is not None:
-            new_mapping[key] = value
-    return new_mapping
+###############################################################################
+###############################################################################
+#### API                                                                   ####
+###############################################################################
+###############################################################################
 
 def generate(
         files:List[IO[Any]],
@@ -178,6 +167,12 @@ def generate(
 
     logging.info('Writing output')
     write_output(dotcode, output_path)
+
+###############################################################################
+###############################################################################
+#### API Helper Functions                                                  ####
+###############################################################################
+###############################################################################
 
 @logged
 def read_sources(files, data_format_cnf):
@@ -290,4 +285,40 @@ def compile_pdf(source):
         raise SnutreeError(msg)
 
     return result.stdout
+
+###############################################################################
+###############################################################################
+#### Utilities                                                             ####
+###############################################################################
+###############################################################################
+
+def deep_update(original, update):
+    '''
+    Recursively updates the original dictionary with the update dictionary. The
+    update dictionary overwrites keys that are also in the original dictionary,
+    except for lists, which are extended with the elements in the update
+    dictionary.
+    '''
+
+    for key, new_value in update.items():
+        old_value = original.get(key)
+        if isinstance(old_value, MutableMapping) and isinstance(new_value, MutableMapping):
+            deep_update(old_value, new_value)
+        elif isinstance(old_value, MutableSequence) and isinstance(new_value, MutableSequence):
+            original[key].extend(new_value)
+        else:
+            original[key] = new_value
+
+def denullified(mapping):
+    '''
+    Recursively remove all keys in the mapping whose values are None.
+    '''
+
+    new_mapping = {}
+    for key, value in list(mapping.items()):
+        if isinstance(value, MutableMapping):
+            new_mapping[key] = denullified(value)
+        elif value is not None:
+            new_mapping[key] = value
+    return new_mapping
 
