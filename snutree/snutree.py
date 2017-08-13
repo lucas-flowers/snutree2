@@ -6,11 +6,25 @@ from pathlib import Path
 from contextlib import contextmanager
 from collections import MutableSequence, MutableMapping
 import yaml
+from cerberus import Validator
 from pluginbase import PluginBase
 from . import SnutreeError
 from .readers import sql, dotread, csv
 from .tree import FamilyTree
 from .utilities import logged
+from .utilities.cerberus import validate
+
+CONFIG_VALIDATOR = Validator({
+    'data_formats' : {
+        'type' : 'dict',
+        },
+    'member_schema' : {
+        'type' : 'dict',
+        },
+    'output' : {
+        'type' : 'dict',
+        }
+    })
 
 # The folder this file is located in (used for importing member formats)
 if getattr(sys, 'frozen', False):
@@ -147,6 +161,7 @@ def generate(
     config = {}
     for config_file in load_configuration(config_paths) + [config_params]:
         deep_update(config, config_file)
+    config = validate(CONFIG_VALIDATOR, config)
 
     logging.info('Retrieving data from sources')
     member_dicts = read_sources(files, config['data_formats'])
