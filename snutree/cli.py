@@ -47,7 +47,7 @@ options = [
             }),
         ('input_format','--format', '-f', {
             'type' : str,
-            'help' : 'Input file format for stdin'
+            'help' : f'Input file format for stdin; one of {snutree.BUILTIN_READERS!r} or a custom Python module'
             }),
         ('--seed', '-S', {
             'type' : int,

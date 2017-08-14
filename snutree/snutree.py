@@ -102,12 +102,12 @@ def get_plugin_builtins(plugin_base):
     return plugin_base.make_plugin_source(searchpath=[]).list_plugins()
 
 # Location of all built-in modules
-SCHEMAS_PLUGIN_BASE = get_plugin_base('schemas')
-READERS_PLUGIN_BASE = get_plugin_base('readers')
+SCHEMAS_PLUGIN, READERS_PLUGIN, WRITERS_PLUGIN = \
+        (get_plugin_base(p) for p in ('schemas', 'readers', 'writers'))
 
-# The built-in member table schemas
-BUILTIN_SCHEMAS = get_plugin_builtins(SCHEMAS_PLUGIN_BASE)
-BUILTIN_READERS = get_plugin_builtins(READERS_PLUGIN_BASE)
+# Built-in modules for each plugin
+BUILTIN_SCHEMAS, BUILTIN_READERS, BUILTIN_WRITERS = \
+        (get_plugin_builtins(p) for p in ('schemas', 'readers', 'writers'))
 
 ###############################################################################
 ###############################################################################
@@ -160,7 +160,7 @@ def generate(
     config = get_config(config_paths, config_args)
 
     logging.info('Loading member schema module')
-    schema = get_module(config['schema'].get('name', 'basic'), ['Rank', 'to_Members', 'description'], SCHEMAS_PLUGIN_BASE, 'member schema')
+    schema = get_module(config['schema'].get('name', 'basic'), ['Rank', 'to_Members', 'description'], SCHEMAS_PLUGIN, 'member schema')
 
     logging.info('Reading member table from data sources')
     member_table = get_member_table(input_files, config['readers'])
@@ -280,7 +280,7 @@ def get_member_table(files, reader_configs):
         else:
             filetype = Path(f.name).suffix[1:] # ignore first element (a dot)
 
-        reader = get_module(filetype, ['get_table'], READERS_PLUGIN_BASE, 'reader')
+        reader = get_module(filetype, ['get_table'], READERS_PLUGIN, 'reader')
         if not reader:
             msg = f'data source filetype {filetype!r} not supported'
             raise SnutreeError(msg)
