@@ -30,28 +30,28 @@ def main():
 options = [
         ('output_path', '--output', '-o', {
             'type' : click.Path(),
-            'help' : 'PDF or DOT file'
+            'help' : 'Send output to the provided PDF or DOT file, instead of sending DOT code stdout'
             }),
         ('log_path', '--log', '-l', {
             'type' : click.Path(exists=False),
-            'help' : 'Log location'
+            'help' : 'Log file path'
             }),
         ('config_paths', '--config', '-c', {
             'type' : click.Path(exists=True),
             'multiple' : True,
-            'help' : 'Tree configuration file'
+            'help' : 'Program configuration files'
             }),
         ('schema', '--schema', '-m', {
             'type' : str,
-            'help' : 'Expected member schema'
+            'help' : f'Member table schema; one of {snutree.BUILTIN_SCHEMAS!r} or a custom Python module'
             }),
         ('input_format','--format', '-f', {
             'type' : str,
-            'help' : 'Input format for stdin'
+            'help' : 'Input file format for stdin'
             }),
         ('--seed', '-S', {
             'type' : int,
-            'help' : 'Use a different seed to move tree nodes around'
+            'help' : 'Seed for the random number generator, used to move tree nodes around in a repeatable way'
             }),
         ('--verbose', '-v', {
             'is_flag' : True,
@@ -63,7 +63,7 @@ options = [
             }),
         ('--quiet', '-q', {
             'is_flag' : True,
-            'help' : "Don't print anything, including warnings"
+            'help' : "Do not print anything, including warnings"
             }),
         ]
 

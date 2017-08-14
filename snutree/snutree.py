@@ -51,6 +51,8 @@ else:
 # Location of all built-in member formats
 PLUGIN_BASE = PluginBase(package='snutree.schemas', searchpath=[str(SNUTREE_ROOT/'schemas')])
 
+# The built-in member table schemas
+BUILTIN_SCHEMAS = PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
 ###############################################################################
 ###############################################################################
 #### API                                                                   ####
@@ -206,8 +208,7 @@ def get_schema_module(name):
     try:
         module = plugin_source.load_plugin(module_name)
     except ImportError:
-        builtins = PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
-        msg = f'member schema must be one of {builtins!r} or the path to a custom Python module'
+        msg = f'member schema must be one of {BUILTIN_SCHEMAS!r} or the path to a custom Python module'
         raise SnutreeError(msg)
 
     expected_attributes = ['Rank', 'to_Members', 'description']
