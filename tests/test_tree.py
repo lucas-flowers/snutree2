@@ -1,6 +1,6 @@
 from unittest import TestCase
 from functools import partial
-from snutree.member.basic import KeylessMember
+from snutree.schemas.basic import KeylessMember
 from snutree.tree import FamilyTree, TreeError, TreeErrorCode
 
 class TestTree(TestCase):

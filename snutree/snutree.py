@@ -21,10 +21,10 @@ from .utilities.cerberus import validate
 ###############################################################################
 
 CONFIG_VALIDATOR = Validator({
-    'data_formats' : {
+    'readers' : {
         'type' : 'dict',
         },
-    'member_schema' : {
+    'schema' : {
         'type' : 'dict',
         },
     'output' : {
@@ -46,31 +46,32 @@ else:
     SNUTREE_ROOT = Path(__file__).parent
 
 # Location of all built-in member formats
-PLUGIN_BASE = PluginBase(package='snutree.member', searchpath=[str(SNUTREE_ROOT/'member')])
+PLUGIN_BASE = PluginBase(package='snutree.schemas', searchpath=[str(SNUTREE_ROOT/'schemas')])
 
-def get_member_type(value):
+def get_schema_module(name):
     '''
-    Validates the provided member module and returns the appropriate Python
-    module to import.
+    Validates the provided member schema name and returns the appropriate
+    Python module to import.
 
-    Example: "get_member_type('basic')" will import and return member.basic
-    Example: "get_member_type(PATH/'plugin.py')" will import and return plugin.py
+    Example: "get_schema_module('basic')" will import and return schemas.basic
+    Example: "get_schema_module(PATH/'plugin.py')" will import and return plugin.py
 
-    Any module imported here is assumed to implement these two variables:
+    Any module imported here is assumed to implement these attributes:
 
-    + dicts_to_members(members): Takes a list of member dictionaries, validates
-    it, and yields a list of member objects.
+    + to_Members(dicts, **config): Takes a list of member dictionaries and
+    configuration options, validates the list, and yields a sequence of Member
+    objects.
 
-    + RankType(string): Converts a string to RankType, where RankType is a type
-    like int or Semester representing the value of each rank (such as a year or
-    year/season combination) and implementing integer addition.
+    + Rank(string): Converts a string to a Rank, where Rank is a type, like int
+    or Semester, representing the value of each rank (examples: year,
+    year+semester, pledge class) and implementing integer addition.
 
-    + schema_information: A dictionary whose keys are column names and whose
-    values are written descriptions of those columns.
+    + description: A mapping whose keys are column names and whose values are
+    written descriptions of those columns.
 
     '''
 
-    module_file = Path(value) if value else None
+    module_file = Path(name) if name else None
     if module_file and module_file.exists() and module_file.suffix == '.py':
         # Add custom module's directory to plugin path
         searchpath = [str(module_file.parent)] # pluginbase does not support filenames in the searchpath
@@ -78,7 +79,7 @@ def get_member_type(value):
     else:
         # Assume it's a built-in schema
         searchpath = []
-        module_name = value or 'basic' # fall back to basic schema if none provided
+        module_name = name or 'basic' # fall back to basic schema if none provided
 
     # Setting persist=True ensures module won't be garbage collected before its
     # call in cli(). It will stay in memory for the program's duration.
@@ -88,12 +89,12 @@ def get_member_type(value):
         module = plugin_source.load_plugin(module_name)
     except ImportError:
         builtins = PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
-        msg = f'must be one of {builtins!r} or the path to a custom Python module'
+        msg = f'member schema must be one of {builtins!r} or the path to a custom Python module'
         raise SnutreeError(msg)
 
-    expected_functions = ['RankType', 'dicts_to_members', 'schema_information']
-    if not all([hasattr(module, attr) for attr in expected_functions]):
-        msg = f'member module {module_name!r} must implement: {expected_functions!r}'
+    expected_attributes = ['Rank', 'to_Members', 'description']
+    if not all([hasattr(module, a) for a in expected_attributes]):
+        msg = f'member schema module {module_name!r} must implement: {expected_attributes!r}'
         raise SnutreeError(msg)
 
     return module
@@ -104,15 +105,12 @@ def get_member_type(value):
 ###############################################################################
 ###############################################################################
 
-# TODO create unified vocabulary, such as renaming "member_schema" to
-# "schema_options" or something
-
 def generate(
         files:List[IO[Any]],
         output_path:str,
         log_path:str,
         config_paths:List[str],
-        member_type:str,
+        schema:str,
         input_format:str,
         seed:int,
         debug:bool,
@@ -125,11 +123,11 @@ def generate(
 
     # Parameters for this function that can also be included in config files
     config_params = denullified({
-            'data_formats' : {
+            'readers' : {
                 'stdin' : input_format,
                 },
-            'member_schema' : {
-                'type' : member_type,
+            'schema' : {
+                'name' : schema,
                 },
             'output' : {
                 'seed' : seed,
@@ -153,14 +151,14 @@ def generate(
     config = validate(CONFIG_VALIDATOR, config)
 
     logging.info('Retrieving data from sources')
-    member_dicts = read_sources(files, config['data_formats'])
-    member_module = get_member_type(config['member_schema'].get('type'))
+    member_dicts = read_sources(files, config['readers'])
+    schema = get_schema_module(config['schema'].get('name'))
 
     logging.info('Validating data')
-    members = member_module.dicts_to_members(member_dicts, **config['member_schema'])
+    members = schema.to_Members(member_dicts, **config['schema'])
 
     logging.info('Constructing family tree data structure')
-    tree = FamilyTree(members, member_module.RankType, config['output'])
+    tree = FamilyTree(members, schema.Rank, config['output'])
 
     logging.info('Creating DOT code representation')
     dotgraph = tree.to_dot_graph()

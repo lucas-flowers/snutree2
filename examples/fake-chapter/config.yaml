@@ -1,6 +1,6 @@
 
-member_schema:
-  type: chapter
+schema:
+  name: chapter
 
 output:
 

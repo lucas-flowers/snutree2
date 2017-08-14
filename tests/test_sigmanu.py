@@ -1,6 +1,6 @@
 import string
 from unittest import TestCase
-import snutree.member.sigmanu as sn
+import snutree.schemas.sigmanu as sn
 
 class TestSigmaNu(TestCase):
 
@@ -11,7 +11,7 @@ class TestSigmaNu(TestCase):
             with self.subTest(schema=schema):
                 type_keys = set((s if isinstance(s, str) else s.schema)
                     for s in schema.schema.keys())
-                expected_keys = set(sn.schema_information.keys())
+                expected_keys = set(sn.description.keys())
                 self.assertTrue(type_keys <= expected_keys)
 
 class TestAffiliation(TestCase):

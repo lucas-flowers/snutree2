@@ -12,16 +12,16 @@ from snutree.utilities import Semester
 from snutree.tree import Member
 
 SIGMANU_VALIDATOR = Validator({
-    'type' : {
+    'name' : {
         'type' : 'string',
         'regex' : 'sigmanu',
         },
     'chapter' : nonempty_string,
     })
 
-RankType = Semester
+Rank = Semester
 
-def dicts_to_members(dicts, **conf):
+def to_Members(dicts, **config):
     '''
     Convert a list of Sigma Nu member dictionaries to a list of member objects.
     Use the status field to determine which type of member objects are created
@@ -30,11 +30,11 @@ def dicts_to_members(dicts, **conf):
     made for should be in conf['chapter'].
     '''
 
-    chapter = validate(SIGMANU_VALIDATOR, conf or {})['chapter']
+    chapter = validate(SIGMANU_VALIDATOR, config or {})['chapter']
     try:
         SigmaNuMember.chapter = Affiliation.str_to_designation(chapter)
     except ValueError as e:
-        raise SnutreeValidationError(e, conf)
+        raise SnutreeValidationError(e, config)
 
     try:
 
@@ -307,7 +307,7 @@ class Knight(SigmaNuMember):
         'preferred_name' : NonEmptyString,
         Required('last_name') : NonEmptyString,
         'big_badge' : NonEmptyString,
-        'pledge_semester' : Coerce(RankType),
+        'pledge_semester' : Coerce(Rank),
         'affiliations' : AffiliationsList,
         })
 
@@ -348,7 +348,7 @@ class Brother(SigmaNuMember):
         'preferred_name' : NonEmptyString,
         Required('last_name') : NonEmptyString,
         'big_badge' : NonEmptyString,
-        'pledge_semester' : Coerce(RankType),
+        'pledge_semester' : Coerce(Rank),
         'affiliations' : IsFalse,
         })
 
@@ -388,7 +388,7 @@ class Candidate(SigmaNuMember):
         'preferred_name' : NonEmptyString,
         Required('last_name') : NonEmptyString,
         'big_badge' : NonEmptyString,
-        'pledge_semester' : Coerce(RankType),
+        'pledge_semester' : Coerce(Rank),
         'affiliations' : IsFalse,
         })
 
@@ -432,7 +432,7 @@ class Expelled(Knight):
         'preferred_name' : NonEmptyString,
         'last_name' : NonEmptyString,
         'big_badge' : NonEmptyString,
-        'pledge_semester' : Coerce(RankType),
+        'pledge_semester' : Coerce(Rank),
         'affiliations' : AffiliationsList,
         })
 
@@ -473,7 +473,7 @@ for MemberType in [Candidate, Brother, Knight, Expelled, Reaffiliate]:
 
 VALID_STATUSES = MemberTypes.keys()
 
-schema_information = {
+description = {
         'status' : (lambda valid_statuses : f'One of "{valid_statuses}"')('", "'.join(VALID_STATUSES)),
         'badge' : 'Badge number',
         'first_name' : 'First name',

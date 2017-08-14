@@ -41,9 +41,9 @@ options = [
             'multiple' : True,
             'help' : 'Tree configuration file'
             }),
-        ('member_type', '--member-type', '-m', {
+        ('schema', '--schema', '-m', {
             'type' : str,
-            'help' : 'Expected member type'
+            'help' : 'Expected member schema'
             }),
         ('input_format','--format', '-f', {
             'type' : str,

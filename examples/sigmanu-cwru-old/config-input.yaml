@@ -1,5 +1,5 @@
 
-member_schema:
-  type: sigmanu
+schema:
+  name: sigmanu
   chapter: Delta Alpha
 

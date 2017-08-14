@@ -5,44 +5,48 @@ from snutree.tree import Member
 from snutree.utilities.voluptuous import NonEmptyString, SnutreeValidationError
 from snutree.utilities import Semester
 
-RankType = Semester
+Rank = Semester
 
-def dicts_to_members(dicts, **conf):
+def to_Members(dicts, **config):
     '''
-    Convert member dictionaries to member objects.
+    Validate a table of keyed member dictionaries.
     '''
     try:
         for dct in dicts:
-            yield KeylessMember.from_dict(dct)
+            yield KeyedMember.from_dict(dct)
     except Error as exc:
         raise SnutreeValidationError(exc, dct)
 
-schema_information = {
-        'name' : 'Member name',
-        'big_name' : "Name of member's big",
+description = {
+        'key' : "Member ID",
+        'name' : "Member name",
+        'big_key' : "ID of member's big",
         'pledge_semester' : 'Semester the member joined (e.g., "Fall 2000" or "Spring 1999")',
         }
 
-class KeylessMember(Member):
+class KeyedMember(Member):
     '''
-    A Member keyed by their own name.
+    A Member keyed by some ID.
     '''
 
     schema = Schema({
-        Required('name') : NonEmptyString,
-        'big_name' : NonEmptyString,
-        Required('pledge_semester') : Coerce(RankType),
-        })
+            Required('key') : NonEmptyString,
+            Required('name') : NonEmptyString,
+            'big_key' : NonEmptyString,
+            Required('pledge_semester') : Coerce(Rank),
+            })
 
     def __init__(self,
+            key=None,
             name=None,
             pledge_semester=None,
-            big_name=None
+            big_key=None
             ):
 
-        self.key = name
+        self.key = key
+        self.name = name
         self.rank = pledge_semester
-        self.parent = big_name
+        self.parent = big_key
 
     @classmethod
     def validate_dict(cls, dct):
@@ -53,5 +57,5 @@ class KeylessMember(Member):
         return cls(**cls.validate_dict(dct))
 
     def get_dot_label(self):
-        return self.key
+        return self.name
 
