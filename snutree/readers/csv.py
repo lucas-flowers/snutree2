@@ -12,9 +12,7 @@ def get_table(stream, **config):
         raise SnutreeReaderError(f'could not read csv:\n{e}')
 
     for row in rows:
-        # Remove the keys pointing to falsy values from each member. This
-        # simplifies validation (e.g., we don't have to worry about
-        # handling values of None or empty strings)
+        # Delete falsy values to simplify validation
         for key, field in list(row.items()):
             if not field:
                 del row[key]

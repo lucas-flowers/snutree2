@@ -4,6 +4,7 @@ from snutree.utilities.colors import ColorPicker
 class TestColors(TestCase):
 
     def test_use_next(self):
+        # pylint: disable=protected-access
         colors = ColorPicker([1, 2, 3, 4, 5])
         colors.use(3)
         self.assertSequenceEqual(colors._colors, [1, 2, 4, 5, 3])
@@ -14,6 +15,7 @@ class TestColors(TestCase):
         self.assertSequenceEqual(colors._colors, [4, 5, 3, 1, 2])
 
     def test_use_new(self):
+        # pylint: disable=protected-access
         colors = ColorPicker([1, 2, 3, 4, 5])
         colors.use(6)
         self.assertSequenceEqual(colors._colors, [1, 2, 3, 4, 5])

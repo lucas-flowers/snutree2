@@ -1,7 +1,6 @@
 import io
 import logging
 import sys
-from functools import reduce
 from inspect import cleandoc as trim
 from unittest import TestCase
 from pathlib import Path

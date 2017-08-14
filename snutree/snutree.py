@@ -104,6 +104,9 @@ def get_member_type(value):
 ###############################################################################
 ###############################################################################
 
+# TODO create unified vocabulary, such as renaming "member_schema" to
+# "schema_options" or something
+
 def generate(
         files:List[IO[Any]],
         output_path:str,

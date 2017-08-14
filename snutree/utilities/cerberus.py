@@ -1,6 +1,5 @@
 import pprint
 from .. import SnutreeError
-from . import Semester
 
 # A required string; must be nonempty and not None
 nonempty_string = {

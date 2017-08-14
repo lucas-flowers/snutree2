@@ -1,10 +1,10 @@
-from abc import ABCMeta
-from collections import namedtuple
-from .utilities import Indent
-
 '''
 Tools used to print the tree to DOT code.
 '''
+
+from abc import ABCMeta
+from collections import namedtuple
+from .utilities import Indent
 
 class DotCommon(metaclass=ABCMeta):
 

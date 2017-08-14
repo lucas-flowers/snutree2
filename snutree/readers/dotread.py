@@ -1,14 +1,14 @@
+'''
+Utilities get members from a DOT file and turn it into a member list. Assumes
+the DOT file is place nice and is friendly, as this is mainly for testing.
+'''
+
 import re
 from io import StringIO
 from contextlib import redirect_stdout
 import pydotplus
 import networkx.drawing.nx_pydot as nx_pydot
 from . import SnutreeReaderError
-
-'''
-Utilities get members from a DOT file and turn it into a member list. Assumes
-the DOT file is place nice and is friendly, as this is mainly for testing.
-'''
 
 def get_table(f, **config):
     '''
