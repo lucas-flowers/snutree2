@@ -30,7 +30,7 @@ def main():
 options = [
         ('output_path', '--output', '-o', {
             'type' : click.Path(),
-            'help' : 'Send output to the provided PDF or DOT file, instead of sending DOT code stdout'
+            'help' : f'Instead of writing DOT code to stdout, send output to a file with one of the filetypes in {list(snutree.WRITERS.keys())!r}'
             }),
         ('log_path', '--log', '-l', {
             'type' : click.Path(exists=False),
