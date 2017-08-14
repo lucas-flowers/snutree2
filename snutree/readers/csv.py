@@ -1,5 +1,5 @@
 import csv
-from . import SnutreeReaderError
+from snutree import SnutreeReaderError
 
 def get_table(stream, **config):
     '''

@@ -3,8 +3,8 @@ import MySQLdb
 import MySQLdb.cursors
 from sshtunnel import SSHTunnelForwarder, BaseSSHTunnelForwarderError
 from cerberus import Validator
-from . import SnutreeReaderError
-from ..utilities.cerberus import validate, nonempty_string
+from snutree import SnutreeReaderError
+from snutree.utilities.cerberus import validate, nonempty_string
 
 # Validates a configuration YAML file with SQL and ssh options
 SQL_CNF_VALIDATOR = Validator({

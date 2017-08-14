@@ -1,6 +1,7 @@
 from io import StringIO
 from unittest import TestCase
-from snutree.readers import SnutreeReaderError, csv, dot, sql
+from snutree import SnutreeReaderError
+from snutree.readers import csv, dot, sql
 
 class TestReaders(TestCase):
 
@@ -10,7 +11,7 @@ class TestReaders(TestCase):
             csv_stream = StringIO('"A","B bb B","C"\nx')
             row_generator = csv.get_table(csv_stream)
             next(row_generator)
-        except Exception as e:
+        except SnutreeReaderError as e:
             self.fail(f'unexpected CSV read failure:\n{e}')
 
     def test_csv_error(self):
@@ -43,7 +44,7 @@ class TestReaders(TestCase):
         try:
             dot_stream = StringIO('digraph { a -> b; }')
             dot.get_table(dot_stream)
-        except Exception as e:
+        except SnutreeReaderError as e:
             self.fail(f'unexpected DOT read failure:\n{e}')
 
     def test_dot_error(self):

@@ -8,7 +8,6 @@ from collections import MutableSequence, MutableMapping
 import yaml
 from cerberus import Validator
 from pluginbase import PluginBase
-from . import readers
 from . import SnutreeError
 from .tree import FamilyTree
 from .utilities import logged
@@ -104,9 +103,11 @@ def get_plugin_builtins(plugin_base):
 
 # Location of all built-in modules
 SCHEMAS_PLUGIN_BASE = get_plugin_base('schemas')
+READERS_PLUGIN_BASE = get_plugin_base('readers')
 
 # The built-in member table schemas
 BUILTIN_SCHEMAS = get_plugin_builtins(SCHEMAS_PLUGIN_BASE)
+BUILTIN_READERS = get_plugin_builtins(READERS_PLUGIN_BASE)
 
 ###############################################################################
 ###############################################################################
@@ -246,9 +247,10 @@ def get_module(name, attributes, plugin_base, descriptor):
 
     try:
         module = plugin_source.load_plugin(module_name)
-    except ImportError:
+    except ImportError as e:
+        raise e
         builtins = get_plugin_builtins(plugin_base)
-        msg = f'{descriptor}must be one of {builtins!r} or the path to a custom Python module'
+        msg = f'{descriptor} must be one of {builtins!r} or the path to a custom Python module'
         raise SnutreeError(msg)
 
     if not all([hasattr(module, a) for a in attributes]):
@@ -266,15 +268,6 @@ def get_member_table(files, reader_configs):
     may use the dictionary reader_configs[READER_NAME] to configure itself.
     '''
 
-    readers_available = {
-            # SQL query
-            'sql' : readers.sql,
-            # CSV table
-            'csv' : readers.csv,
-            # DOT source code
-            'dot' : readers.dot,
-            }
-
     members = []
     for f in files:
 
@@ -287,7 +280,7 @@ def get_member_table(files, reader_configs):
         else:
             filetype = Path(f.name).suffix[1:] # ignore first element (a dot)
 
-        reader = readers_available.get(filetype)
+        reader = get_module(filetype, ['get_table'], READERS_PLUGIN_BASE, 'reader')
         if not reader:
             msg = f'data source filetype {filetype!r} not supported'
             raise SnutreeError(msg)
