@@ -90,11 +90,23 @@ if getattr(sys, 'frozen', False):
 else:
     SNUTREE_ROOT = Path(__file__).parent
 
-# Location of all built-in member formats
-PLUGIN_BASE = PluginBase(package='snutree.schemas', searchpath=[str(SNUTREE_ROOT/'schemas')])
+def get_plugin_base(subpackage):
+    '''
+    Returns the plugin base of the subpackage whose name is a parameter.
+    '''
+    return PluginBase(package=f'snutree.{subpackage}', searchpath=[str(SNUTREE_ROOT/f'{subpackage}')])
+
+def get_plugin_builtins(plugin_base):
+    '''
+    Takes the plugin base and returns all modules in that plugin base.
+    '''
+    return plugin_base.make_plugin_source(searchpath=[]).list_plugins()
+
+# Location of all built-in modules
+SCHEMAS_PLUGIN_BASE = get_plugin_base('schemas')
 
 # The built-in member table schemas
-BUILTIN_SCHEMAS = PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
+BUILTIN_SCHEMAS = get_plugin_builtins(SCHEMAS_PLUGIN_BASE)
 
 ###############################################################################
 ###############################################################################
@@ -147,7 +159,7 @@ def generate(
     config = get_config(config_paths, config_args)
 
     logging.info('Loading member schema module')
-    schema = get_schema_module(config['schema'].get('name'))
+    schema = get_module(config['schema'].get('name', 'basic'), ['Rank', 'to_Members', 'description'], SCHEMAS_PLUGIN_BASE, 'member schema')
 
     logging.info('Reading member table from data sources')
     member_table = get_member_table(input_files, config['readers'])
@@ -210,28 +222,12 @@ def load_config_files(paths):
 
     return configs
 
-@logged
-def get_schema_module(name):
+def get_module(name, attributes, plugin_base, descriptor):
     '''
-    Validates the provided member schema name and returns the appropriate
-    Python module to import.
-
-    Example: "get_schema_module('basic')" will import and return schemas.basic
-    Example: "get_schema_module(PATH/'plugin.py')" will import and return plugin.py
-
-    Any module imported here is assumed to implement these attributes:
-
-    + to_Members(dicts, **config): Takes a list of member dictionaries and
-    configuration options, validates the list, and yields a sequence of Member
-    objects.
-
-    + Rank(string): Converts a string to a Rank, where Rank is a type, like int
-    or Semester, representing the value of each rank (examples: year,
-    year+semester, pledge class) and implementing integer addition.
-
-    + description: A mapping whose keys are column names and whose values are
-    written descriptions of those columns.
-
+    Validates the provided module name and returns the appropriate Python
+    module to import. The module must implement the functions and variables
+    contained in the attributes parameter. The plugin_base is the location of
+    the built-in modules.
     '''
 
     module_file = Path(name) if name else None
@@ -242,21 +238,21 @@ def get_schema_module(name):
     else:
         # Assume it's a built-in schema
         searchpath = []
-        module_name = name or 'basic' # fall back to basic schema if none provided
+        module_name = name
 
     # Setting persist=True ensures module won't be garbage collected before its
     # call in cli(). It will stay in memory for the program's duration.
-    plugin_source = PLUGIN_BASE.make_plugin_source(searchpath=searchpath, persist=True)
+    plugin_source = plugin_base.make_plugin_source(searchpath=searchpath, persist=True)
 
     try:
         module = plugin_source.load_plugin(module_name)
     except ImportError:
-        msg = f'member schema must be one of {BUILTIN_SCHEMAS!r} or the path to a custom Python module'
+        builtins = get_plugin_builtins(plugin_base)
+        msg = f'{descriptor}must be one of {builtins!r} or the path to a custom Python module'
         raise SnutreeError(msg)
 
-    expected_attributes = ['Rank', 'to_Members', 'description']
-    if not all([hasattr(module, a) for a in expected_attributes]):
-        msg = f'member schema module {module_name!r} must implement: {expected_attributes!r}'
+    if not all([hasattr(module, a) for a in attributes]):
+        msg = f'{descriptor} module {module_name!r} must implement: {attributes!r}'
         raise SnutreeError(msg)
 
     return module
