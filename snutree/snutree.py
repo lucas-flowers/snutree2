@@ -8,8 +8,8 @@ from collections import MutableSequence, MutableMapping
 import yaml
 from cerberus import Validator
 from pluginbase import PluginBase
+from . import readers
 from . import SnutreeError
-from .readers import sql, dotread, csv
 from .tree import FamilyTree
 from .utilities import logged
 from .utilities.cerberus import validate
@@ -23,6 +23,9 @@ from .utilities.cerberus import validate
 CONFIG_VALIDATOR = Validator({
     'readers' : {
         'type' : 'dict',
+        'valueschema' : {
+            'type' : 'dict',
+            }
         },
     'schema' : {
         'type' : 'dict',
@@ -48,6 +51,121 @@ else:
 # Location of all built-in member formats
 PLUGIN_BASE = PluginBase(package='snutree.schemas', searchpath=[str(SNUTREE_ROOT/'schemas')])
 
+###############################################################################
+###############################################################################
+#### API                                                                   ####
+###############################################################################
+###############################################################################
+
+def generate(
+        input_files:List[IO[Any]],
+        output_path:str,
+        log_path:str,
+        config_paths:List[str],
+        schema:str,
+        input_format:str,
+        seed:int,
+        debug:bool,
+        verbose:bool,
+        quiet:bool,
+        ):
+    '''
+    Create a big-little family tree.
+    '''
+
+    # Parameters for this function that can also be included in config files
+    config_args = denullified({
+        'readers' : {
+            'stdin' : {
+                'format' : input_format,
+                },
+            },
+        'schema' : {
+            'name' : schema,
+            },
+        'output' : {
+            'seed' : seed,
+            }
+        })
+
+    # Set up logging when it won't conflict with stdout
+    if log_path or output_path:
+        log_stream = open(log_path, 'w') if log_path else sys.stdout
+        if debug:
+            logging.basicConfig(level=logging.DEBUG, stream=log_stream, format='%(asctime)s %(levelname)s: %(name)s - %(message)s')
+        elif verbose:
+            logging.basicConfig(level=logging.INFO, stream=log_stream, format='%(levelname)s: %(message)s')
+        elif not quiet:
+            logging.basicConfig(level=logging.WARNING, stream=log_stream, format='%(levelname)s: %(message)s')
+
+    logging.info('Loading configuration files')
+    config = get_config(config_paths, config_args)
+
+    logging.info('Loading member schema module')
+    schema = get_schema_module(config['schema'].get('name'))
+
+    logging.info('Reading member table from data sources')
+    member_table = get_member_table(input_files, config['readers'])
+
+    logging.info('Validating member table')
+    members = schema.to_Members(member_table, **config['schema'])
+
+    logging.info('Building family tree')
+    tree = FamilyTree(members, schema.Rank, config['output'])
+
+    logging.info('Building DOT graph')
+    dot_graph = tree.to_dot_graph()
+
+    logging.info('Composing DOT source code')
+    dot_src = dot_graph.to_dot()
+
+    logging.info('Writing to output file')
+    write_output(dot_src, output_path)
+
+###############################################################################
+###############################################################################
+#### API Helper Functions                                                  ####
+###############################################################################
+###############################################################################
+
+@logged
+def get_config(config_paths, config_args):
+    '''
+    Loads the YAML configuration files at the given paths and combines their
+    contents with the configuration arguments dictionary provided. Validates
+    the combined configurations and returns the result as a dictionary. If
+    there is overlap between configurations, keys from files earlier in the
+    list will be overwritten by those later in the list (the arguments will
+    overwritten any keys from the list itself). If there are lists inside the
+    configuration, those lists will be extended, not overwritten.
+    '''
+
+    config = {}
+    for c in load_config_files(config_paths) + [config_args]:
+        deep_update(config, c)
+    return validate(CONFIG_VALIDATOR, config)
+
+def load_config_files(paths):
+    '''
+    Load configuration YAML files from the given paths. Returns a list of
+    dictionaries representing each configuraton file.
+    '''
+
+    configs = []
+    for path in paths:
+        with open(path, 'r') as f:
+
+            try:
+                config = yaml.safe_load(f) or {}
+            except yaml.YAMLError as e:
+                msg = f'problem reading configuration:\n{e}'
+                raise SnutreeError(msg)
+
+            configs.append(config)
+
+    return configs
+
+@logged
 def get_schema_module(name):
     '''
     Validates the provided member schema name and returns the appropriate
@@ -99,158 +217,61 @@ def get_schema_module(name):
 
     return module
 
-###############################################################################
-###############################################################################
-#### API                                                                   ####
-###############################################################################
-###############################################################################
-
-def generate(
-        files:List[IO[Any]],
-        output_path:str,
-        log_path:str,
-        config_paths:List[str],
-        schema:str,
-        input_format:str,
-        seed:int,
-        debug:bool,
-        verbose:bool,
-        quiet:bool,
-        ):
-    '''
-    Create a big-little family tree.
-    '''
-
-    # Parameters for this function that can also be included in config files
-    config_params = denullified({
-            'readers' : {
-                'stdin' : input_format,
-                },
-            'schema' : {
-                'name' : schema,
-                },
-            'output' : {
-                'seed' : seed,
-                }
-            })
-
-    # Set up logging when it won't conflict with stdout
-    if log_path or output_path:
-        log_stream = open(log_path, 'w') if log_path else sys.stdout
-        if debug:
-            logging.basicConfig(level=logging.DEBUG, stream=log_stream, format='%(asctime)s %(levelname)s: %(name)s - %(message)s')
-        elif verbose:
-            logging.basicConfig(level=logging.INFO, stream=log_stream, format='%(levelname)s: %(message)s')
-        elif not quiet:
-            logging.basicConfig(level=logging.WARNING, stream=log_stream, format='%(levelname)s: %(message)s')
-
-    logging.info('Loading configuration')
-    config = {}
-    for config_file in load_configuration(config_paths) + [config_params]:
-        deep_update(config, config_file)
-    config = validate(CONFIG_VALIDATOR, config)
-
-    logging.info('Retrieving data from sources')
-    member_dicts = read_sources(files, config['readers'])
-    schema = get_schema_module(config['schema'].get('name'))
-
-    logging.info('Validating data')
-    members = schema.to_Members(member_dicts, **config['schema'])
-
-    logging.info('Constructing family tree data structure')
-    tree = FamilyTree(members, schema.Rank, config['output'])
-
-    logging.info('Creating DOT code representation')
-    dotgraph = tree.to_dot_graph()
-
-    logging.info('Converting DOT code representation to text')
-    dotcode = dotgraph.to_dot()
-
-    logging.info('Writing output')
-    write_output(dotcode, output_path)
-
-###############################################################################
-###############################################################################
-#### API Helper Functions                                                  ####
-###############################################################################
-###############################################################################
-
 @logged
-def read_sources(files, data_format_cnf):
+def get_member_table(files, reader_configs):
     '''
-    Retrieves a list of members from the provided open files. Using the file
-    extensions to determine what format to interpret the inputs as. Use the
-    provided stdin_fmt if files are coming from stdin and use the
-    data_format_cnf dictionary to provide any needed configuration.
+    Retrieves a list of members from the provided files, using the file
+    extensions to determine what format to interpret the inputs as (stdin will
+    use the format provided by reader_configs['stdin']['format']). The reader
+    may use the dictionary reader_configs[READER_NAME] to configure itself.
     '''
 
-    readers = {
+    readers_available = {
             # SQL query
-            'sql' : sql.get_table,
+            'sql' : readers.sql,
             # CSV table
-            'csv' : csv.get_table,
+            'csv' : readers.csv,
             # DOT source code
-            'dot' : dotread.get_table,
+            'dot' : readers.dot,
             }
 
     members = []
-    for f in files or []:
+    for f in files:
 
         # Filetype is the path suffix or stdin's format if input is stdin
         if f.name == '<stdin>':
-            filetype = data_format_cnf.get('stdin')
+            filetype = reader_configs.get('stdin', {}).get('format')
             if not filetype:
                 msg = f'data from stdin requires an input format'
                 raise SnutreeError(msg)
         else:
             filetype = Path(f.name).suffix[1:] # ignore first element (a dot)
 
-        read = readers.get(filetype)
-        if not read:
+        reader = readers_available.get(filetype)
+        if not reader:
             msg = f'data source filetype {filetype!r} not supported'
             raise SnutreeError(msg)
 
-        members += read(f, **data_format_cnf)
+        members += reader.get_table(f, **reader_configs.get(filetype, {}))
 
     return members
 
 @logged
-def load_configuration(paths):
-    '''
-    Load configuration YAML files from the given paths. Returns a list of
-    dictionaries representing each configuraton file.
-    '''
-
-    configs = []
-    for path in paths:
-        with open(path, 'r') as f:
-
-            try:
-                config = yaml.safe_load(f) or {}
-            except yaml.YAMLError as e:
-                msg = f'problem reading configuration:\n{e}'
-                raise SnutreeError(msg)
-
-            configs.append(config)
-
-    return configs
-
-@logged
-def write_output(dotcode, filename=None):
+def write_output(src, filename=None):
     '''
     If a filename is provided: Use the filename to determine the output format,
-    then compile the DOT code to the target format and write to the file.
+    then compile the DOT source code to the target format and write to the file.
 
-    If no filename is provided: Write the DOT code directly to sys.stdout.
+    If no filename is provided: Write DOT source code directly to sys.stdout.
     '''
 
     path = Path(filename) if filename is not None else None
     filetype = path.suffix if path else '.dot'
 
     if filetype == '.dot':
-        dot_compile = lambda x : bytes(x, sys.getdefaultencoding())
+        compiled = lambda x : bytes(x, sys.getdefaultencoding())
     elif filetype == '.pdf':
-        dot_compile = compile_pdf
+        compiled = compiled_pdf
     else:
         msg = f'output filetype {filetype!r} not supported'
         raise SnutreeError(msg)
@@ -262,9 +283,9 @@ def write_output(dotcode, filename=None):
         stream_open = contextmanager(lambda : (yield sys.stdout.buffer))
 
     with stream_open() as f:
-        f.write(dot_compile(dotcode))
+        f.write(compiled(src))
 
-def compile_pdf(source):
+def compiled_pdf(src):
     '''
     Use dot to convert the DOT source code into a PDF, then return the result.
     '''
@@ -277,7 +298,7 @@ def compile_pdf(source):
                 # subprocess.run requires they both be str or both be binary.
                 # So, use binary and send the source in as binary (with default
                 # encoding).
-                input=bytes(source, sys.getdefaultencoding()),
+                input=bytes(src, sys.getdefaultencoding()),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
                 )
@@ -312,7 +333,8 @@ def deep_update(original, update):
 
 def denullified(mapping):
     '''
-    Recursively remove all keys in the mapping whose values are None.
+    Creates and returns a new mapping from the provided mapping, but with all
+    None-valued keys in the mapping recursively removed.
     '''
 
     new_mapping = {}

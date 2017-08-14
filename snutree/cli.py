@@ -82,7 +82,7 @@ class collect_options:
         return accumulator
 
 @click.command()
-@click.argument('files', nargs=-1, type=click.File('r'))
+@click.argument('input_files', nargs=-1, type=click.File('r'))
 @collect_options(options)
 @logged
 def cli(*args, **kwargs):

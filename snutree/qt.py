@@ -291,14 +291,14 @@ class SnutreeGUI(QWidget):
             filenames = fancy_split(self.box_inputs.text())
             with ExitStack() as stack:
 
-                files = [stack.enter_context(open(f)) for f in filenames]
+                input_files = [stack.enter_context(open(f)) for f in filenames]
                 output_path = LazyPath(self, 'Select output file', '', 'PDF (*.pdf);;Graphviz source (*.dot)')
                 configs = fancy_split(self.box_config.text())
                 member_type = self.box_member_type.currentData()
                 seed = int(self.box_seed.text()) if self.box_seed.text() else 0
 
                 snutree.generate(
-                        files=files,
+                        input_files=input_files,
                         output_path=output_path,
                         log_path=None,
                         config_paths=configs,

@@ -9,33 +9,24 @@ from ..utilities.cerberus import validate, nonempty_string
 # Validates a configuration YAML file with SQL and ssh options
 SQL_CNF_VALIDATOR = Validator({
 
-    'sql' : {
+    'host' : { 'type' : 'string', 'default' : '127.0.0.1' },
+    'user' : { 'type' : 'string', 'default' : 'root' },
+    'passwd' : nonempty_string,
+    'port' : { 'type': 'integer', 'default' : 3306 },
+    'db' : nonempty_string,
 
+    # SSH for remote SQL databases
+    'ssh' : {
         'type' : 'dict',
-        'required' : True,
+        'required' : False,
         'schema' : {
-
-            'host' : { 'type' : 'string', 'default' : '127.0.0.1' },
-            'user' : { 'type' : 'string', 'default' : 'root' },
-            'passwd' : nonempty_string,
-            'port' : { 'type': 'integer', 'default' : 3306 },
-            'db' : nonempty_string,
-
-            # SSH for remote SQL databases
-            'ssh' : {
-                'type' : 'dict',
-                'required' : False,
-                'schema' : {
-                    'host' : nonempty_string,
-                    'port' : { 'type' : 'integer', 'default' : 22 },
-                    'user' : nonempty_string,
-                    'public_key' : nonempty_string,
-                    }
-                }
-
-            },
+            'host' : nonempty_string,
+            'port' : { 'type' : 'integer', 'default' : 22 },
+            'user' : nonempty_string,
+            'public_key' : nonempty_string,
+            }
         }
-    }, allow_other=True)
+    })
 
 def get_table(query_stream, **config):
     '''
@@ -58,8 +49,8 @@ def get_members(query, config):
     '''
 
     config = validate(SQL_CNF_VALIDATOR, config)
-    ssh_config = config['sql'].get('ssh')
-    sql_config = config['sql'].copy()
+    ssh_config = config.get('ssh')
+    sql_config = config.copy()
     del sql_config['ssh']
     if ssh_config:
         return get_members_ssh(query, sql_config, ssh_config)
