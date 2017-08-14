@@ -37,6 +37,48 @@ CONFIG_VALIDATOR = Validator({
 
 ###############################################################################
 ###############################################################################
+#### Input/Output                                                          ####
+###############################################################################
+###############################################################################
+
+def compile_pdf(src):
+    '''
+    Uses Graphviz dot to convert the DOT source into a PDF. Returns the PDF.
+    '''
+
+    try:
+        # `shell=True` is necessary for Windows, but not for Linux. The command
+        # string is constant, so shell=True should be fine
+        result = subprocess.run('dot -Tpdf', check=True, shell=True,
+                # The input will be a str and the output will be binary, but
+                # subprocess.run requires they both be str or both be binary.
+                # So, use binary and send the source in as binary (with default
+                # encoding).
+                input=bytes(src, sys.getdefaultencoding()),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
+                )
+    except OSError as exception:
+        msg = f'had a problem compiling to PDF:\n{exception}'
+        raise SnutreeError(msg)
+
+    return result.stdout
+
+def compile_dot(src):
+    '''
+    Converts the DOT source into bytes suitable for writing (bytes, not
+    characters, are expected by the main output writer).
+    '''
+    return bytes(src, sys.getdefaultencoding())
+
+# Available output writers
+WRITERS = {
+        'dot' : compile_dot,
+        'pdf' : compile_pdf,
+        }
+
+###############################################################################
+###############################################################################
 #### Member Plugin Modules Setup                                           ####
 ###############################################################################
 ###############################################################################
@@ -53,6 +95,7 @@ PLUGIN_BASE = PluginBase(package='snutree.schemas', searchpath=[str(SNUTREE_ROOT
 
 # The built-in member table schemas
 BUILTIN_SCHEMAS = PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
+
 ###############################################################################
 ###############################################################################
 #### API                                                                   ####
@@ -267,13 +310,10 @@ def write_output(src, filename=None):
     '''
 
     path = Path(filename) if filename is not None else None
-    filetype = path.suffix if path else '.dot'
+    filetype = path.suffix[1:] if path else 'dot'
 
-    if filetype == '.dot':
-        compiled = lambda x : bytes(x, sys.getdefaultencoding())
-    elif filetype == '.pdf':
-        compiled = compiled_pdf
-    else:
+    compiled = WRITERS.get(filetype)
+    if compiled is None:
         msg = f'output filetype {filetype!r} not supported'
         raise SnutreeError(msg)
 
@@ -285,29 +325,6 @@ def write_output(src, filename=None):
 
     with stream_open() as f:
         f.write(compiled(src))
-
-def compiled_pdf(src):
-    '''
-    Use dot to convert the DOT source code into a PDF, then return the result.
-    '''
-
-    try:
-        # `shell=True` is necessary for Windows, but not for Linux. The command
-        # string is constant, so shell=True should be fine
-        result = subprocess.run('dot -Tpdf', check=True, shell=True,
-                # The input will be a str and the output will be binary, but
-                # subprocess.run requires they both be str or both be binary.
-                # So, use binary and send the source in as binary (with default
-                # encoding).
-                input=bytes(src, sys.getdefaultencoding()),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
-                )
-    except OSError as exception:
-        msg = f'had a problem compiling to PDF:\n{exception}'
-        raise SnutreeError(msg)
-
-    return result.stdout
 
 ###############################################################################
 ###############################################################################
