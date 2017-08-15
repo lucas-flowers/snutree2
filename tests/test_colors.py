@@ -1,5 +1,5 @@
 from unittest import TestCase
-from snutree.utilities.colors import ColorPicker
+from snutree.colors import ColorPicker
 
 class TestColors(TestCase):
 

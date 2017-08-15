@@ -4,7 +4,7 @@ Tools used to print the tree to DOT code.
 
 from abc import ABCMeta
 from collections import namedtuple
-from snutree.utilities import Indent
+from snutree.indent import Indent
 
 class DotCommon(metaclass=ABCMeta):
 

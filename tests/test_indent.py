@@ -1,5 +1,5 @@
 from unittest import TestCase
-from snutree.utilities import Indent
+from snutree.indent import Indent
 
 class TestIndent(TestCase):
 

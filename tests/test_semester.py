@@ -1,6 +1,6 @@
 from unittest import TestCase
 from itertools import permutations
-from snutree.utilities.semester import Semester
+from snutree.semester import Semester
 
 class TestSemester(TestCase):
 

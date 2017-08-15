@@ -1,5 +1,5 @@
 from unittest import TestCase
-from snutree.utilities import combine_names
+from snutree.schemas.sigmanu import combine_names
 
 class TestCombineNames(TestCase):
 

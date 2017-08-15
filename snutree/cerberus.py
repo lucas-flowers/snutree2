@@ -1,5 +1,5 @@
 import pprint
-from .. import SnutreeError
+from . import SnutreeError
 
 # A required string; must be nonempty and not None
 nonempty_string = {

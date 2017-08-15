@@ -6,7 +6,7 @@ from unittest import TestCase
 from pathlib import Path
 from click.testing import CliRunner
 from snutree import SnutreeError
-from snutree.utilities.voluptuous import SnutreeValidationError
+from snutree.voluptuous import SnutreeValidationError
 from snutree.cli import cli
 
 TESTS_ROOT = Path(__file__).parent

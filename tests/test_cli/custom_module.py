@@ -1,5 +1,5 @@
 from voluptuous import Schema, Required, Coerce
-from snutree.utilities.voluptuous import NonEmptyString
+from snutree.voluptuous import NonEmptyString
 from snutree.tree import Member
 
 Rank = int

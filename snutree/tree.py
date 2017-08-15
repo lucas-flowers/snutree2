@@ -6,8 +6,9 @@ from networkx import DiGraph
 from networkx.algorithms.components import weakly_connected_components
 from cerberus import Validator
 from . import dot, SnutreeError
-from .utilities import logged, ColorPicker
-from .utilities.cerberus import optional_boolean, nonempty_string, validate
+from . import logged
+from .colors import ColorPicker
+from .cerberus import optional_boolean, nonempty_string, validate
 
 ###############################################################################
 ###############################################################################

@@ -1,5 +1,5 @@
 import re
-from .. import SnutreeError
+from . import SnutreeError
 
 DIGITS_MATCHER = re.compile(r'\d+')
 

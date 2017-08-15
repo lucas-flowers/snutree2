@@ -1,7 +1,7 @@
 from unittest import TestCase
 from inspect import cleandoc as trim
 from snutree.dot import Defaults, Node, Edge, Rank, Graph
-from snutree.utilities import Indent
+from snutree.indent import Indent
 
 class TestDot(TestCase):
 

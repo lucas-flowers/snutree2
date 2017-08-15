@@ -8,10 +8,9 @@ from collections import MutableSequence, MutableMapping
 import yaml
 from cerberus import Validator
 from pluginbase import PluginBase
-from . import SnutreeError
+from . import logged, SnutreeError
 from .tree import FamilyTree
-from .utilities import logged
-from .utilities.cerberus import validate
+from .cerberus import validate
 
 ###############################################################################
 ###############################################################################
