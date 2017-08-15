@@ -31,6 +31,7 @@ from PyQt5.QtWidgets import (
         QTableWidgetItem,
         )
 from . import api
+from .logging import setup_logger
 from .errors import SnutreeError
 
 ###############################################################################
@@ -109,6 +110,13 @@ class SnutreeGUI(QWidget):
         self.init_ui()
 
     def init_ui(self):
+
+        setup_logger(
+                debug=False,
+                verbose=True,
+                quiet=False,
+                log_path=None,
+                )
 
         self.setLayout(QGridLayout())
         row_counter = count(start=0)
@@ -248,18 +256,14 @@ class SnutreeGUI(QWidget):
                 api.generate(
                         input_files=input_files,
                         output_path=output_path,
-                        log_path=None,
                         config_paths=configs,
                         schema=member_schema,
                         input_format=None,
                         seed=seed,
-                        debug=False,
-                        verbose=True,
-                        quiet=False,
                         )
 
         except Exception as e:
-            logging.error(e)
+            logging.getLogger('snutree').error(e)
             SnutreeErrorMessage(e).exec_()
 
     ###########################################################################

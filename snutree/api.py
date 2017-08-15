@@ -134,14 +134,10 @@ def get_reader_module(filetype):
 def generate(
         input_files:List[IO[Any]],
         output_path:str,
-        log_path:str,
         config_paths:List[str],
         schema:str,
         input_format:str,
         seed:int,
-        debug:bool,
-        verbose:bool,
-        quiet:bool,
         ):
     '''
     Create a big-little family tree.
@@ -162,38 +158,30 @@ def generate(
             }
         })
 
-    # Set up logging when it won't conflict with stdout
-    if log_path or output_path:
-        log_stream = open(log_path, 'w') if log_path else sys.stdout
-        if debug:
-            logging.basicConfig(level=logging.DEBUG, stream=log_stream, format='%(asctime)s %(levelname)s: %(name)s - %(message)s')
-        elif verbose:
-            logging.basicConfig(level=logging.INFO, stream=log_stream, format='%(levelname)s: %(message)s')
-        elif not quiet:
-            logging.basicConfig(level=logging.WARNING, stream=log_stream, format='%(levelname)s: %(message)s')
+    logger = logging.getLogger(__name__)
 
-    logging.info('Loading configuration files')
+    logger.info('Loading configuration files')
     config = get_config(config_paths, config_args)
 
-    logging.info('Loading member schema module')
+    logger.info('Loading member schema module')
     schema = get_schema_module(config['schema'].get('name', 'basic'))
 
-    logging.info('Reading member table from data sources')
+    logger.info('Reading member table from data sources')
     member_table = get_member_table(input_files, config['readers'])
 
-    logging.info('Validating member table')
+    logger.info('Validating member table')
     members = schema.to_Members(member_table, **config['schema'])
 
-    logging.info('Building family tree')
+    logger.info('Building family tree')
     tree = FamilyTree(members, schema.Rank, config['output'])
 
-    logging.info('Building DOT graph')
+    logger.info('Building DOT graph')
     dot_graph = tree.to_dot_graph()
 
-    logging.info('Composing DOT source code')
+    logger.info('Composing DOT source code')
     dot_src = dot_graph.to_dot()
 
-    logging.info('Writing to output file')
+    logger.info('Writing to output file')
     write_output(dot_src, output_path)
 
 ###############################################################################
