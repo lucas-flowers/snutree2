@@ -6,6 +6,19 @@ from functools import wraps
 from .errors import SnutreeError
 
 def setup_logger(verbose, debug, quiet, log_path=None):
+    '''
+    Creates a top-level logger for the snutree package called 'snutree',
+    intended for use in the snutree.cli and snutree.qt modules. Also creates
+    two handlers:
+
+    #. Standard error: Writes warnings and errors to stderr by default. The
+    verbose flag will add INFO, and the debug flag will add DEBUG. The quiet
+    flag will suppress warnings and include only errors.
+
+    #. Log file: Writes all events at the INFO level of severity. The verbose
+    and quiet flags have no effect, but the debug flag will add DEBUG events to
+    the log. If no log_path is provided, there will be no log file.
+    '''
 
     if debug:
         level = logging.DEBUG
@@ -24,15 +37,13 @@ def setup_logger(verbose, debug, quiet, log_path=None):
     logger = logging.getLogger('snutree')
     logger.setLevel(min(logging.INFO, level))
 
-    # Standard error handler: Log records according to the level given in the
-    # arguments.
+    # Standard error handler
     stderr_handler = logging.StreamHandler(sys.stderr)
     stderr_handler.setLevel(level if not quiet else logging.ERROR)
     stderr_handler.setFormatter(formatter)
     logger.addHandler(stderr_handler)
 
-    # File handler: If a log file is provided, logs at a level of detail of at
-    # least INFO and maybe more depending the arguments.
+    # File handler
     if log_path:
         try:
             file_handler = logging.FileHandler(log_path)
@@ -45,8 +56,8 @@ def setup_logger(verbose, debug, quiet, log_path=None):
 
 def logged(function):
     '''
-    Sends timing information to the debug logger on functions this function
-    decorates.
+    Wraps around a function, logging the amount of time it takes to run that
+    function every time it is called.
     '''
 
     logger = logging.getLogger(inspect.getmodule(function).__name__)
