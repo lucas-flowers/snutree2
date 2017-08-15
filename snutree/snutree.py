@@ -36,49 +36,7 @@ CONFIG_VALIDATOR = Validator({
 
 ###############################################################################
 ###############################################################################
-#### Input/Output                                                          ####
-###############################################################################
-###############################################################################
-
-def compile_pdf(src):
-    '''
-    Uses Graphviz dot to convert the DOT source into a PDF. Returns the PDF.
-    '''
-
-    try:
-        # `shell=True` is necessary for Windows, but not for Linux. The command
-        # string is constant, so shell=True should be fine
-        result = subprocess.run('dot -Tpdf', check=True, shell=True,
-                # The input will be a str and the output will be binary, but
-                # subprocess.run requires they both be str or both be binary.
-                # So, use binary and send the source in as binary (with default
-                # encoding).
-                input=bytes(src, sys.getdefaultencoding()),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
-                )
-    except OSError as exception:
-        msg = f'had a problem compiling to PDF:\n{exception}'
-        raise SnutreeError(msg)
-
-    return result.stdout
-
-def compile_dot(src):
-    '''
-    Converts the DOT source into bytes suitable for writing (bytes, not
-    characters, are expected by the main output writer).
-    '''
-    return bytes(src, sys.getdefaultencoding())
-
-# Available output writers
-WRITERS = {
-        'dot' : compile_dot,
-        'pdf' : compile_pdf,
-        }
-
-###############################################################################
-###############################################################################
-#### Member Plugin Modules Setup                                           ####
+#### Plugins Setup                                                         ####
 ###############################################################################
 ###############################################################################
 
@@ -101,13 +59,66 @@ def get_plugin_builtins(plugin_base):
     '''
     return plugin_base.make_plugin_source(searchpath=[]).list_plugins()
 
-# Plugin bases for each of the three possible types of plugins
+# Plugin bases for each of the possible types of plugins
 PLUGIN_BASES = tuple(get_plugin_base(p) for p in ('readers', 'schemas'))
 READERS_PLUGIN_BASE, SCHEMAS_PLUGIN_BASE = PLUGIN_BASES
 
 # Lists of the built-in plugins for each of the possible types of plugins
 BUILTIN_LISTS = tuple(get_plugin_builtins for p in PLUGIN_BASES)
 BUILTIN_READERS, BUILTIN_SCHEMAS = BUILTIN_LISTS
+
+def get_module(plugin_base, name, attributes=None, descriptor='module'):
+    '''
+    For the given PluginBase, validates the module whose name is given, by
+    ensuring the module implements the expected attributes whose names are
+    contained in the attributes parameter. Returns the validated module. (The
+    descriptor is used in error messages.)
+    '''
+
+    attributes = attributes or []
+
+    module_file = Path(name) if name else None
+    if module_file and module_file.exists() and module_file.suffix == '.py':
+        # Add custom module's directory to plugin path
+        searchpath = [str(module_file.parent)] # pluginbase does not support filenames in the searchpath
+        module_name = module_file.stem
+    else:
+        # Assume it's a built-in schema
+        searchpath = []
+        module_name = name
+
+    # Setting persist=True ensures module won't be garbage collected before its
+    # call in cli(). It will stay in memory for the program's duration.
+    plugin_source = plugin_base.make_plugin_source(searchpath=searchpath, persist=True)
+
+    try:
+        module = plugin_source.load_plugin(module_name)
+    except ImportError:
+        builtins = get_plugin_builtins(plugin_base)
+        msg = f'{descriptor} must be one of {builtins!r} or the path to a custom Python module'
+        raise SnutreeError(msg)
+
+    if not all([hasattr(module, a) for a in attributes]):
+        msg = f'{descriptor} module {module_name!r} must implement: {attributes!r}'
+        raise SnutreeError(msg)
+
+    return module
+
+def get_schema_module(name):
+    '''
+    Return the member table schema module of the given name.
+    '''
+    return get_module(SCHEMAS_PLUGIN_BASE, name,
+            attributes=['Rank', 'to_Members', 'description'],
+            descriptor='member schema')
+
+def get_reader_module(filetype):
+    '''
+    Return the reader module for the given filetype.
+    '''
+    return get_module(READERS_PLUGIN_BASE, filetype, 
+            attributes=['get_table'],
+            descriptor='reader')
 
 ###############################################################################
 ###############################################################################
@@ -160,7 +171,7 @@ def generate(
     config = get_config(config_paths, config_args)
 
     logging.info('Loading member schema module')
-    schema = get_module(config['schema'].get('name', 'basic'), ['Rank', 'to_Members', 'description'], SCHEMAS_PLUGIN_BASE, 'member schema')
+    schema = get_schema_module(config['schema'].get('name', 'basic'))
 
     logging.info('Reading member table from data sources')
     member_table = get_member_table(input_files, config['readers'])
@@ -223,41 +234,6 @@ def load_config_files(paths):
 
     return configs
 
-def get_module(name, attributes, plugin_base, descriptor):
-    '''
-    Validates the provided module name and returns the appropriate Python
-    module to import. The module must implement the functions and variables
-    contained in the attributes parameter. The plugin_base is the location of
-    the built-in modules.
-    '''
-
-    module_file = Path(name) if name else None
-    if module_file and module_file.exists() and module_file.suffix == '.py':
-        # Add custom module's directory to plugin path
-        searchpath = [str(module_file.parent)] # pluginbase does not support filenames in the searchpath
-        module_name = module_file.stem
-    else:
-        # Assume it's a built-in schema
-        searchpath = []
-        module_name = name
-
-    # Setting persist=True ensures module won't be garbage collected before its
-    # call in cli(). It will stay in memory for the program's duration.
-    plugin_source = plugin_base.make_plugin_source(searchpath=searchpath, persist=True)
-
-    try:
-        module = plugin_source.load_plugin(module_name)
-    except ImportError:
-        builtins = get_plugin_builtins(plugin_base)
-        msg = f'{descriptor} must be one of {builtins!r} or the path to a custom Python module'
-        raise SnutreeError(msg)
-
-    if not all([hasattr(module, a) for a in attributes]):
-        msg = f'{descriptor} module {module_name!r} must implement: {attributes!r}'
-        raise SnutreeError(msg)
-
-    return module
-
 @logged
 def get_member_table(files, reader_configs):
     '''
@@ -279,7 +255,7 @@ def get_member_table(files, reader_configs):
         else:
             filetype = Path(f.name).suffix[1:] # ignore first element (a dot)
 
-        reader = get_module(filetype, ['get_table'], READERS_PLUGIN_BASE, 'reader')
+        reader = get_reader_module(filetype)
         if not reader:
             msg = f'data source filetype {filetype!r} not supported'
             raise SnutreeError(msg)
@@ -313,6 +289,48 @@ def write_output(src, filename=None):
 
     with stream_open() as f:
         f.write(compiled(src))
+
+###############################################################################
+###############################################################################
+#### Output Helper Functions                                               ####
+###############################################################################
+###############################################################################
+
+def compile_pdf(src):
+    '''
+    Uses Graphviz dot to convert the DOT source into a PDF. Returns the PDF.
+    '''
+
+    try:
+        # `shell=True` is necessary for Windows, but not for Linux. The command
+        # string is constant, so shell=True should be fine
+        result = subprocess.run('dot -Tpdf', check=True, shell=True,
+                # The input will be a str and the output will be binary, but
+                # subprocess.run requires they both be str or both be binary.
+                # So, use binary and send the source in as binary (with default
+                # encoding).
+                input=bytes(src, sys.getdefaultencoding()),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
+                )
+    except OSError as exception:
+        msg = f'had a problem compiling to PDF:\n{exception}'
+        raise SnutreeError(msg)
+
+    return result.stdout
+
+def compile_dot(src):
+    '''
+    Converts the DOT source into bytes suitable for writing (bytes, not
+    characters, are expected by the main output writer).
+    '''
+    return bytes(src, sys.getdefaultencoding())
+
+# Available output writers
+WRITERS = {
+        'dot' : compile_dot,
+        'pdf' : compile_pdf,
+        }
 
 ###############################################################################
 ###############################################################################
