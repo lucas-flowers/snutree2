@@ -6,7 +6,6 @@ the DOT file is place nice and is friendly, as this is mainly for testing.
 import re
 from io import StringIO
 from contextlib import redirect_stdout
-import pydotplus
 import networkx.drawing.nx_pydot as nx_pydot
 from snutree.errors import SnutreeReaderError
 
@@ -16,6 +15,11 @@ def get_table(f, **config):
     intermediate networkx graph (they're easier to deal with), and return a
     list of member dictionaries from the networkx graph.
     '''
+
+    try:
+        import pydotplus
+    except ModuleNotFoundError:
+        raise SnutreeReaderError(f'could not read DOT file: missing pydotplus package')
 
     # Pydotplus catches all of its ParseExceptions at the end of parse_dot_data
     # and doesn't bother to rethrow them or store the messages in a log.
