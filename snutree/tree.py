@@ -5,8 +5,9 @@ from abc import ABCMeta, abstractmethod
 from networkx import DiGraph
 from networkx.algorithms.components import weakly_connected_components
 from cerberus import Validator
-from . import dot, SnutreeError
-from . import logged
+from . import dot
+from .errors import SnutreeError
+from .logging import logged
 from .colors import ColorPicker
 from .cerberus import optional_boolean, nonempty_string, validate
 

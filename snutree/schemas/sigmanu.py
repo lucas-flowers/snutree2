@@ -8,7 +8,7 @@ from voluptuous.humanize import validate_with_humanized_errors
 from voluptuous.error import Error
 from snutree.voluptuous import NonEmptyString, Digits, SnutreeValidationError
 from snutree.cerberus import nonempty_string, validate
-from snutree import SnutreeError
+from snutree.errors import SnutreeError
 from snutree.semester import Semester
 from snutree.tree import Member
 

@@ -24,7 +24,8 @@ from PyQt5.QtWidgets import (
         QTableWidget,
         QTableWidgetItem,
         )
-from . import snutree
+from . import api
+from .errors import SnutreeError
 
 def fancy_join(lst):
     '''
@@ -119,8 +120,8 @@ class SchemaTable(QTableWidget):
         '''
 
         try:
-            module = snutree.get_schema_module(module_name)
-        except snutree.SnutreeError as e:
+            module = api.get_schema_module(module_name)
+        except SnutreeError as e:
             logging.error(e)
             SnutreeErrorMessage(e).exec_()
             return # Abort table update
@@ -226,7 +227,7 @@ class SnutreeGUI(QWidget):
         table = SchemaTable()
 
         # Populate builtin member formats
-        formats = snutree.BUILTIN_SCHEMAS
+        formats = api.BUILTIN_SCHEMAS
         for fmt in formats:
             combobox.addItem(fmt, fmt)
 
@@ -297,7 +298,7 @@ class SnutreeGUI(QWidget):
                 member_schema = self.box_member_schema.currentData()
                 seed = int(self.box_seed.text()) if self.box_seed.text() else 0
 
-                snutree.generate(
+                api.generate(
                         input_files=input_files,
                         output_path=output_path,
                         log_path=None,

@@ -8,7 +8,7 @@ from io import StringIO
 from contextlib import redirect_stdout
 import pydotplus
 import networkx.drawing.nx_pydot as nx_pydot
-from snutree import SnutreeReaderError
+from snutree.errors import SnutreeReaderError
 
 def get_table(f, **config):
     '''

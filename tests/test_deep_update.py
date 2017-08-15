@@ -1,6 +1,6 @@
 from unittest import TestCase
 from types import MappingProxyType
-from snutree.snutree import deep_update
+from snutree.api import deep_update
 
 class TestDeepUpdate(TestCase):
 

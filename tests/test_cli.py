@@ -5,7 +5,7 @@ from inspect import cleandoc as trim
 from unittest import TestCase
 from pathlib import Path
 from click.testing import CliRunner
-from snutree import SnutreeError
+from snutree.errors import SnutreeError
 from snutree.voluptuous import SnutreeValidationError
 from snutree.cli import cli
 

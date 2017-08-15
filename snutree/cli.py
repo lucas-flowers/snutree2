@@ -2,7 +2,9 @@ import logging
 import sys
 from functools import wraps
 import click
-from . import snutree, logged, SnutreeError
+from . import api
+from .errors import SnutreeError
+from .logging import logged
 
 def main():
     '''
@@ -29,7 +31,7 @@ def main():
 options = [
         ('output_path', '--output', '-o', {
             'type' : click.Path(),
-            'help' : f'Instead of writing DOT code to stdout, send output to a file with one of the filetypes in {list(snutree.WRITERS.keys())!r}'
+            'help' : f'Instead of writing DOT code to stdout, send output to a file with one of the filetypes in {list(api.WRITERS.keys())!r}'
             }),
         ('log_path', '--log', '-l', {
             'type' : click.Path(exists=False),
@@ -42,11 +44,11 @@ options = [
             }),
         ('schema', '--schema', '-m', {
             'type' : str,
-            'help' : f'Member table schema; one of {snutree.BUILTIN_SCHEMAS!r} or a custom Python module'
+            'help' : f'Member table schema; one of {api.BUILTIN_SCHEMAS!r} or a custom Python module'
             }),
         ('input_format','--format', '-f', {
             'type' : str,
-            'help' : f'Input file format for stdin; one of {snutree.BUILTIN_READERS!r} or a custom Python module'
+            'help' : f'Input file format for stdin; one of {api.BUILTIN_READERS!r} or a custom Python module'
             }),
         ('--seed', '-S', {
             'type' : int,
@@ -85,5 +87,5 @@ class collect_options:
 @collect_options(options)
 @logged
 def cli(*args, **kwargs):
-    return snutree.generate(*args, **kwargs)
+    return api.generate(*args, **kwargs)
 

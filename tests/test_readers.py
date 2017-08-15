@@ -1,6 +1,6 @@
 from io import StringIO
 from unittest import TestCase
-from snutree import SnutreeReaderError
+from snutree.errors import SnutreeReaderError
 from snutree.readers import csv, dot, sql
 
 class TestReaders(TestCase):
