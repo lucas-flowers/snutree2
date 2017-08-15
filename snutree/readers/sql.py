@@ -1,5 +1,4 @@
 from contextlib import closing
-from sshtunnel import SSHTunnelForwarder, BaseSSHTunnelForwarderError
 from cerberus import Validator
 from snutree.errors import SnutreeReaderError
 from snutree.cerberus import validate, nonempty_string
@@ -63,7 +62,8 @@ def get_members_local(query, sql_config):
     try:
         import MySQLdb
     except ModuleNotFoundError:
-        raise SnutreeReaderError(f'could not read SQL database: missing MySQLdb package')
+        msg = 'could not read SQL database: missing MySQLdb package'
+        raise SnutreeReaderError(msg)
 
     import MySQLdb.cursors
 
@@ -89,6 +89,12 @@ def get_members_ssh(query, sql, ssh):
             }
 
     try:
+        from sshtunnel import SSHTunnelForwarder, BaseSSHTunnelForwarderError
+    except ModuleNotFoundError:
+        msg = 'could not connect to SQL server via ssh: missing sshtunnel package'
+        raise SnutreeReaderError(msg)
+
+    try:
 
         with SSHTunnelForwarder(**options) as tunnel:
             tunneled_sql = sql.copy()
@@ -98,5 +104,5 @@ def get_members_ssh(query, sql, ssh):
     # The sshtunnel module lets invalid assertions and value errors go
     # untouched, so catch them too
     except (BaseSSHTunnelForwarderError, AssertionError, ValueError) as e:
-        raise SnutreeReaderError(f'problem connecting via SSH:\n{e}')
+        raise SnutreeReaderError(f'problem connecting via ssh:\n{e}')
 
