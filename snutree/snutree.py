@@ -247,8 +247,7 @@ def get_module(name, attributes, plugin_base, descriptor):
 
     try:
         module = plugin_source.load_plugin(module_name)
-    except ImportError as e:
-        raise e
+    except ImportError:
         builtins = get_plugin_builtins(plugin_base)
         msg = f'{descriptor} must be one of {builtins!r} or the path to a custom Python module'
         raise SnutreeError(msg)
