@@ -1,3 +1,8 @@
+
+'''
+Additional functions for voluptuous-style validation.
+'''
+
 import re
 
 DIGITS_MATCHER = re.compile(r'\d+')

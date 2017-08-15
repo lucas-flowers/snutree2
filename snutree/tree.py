@@ -220,7 +220,6 @@ def create_settings_validator(RankType):
 
         })
 
-
 class FamilyTree:
     '''
     Representation of the family tree. The tree is made of nodes connected by

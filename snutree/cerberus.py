@@ -1,3 +1,8 @@
+
+'''
+Additional functions for cerberus-style validation.
+'''
+
 import pprint
 from .errors import SnutreeError
 

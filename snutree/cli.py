@@ -48,7 +48,7 @@ options = [
             }),
         ('input_format','--format', '-f', {
             'type' : str,
-            'help' : f'Input file format for stdin; one of {api.BUILTIN_READERS!r} or a custom Python module'
+            'help' : f'Input file format for stdin; one of {api.BUILTIN_READERS!r}'
             }),
         ('--seed', '-S', {
             'type' : int,
@@ -69,6 +69,9 @@ options = [
         ]
 
 class collect_options:
+    '''
+    Combines the list of options into a chain of options for the click package.
+    '''
 
     def __init__(self, options_list):
         self.options = options_list

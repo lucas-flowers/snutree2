@@ -47,8 +47,8 @@ def pydot_to_nx(pydot):
 
 def add_member_dicts(graph):
     '''
-    Add names and big brothers to the node attribute dictionaries in the graph,
-    based on the values provided by pydot.
+    Add names and bigs to the node attribute dictionaries in the graph, based
+    on the values provided by pydot.
     '''
 
     for key in graph.nodes_iter():
@@ -59,8 +59,8 @@ def add_member_dicts(graph):
 
 def add_pledge_classes(pydot, graph):
     '''
-    Retrieve pledge classes from each pydot subgraph that has "rank=same", then
-    set the pledge_semester field in each member's node attribute dictionary
+    Retrieve ranks from each pydot subgraph that has "rank=same", then set the
+    pledge_semester field in each member's node attribute dictionary
     appropriately.
     '''
 

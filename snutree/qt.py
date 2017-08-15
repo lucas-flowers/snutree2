@@ -1,3 +1,9 @@
+
+'''
+A very simple GUI for the snutree program. Advanced features are available in
+the CLI version of the program.
+'''
+
 import sys
 import csv
 import logging
@@ -27,66 +33,11 @@ from PyQt5.QtWidgets import (
 from . import api
 from .errors import SnutreeError
 
-def fancy_join(lst):
-    '''
-    Join the strings in the provided list in style of a CSV file (to avoid the
-    hassle of escaping delimiters, etc.). Return the resulting string.
-    '''
-    stream = StringIO()
-    csv.writer(stream).writerow(lst)
-    return stream.getvalue().strip()
-
-def fancy_split(string):
-    '''
-    Split the string as if it were a CSV file row. Return the resulting list.
-    '''
-    return next(csv.reader(StringIO(string))) if string != '' else ''
-
-def relative_path(path):
-    '''
-    Return the path as it is represented relative to the current working
-    directory. If that is not possible (i.e., the path is not under the current
-    working directory), return the path.
-    '''
-    try:
-        return Path(path).relative_to(Path.cwd())
-    except ValueError:
-        return Path(path)
-
-class SnutreeErrorMessage(QErrorMessage):
-    '''
-    Error message for the Snutree GUI.
-    '''
-
-    def __init__(self, exc, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.exception = exc
-        self.init_ui()
-
-    def init_ui(self):
-        self.resize(700, 400)
-        self.showMessage(str(self.exception).replace('\n', '<br>'))
-
-class LazyPath:
-    '''
-    A placeholder for some path. Waits until the very last minute (i.e., when
-    self.__fspath__() is called when interpreting this object as a path) to
-    determine an actual value. It determines the value by asking the user using
-    a save file dialog box created from the arguments provided to the LazyPath
-    constructor.
-
-    This allows snutree.generate to be called without knowing the output path
-    beforehand, saving time if the generation fails.
-    '''
-
-    def __init__(self, parent, caption, dir_, filter_):
-        self.parent = parent
-        self.caption = caption
-        self.dir = dir_
-        self.filter = filter_
-
-    def __fspath__(self):
-        return QFileDialog.getSaveFileName(self.parent, self.caption, self.dir, self.filter)[0]
+###############################################################################
+###############################################################################
+#### GUI Objects                                                          #####
+###############################################################################
+###############################################################################
 
 class SchemaTable(QTableWidget):
     '''
@@ -148,10 +99,6 @@ class SchemaTable(QTableWidget):
         self.horizontalHeader().stretchLastSection()
 
 class SnutreeGUI(QWidget):
-    '''
-    A simple GUI for the snutree program. Advanced features are available in
-    the CLI version of the program.
-    '''
 
     ###########################################################################
     #### Initialization                                                    ####
@@ -214,7 +161,7 @@ class SnutreeGUI(QWidget):
 
     def render_box_member_schema(self, row_counter):
         '''
-        Render the member format selector. Have the builtin member formats
+        Render the member schema selector. Have the builtin member schemas
         already selectable from a drop-down, and allow the possibility for a
         custom Python module to be selected instead of the builtins.
         '''
@@ -362,6 +309,79 @@ class SnutreeGUI(QWidget):
         center_point = QDesktopWidget().availableGeometry().center()
         geo.moveCenter(center_point)
         self.move(geo.topLeft())
+
+class SnutreeErrorMessage(QErrorMessage):
+    '''
+    Error message for the Snutree GUI.
+    '''
+
+    def __init__(self, exc, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.exception = exc
+        self.init_ui()
+
+    def init_ui(self):
+        self.resize(700, 400)
+        self.showMessage(str(self.exception).replace('\n', '<br>'))
+
+###############################################################################
+###############################################################################
+#### Utilitites                                                           #####
+###############################################################################
+###############################################################################
+
+def fancy_join(lst):
+    '''
+    Join the strings in the provided list in style of a CSV file (to avoid the
+    hassle of escaping delimiters, etc.). Return the resulting string.
+    '''
+    stream = StringIO()
+    csv.writer(stream).writerow(lst)
+    return stream.getvalue().strip()
+
+def fancy_split(string):
+    '''
+    Split the string as if it were a CSV file row. Return the resulting list.
+    '''
+    return next(csv.reader(StringIO(string))) if string != '' else ''
+
+def relative_path(path):
+    '''
+    Return the path as it is represented relative to the current working
+    directory. If that is not possible (i.e., the path is not under the current
+    working directory), return the path.
+    '''
+    try:
+        return Path(path).relative_to(Path.cwd())
+    except ValueError:
+        return Path(path)
+
+class LazyPath:
+    '''
+    A placeholder for some path. Waits until the very last minute (i.e., when
+    self.__fspath__() is called when interpreting this object as a path) to
+    determine an actual value. It determines the value by asking the user,
+    using a save file dialog box created from the arguments provided to the
+    LazyPath constructor.
+
+    This allows api.generate to be called without knowing the output path
+    beforehand, saving time if the generation fails.
+    '''
+
+    def __init__(self, parent, caption, dir_, filter_):
+        self.parent = parent
+        self.caption = caption
+        self.dir = dir_
+        self.filter = filter_
+
+    def __fspath__(self):
+        return QFileDialog.getSaveFileName(self.parent, self.caption, self.dir, self.filter)[0]
+
+###############################################################################
+###############################################################################
+#### Entrypoint                                                           #####
+###############################################################################
+###############################################################################
 
 def main():
     '''

@@ -19,7 +19,7 @@ def to_Members(dicts, **config):
 
 description = {
         'child' : 'Chapter name',
-        'mother' : "Name of the chapter's mother chapter",
+        'parent' : "Name of the chapter's parent chapter",
         'founded' : 'Year the chapter was founded',
         }
 
@@ -29,20 +29,20 @@ class Chapter(Member):
     '''
 
     schema = Schema({
-        'mother' : NonEmptyString,
+        'parent' : NonEmptyString,
         Required('child') : NonEmptyString,
         Required('founded') : Coerce(Rank)
         })
 
     def __init__(self,
-            mother=None,
+            parent=None,
             child=None,
             founded=None,
             ):
 
         self.key = child
         self.rank = founded
-        self.parent = mother
+        self.parent = parent
 
     def get_dot_label(self):
         return self.key

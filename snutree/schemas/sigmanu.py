@@ -28,7 +28,7 @@ def to_Members(dicts, **config):
     Use the status field to determine which type of member objects are created
     (or ignored, in the case of Reaffiliates), and make sure there are no
     duplicate affiliations. The name of the chapter the family tree will be
-    made for should be in conf['chapter'].
+    made for should be in config['chapter'].
     '''
 
     chapter = validate(SIGMANU_VALIDATOR, config or {})['chapter']
@@ -418,9 +418,9 @@ class Candidate(SigmaNuMember):
 
 class Expelled(Knight):
     '''
-    A Sigma Nu that was initiated, but later exxpelled. Such members are kept
-    on the tree and might have had other chapter affiliations, but their names
-    and affiliations will be removed. Only their former badges are rendered,
+    A Sigma Nu that was initiated, but later expelled. Such members are kept on
+    the tree and might have had other chapter affiliations, but their names and
+    affiliations will be removed. Only their former badges are rendered,
     without the name of their chapter.
     '''
 
