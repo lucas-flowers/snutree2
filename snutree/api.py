@@ -93,7 +93,7 @@ def get_module(plugin_base, name, attributes=None, descriptor='module'):
 
     try:
         module = plugin_source.load_plugin(module_name)
-    except ImportError:
+    except ModuleNotFoundError:
         builtins = get_plugin_builtins(plugin_base)
         msg = f'{descriptor} must be one of {builtins!r} or the path to a custom Python module'
         raise SnutreeError(msg)
