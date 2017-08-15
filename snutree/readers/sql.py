@@ -1,6 +1,4 @@
 from contextlib import closing
-import MySQLdb
-import MySQLdb.cursors
 from sshtunnel import SSHTunnelForwarder, BaseSSHTunnelForwarderError
 from cerberus import Validator
 from snutree.errors import SnutreeReaderError
@@ -61,6 +59,13 @@ def get_members_local(query, sql_config):
     '''
     Use the query and SQL configuration to get a table of members.
     '''
+
+    try:
+        import MySQLdb
+    except ModuleNotFoundError:
+        raise SnutreeReaderError(f'could not read SQL database: missing MySQLdb package')
+
+    import MySQLdb.cursors
 
     try:
         with closing(MySQLdb.Connection(**sql_config)) as cxn:
