@@ -8,7 +8,7 @@ def logged(function):
     decorates.
     '''
 
-    logger = logging.getLogger(function.__module__)
+    logger = logging.getLogger('snutree.api')
 
     @wraps(function)
     def wrapped(*args, **kwargs):

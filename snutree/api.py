@@ -162,38 +162,30 @@ def generate(
             }
         })
 
-    # Set up logging when it won't conflict with stdout
-    if log_path or output_path:
-        log_stream = open(log_path, 'w') if log_path else sys.stdout
-        if debug:
-            logging.basicConfig(level=logging.DEBUG, stream=log_stream, format='%(asctime)s %(levelname)s: %(name)s - %(message)s')
-        elif verbose:
-            logging.basicConfig(level=logging.INFO, stream=log_stream, format='%(levelname)s: %(message)s')
-        elif not quiet:
-            logging.basicConfig(level=logging.WARNING, stream=log_stream, format='%(levelname)s: %(message)s')
+    logger = get_logger(log_path, quiet, verbose, debug)
 
-    logging.info('Loading configuration files')
+    logger.info('Loading configuration files')
     config = get_config(config_paths, config_args)
 
-    logging.info('Loading member schema module')
+    logger.info('Loading member schema module')
     schema = get_schema_module(config['schema'].get('name', 'basic'))
 
-    logging.info('Reading member table from data sources')
+    logger.info('Reading member table from data sources')
     member_table = get_member_table(input_files, config['readers'])
 
-    logging.info('Validating member table')
+    logger.info('Validating member table')
     members = schema.to_Members(member_table, **config['schema'])
 
-    logging.info('Building family tree')
+    logger.info('Building family tree')
     tree = FamilyTree(members, schema.Rank, config['output'])
 
-    logging.info('Building DOT graph')
+    logger.info('Building DOT graph')
     dot_graph = tree.to_dot_graph()
 
-    logging.info('Composing DOT source code')
+    logger.info('Composing DOT source code')
     dot_src = dot_graph.to_dot()
 
-    logging.info('Writing to output file')
+    logger.info('Writing to output file')
     write_output(dot_src, output_path)
 
 ###############################################################################
@@ -201,6 +193,42 @@ def generate(
 #### API Helper Functions                                                  ####
 ###############################################################################
 ###############################################################################
+
+def get_logger(log_path, quiet, verbose, debug):
+
+    if debug:
+        level = logging.DEBUG
+    elif verbose:
+        level = logging.INFO
+    else:
+        level = logging.WARNING
+
+    # Use a more detailed log format for debugging
+    if level <= logging.DEBUG:
+        fmt = '%(asctime)s %(levelname)5s: %(name)s - %(message)s'
+    else:
+        fmt = '%(levelname)s: %(message)s'
+    formatter = logging.Formatter(fmt)
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(min(logging.INFO, level))
+
+    # Standard error handler: Log records according to the level given in the
+    # arguments.
+    stderr_handler = logging.StreamHandler(sys.stderr)
+    stderr_handler.setLevel(level if not quiet else logging.ERROR)
+    stderr_handler.setFormatter(formatter)
+    logger.addHandler(stderr_handler)
+
+    # File handler: If a log file is provided, logs at a level of detail of at
+    # least INFO and maybe more depending the arguments.
+    if log_path:
+        file_handler = logging.FileHandler(log_path, mode='w')
+        file_handler.setLevel(min(logging.INFO, level))
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+
+    return logger
 
 @logged
 def get_config(config_paths, config_args):

@@ -25,7 +25,7 @@ def main():
 
     # Unexpected errors
     except Exception as e:
-        logging.error('Unexpected error.', exc_info=True)
+        logging.critical('Unexpected error.', exc_info=True)
         sys.exit(1)
 
 options = [
