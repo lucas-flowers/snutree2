@@ -1,5 +1,4 @@
 import re
-from .errors import SnutreeError
 
 DIGITS_MATCHER = re.compile(r'\d+')
 
