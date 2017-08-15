@@ -134,14 +134,10 @@ def get_reader_module(filetype):
 def generate(
         input_files:List[IO[Any]],
         output_path:str,
-        log_path:str,
         config_paths:List[str],
         schema:str,
         input_format:str,
         seed:int,
-        debug:bool,
-        verbose:bool,
-        quiet:bool,
         ):
     '''
     Create a big-little family tree.
@@ -162,7 +158,7 @@ def generate(
             }
         })
 
-    logger = get_logger(log_path, quiet, verbose, debug)
+    logger = logging.getLogger(__name__)
 
     logger.info('Loading configuration files')
     config = get_config(config_paths, config_args)
@@ -193,42 +189,6 @@ def generate(
 #### API Helper Functions                                                  ####
 ###############################################################################
 ###############################################################################
-
-def get_logger(log_path, quiet, verbose, debug):
-
-    if debug:
-        level = logging.DEBUG
-    elif verbose:
-        level = logging.INFO
-    else:
-        level = logging.WARNING
-
-    # Use a more detailed log format for debugging
-    if level <= logging.DEBUG:
-        fmt = '%(asctime)s %(levelname)5s: %(name)s - %(message)s'
-    else:
-        fmt = '%(levelname)s: %(message)s'
-    formatter = logging.Formatter(fmt)
-
-    logger = logging.getLogger(__name__)
-    logger.setLevel(min(logging.INFO, level))
-
-    # Standard error handler: Log records according to the level given in the
-    # arguments.
-    stderr_handler = logging.StreamHandler(sys.stderr)
-    stderr_handler.setLevel(level if not quiet else logging.ERROR)
-    stderr_handler.setFormatter(formatter)
-    logger.addHandler(stderr_handler)
-
-    # File handler: If a log file is provided, logs at a level of detail of at
-    # least INFO and maybe more depending the arguments.
-    if log_path:
-        file_handler = logging.FileHandler(log_path, mode='w')
-        file_handler.setLevel(min(logging.INFO, level))
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-
-    return logger
 
 @logged
 def get_config(config_paths, config_args):

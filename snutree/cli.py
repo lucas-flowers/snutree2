@@ -4,38 +4,48 @@ from functools import wraps
 import click
 from . import api
 from .errors import SnutreeError
-from .logging import logged
+from .logging import create_snutree_logger, logged
 
 def main():
     '''
     Run the command-line version of the program.
     '''
 
+    logger = logging.getLogger('snutree')
+
     try:
         cli()
 
-    ## Debugging
-    # except:
-    #     import pdb; pdb.post_mortem()
-
     # Expected errors
     except SnutreeError as e:
-        logging.error(e)
+        logger.error(e)
         sys.exit(1)
 
     # Unexpected errors
     except Exception as e:
-        logging.critical('Unexpected error.', exc_info=True)
+        logger.critical('Unexpected error.', exc_info=True)
         sys.exit(1)
 
 options = [
-        ('output_path', '--output', '-o', {
-            'type' : click.Path(),
-            'help' : f'Instead of writing DOT code to stdout, send output to a file with one of the filetypes in {list(api.WRITERS.keys())!r}'
+        ('--verbose', '-v', {
+            'is_flag' : True,
+            'help' : 'Print progress'
+            }),
+        ('--debug', '-d', {
+            'is_flag' : True,
+            'help' : 'Print debug information'
+            }),
+        ('--quiet', '-q', {
+            'is_flag' : True,
+            'help' : "Do not print anything, including warnings"
             }),
         ('log_path', '--log', '-l', {
             'type' : click.Path(exists=False),
             'help' : 'Log file path'
+            }),
+        ('output_path', '--output', '-o', {
+            'type' : click.Path(),
+            'help' : f'Instead of writing DOT code to stdout, send output to a file with one of the filetypes in {list(api.WRITERS.keys())!r}'
             }),
         ('config_paths', '--config', '-c', {
             'type' : click.Path(exists=True),
@@ -53,18 +63,6 @@ options = [
         ('--seed', '-S', {
             'type' : int,
             'help' : 'Seed for the random number generator, used to move tree nodes around in a repeatable way'
-            }),
-        ('--verbose', '-v', {
-            'is_flag' : True,
-            'help' : 'Print progress'
-            }),
-        ('--debug', '-d', {
-            'is_flag' : True,
-            'help' : 'Print debug information'
-            }),
-        ('--quiet', '-q', {
-            'is_flag' : True,
-            'help' : "Do not print anything, including warnings"
             }),
         ]
 
@@ -89,6 +87,7 @@ class collect_options:
 @click.argument('input_files', nargs=-1, type=click.File('r'))
 @collect_options(options)
 @logged
-def cli(*args, **kwargs):
+def cli(verbose, debug, quiet, log_path, *args, **kwargs):
+    create_snutree_logger(verbose, debug, quiet, log_path)
     return api.generate(*args, **kwargs)
 

@@ -480,7 +480,7 @@ class FamilyTree:
 
             if key not in self.graph.node:
                 msg = f'family color map includes nonexistent member: {key!r}'
-                logging.warning(msg)
+                logging.getLogger(__name__).warning(msg)
 
             else:
 
