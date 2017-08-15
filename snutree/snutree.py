@@ -64,7 +64,7 @@ PLUGIN_BASES = tuple(get_plugin_base(p) for p in ('readers', 'schemas'))
 READERS_PLUGIN_BASE, SCHEMAS_PLUGIN_BASE = PLUGIN_BASES
 
 # Lists of the built-in plugins for each of the possible types of plugins
-BUILTIN_LISTS = tuple(get_plugin_builtins for p in PLUGIN_BASES)
+BUILTIN_LISTS = tuple(get_plugin_builtins(p) for p in PLUGIN_BASES)
 BUILTIN_READERS, BUILTIN_SCHEMAS = BUILTIN_LISTS
 
 def get_module(plugin_base, name, attributes=None, descriptor='module'):
@@ -116,7 +116,7 @@ def get_reader_module(filetype):
     '''
     Return the reader module for the given filetype.
     '''
-    return get_module(READERS_PLUGIN_BASE, filetype, 
+    return get_module(READERS_PLUGIN_BASE, filetype,
             attributes=['get_table'],
             descriptor='reader')
 
