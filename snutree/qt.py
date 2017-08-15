@@ -119,7 +119,7 @@ class SchemaTable(QTableWidget):
         '''
 
         try:
-            module = snutree.get_member_type(module_name)
+            module = snutree.get_schema_module(module_name)
         except snutree.SnutreeError as e:
             logging.error(e)
             SnutreeErrorMessage(e).exec_()
@@ -128,7 +128,7 @@ class SchemaTable(QTableWidget):
             # Clear the table before adding new information (or aborting)
             self.setRowCount(0)
 
-        rows = sorted(module.schema_information.items())
+        rows = sorted(module.description.items())
         for i, (fieldname, description) in enumerate(rows):
 
             self.insertRow(i)
@@ -174,7 +174,7 @@ class SnutreeGUI(QWidget):
                 'Select input files', 'Supported filetypes (*.csv *.sql *.dot);;All files (*)')
 
         # Member format dropdown, custom browse button, and schema information
-        self.box_member_type = self.render_box_member_type(row_counter)
+        self.box_member_schema = self.render_box_member_schema(row_counter)
 
         # Get tree generation seed
         self.box_seed = self.render_box_seed(row_counter)
@@ -211,7 +211,7 @@ class SnutreeGUI(QWidget):
 
         return textbox
 
-    def render_box_member_type(self, row_counter):
+    def render_box_member_schema(self, row_counter):
         '''
         Render the member format selector. Have the builtin member formats
         already selectable from a drop-down, and allow the possibility for a
@@ -226,7 +226,7 @@ class SnutreeGUI(QWidget):
         table = SchemaTable()
 
         # Populate builtin member formats
-        formats = snutree.PLUGIN_BASE.make_plugin_source(searchpath=[]).list_plugins()
+        formats = snutree.BUILTIN_SCHEMAS
         for fmt in formats:
             combobox.addItem(fmt, fmt)
 
@@ -294,7 +294,7 @@ class SnutreeGUI(QWidget):
                 input_files = [stack.enter_context(open(f)) for f in filenames]
                 output_path = LazyPath(self, 'Select output file', '', 'PDF (*.pdf);;Graphviz source (*.dot)')
                 configs = fancy_split(self.box_config.text())
-                member_type = self.box_member_type.currentData()
+                member_schema = self.box_member_schema.currentData()
                 seed = int(self.box_seed.text()) if self.box_seed.text() else 0
 
                 snutree.generate(
@@ -302,7 +302,7 @@ class SnutreeGUI(QWidget):
                         output_path=output_path,
                         log_path=None,
                         config_paths=configs,
-                        member_type=member_type,
+                        schema=member_schema,
                         input_format=None,
                         seed=seed,
                         debug=False,
