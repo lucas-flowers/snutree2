@@ -21,17 +21,3 @@ def NonEmptyString(s):
         return s
     raise ValueError
 
-class SnutreeValidationError(SnutreeError):
-    '''
-    Helper error for when using voluptuous to validate. When an error is caught
-    in a specific row, send the error and the row to this error's constructor
-    to raise a SnutreeError that will give a halfway-reasonable message.
-    '''
-
-    def __init__(self, voluptuous_error, data):
-        self.err = voluptuous_error
-        self.data = data
-
-    def __str__(self):
-        return f'{self.err}. In:\n{self.data}'
-

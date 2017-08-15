@@ -4,13 +4,13 @@ import re
 from abc import ABCMeta, abstractmethod
 from cerberus import Validator
 from voluptuous import Schema, Required, In, Coerce, IsFalse
-from voluptuous.humanize import validate_with_humanized_errors
 from voluptuous.error import Error
-from snutree.voluptuous import NonEmptyString, Digits, SnutreeValidationError
+from voluptuous.humanize import validate_with_humanized_errors
 from snutree.cerberus import nonempty_string, validate
-from snutree.errors import SnutreeError
+from snutree.errors import SnutreeError, SnutreeSchemaError
 from snutree.semester import Semester
 from snutree.tree import Member
+from snutree.voluptuous import NonEmptyString, Digits
 
 SIGMANU_VALIDATOR = Validator({
     'name' : {
@@ -35,7 +35,7 @@ def to_Members(dicts, **config):
     try:
         SigmaNuMember.chapter = Affiliation.str_to_designation(chapter)
     except ValueError as e:
-        raise SnutreeValidationError(e, config)
+        raise SnutreeSchemaError(e, config)
 
     try:
 
@@ -63,7 +63,7 @@ def to_Members(dicts, **config):
             yield member
 
     except Error as e:
-        raise SnutreeValidationError(e, dct)
+        raise SnutreeSchemaError(e, dct)
 
 class Affiliation:
     '''

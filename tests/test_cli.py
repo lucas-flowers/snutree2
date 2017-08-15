@@ -5,8 +5,7 @@ from inspect import cleandoc as trim
 from unittest import TestCase
 from pathlib import Path
 from click.testing import CliRunner
-from snutree.errors import SnutreeError
-from snutree.voluptuous import SnutreeValidationError
+from snutree.errors import SnutreeError, SnutreeSchemaError
 from snutree.cli import cli
 
 TESTS_ROOT = Path(__file__).parent
@@ -91,7 +90,7 @@ class TestCli(TestCliCommon):
             Sue,,Spring 1965
             ''')
         result = self.invoke(['-f', 'csv', '-'], bad_csv)
-        self.assertIsInstance(result.exception, SnutreeValidationError)
+        self.assertIsInstance(result.exception, SnutreeSchemaError)
 
     def test_custom_module(self):
 

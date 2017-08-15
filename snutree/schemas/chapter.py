@@ -1,8 +1,9 @@
 from voluptuous import Schema, Required, Coerce
-from voluptuous.humanize import validate_with_humanized_errors
 from voluptuous.error import Error
+from voluptuous.humanize import validate_with_humanized_errors
+from snutree.errors import SnutreeSchemaError
 from snutree.tree import Member
-from snutree.voluptuous import NonEmptyString, SnutreeValidationError
+from snutree.voluptuous import NonEmptyString
 
 Rank = int
 
@@ -14,7 +15,7 @@ def to_Members(dicts, **config):
         for dct in dicts:
             yield Chapter.from_dict(dct)
     except Error as exc:
-        raise SnutreeValidationError(exc, dct)
+        raise SnutreeSchemaError(exc, dct)
 
 description = {
         'child' : 'Chapter name',

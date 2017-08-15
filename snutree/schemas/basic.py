@@ -1,9 +1,10 @@
 from voluptuous import Schema, Required, Coerce
-from voluptuous.humanize import validate_with_humanized_errors
 from voluptuous.error import Error
-from snutree.tree import Member
-from snutree.voluptuous import NonEmptyString, SnutreeValidationError
+from voluptuous.humanize import validate_with_humanized_errors
+from snutree.errors import SnutreeSchemaError
 from snutree.semester import Semester
+from snutree.tree import Member
+from snutree.voluptuous import NonEmptyString
 
 Rank = Semester
 
@@ -15,7 +16,7 @@ def to_Members(dicts, **config):
         for dct in dicts:
             yield KeylessMember.from_dict(dct)
     except Error as exc:
-        raise SnutreeValidationError(exc, dct)
+        raise SnutreeSchemaError(exc, dct)
 
 description = {
         'name' : 'Member name',

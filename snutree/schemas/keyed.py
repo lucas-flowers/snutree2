@@ -1,9 +1,9 @@
 from voluptuous import Schema, Required, Coerce
-from voluptuous.humanize import validate_with_humanized_errors
 from voluptuous.error import Error
-from snutree.tree import Member
-from snutree.voluptuous import NonEmptyString, SnutreeValidationError
+from voluptuous.humanize import validate_with_humanized_errors
 from snutree.semester import Semester
+from snutree.tree import Member
+from snutree.voluptuous import NonEmptyString
 
 Rank = Semester
 
