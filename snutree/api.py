@@ -67,18 +67,20 @@ READERS_PLUGIN_BASE, SCHEMAS_PLUGIN_BASE = PLUGIN_BASES
 BUILTIN_LISTS = tuple(get_plugin_builtins(p) for p in PLUGIN_BASES)
 BUILTIN_READERS, BUILTIN_SCHEMAS = BUILTIN_LISTS
 
-def get_module(plugin_base, name, attributes=None, descriptor='module'):
+def get_module(plugin_base, name, attributes=None, descriptor='module', custom=True):
     '''
     For the given PluginBase, validates the module whose name is given, by
     ensuring the module implements the expected attributes whose names are
     contained in the attributes parameter. Returns the validated module. (The
     descriptor is used in error messages.)
+
+    If it is desired to not permit custom module paths to directly be provided
+    (and instead just use the files in the builtins folder), set the custom
+    flag to False.
     '''
 
-    attributes = attributes or []
-
     module_file = Path(name) if name else None
-    if module_file and module_file.exists() and module_file.suffix == '.py':
+    if custom and module_file and module_file.exists() and module_file.suffix == '.py':
         # Add custom module's directory to plugin path
         searchpath = [str(module_file.parent)] # pluginbase does not support filenames in the searchpath
         module_name = module_file.stem
@@ -94,11 +96,12 @@ def get_module(plugin_base, name, attributes=None, descriptor='module'):
     try:
         module = plugin_source.load_plugin(module_name)
     except ModuleNotFoundError:
+        _or_custom_module = ' or the path to a custom Python module' if custom else ''
         builtins = get_plugin_builtins(plugin_base)
-        msg = f'{descriptor} must be one of {builtins!r} or the path to a custom Python module'
+        msg = f'{descriptor} must be one of {builtins!r}{_or_custom_module}'
         raise SnutreeError(msg)
 
-    if not all([hasattr(module, a) for a in attributes]):
+    if not all([hasattr(module, a) for a in attributes or []]):
         msg = f'{descriptor} module {module_name!r} must implement: {attributes!r}'
         raise SnutreeError(msg)
 
@@ -110,7 +113,8 @@ def get_schema_module(name):
     '''
     return get_module(SCHEMAS_PLUGIN_BASE, name,
             attributes=['Rank', 'to_Members', 'description'],
-            descriptor='member schema')
+            descriptor='member schema',
+            custom=True)
 
 def get_reader_module(filetype):
     '''
@@ -118,7 +122,8 @@ def get_reader_module(filetype):
     '''
     return get_module(READERS_PLUGIN_BASE, filetype,
             attributes=['get_table'],
-            descriptor='reader')
+            descriptor='input file format',
+            custom=False)
 
 ###############################################################################
 ###############################################################################
@@ -204,11 +209,11 @@ def get_config(config_paths, config_args):
     contents with the configuration arguments dictionary provided. Validates
     the combined configurations and returns the result as a dictionary. If
     there is overlap between configurations, keys from files earlier in the
-    list will be overwritten by those later in the list (the arguments will
-    overwritten any keys from the list itself). If there are lists inside the
-    configuration, those lists will be extended, not overwritten.
+    list will be overwritten by those later in the list (anything in
+    config_args will overwrite any keys from the list itself). If there are
+    lists inside the configuration, those lists will be extended, not
+    overwritten.
     '''
-
     config = {}
     for c in load_config_files(config_paths) + [config_args]:
         deep_update(config, c)
@@ -223,13 +228,11 @@ def load_config_files(paths):
     configs = []
     for path in paths:
         with open(path, 'r') as f:
-
             try:
                 config = yaml.safe_load(f) or {}
             except yaml.YAMLError as e:
-                msg = f'problem reading configuration:\n{e}'
+                msg = f'problem reading configuration file {path!r}:\n{e}'
                 raise SnutreeError(msg)
-
             configs.append(config)
 
     return configs
@@ -256,10 +259,6 @@ def get_member_table(files, reader_configs):
             filetype = Path(f.name).suffix[1:] # ignore first element (a dot)
 
         reader = get_reader_module(filetype)
-        if not reader:
-            msg = f'data source filetype {filetype!r} not supported'
-            raise SnutreeError(msg)
-
         members += reader.get_table(f, **reader_configs.get(filetype, {}))
 
     return members
