@@ -5,7 +5,7 @@ import inspect
 from functools import wraps
 from .errors import SnutreeError
 
-def create_snutree_logger(verbose, debug, quiet, log_path=None):
+def setup_logger(verbose, debug, quiet, log_path=None):
 
     if debug:
         level = logging.DEBUG

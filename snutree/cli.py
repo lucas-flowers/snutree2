@@ -4,7 +4,7 @@ from functools import wraps
 import click
 from . import api
 from .errors import SnutreeError
-from .logging import create_snutree_logger, logged
+from .logging import setup_logger, logged
 
 def main():
     '''
@@ -29,15 +29,15 @@ def main():
 options = [
         ('--verbose', '-v', {
             'is_flag' : True,
-            'help' : 'Print progress'
+            'help' : 'Print extra information on progress to stderr'
             }),
         ('--debug', '-d', {
             'is_flag' : True,
-            'help' : 'Print debug information'
+            'help' : 'Print debug information to stderr'
             }),
         ('--quiet', '-q', {
             'is_flag' : True,
-            'help' : "Do not print anything, including warnings"
+            'help' : 'Only print errors to stderr, no warnings'
             }),
         ('log_path', '--log', '-l', {
             'type' : click.Path(exists=False),
@@ -88,6 +88,6 @@ class collect_options:
 @collect_options(options)
 @logged
 def cli(verbose, debug, quiet, log_path, *args, **kwargs):
-    create_snutree_logger(verbose, debug, quiet, log_path)
+    setup_logger(verbose, debug, quiet, log_path)
     return api.generate(*args, **kwargs)
 
