@@ -14,6 +14,7 @@ def main():
     logger = logging.getLogger('snutree')
 
     try:
+        # pylint: disable=no-value-for-parameter
         cli()
 
     # Expected errors
