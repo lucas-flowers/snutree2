@@ -1,32 +1,14 @@
 import io
-import logging
-import sys
 from inspect import cleandoc as trim
 from pathlib import Path
-import pytest
 from click.testing import CliRunner
 from snutree.errors import SnutreeError, SnutreeSchemaError
 from snutree.cli import cli
+from snutree.logging import setup_logger
 
 TESTS_ROOT = Path(__file__).parent
 
 runner = CliRunner()
-
-# pylint: disable=redefined-outer-name
-@pytest.fixture
-def logger():
-
-    # Allow sending CLI logging output to testing stdout when stdout is not
-    # captured by unittest
-    stream_handler = logging.StreamHandler(sys.stdout)
-    logger = logging.getLogger()
-    logger.level = logging.DEBUG
-    logger.addHandler(stream_handler)
-
-    yield
-
-    # Clean up logging
-    logger.removeHandler(stream_handler)
 
 def invoke(args, infile=None):
     if infile:
@@ -55,6 +37,7 @@ def run_example(
         config_params.append('--config')
         config_params.append(str(config))
 
+    setup_logger(verbose=False, debug=True, quiet=False)
     result = invoke(config_params + [
         '--seed', seed,
         '--output', str(output),
@@ -67,7 +50,7 @@ def run_example(
 
     assert output.read_text() == expected.read_text()
 
-def test_simple(logger):
+def test_simple():
 
     good_csv = trim('''
         name,big_name,pledge_semester
@@ -89,7 +72,7 @@ def test_simple(logger):
     result = invoke(['-f', 'csv', '-'], bad_csv)
     assert isinstance(result.exception, SnutreeSchemaError)
 
-def test_custom_module(logger):
+def test_custom_module():
     # The custom module should be in the same folder this test file is in
     custom_module = str(Path(__file__).parent/'test_cli/custom_module.py')
     custom_csv = trim('''
@@ -101,7 +84,7 @@ def test_custom_module(logger):
     if result.exception:
         raise result.exception
 
-def test_sigmanu_example(logger):
+def test_sigmanu_example():
     run_example(
             example_name='sigmanu-cwru-old',
             configs=['config-input.yaml', 'config.yaml'],
@@ -109,7 +92,7 @@ def test_sigmanu_example(logger):
             inputs=['directory-brothers_not_knights.csv', 'directory.csv'],
             )
 
-def test_chapters(logger):
+def test_chapters():
     run_example(
             example_name='fake-chapter',
             configs=['config.yaml'],
@@ -117,7 +100,7 @@ def test_chapters(logger):
             inputs=['directory.csv'],
             )
 
-def test_fake(logger):
+def test_fake():
     run_example(
             example_name='fake',
             configs=['config.yaml'],
