@@ -6,7 +6,7 @@ from cerberus import Validator
 from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.error import Error
 from voluptuous.humanize import validate_with_humanized_errors
-from snutree.cerberus import nonempty_string, validate
+from snutree.cerberus import nonempty_string, Validator
 from snutree.errors import SnutreeError, SnutreeSchemaError
 from snutree.semester import Semester
 from snutree.tree import Member
@@ -31,7 +31,7 @@ def to_Members(dicts, **config):
     made for should be in config['chapter'].
     '''
 
-    chapter = validate(SIGMANU_VALIDATOR, config or {})['chapter']
+    chapter = SIGMANU_VALIDATOR.validated(config or {})['chapter']
     try:
         SigmaNuMember.chapter = Affiliation.str_to_designation(chapter)
     except ValueError as e:

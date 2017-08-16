@@ -4,12 +4,11 @@ from enum import Enum
 from abc import ABCMeta, abstractmethod
 from networkx import DiGraph
 from networkx.algorithms.components import weakly_connected_components
-from cerberus import Validator
 from . import dot
 from .errors import SnutreeError
 from .logging import logged
 from .colors import ColorPicker
-from .cerberus import optional_boolean, nonempty_string, validate
+from .cerberus import optional_boolean, nonempty_string, Validator
 
 ###############################################################################
 ###############################################################################
@@ -239,8 +238,8 @@ class FamilyTree:
     def __init__(self, members, RankType=int, settings=None):
 
         self.graph = DiGraph()
-        settings_validator = create_settings_validator(RankType)
-        self.settings = validate(settings_validator, settings or {})
+        TREE_VALIDATOR = create_settings_validator(RankType)
+        self.settings = TREE_VALIDATOR.validated(settings or {})
 
         # Add all the entities in the settings and member list provided
         self.add_members(members)

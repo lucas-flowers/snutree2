@@ -1,7 +1,7 @@
 from contextlib import closing
 from cerberus import Validator
 from snutree.errors import SnutreeReaderError
-from snutree.cerberus import validate, nonempty_string
+from snutree.cerberus import Validator, nonempty_string
 
 # Validates a configuration YAML file with SQL and ssh options
 SQL_CNF_VALIDATOR = Validator({
@@ -45,7 +45,7 @@ def get_members(query, config):
     members from the configuration's SQL database.
     '''
 
-    config = validate(SQL_CNF_VALIDATOR, config)
+    config = SQL_CNF_VALIDATOR.validated(config)
     ssh_config = config.get('ssh')
     sql_config = config.copy()
     del sql_config['ssh']

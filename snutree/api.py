@@ -11,7 +11,7 @@ from pluginbase import PluginBase
 from .errors import SnutreeError
 from .logging import logged
 from .tree import FamilyTree
-from .cerberus import validate
+from .cerberus import Validator
 
 ###############################################################################
 ###############################################################################
@@ -205,7 +205,7 @@ def get_config(config_paths, config_args):
     config = {}
     for c in load_config_files(config_paths) + [config_args]:
         deep_update(config, c)
-    return validate(CONFIG_VALIDATOR, config)
+    return CONFIG_VALIDATOR.validated(config)
 
 def load_config_files(paths):
     '''
