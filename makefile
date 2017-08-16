@@ -1,6 +1,6 @@
 
 CC = pyinstaller
-TEST = nosetests --verbose
+TEST = pytest
 
 snutree: clean
 	$(CC) snutree.spec
@@ -19,7 +19,7 @@ build-clean:
 clean: py-clean build-clean
 
 test: py-clean
-	$(TEST) --exclude=private
+	$(TEST) -k 'not private'
 
 priv-test: py-clean
 	$(TEST)

@@ -1,54 +1,34 @@
 from io import StringIO
-from unittest import TestCase
+import pytest
 from snutree.errors import SnutreeReaderError
 from snutree.readers import csv, dot, sql
 
-class TestReaders(TestCase):
+def test_csv_no_error():
+    csv_stream = StringIO('"A","B bb B","C"\nx')
+    row_generator = csv.get_table(csv_stream)
+    next(row_generator)
 
-    def test_csv_no_error(self):
+def test_csv_error():
+    csv_stream = StringIO('"A";"B "bb" B";"C"\nx')
+    row_generator = csv.get_table(csv_stream)
+    with pytest.raises(SnutreeReaderError):
+        next(row_generator)
 
-        try:
-            csv_stream = StringIO('"A","B bb B","C"\nx')
-            row_generator = csv.get_table(csv_stream)
-            next(row_generator)
-        except SnutreeReaderError as e:
-            self.fail(f'unexpected CSV read failure:\n{e}')
+def test_sql_mysql_error():
+    with pytest.raises(SnutreeReaderError):
+        sql.get_members_local('', {})
 
-    def test_csv_error(self):
+def test_sql_ssh_error():
+    conf = { 'host' : '', 'port' : 0, 'user' : '', 'public_key' : '' }
+    with pytest.raises(SnutreeReaderError):
+        sql.get_members_ssh('', conf, conf)
 
-        csv_stream = StringIO('"A";"B "bb" B";"C"\nx')
-        row_generator = csv.get_table(csv_stream)
-        self.assertRaises(SnutreeReaderError, next, row_generator)
+def test_dot_no_error():
+    dot_stream = StringIO('digraph { a -> b; }')
+    dot.get_table(dot_stream)
 
-    def test_sql_mysql_error(self):
-
-        self.assertRaises(SnutreeReaderError,
-                sql.get_members_local, '', {}
-                )
-
-    def test_sql_ssh_error(self):
-
-        conf = {
-                'host' : '',
-                'port' : 0,
-                'user' : '',
-                'public_key' : '',
-                }
-
-        self.assertRaises(SnutreeReaderError,
-                sql.get_members_ssh, '', conf, conf
-                )
-
-    def test_dot_no_error(self):
-
-        try:
-            dot_stream = StringIO('digraph { a -> b; }')
-            dot.get_table(dot_stream)
-        except SnutreeReaderError as e:
-            self.fail(f'unexpected DOT read failure:\n{e}')
-
-    def test_dot_error(self):
-
-        dot_stream = StringIO('digraph { \n a------ \n }')
-        self.assertRaises(SnutreeReaderError, dot.get_table, dot_stream)
+def test_dot_error():
+    dot_stream = StringIO('digraph { \n a------ \n }')
+    with pytest.raises(SnutreeReaderError):
+        dot.get_table(dot_stream)
 

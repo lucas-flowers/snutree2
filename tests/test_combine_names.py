@@ -1,17 +1,20 @@
-from unittest import TestCase
+import pytest
 from snutree.schemas.sigmanu import combine_names
 
-class TestCombineNames(TestCase):
+@pytest.mark.parametrize('names, combined_name', [
+    (('Jon', 'Freaking', 'Snow'), 'Freaking Snow'),
+    (('Jon', 'Jonathan', 'Snow'), 'Jonathan Snow'),
+    (('Jon', 'Snowy', 'Snow'), 'Jon Snow'),
+    (('Jon', 'Snowball', 'Snow'), 'Jon Snow'),
+    (('Samuel', 'Dick', 'Richards'), 'Dick Richards') # An unfortunate compromise
+    ])
+def test_combine_names(names, combined_name):
+    assert combine_names(*names) == combined_name
 
-    def test_combine_names(self):
+@pytest.mark.parametrize('names, combined_name', [
+    (('Jon', 'Snow', 'Snow'), 'Snow Snow')
+    ])
+def test_combine_names_not_equal(names, combined_name):
+    assert combine_names(*names) != combined_name
 
-        self.assertEqual(combine_names('Jon', 'Freaking', 'Snow'), 'Freaking Snow')
-        self.assertEqual(combine_names('Jon', 'Jonathan', 'Snow'), 'Jonathan Snow')
-        self.assertEqual(combine_names('Jon', 'Snowy', 'Snow'), 'Jon Snow')
-        self.assertEqual(combine_names('Jon', 'Snowball', 'Snow'), 'Jon Snow')
-
-        # An unfortunate compromise
-        self.assertEqual(combine_names('Samuel', 'Dick', 'Richards'), 'Dick Richards')
-
-        self.assertNotEqual(combine_names('Jon', 'Snow', 'Snow'), 'Snow Snow')
 

@@ -1,68 +1,53 @@
-from unittest import TestCase
 from itertools import permutations
+import pytest
 from snutree.semester import Semester
 
-class TestSemester(TestCase):
+a = Semester('Fall 1900')
+b = Semester('Fall 1994')
+c = Semester('Spring 1995')
+d = Semester('Fall 1995')
+e = Semester('Fall 001995')
+f = Semester('Spring 3000')
 
-    def setUp(self):
+@pytest.mark.parametrize('p', permutations([a, b, c, d]))
+def test_sorting(p):
+    assert sorted(p) == [a, b, c, d]
 
-        self.a = Semester('Fall 1900')
-        self.b = Semester('Fall 1994')
-        self.c = Semester('Spring 1995')
-        self.d = Semester('Fall 1995')
-        self.e = Semester('Fall 001995')
-        self.f = Semester('Spring 3000')
-        self.semesters = [self.a, self.b, self.c, self.d, self.e, self.f]
+def test_total_ordering():
+    assert b != c
+    assert e  > c
+    assert e >= c
+    assert e >= e
 
-    def test_sorting(self):
+def test_min_max():
+    assert max(a, b, c) == c
+    assert min(a, e, d) == a
 
-        for p in permutations(self.semesters):
-            with self.subTest(p=p):
-                self.assertEqual(sorted(p), self.semesters)
+def test_primitive():
+    new_a = a
+    new_a += 1
+    assert new_a is not a
 
-    def test_total_ordering(self):
+def test_inc_dec():
+    new_a = a
+    new_a += 1
+    new_a -= 1
+    assert new_a == a
+    new_b = b
+    new_b += 1
+    new_b -= 1
+    assert new_b == b
 
-        self.assertNotEqual(self.b, self.c)
-        self.assertGreater(self.e, self.c)
-        self.assertGreaterEqual(self.e, self.c)
-        self.assertGreaterEqual(self.e, self.e)
+def test_str():
+    assert str(Semester('Fall 0001933')) == 'Fall 1933'
+    assert str(Semester('Spring 323')) == 'Spring 323'
 
-    def test_min_max(self):
+def test_math():
+    assert isinstance(Semester('Fall 2001') + 8, Semester)
+    assert str(Semester('Fall 2001') + 8) == 'Fall 2005'
+    assert str(8 + Semester('Fall 2001')) == 'Fall 2005'
+    assert str(Semester('Fall 2001') + Semester('Spring 2001')) == 'Fall 4002'
 
-        self.assertEqual(max(self.a, self.b, self.c), self.c)
-        self.assertEqual(min(self.a, self.e, self.d), self.a)
-
-    def test_primitive(self):
-
-        a = self.a
-        a += 1
-        self.assertIsNot(a, self.a)
-
-    def test_inc_dec(self):
-
-        a = self.a
-        a += 1
-        a -= 1
-        self.assertEqual(a, self.a)
-
-        b = self.b
-        b += 1
-        b -= 1
-        self.assertEqual(b, self.b)
-
-    def test_str(self):
-
-        self.assertEqual(str(Semester('Fall 0001933')), 'Fall 1933')
-        self.assertEqual(str(Semester('Spring 323')), 'Spring 323')
-
-    def test_math(self):
-
-        self.assertIsInstance(Semester('Fall 2001') + 8, Semester)
-        self.assertEqual(str(Semester('Fall 2001') + 8), 'Fall 2005')
-        self.assertEqual(str(8 + Semester('Fall 2001')), 'Fall 2005')
-        self.assertEqual(str(Semester('Fall 2001') + Semester('Spring 2001')), 'Fall 4002')
-
-    def test_subtract(self):
-
-        self.assertEqual(str(Semester('Fall 2001') - 1), 'Spring 2001')
+def test_subtract():
+    assert str(Semester('Fall 2001') - 1) == 'Spring 2001'
 
