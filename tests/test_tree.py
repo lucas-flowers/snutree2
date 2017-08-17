@@ -44,24 +44,22 @@ def test_parent_not_prior(members):
     assert tree_error_code_of(func) == code
 
 def test_unknown_edge_component(members):
-    settings = {'edges' : [{
-        'nodes' : ['Bob Dole', 'Rob Cole', 'Carmen Sandiego']
-        }]}
-    tree = FamilyTree(members, settings=settings)
+    edges = [{ 'nodes' : ['Bob Dole', 'Rob Cole', 'Carmen Sandiego'] }]
+    tree = FamilyTree(members)
     from snutree.writers.dot import add_custom_edges
-    func = partial(add_custom_edges, tree, settings['edges'])
+    func = partial(add_custom_edges, tree, edges)
     code = TreeErrorCode.UNKNOWN_EDGE_COMPONENT
     assert tree_error_code_of(func) == code
 
 # TODO move?
 def test_family_color_conflict(members):
-    settings = {'family_colors' : {
-        'Bob Dole' : 'blue',
-        'Rob Cole' : 'yellow'
-        }}
-    tree = FamilyTree(members, settings=settings)
+    family_colors = {
+            'Bob Dole' : 'blue',
+            'Rob Cole' : 'yellow'
+            }
+    tree = FamilyTree(members)
     from snutree.writers.dot import add_colors
-    func = partial(add_colors, tree, settings['family_colors'])
+    func = partial(add_colors, tree, family_colors)
     code = TreeErrorCode.FAMILY_COLOR_CONFLICT
     assert tree_error_code_of(func) == code
 

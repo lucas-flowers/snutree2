@@ -85,14 +85,10 @@ class FamilyTree:
     '''
 
     @logged
-    def __init__(self, members, RankType=int, settings=None):
+    def __init__(self, members, seed=0):
 
         self.graph = DiGraph()
-        # TREE_VALIDATOR = create_settings_validator(RankType)
-        # TODO add new tree validator
-        # self.settings = TREE_VALIDATOR.validated(settings or {})
-        self.settings = settings or {}
-        self.settings.setdefault('seed', 0)
+        self.seed = seed
 
         # Add all the entities in the settings and member list provided
         self.add_members(members)
@@ -261,7 +257,7 @@ class FamilyTree:
 
         components = weakly_connected_components(self.graph)
         components = sorted(components, key = lambda component : min(component, key=str))
-        rng = random.Random(self.settings['seed'])
+        rng = random.Random(self.seed)
         rng.shuffle(components)
 
         for component in components:

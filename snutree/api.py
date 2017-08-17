@@ -31,6 +31,11 @@ CONFIG_VALIDATOR = Validator({
         },
     'tree' : {
         'type' : 'dict',
+        'default' : {},
+        },
+    'seed' : {
+        'type' : 'integer',
+        'default' : 71,
         },
     })
 
@@ -153,9 +158,7 @@ def generate(
         'schema' : {
             'name' : schema,
             },
-        'tree' : {
-            'seed' : seed,
-            }
+        'seed' : seed,
         })
 
     logger = logging.getLogger(__name__)
@@ -173,7 +176,7 @@ def generate(
     members = schema.to_Members(member_table, **config['schema'])
 
     logger.info('Building family tree')
-    tree = FamilyTree(members, schema.Rank, config['tree'])
+    tree = FamilyTree(members, config['seed'])
 
     logger.info('Building DOT graph')
     from snutree.writers import dot
