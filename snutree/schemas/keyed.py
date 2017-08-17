@@ -59,5 +59,5 @@ class KeyedMember(Member):
 
     @property
     def attributes(self):
-        return { 'label' : self.name }
+        return { 'dot' : { 'label' : self.name } }
 

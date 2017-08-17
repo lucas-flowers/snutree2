@@ -74,57 +74,65 @@ tree:
   # Defaults style for the overall Graphviz graph
   graph_defaults:
     all:
-      size: 80
-      ratio: compress
-      pad: .5, .5
-      ranksep: .15
-      nodesep: .5
-      label: 'Family Tree: Delta Alpha Chapter of Sigma Nu Fraternity'
-      labelloc: 't'
-      fontsize: 110
-      concentrate: false
+      dot:
+        size: 80
+        ratio: compress
+        pad: .5, .5
+        ranksep: .15
+        nodesep: .5
+        label: 'Family Tree: Delta Alpha Chapter of Sigma Nu Fraternity'
+        labelloc: 't'
+        fontsize: 110
+        concentrate: false
 
   # Default style for Graphviz nodes
   node_defaults:
 
     # *All* node defaults
     all:
-      style: filled
-      shape: box
-      penwidth: 2
-      width: 1.63
-      fontname: dejavu sans
+      dot:
+        style: filled
+        shape: box
+        penwidth: 2
+        width: 1.63
+        fontname: dejavu sans
 
     # Defaults for brother nodes
     member:
-      fillcolor: .11 .71 1. # A goldish color
+      dot:
+        fillcolor: .11 .71 1. # A goldish color
 
     # Defaults for rank labels
     rank:
-      color: none
-      fontsize: 20
-      fontname: dejavu serif
+      dot:
+        color: none
+        fontsize: 20
+        fontname: dejavu serif
 
     # Defaults for unknown big brothers
     unknown:
-      height: 0
-      width: 0
-      style: invis
+      dot:
+        height: 0
+        width: 0
+        style: invis
 
   # Default style for Graphviz edges
   edge_defaults:
 
     # *All* edge defaults
     all:
-      arrowhead: none
+      dot:
+        arrowhead: none
 
     # Defaults for the edges connecting rank labels
     rank:
-      style: invis
+      dot:
+        style: invis
 
     # Defaults for edges connecting unknown big brothers to their littles
     unknown:
-      style: dotted
+      dot:
+        style: dotted
 
   #############################################################################
   ## CUSTOM NODES AND EDGES                                                  ##
@@ -139,25 +147,28 @@ tree:
     'Reorganization':
       rank: 'Spring 1989'
       attributes:
-        height: .6
-        label: 'Reorganization'
-        shape: oval
+        dot:
+          height: .6
+          label: 'Reorganization'
+          shape: oval
 
     # Make the Reorganization rank larger with an invisible, tall node
     'Spacer':
       rank: 'Spring 1989'
       attributes:
-        height: 1.5
-        style: invis
-        width: 0
+        dot:
+          height: 1.5
+          style: invis
+          width: 0
 
     # The home chapter of ΔA 986, who transferred to CWRU from Duquesne
     'Kappa Delta':
       rank: 'Fall 1982'
       attributes:
-        label: 'Kappa Delta Chapter\nDuquesne University'
-        color: none
-        fillcolor: none
+        dot:
+          label: 'Kappa Delta Chapter\nDuquesne University'
+          color: none
+          fillcolor: none
 
   # A list of custom edges. Each item in the list contains a `nodes` value (a
   # list of node keys representing each node on the edge, in order) and an
@@ -169,19 +180,28 @@ tree:
 
     # Connect refounders from the old chapter to Reorganization
     - nodes: ['Reorganization', '1031']
-      attributes: {style: dashed}
+      attributes: 
+        dot:
+          {style: dashed}
     - nodes: ['Reorganization', '1034']
-      attributes: {style: dashed}
+      attributes:
+        dot:
+          {style: dashed}
     - nodes: ['Reorganization', '1035']
-      attributes: {style: dashed}
+      attributes:
+        dot: {style: dashed}
     - nodes: ['Reorganization', '1036']
-      attributes: {style: dashed}
+      attributes:
+        dot: {style: dashed}
     - nodes: ['Reorganization', '1038']
-      attributes: {style: dashed}
+      attributes:
+        dot: {style: dashed}
     - nodes: ['Reorganization', '1039']
-      attributes: {style: dashed}
+      attributes:
+        dot: {style: dashed}
     - nodes: ['Reorganization', '1041']
-      attributes: {style: dashed}
+      attributes:
+        dot: {style: dashed}
 
     # Make Reorganization the "big" of the new refounders
     - nodes: ['Reorganization', '1043']

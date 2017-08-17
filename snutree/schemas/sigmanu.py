@@ -333,7 +333,7 @@ class Knight(SigmaNuMember):
     @property
     def attributes(self):
         affiliations = ', '.join([str(s) for s in sorted(self.affiliations)])
-        return { 'label' : f'{self.name}\\n{affiliations}' }
+        return { 'dot' : { 'label' : f'{self.name}\\n{affiliations}' } }
 
 class Brother(SigmaNuMember):
     '''
@@ -377,7 +377,7 @@ class Brother(SigmaNuMember):
 
     @property
     def attributes(self):
-        return { 'label' :  f'{self.name}\\n{self.chapter} Brother' }
+        return { 'dot' : { 'label' :  f'{self.name}\\n{self.chapter} Brother' } }
 
 class Candidate(SigmaNuMember):
     '''
@@ -418,7 +418,7 @@ class Candidate(SigmaNuMember):
 
     @property
     def attributes(self):
-        return { 'label' : f'{self.name}\\n{self.chapter} Candidate' }
+        return { 'dot' : { 'label' : f'{self.name}\\n{self.chapter} Candidate' } }
 
 class Expelled(Knight):
     '''
@@ -460,7 +460,7 @@ class Expelled(Knight):
 
     @property
     def attributes(self):
-        return { 'label' : f'{self.name}\\n{self.key}' }
+        return { 'dot' : { 'label' : f'{self.name}\\n{self.key}' } }
 
 class Reaffiliate:
     '''

@@ -2,44 +2,52 @@
 schema:
   name: chapter
 
-output:
+tree:
 
   # Defaults style for Graphviz graphs and subgraphs
   graph_defaults:
     all:
-      ratio: compress
-      pad: .5, .5
-      ranksep: .3
-      concentrate: false
+      dot:
+        ratio: compress
+        pad: .5, .5
+        ranksep: .3
+        concentrate: false
 
   # Default style for Graphviz nodes
   node_defaults:
     all:
-      style: filled
-      shape: box
-      penwidth: 2
-      width: 2
-      height: .45
-      fontname: dejavu sans
+      dot:
+        style: filled
+        shape: box
+        penwidth: 2
+        width: 2
+        height: .45
+        fontname: dejavu sans
     member:
-      fillcolor: .11 .71 1. # A goldish color
+      dot:
+        fillcolor: .11 .71 1. # A goldish color
     rank:
-      color: none
-      fontsize: 20
-      fontname: georgia
+      dot:
+        color: none
+        fontsize: 20
+        fontname: georgia
     unknown:
-      height: 0
-      width: 0
-      style: invis
+      dot:
+        height: 0
+        width: 0
+        style: invis
 
   # Default style for Graphviz edges
   edge_defaults:
     all:
-      arrowhead: none
+      dot:
+        arrowhead: none
     rank:
-      style: invis
+      dot:
+        style: invis
     unknown:
-      style: dotted
+      dot:
+        style: dotted
 
   layout:
     ranks: True

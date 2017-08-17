@@ -55,5 +55,5 @@ class KeylessMember(Member):
 
     @property
     def attributes(self):
-        return { 'label' : self.key }
+        return { 'dot' : { 'label' : self.key } }
 

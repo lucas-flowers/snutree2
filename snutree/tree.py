@@ -26,14 +26,17 @@ graphviz_attributes = {
         }
 
 # Contains groups of attributes labeled by the strings in `allowed`
-dot_defaults = lambda *allowed : {
+attribute_defaults = lambda *allowed : {
         'type' : 'dict',
         'nullable' : False,
         'default' : { a : {} for a in allowed },
-        'keyschema' : {
-            'allowed' : allowed,
-            },
-        'valueschema' : graphviz_attributes
+        'keyschema' : { 'allowed' : allowed },
+        'valueschema' : {
+            'type' : 'dict',
+            'schema' : {
+                'dot' : graphviz_attributes
+                }
+            }
         }
 
 ###############################################################################
@@ -148,9 +151,9 @@ def create_settings_validator(RankType):
             },
 
         # Default attributes for graphs, nodes, edges, and their subcategories
-        'graph_defaults' : dot_defaults('all'),
-        'node_defaults' : dot_defaults('all', 'rank', 'unknown', 'member'),
-        'edge_defaults' : dot_defaults('all', 'rank', 'unknown'),
+        'graph_defaults' : attribute_defaults('all'),
+        'node_defaults' : attribute_defaults('all', 'rank', 'unknown', 'member'),
+        'edge_defaults' : attribute_defaults('all', 'rank', 'unknown'),
 
         # A mapping of node keys to colors
         'family_colors' : {
@@ -171,7 +174,13 @@ def create_settings_validator(RankType):
                     'rank' : {
                         'coerce' : RankType
                         },
-                    'attributes' : graphviz_attributes,
+                    'attributes' : {
+                        'type' : 'dict',
+                        'default' : {},
+                        'schema' : {
+                            'dot' : graphviz_attributes,
+                            }
+                        }
                     }
                 }
             },
@@ -192,14 +201,19 @@ def create_settings_validator(RankType):
                         'minlength' : 2,
                         'schema' : nonempty_string,
                         },
-                    'attributes' : graphviz_attributes,
+                    'attributes' : {
+                        'type' : 'dict',
+                        'default' : {},
+                        'schema' : {
+                            'dot' : graphviz_attributes,
+                            }
+                        }
                     }
                 },
             },
 
         # Seed for the RNG, to provide consistent output
         'seed': {
-                'type' : 'integer',
                 'default' : 71,
                 }
 
@@ -326,7 +340,7 @@ class FamilyTree:
             msg = f'rank {member.rank!r} of member {ckey!r} cannot be prior to rank of parent {pkey!r}: {parent.rank!r}'
             raise TreeError(code, msg)
 
-        self.graph.add_edge(pkey, ckey, attributes=attributes)
+        self.graph.add_edge(pkey, ckey, attributes=attributes or {})
 
     ###########################################################################
     #### Decoration                                                        ####
@@ -486,7 +500,7 @@ class FamilyTree:
                 if 'color' not in family_dict:
                     family_dict['color'] = next(color_picker)
 
-                node_dict['attributes']['color'] = family_dict['color']
+                node_dict['attributes'].get('dot', {})['color'] = family_dict['color']
 
     @logged
     def to_dot_graph(self):
@@ -497,11 +511,11 @@ class FamilyTree:
 
         tree = self.create_tree_subgraph('members')
 
-        graph_defaults = self.settings['graph_defaults']['all']
+        graph_defaults = self.settings['graph_defaults']['all']['dot']
         dotgraph = dot.Graph('family_tree', 'digraph', attributes=graph_defaults)
 
-        node_defaults = dot.Defaults('node', self.settings['node_defaults']['all'])
-        edge_defaults = dot.Defaults('edge', self.settings['edge_defaults']['all'])
+        node_defaults = dot.Defaults('node', self.settings['node_defaults']['all']['dot'])
+        edge_defaults = dot.Defaults('edge', self.settings['edge_defaults']['all']['dot'])
 
         if self.settings['layout']['ranks']:
             min_rank, max_rank = self.get_rank_bounds()
@@ -539,8 +553,8 @@ class FamilyTree:
 
         subgraph = dot.Graph(f'dates{suffix}', 'subgraph')
 
-        node_defaults = dot.Defaults('node', self.settings['node_defaults']['rank'])
-        edge_defaults = dot.Defaults('edge', self.settings['edge_defaults']['rank'])
+        node_defaults = dot.Defaults('node', self.settings['node_defaults']['rank']['dot'])
+        edge_defaults = dot.Defaults('edge', self.settings['edge_defaults']['rank']['dot'])
 
         nodes, edges = [], []
         rank = min_rank
@@ -565,15 +579,15 @@ class FamilyTree:
 
         dotgraph = dot.Graph(subgraph_key, 'subgraph')
 
-        node_defaults = dot.Defaults('node', self.settings['node_defaults']['member'])
+        node_defaults = dot.Defaults('node', self.settings['node_defaults']['member']['dot'])
 
         nodes = []
         for key, node_dict in self.ordered_nodes():
-            nodes.append(dot.Node(key, node_dict['attributes']))
+            nodes.append(dot.Node(key, node_dict['attributes'].get('dot'))) # TODO validate later
 
         edges = []
         for parent_key, child_key, edge_dict in self.ordered_edges():
-            edges.append(dot.Edge(parent_key, child_key, edge_dict['attributes']))
+            edges.append(dot.Edge(parent_key, child_key, edge_dict['attributes'].get('dot'))) # TODO validate later
 
         dotgraph.children = [node_defaults] + nodes + edges
 
