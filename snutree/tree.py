@@ -26,7 +26,8 @@ class TreeEntity(metaclass=ABCMeta):
         some kind of integer-compatible object (e.g., actual integers
         representing years, a Semester object, or other ordered types that
         integers can be added to). This field might be allowed to remain
-        unset, though it will raise an error if used before it is set.
+        unset (for example, when the tree is drawn without using ranks), though
+        it will raise an error if used before it is set.
 
     '''
 
@@ -66,17 +67,14 @@ class Member(TreeEntity, metaclass=ABCMeta):
 
 class FamilyTree:
     '''
-    Representation of the family tree. Every node must store a TreeEntity
-    object in node['entity'], and TreeEntities may either be Members or
-    non-Members. All entities must have a valid rank field when the tree is
-    printed (unless ranks are ignored in the settings dictionary). The type of
-    the rank field (such as int, Semester, or a custom type) is provided to the
-    constructor.
+    Representation of the family tree. Each key is a string and each node is a
+    dictionary containing 'entity', which stores a TreeEntity for the
+    corresponding key. TreeEntities may also be Members.
 
-    Members have big-little relationships, determined by the parent field. This
-    relationship determines the edges between them. Non-Members do *not* have
-    such relationships, though they may have edges in the tree provided from
-    outside the directory (either through custom edges or special code).
+    The edges between Members are the big-little relationships. These are
+    created from the parent fields when Members are loaded into the tree.
+    Non-Members may have edges, but these do not represent big-little
+    relationships.
     '''
 
     @logged
@@ -85,47 +83,96 @@ class FamilyTree:
         self.graph = DiGraph()
         self.seed = seed
 
-        # Add all the entities in the settings and member list provided
+        # Add all the members and their big-little relationships
         self.add_members(members)
-
-        # Add all the edges in the settings and members provided
         self.add_member_relationships()
 
-        # Add family information to each individual node
+        # Add information about families to each Member node
         self.mark_families()
 
     ###########################################################################
     #### Utilities                                                         ####
     ###########################################################################
 
-    def nodes_iter(self, *attributes, node_dict=False):
+    def _iter(self, *attributes, keys=True, nodes=False):
         '''
         Iterates over the nodes in the graph by yielding a tuple with the key
-        first, followed by the fields asked for in the *fields arguments in
-        the same order asked.
-
-        If node_dict=True, then a the entire attribute dictionary is also
-        provided at the end of the tuple.
+        first (if keys=True), followed by the fields asked for in the *fields
+        arguments in the same order asked. If nodes=True, then a the entire node
+        dictionary is also provided at the end of the tuple.
         '''
-        for key in list(self.graph.nodes_iter()):
-            yield (key,
-                    *(self.graph.node[key][attr] for attr in attributes)) + \
-                    ((self.graph.node[key],) if node_dict else ())
+        for key, node in list(self.graph.nodes_iter(data=True)):
+            yielded = (
+                    *((key,) if keys else ()),
+                    *tuple([node[attr] for attr in attributes]),
+                    *((node,) if nodes else ())
+                    )
+            yield yielded[0] if len(yielded) == 1 else yielded
+
+    def keys(self):
+        '''
+        Yields all the keys in the tree.
+        '''
+        yield from self._iter()
+
+    def nodes(self):
+        '''
+        Yields all the nodes in the tree.
+        '''
+        yield from self._iter(keys=False, nodes=True)
+
+    def items(self):
+        '''
+        Yields all keys and their nodes.
+        '''
+        yield from self._iter(nodes=True)
+
+    def members(self):
+        '''
+        Yields all the Member objects in the tree's nodes.
+        '''
+        for entity in self._iter('entity', keys=False):
+            if isinstance(entity, Member) :
+                yield entity
+
+    def orphans(self):
+        '''
+        Yields all the orphaned members in the tree.
+        '''
+        for key, in_degree in self.graph.in_degree().items():
+            entity = self[key]['entity']
+            if in_degree == 0 and isinstance(entity, Member):
+                yield entity
+    
+    def singletons(self):
+        '''
+        Yields all members who are not connected to any node in the tree at
+        all, whether they be bigs, littles, or decorative nodes.
+        '''
+        for key, degree in list(self.graph.degree_iter()):
+            entity = self[key]['entity']
+            if degree == 0 and isinstance(entity, Member):
+                yield entity
+    
+    def edges(self):
+        '''
+        Yields all the edges in the tree.
+        '''
+        for _, _, edge in self.graph.edges_iter(data=True):
+            yield edge
 
     def member_subgraph(self):
         '''
         Returns a subgraph consisting only of members.
         '''
-        member_keys = (k for k, m in self.nodes_iter('entity') if isinstance(m, Member))
+        member_keys = (member.key for member in self.members())
         return self.graph.subgraph(member_keys)
 
-    def orphan_keys(self):
-        '''
-        Returns the keys of all orphaned members in the tree.
-        '''
-        in_degrees = self.graph.in_degree().items()
-        return (k for k, in_degree in in_degrees if in_degree == 0
-                and isinstance(self.graph.node[k]['entity'], Member))
+    def __contains__(self, key):
+        return key in self.graph
+
+    def __getitem__(self, key):
+        return self.graph.node[key]
 
     def add_entity(self, entity, **attributes):
         '''
@@ -133,7 +180,7 @@ class FamilyTree:
         '''
 
         key = entity.key
-        if key in self.graph:
+        if key in self:
             code = TreeErrorCode.DUPLICATE_ENTITY
             msg = f'duplicate entity key: {key!r}'
             raise TreeError(code, msg)
@@ -149,12 +196,12 @@ class FamilyTree:
         ckey = member.key
         pkey = member.parent
 
-        if pkey not in self.graph:
+        if pkey not in self:
             code = TreeErrorCode.PARENT_UNKNOWN
             msg = f'member {ckey!r} has unknown parent: {pkey!r}'
             raise TreeError(code, msg)
 
-        parent = self.graph.node[pkey]['entity']
+        parent = self[pkey]['entity']
 
         if member.rank and parent.rank and member.rank < parent.rank:
             code = TreeErrorCode.PARENT_NOT_PRIOR
@@ -169,7 +216,7 @@ class FamilyTree:
         '''
 
         min_rank, max_rank = float('inf'), float('-inf')
-        for _, entity in self.nodes_iter('entity'):
+        for entity in self._iter('entity', keys=False):
             rank = entity.rank
             if rank and min_rank > rank:
                 min_rank = rank
@@ -198,9 +245,9 @@ class FamilyTree:
         Members (to add non-Members as parent nodes, use custom edges).
         '''
 
-        for _, entity in self.nodes_iter('entity'):
-            if isinstance(entity, Member) and entity.parent:
-                self.add_big_relationship(entity)
+        for member in self.members():
+            if member.parent:
+                self.add_big_relationship(member)
 
     @logged
     def mark_families(self):
@@ -217,7 +264,7 @@ class FamilyTree:
         for family in families:
             family_dict = {}
             for key in family:
-                self.graph.node[key]['family'] = family_dict
+                self[key]['family'] = family_dict
 
     ###########################################################################
     #### Ordering                                                          ####

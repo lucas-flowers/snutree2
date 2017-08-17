@@ -154,7 +154,7 @@ def add_custom_edges(tree, edges):
 
         nodes = path['nodes']
         for key in nodes:
-            if key not in tree.graph:
+            if key not in tree:
                 path_or_edge = 'path' if len(nodes) > 2 else 'edge'
                 msg = f'custom {path_or_edge} {nodes} has undefined node: {key!r}'
                 raise SnutreeWriterError(msg)
@@ -166,11 +166,11 @@ def add_custom_edges(tree, edges):
 
 def add_attributes(tree):
 
-    for _, entity, node_dict in tree.nodes_iter('entity', node_dict=True):
-        node_dict['attributes'] = { 'label' : entity.label } 
+    for node in tree.nodes():
+        node['attributes'] = { 'label' : node['entity'].label } 
 
-    for pkey, ckey, edge_dict in tree.graph.edges_iter(data=True):
-        edge_dict['attributes'] = {}
+    for edge in tree.edges():
+        edge['attributes'] = {}
 
 @logged
 def add_colors(tree, family_colors):
@@ -183,23 +183,23 @@ def add_colors(tree, family_colors):
 
     for key, color in family_colors.items():
 
-        if key not in tree.graph.node:
+        if key not in tree:
             msg = f'family color map includes nonexistent member: {key!r}'
             logging.getLogger(__name__).warning(msg)
 
         else:
 
-            family = tree.graph.node[key]['family']
+            family = tree[key]['family']
             if 'color' in family:
                 msg = f'family of member {key!r} already assigned the color {color!r}'
                 raise SnutreeWriterError(msg)
 
             color_picker.use(color)
-            tree.graph.node[key]['family']['color'] = color
+            tree[key]['family']['color'] = color
 
     # The nodes are sorted first, to ensure that the same colors are used
     # for the same input data.
-    for key, node_dict in sorted(tree.graph.nodes_iter(data=True)):
+    for key, node_dict in sorted(tree.items(), key=lambda x : x[0]):
         family_dict = node_dict.get('family')
         if family_dict is not None:
             if 'color' not in family_dict:
@@ -223,18 +223,16 @@ def add_orphan_parents(tree, node_attributes, edge_attributes):
     function that would normally be done by add_XXX_attributes.
     '''
 
-    for orphan_key in tree.orphan_keys():
-
-        orphan = tree.graph.node[orphan_key]['entity']
+    for orphan in tree.orphans():
 
         parent = UnidentifiedMember(orphan)
 
         orphan.parent = parent.key
         tree.add_entity(parent, attributes=node_attributes)
-        tree.graph.add_edge(orphan.parent, orphan_key, attributes=edge_attributes)
+        tree.graph.add_edge(orphan.parent, orphan.key, attributes=edge_attributes)
 
 @logged
-def remove_singleton_members(self):
+def remove_singleton_members(tree):
     '''
     Remove all members in the tree whose nodes neither have parents nor
     children, as determined by the node's degree (including both in-edges
@@ -243,10 +241,9 @@ def remove_singleton_members(self):
 
     # TODO protect singletons (e.g., refounders without littles) after a
     # certain date so they don't disappear without at least a warning?
-    singletons = [key for key, degree in self.graph.degree_iter() if degree == 0
-            and isinstance(self.graph.node[key]['entity'], Member)]
 
-    self.graph.remove_nodes_from(singletons)
+    keys = (singleton.key for singleton in tree.singletons())
+    tree.graph.remove_nodes_from(keys)
 
 @logged
 def to_dot_graph(tree, RankType, config):
@@ -362,8 +359,8 @@ def create_ranks(tree, min_rank, max_rank):
         ranks.append(dot.Rank([f'{i}L', f'{i}R']))
         i += 1
 
-    for key, entity in tree.nodes_iter('entity'):
-        ranks[entity.rank - min_rank].keys.append(key)
+    for key, node in tree.items():
+        ranks[node['entity'].rank - min_rank].keys.append(key)
 
     return ranks
 
