@@ -4,6 +4,5 @@ schema:
 
 tree:
 
-  layout:
-    family_colors: False
+  colors: False
 

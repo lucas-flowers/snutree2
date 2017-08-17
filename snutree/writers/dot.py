@@ -1,4 +1,5 @@
 import logging
+from collections import defaultdict
 from snutree import dot
 from snutree.errors import SnutreeWriterError
 from snutree.tree import TreeEntity, Member
@@ -39,23 +40,25 @@ flags = [
         'custom_edges',
         'custom_nodes',
         'no_singletons',
-        'family_colors',
+        'colors',
         'unknowns',
         ]
 
 DOT_SCHEMA = {
 
-        # Layout options
-        'layout' : {
-            'type' : 'dict',
-            'schema' : { flag : optional_boolean for flag in flags },
-            'default' : { flag : True for flag in flags },
-            },
+        # Flags
+        **{ flag : optional_boolean for flag in flags },
 
         # Default attributes for graphs, nodes, edges, and their subcategories
-        'graph_defaults' : attribute_defaults('all'),
-        'node_defaults' : attribute_defaults('all', 'rank', 'unknown', 'member'),
-        'edge_defaults' : attribute_defaults('all', 'rank', 'unknown'),
+        'defaults' : {
+            'type' : 'dict',
+            'default' : {},
+            'schema' : {
+                'graph' : attribute_defaults('all'),
+                'node' : attribute_defaults('all', 'rank', 'unknown', 'member'),
+                'edge' : attribute_defaults('all', 'rank', 'unknown'),
+                }
+            },
 
         # A mapping of node keys to colors
         'family_colors' : {
@@ -127,39 +130,24 @@ def to_dot_graph(tree, RankType, config):
     validator = Validator(DOT_SCHEMA)
     config = validator.validated(config)
 
-    add_attributes(tree)
+    node_defaults = config['defaults']
+    edge_defaults = config['defaults']
 
-    if config['layout']['custom_nodes']:
-        add_custom_nodes(tree, config['nodes'])
+    decorate(tree, config)
 
-    if config['layout']['custom_edges']:
-        add_custom_edges(tree, config['edges'])
+    members = create_tree_subgraph(tree, 'members', config['defaults']['node']['member'])
 
-    if config['layout']['no_singletons']:
-        remove_singleton_members(tree)
-
-    # TODO move
-    if config['layout']['family_colors']:
-        add_colors(tree, config['family_colors'])
-
-    if config['layout']['unknowns']:
-        node_attributes = config['node_defaults']['unknown']
-        edge_attributes = config['edge_defaults']['unknown']
-        add_orphan_parents(tree, node_attributes, edge_attributes)
-
-    members = create_tree_subgraph(tree, 'members', config['node_defaults']['member'])
-
-    graph_defaults = config['graph_defaults']['all']
+    graph_defaults = config['defaults']['graph']['all']
     dotgraph = dot.Graph('family_tree', 'digraph', attributes=graph_defaults)
 
-    node_defaults = dot.Defaults('node', config['node_defaults']['all'])
-    edge_defaults = dot.Defaults('edge', config['edge_defaults']['all'])
+    node_defaults = dot.Defaults('node', config['defaults']['node']['all'])
+    edge_defaults = dot.Defaults('edge', config['defaults']['edge']['all'])
 
-    if config['layout']['ranks']:
+    if config['ranks']:
         min_rank, max_rank = tree.get_rank_bounds()
         max_rank += 1 # always include one extra, blank rank at the end
-        node_attributes = config['node_defaults']['rank']
-        edge_attributes = config['edge_defaults']['rank']
+        node_attributes = config['defaults']['node']['rank']
+        edge_attributes = config['defaults']['edge']['rank']
         dates_left = create_date_subgraph(tree, 'L', min_rank, max_rank, node_attributes, edge_attributes)
         dates_right = create_date_subgraph(tree, 'R', min_rank, max_rank, node_attributes, edge_attributes)
         ranks = create_ranks(tree, min_rank, max_rank)
@@ -170,33 +158,57 @@ def to_dot_graph(tree, RankType, config):
 
     return dotgraph
 
-def add_attributes(tree):
+###############################################################################
+###############################################################################
+#### Decoration                                                            ####
+###############################################################################
+###############################################################################
 
+def decorate(tree, config):
+    '''
+    Add DOT attributes to the nodes and edges in the tree. Also add/remove
+    nodes/edges to prepare it for display.
+    '''
+
+    # Add DOT attributes
     for node in tree.nodes():
         node['attributes'] = { 'label' : node['entity'].label }
-
     for edge in tree.edges():
         edge['attributes'] = {}
+
+    # Make structural changes to prepare the tree for display, depending on the
+    # values of the flags
+    unknown_node_defaults = config['defaults']['node']['unknown']
+    unknown_edge_defaults = config['defaults']['edge']['unknown']
+    # pylint: disable=expression-not-assigned
+    config['custom_nodes'] and add_custom_nodes(tree, config['nodes'])
+    config['custom_edges'] and add_custom_edges(tree, config['edges'])
+    config['no_singletons'] and remove_singleton_members(tree)
+    config['colors'] and add_colors(tree, config['family_colors'])
+    config['unknowns'] and add_orphan_parents(tree, unknown_node_defaults, unknown_edge_defaults)
 
 @logged
 def add_custom_nodes(tree, nodes):
     '''
-    Add all custom nodes loaded from settings.
+    Add the custom nodes to the tree along with associated DOT attributes.
     '''
-
     for key, value in nodes.items():
         rank = value['rank']
         attributes = value['attributes']
         tree.add_entity(TreeEntity(key, rank=rank), attributes=attributes)
 
 @logged
-def add_custom_edges(tree, edges):
+def add_custom_edges(tree, paths):
     '''
-    Add all custom edges loaded from settings. All nodes in the edge list m
+    Add the custom edges (i.e., paths) to the tree along with associated DOT
+    attributes. All nodes referenced in these edges must already be defined in
+    the tree. "Edges" with more than two nodes can also be added by included
+    more in the nodes list.
     '''
 
-    for path in edges:
+    for path in paths:
 
+        # Check node existence
         nodes = path['nodes']
         for key in nodes:
             if key not in tree:
@@ -204,83 +216,75 @@ def add_custom_edges(tree, edges):
                 msg = f'custom {path_or_edge} {nodes} has undefined node: {key!r}'
                 raise SnutreeWriterError(msg)
 
+        # Add edges in this path
         attributes = path['attributes']
-
         edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
         tree.add_edges(edges, attributes=attributes)
 
 @logged
 def remove_singleton_members(tree):
     '''
-    Remove all members in the tree whose nodes neither have parents nor
-    children, as determined by the node's degree (including both in-edges
-    and out-edges).
+    Remove all members in the tree whose nodes neither have parents nor children.
     '''
-
     # TODO protect singletons (e.g., refounders without littles) after a
     # certain date so they don't disappear without at least a warning?
-
     keys = [singleton.key for singleton in tree.singletons()]
     tree.remove(keys)
 
 @logged
 def add_colors(tree, family_colors):
     '''
-    Add colors to member nodes, based on their family. Uses settings
-    dictionary to provide initial colors, and generates the rest as needed.
+    Add colors to member nodes, based on their family. Uses the map
+    family_colors to determines colors; its keys are node keys and its values
+    are Graphviz colors. Any family not in the color map will have a color
+    assigned to it automatically. Warns if the family_colors contains a key
+    that is not in the tree itself.
     '''
 
     color_picker = ColorPicker.from_graphviz()
 
+    # Take note of the family-color mappings in family_color
     for key, color in family_colors.items():
-
         if key not in tree:
             msg = f'family color map includes nonexistent member: {key!r}'
             logging.getLogger(__name__).warning(msg)
+            continue
+        family = tree[key]['family']
+        if 'color' in family:
+            msg = f'family of member {key!r} already assigned the color {color!r}'
+            raise SnutreeWriterError(msg)
+        color_picker.use(color)
+        tree[key]['family']['color'] = color
 
-        else:
-
-            family = tree[key]['family']
-            if 'color' in family:
-                msg = f'family of member {key!r} already assigned the color {color!r}'
-                raise SnutreeWriterError(msg)
-
-            color_picker.use(color)
-            tree[key]['family']['color'] = color
-
-    # The nodes are sorted first, to ensure that the same colors are used
-    # for the same input data.
-    for key, node_dict in sorted(tree.items(), key=lambda x : x[0]):
-        family_dict = node_dict.get('family')
-        if family_dict is not None:
-            if 'color' not in family_dict:
-                family_dict['color'] = next(color_picker)
-
-            node_dict['attributes']['color'] = family_dict['color']
+    # Color the nodes. The nodes are sorted first, to ensure that the same
+    # colors are used for the same input data when there are families with
+    # unassigned colors.
+    for key in sorted(tree.keys()):
+        node = tree[key]
+        family = node.get('family')
+        if family is not None:
+            if 'color' not in family:
+                family['color'] = next(color_picker)
+            node['attributes']['color'] = family['color']
 
 @logged
 def add_orphan_parents(tree, node_attributes, edge_attributes):
     '''
-    Add custom entities as parents to members whose nodes have no parents,
-    as determined by the nodes' in-degrees.
-
-    Note: This must occur after edges are generated in order to determine
-    degrees. But it must also occur after singletons are removed, because
-    many singletons do not have well-formed pledge class rank values in the
-    actual Sigma Nu directory directory (and determining pledge class
-    semesters values accurately is not simple enough for me to bother
-    doing). If every pledge class semester filled in, this could occur
-    before add_edges and we can remove some of the extra code in this
-    function that would normally be done by add_XXX_attributes.
+    Add custom nodes as parents to those members whose nodes currently have no
+    parents. Use the parameters to set node and edge attributes for the new
+    custom nodes and associated edges.
     '''
-
     for orphan in tree.orphans():
-
         parent = UnidentifiedMember(orphan)
-
         orphan.parent = parent.key
         tree.add_entity(parent, attributes=node_attributes)
         tree.add_edge(orphan.parent, orphan.key, attributes=edge_attributes)
+
+###############################################################################
+###############################################################################
+#### Writing to DOT                                                        ####
+###############################################################################
+###############################################################################
 
 def create_tree_subgraph(tree, subgraph_key, node_defaults):
     '''
