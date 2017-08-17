@@ -25,14 +25,14 @@ class DotCommon(metaclass=ABCMeta):
         result code more diffable).
         '''
 
-        dot_attributes = []
+        attributes = []
         for key, value in sorted(self.attributes.items()):
             # If the value is a string bracketed by '<' and '>', use those instead
             bracketed = isinstance(value, str) and len(value) > 1 and value[0::len(value)-1] == '<>'
             kv_pair = f'{key}="{value}"' if not bracketed else f'{key}={value}'
-            dot_attributes.append(kv_pair)
+            attributes.append(kv_pair)
 
-        return sep.join(dot_attributes)
+        return sep.join(attributes)
 
 class Graph(DotCommon):
 

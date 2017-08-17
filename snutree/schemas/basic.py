@@ -53,6 +53,7 @@ class KeylessMember(Member):
     def from_dict(cls, dct):
         return cls(**cls.validate_dict(dct))
 
-    def get_dot_label(self):
-        return self.key
+    @property
+    def attributes(self):
+        return { 'label' : self.key }
 

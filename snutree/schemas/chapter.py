@@ -44,8 +44,9 @@ class Chapter(Member):
         self.rank = founded
         self.parent = parent
 
-    def get_dot_label(self):
-        return self.key
+    @property
+    def attributes(self):
+        return { 'label' : self.key }
 
     @classmethod
     def validate_dict(cls, dct):

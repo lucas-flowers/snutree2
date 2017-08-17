@@ -32,8 +32,9 @@ class SubMember(Member):
         self.rank = s
         self.parent = pid
 
-    def get_dot_label(self):
-        return self.key
+    @property
+    def attributes(self):
+        return { 'label' : self.key }
 
     @classmethod
     def from_dict(cls, dct):

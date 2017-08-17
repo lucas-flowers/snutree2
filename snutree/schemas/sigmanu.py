@@ -278,8 +278,9 @@ class SigmaNuMember(Member, metaclass=ABCMeta):
     chapter = NotImplemented
     schema = NotImplemented
 
+    @property
     @abstractmethod
-    def get_dot_label(self):
+    def attributes(self):
         pass
 
     @classmethod
@@ -329,9 +330,10 @@ class Knight(SigmaNuMember):
         self.rank = pledge_semester
         self.affiliations = set(affiliations or []) | {Affiliation(self.chapter, int(badge))}
 
-    def get_dot_label(self):
+    @property
+    def attributes(self):
         affiliations = ', '.join([str(s) for s in sorted(self.affiliations)])
-        return f'{self.name}\\n{affiliations}'
+        return { 'label' : f'{self.name}\\n{affiliations}' }
 
 class Brother(SigmaNuMember):
     '''
@@ -373,8 +375,9 @@ class Brother(SigmaNuMember):
         self.key = f'Brother {Brother.bid}'
         Brother.bid += 1
 
-    def get_dot_label(self):
-        return f'{self.name}\\n{self.chapter} Brother'
+    @property
+    def attributes(self):
+        return { 'label' :  f'{self.name}\\n{self.chapter} Brother' }
 
 class Candidate(SigmaNuMember):
     '''
@@ -413,8 +416,9 @@ class Candidate(SigmaNuMember):
         self.key = f'Candidate {Candidate.cid}'
         Candidate.cid += 1
 
-    def get_dot_label(self):
-        return f'{self.name}\\n{self.chapter} Candidate'
+    @property
+    def attributes(self):
+        return { 'label' : f'{self.name}\\n{self.chapter} Candidate' }
 
 class Expelled(Knight):
     '''
@@ -454,8 +458,9 @@ class Expelled(Knight):
         self.rank = pledge_semester
         self.affiliations = affiliations or []
 
-    def get_dot_label(self):
-        return f'{self.name}\\n{self.key}'
+    @property
+    def attributes(self):
+        return { 'label' : f'{self.name}\\n{self.key}' }
 
 class Reaffiliate:
     '''

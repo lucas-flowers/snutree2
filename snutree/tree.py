@@ -60,13 +60,14 @@ class TreeEntity(metaclass=ABCMeta):
         integers can be added to). This field might be allowed to remain
         unset, though it will raise an error if used before it is set.
 
-        + dot_attributes: The node attributes to be used in DOT
+        + attributes: Dictionary of attributes that a writing module use.
 
     '''
 
-    def __init__(self, key, rank=None):
+    def __init__(self, key, rank=None, attributes=None):
         self.key = key
         self._rank = rank
+        self.attributes = attributes
 
     @property
     def rank(self):
@@ -80,10 +81,6 @@ class TreeEntity(metaclass=ABCMeta):
     def rank(self, value):
         self._rank = value
 
-    @property
-    def dot_attributes(self):
-        return {}
-
 class Custom(TreeEntity):
     '''
     TreeEntities used for decoration.
@@ -93,10 +90,6 @@ class Custom(TreeEntity):
         self.key = key
         self.rank = rank
         self.attributes = attributes.copy() if attributes else {}
-
-    @property
-    def dot_attributes(self):
-        return self.attributes
 
 class UnidentifiedMember(Custom):
     '''
@@ -118,14 +111,7 @@ class Member(TreeEntity, metaclass=ABCMeta):
     '''
     A member of the organization.
     '''
-
-    @abstractmethod
-    def get_dot_label(self):
-        pass
-
-    @property
-    def dot_attributes(self):
-        return {'label' : self.get_dot_label()}
+    pass
 
 class TreeEntityAttributeError(SnutreeError):
     pass
@@ -315,9 +301,9 @@ class FamilyTree:
             code = TreeErrorCode.DUPLICATE_ENTITY
             msg = f'duplicate entity key: {key!r}'
             raise TreeError(code, msg)
-        self.graph.add_node(key, entity=entity, dot_attributes=entity.dot_attributes)
+        self.graph.add_node(key, entity=entity, attributes=entity.attributes)
 
-    def add_big_relationship(self, member, dot_attributes=None):
+    def add_big_relationship(self, member, attributes=None):
         '''
         Add an edge for the member and its parent to the tree, with any
         provided DOT edge attributes. Ensure that the parent actually exists in
@@ -340,7 +326,7 @@ class FamilyTree:
             msg = f'rank {member.rank!r} of member {ckey!r} cannot be prior to rank of parent {pkey!r}: {parent.rank!r}'
             raise TreeError(code, msg)
 
-        self.graph.add_edge(pkey, ckey, dot_attributes=dot_attributes)
+        self.graph.add_edge(pkey, ckey, attributes=attributes)
 
     ###########################################################################
     #### Decoration                                                        ####
@@ -397,7 +383,7 @@ class FamilyTree:
             attributes = path['attributes']
 
             edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
-            self.graph.add_edges_from(edges, dot_attributes=attributes)
+            self.graph.add_edges_from(edges, attributes=attributes)
 
     @option('no_singletons')
     @logged
@@ -458,7 +444,7 @@ class FamilyTree:
 
             orphan.parent = parent.key
             self.add_entity(parent)
-            self.graph.add_edge(orphan.parent, orphan_key, dot_attributes=self.settings['edge_defaults']['unknown'])
+            self.graph.add_edge(orphan.parent, orphan_key, attributes=self.settings['edge_defaults']['unknown'])
 
     ###########################################################################
     #### Convert to DOT                                                    ####
@@ -500,7 +486,7 @@ class FamilyTree:
                 if 'color' not in family_dict:
                     family_dict['color'] = next(color_picker)
 
-                node_dict['dot_attributes']['color'] = family_dict['color']
+                node_dict['attributes']['color'] = family_dict['color']
 
     @logged
     def to_dot_graph(self):
@@ -583,11 +569,11 @@ class FamilyTree:
 
         nodes = []
         for key, node_dict in self.ordered_nodes():
-            nodes.append(dot.Node(key, node_dict['dot_attributes']))
+            nodes.append(dot.Node(key, node_dict['attributes']))
 
         edges = []
         for parent_key, child_key, edge_dict in self.ordered_edges():
-            edges.append(dot.Edge(parent_key, child_key, edge_dict['dot_attributes']))
+            edges.append(dot.Edge(parent_key, child_key, edge_dict['attributes']))
 
         dotgraph.children = [node_defaults] + nodes + edges
 
