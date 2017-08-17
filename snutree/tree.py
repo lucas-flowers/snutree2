@@ -1,5 +1,6 @@
 import random
 from enum import Enum
+from collections import Iterable
 from abc import ABCMeta, abstractmethod
 from networkx import DiGraph
 from networkx.algorithms.components import weakly_connected_components
@@ -185,6 +186,18 @@ class FamilyTree:
             msg = f'duplicate entity key: {key!r}'
             raise TreeError(code, msg)
         self.graph.add_node(key, entity=entity, **attributes)
+
+    def add_edge(self, key, pkey, **attributes):
+        self.graph.add_edge(key, pkey, **attributes)
+
+    def add_edges(self, edges, **attributes):
+        self.graph.add_edges_from(edges, **attributes)
+
+    def remove(self, key_or_keys):
+        if isinstance(key_or_keys, Iterable):
+            self.graph.remove_nodes_from(key_or_keys)
+        else:
+            self.graph.remove_node(key_or_keys)
 
     def add_big_relationship(self, member):
         '''

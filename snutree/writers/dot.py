@@ -162,7 +162,7 @@ def add_custom_edges(tree, edges):
         attributes = path['attributes']
 
         edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
-        tree.graph.add_edges_from(edges, attributes=attributes)
+        tree.add_edges(edges, attributes=attributes)
 
 def add_attributes(tree):
 
@@ -229,7 +229,7 @@ def add_orphan_parents(tree, node_attributes, edge_attributes):
 
         orphan.parent = parent.key
         tree.add_entity(parent, attributes=node_attributes)
-        tree.graph.add_edge(orphan.parent, orphan.key, attributes=edge_attributes)
+        tree.add_edge(orphan.parent, orphan.key, attributes=edge_attributes)
 
 @logged
 def remove_singleton_members(tree):
@@ -243,7 +243,7 @@ def remove_singleton_members(tree):
     # certain date so they don't disappear without at least a warning?
 
     keys = (singleton.key for singleton in tree.singletons())
-    tree.graph.remove_nodes_from(keys)
+    tree.remove(keys)
 
 @logged
 def to_dot_graph(tree, RankType, config):
