@@ -1,10 +1,42 @@
 import logging
 from snutree import dot
+from snutree.tree import Custom, UnidentifiedMember, Member
 from snutree.logging import logged
 from snutree.colors import ColorPicker
 from snutree.tree import TreeErrorCode, TreeError # TODO make writer errors
 
-# @option('family_colors')
+@logged
+def add_custom_nodes(tree):
+    '''
+    Add all custom nodes loaded from settings.
+    '''
+
+    for key, value in tree.settings['nodes'].items():
+        rank = value['rank']
+        attributes = {'dot' : value['attributes']}
+        tree.add_entity(Custom(key, rank=rank, attributes=attributes))
+
+@logged
+def add_custom_edges(tree):
+    '''
+    Add all custom edges loaded from settings. All nodes in the edge list m
+    '''
+
+    for path in tree.settings['edges']:
+
+        nodes = path['nodes']
+        for key in nodes:
+            if key not in tree.graph:
+                code = TreeErrorCode.UNKNOWN_EDGE_COMPONENT
+                path_or_edge = 'path' if len(nodes) > 2 else 'edge'
+                msg = f'custom {path_or_edge} {nodes} has undefined node: {key!r}'
+                raise TreeError(code, msg)
+
+        attributes = {'dot' : path['attributes']}
+
+        edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
+        tree.graph.add_edges_from(edges, attributes=attributes)
+
 @logged
 def add_colors(tree):
     '''
@@ -43,15 +75,69 @@ def add_colors(tree):
             node_dict['attributes']['dot']['color'] = family_dict['color']
 
 @logged
+def add_orphan_parents(tree):
+    '''
+    Add custom entities as parents to members whose nodes have no parents,
+    as determined by the nodes' in-degrees.
+
+    Note: This must occur after edges are generated in order to determine
+    degrees. But it must also occur after singletons are removed, because
+    many singletons do not have well-formed pledge class rank values in the
+    actual Sigma Nu directory directory (and determining pledge class
+    semesters values accurately is not simple enough for me to bother
+    doing). If every pledge class semester filled in, this could occur
+    before add_edges and we can remove some of the extra code in this
+    function that would normally be done by add_XXX_attributes.
+    '''
+
+    for orphan_key in tree.orphan_keys():
+
+        orphan = tree.graph.node[orphan_key]['entity']
+
+        parent = UnidentifiedMember(orphan, attributes={'dot' : tree.settings['node_defaults']['unknown']})
+
+        orphan.parent = parent.key
+        tree.add_entity(parent)
+        tree.graph.add_edge(orphan.parent, orphan_key, attributes={'dot' : tree.settings['edge_defaults']['unknown']})
+
+@logged
+def remove_singleton_members(self):
+    '''
+    Remove all members in the tree whose nodes neither have parents nor
+    children, as determined by the node's degree (including both in-edges
+    and out-edges).
+    '''
+
+    # TODO protect singletons (e.g., refounders without littles) after a
+    # certain date so they don't disappear without at least a warning?
+    singletons = [key for key, degree in self.graph.degree_iter() if degree == 0
+            and isinstance(self.graph.node[key]['entity'], Member)]
+
+    self.graph.remove_nodes_from(singletons)
+
+@logged
 def to_dot_graph(tree):
     '''
     Convert the tree into an object representing a DOT file, then return
     that object.
     '''
 
+    if tree.settings['layout']['custom_nodes']:
+        add_custom_nodes(tree)
+
+    if tree.settings['layout']['custom_edges']:
+        add_custom_edges(tree)
+
+    if tree.settings['layout']['no_singletons']:
+        remove_singleton_members(tree)
+# ginlee tons
+
     # TODO move
     if tree.settings['layout']['family_colors']:
         add_colors(tree)
+
+    if tree.settings['layout']['unknowns']:
+        add_orphan_parents(tree)
 
     members = create_tree_subgraph(tree, 'members')
 

@@ -231,37 +231,16 @@ class FamilyTree:
 
         # Add all the entities in the settings and member list provided
         self.add_members(members)
-        self.add_custom_nodes()
 
         # Add all the edges in the settings and members provided
         self.add_member_relationships()
-        self.add_custom_edges()
 
-        # Decorations
-        self.remove_singleton_members()
+        # Add family information to each individual node
         self.mark_families()
-        self.add_orphan_parents()
 
     ###########################################################################
     #### Utilities                                                         ####
     ###########################################################################
-
-    class option:
-        '''
-        Decorates methods that can be toggled through options in the tree's
-        settings dictionary. For example, @option('custom_edges') will enable
-        the function it decorates if the 'custom_edges' option in the
-        settings dictionary is True---and disable it otherwise.
-        '''
-
-        def __init__(self, option_name):
-            self.option_name = option_name
-
-        def __call__(self, function):
-            def wrapped(tree_self):
-                if tree_self.settings['layout'][self.option_name]:
-                    function(tree_self)
-            return wrapped
 
     def nodes_iter(self, *attributes, node_dict=False):
         '''
@@ -356,18 +335,6 @@ class FamilyTree:
         for member in member_list:
             self.add_entity(member)
 
-    @option('custom_nodes')
-    @logged
-    def add_custom_nodes(self):
-        '''
-        Add all custom nodes loaded from settings.
-        '''
-
-        for key, value in self.settings['nodes'].items():
-            rank = value['rank']
-            attributes = {'dot' : value['attributes']}
-            self.add_entity(Custom(key, rank=rank, attributes=attributes))
-
     @logged
     def add_member_relationships(self):
         '''
@@ -380,45 +347,6 @@ class FamilyTree:
             if isinstance(entity, Member) and entity.parent:
                 self.add_big_relationship(entity)
 
-    @option('custom_edges')
-    @logged
-    def add_custom_edges(self):
-        '''
-        Add all custom edges loaded from settings. All nodes in the edge list m
-        '''
-
-        for path in self.settings['edges']:
-
-            nodes = path['nodes']
-            for key in nodes:
-                if key not in self.graph:
-                    code = TreeErrorCode.UNKNOWN_EDGE_COMPONENT
-                    path_or_edge = 'path' if len(nodes) > 2 else 'edge'
-                    msg = f'custom {path_or_edge} {nodes} has undefined node: {key!r}'
-                    raise TreeError(code, msg)
-
-            attributes = {'dot' : path['attributes']}
-
-            edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
-            self.graph.add_edges_from(edges, attributes=attributes)
-
-    @option('no_singletons')
-    @logged
-    def remove_singleton_members(self):
-        '''
-        Remove all members in the tree whose nodes neither have parents nor
-        children, as determined by the node's degree (including both in-edges
-        and out-edges).
-        '''
-
-        # TODO protect singletons (e.g., refounders without littles) after a
-        # certain date so they don't disappear without at least a warning?
-        singletons = [key for key, degree in self.graph.degree_iter() if degree == 0
-                and isinstance(self.graph.node[key]['entity'], Member)]
-
-        self.graph.remove_nodes_from(singletons)
-
-    @option('family_colors')
     @logged
     def mark_families(self):
         '''
@@ -435,33 +363,6 @@ class FamilyTree:
             family_dict = {}
             for key in family:
                 self.graph.node[key]['family'] = family_dict
-
-    @option('unknowns')
-    @logged
-    def add_orphan_parents(self):
-        '''
-        Add custom entities as parents to members whose nodes have no parents,
-        as determined by the nodes' in-degrees.
-
-        Note: This must occur after edges are generated in order to determine
-        degrees. But it must also occur after singletons are removed, because
-        many singletons do not have well-formed pledge class rank values in the
-        actual Sigma Nu directory directory (and determining pledge class
-        semesters values accurately is not simple enough for me to bother
-        doing). If every pledge class semester filled in, this could occur
-        before add_edges and we can remove some of the extra code in this
-        function that would normally be done by add_XXX_attributes.
-        '''
-
-        for orphan_key in self.orphan_keys():
-
-            orphan = self.graph.node[orphan_key]['entity']
-
-            parent = UnidentifiedMember(orphan, attributes={'dot' : self.settings['node_defaults']['unknown']})
-
-            orphan.parent = parent.key
-            self.add_entity(parent)
-            self.graph.add_edge(orphan.parent, orphan_key, attributes={'dot' : self.settings['edge_defaults']['unknown']})
 
     ###########################################################################
     #### Ordering                                                          ####

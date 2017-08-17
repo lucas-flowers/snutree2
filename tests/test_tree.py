@@ -4,6 +4,7 @@ from snutree.schemas.basic import KeylessMember
 from snutree.tree import FamilyTree, TreeError, TreeErrorCode
 
 # pylint: disable=redefined-outer-name
+
 @pytest.fixture
 def members():
     return [
@@ -46,7 +47,9 @@ def test_unknown_edge_component(members):
     settings = {'edges' : [{
         'nodes' : ['Bob Dole', 'Rob Cole', 'Carmen Sandiego']
         }]}
-    func = partial(FamilyTree, members, settings=settings)
+    tree = FamilyTree(members, settings=settings)
+    from snutree.writers.dot import add_custom_edges
+    func = partial(add_custom_edges, tree)
     code = TreeErrorCode.UNKNOWN_EDGE_COMPONENT
     assert tree_error_code_of(func) == code
 
