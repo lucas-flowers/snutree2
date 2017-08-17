@@ -113,11 +113,6 @@ def create_settings_validator(RankType):
                 },
             },
 
-        # Seed for the RNG, to provide consistent output
-        'seed': {
-                'default' : 71,
-                }
-
         })
 
 class UnidentifiedMember(TreeEntity):

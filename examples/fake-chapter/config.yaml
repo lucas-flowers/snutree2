@@ -49,6 +49,6 @@ tree:
     family_colors: False
     unknowns: True
 
-  # Random seed for ordering family placement
-  seed: 54
+# Random seed for ordering family placement
+seed: 54
 

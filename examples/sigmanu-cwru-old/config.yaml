@@ -7,16 +7,17 @@
 ###############################################################################
 ###############################################################################
 
+# If the tree's layout looks ugly, try changing this value to something else.
+# This seed is overridden by the seed provided in the normal settings, if
+# provided.
+seed: 6584
+
+
 tree:
 
   #############################################################################
   ## LAYOUT                                                                  ##
   #############################################################################
-
-  # If the tree's layout looks ugly, try changing this value to something else.
-  # This seed is overridden by the seed provided in the normal settings, if
-  # provided.
-  seed: 6584
 
   # Tree layout options
   layout:
