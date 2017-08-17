@@ -7,6 +7,7 @@ from snutree.colors import ColorPicker
 from snutree.tree import TreeError
 from ..cerberus import optional_boolean, nonempty_string, Validator
 
+
 ###############################################################################
 ###############################################################################
 #### Cerberus Schemas                                                      ####
@@ -43,13 +44,7 @@ flags = [
         'unknowns',
         ]
 
-def create_settings_validator(RankType):
-    '''
-    Returns new validator for family tree settings which uses RankType to
-    validate the type of rank values.
-    '''
-
-    return Validator({
+DOT_SCHEMA = {
 
         # Layout options
         'layout' : {
@@ -80,7 +75,7 @@ def create_settings_validator(RankType):
                 'type' : 'dict',
                 'schema' : {
                     'rank' : {
-                        'coerce' : RankType
+                        'coerce' : 'rank',
                         },
                     'attributes' : {
                         'type' : 'dict',
@@ -114,7 +109,7 @@ def create_settings_validator(RankType):
                 },
             },
 
-        })
+        }
 
 class UnidentifiedMember(TreeEntity):
     '''
@@ -167,7 +162,7 @@ def add_custom_edges(tree, edges):
 def add_attributes(tree):
 
     for node in tree.nodes():
-        node['attributes'] = { 'label' : node['entity'].label } 
+        node['attributes'] = { 'label' : node['entity'].label }
 
     for edge in tree.edges():
         edge['attributes'] = {}
@@ -252,7 +247,9 @@ def to_dot_graph(tree, RankType, config):
     that object.
     '''
 
-    config = create_settings_validator(RankType).validated(config)
+    DOT_SCHEMA['nodes']['valueschema']['schema']['rank']['coerce'] = RankType
+    validator = Validator(DOT_SCHEMA)
+    config = validator.validated(config)
 
     add_attributes(tree)
 
@@ -264,7 +261,6 @@ def to_dot_graph(tree, RankType, config):
 
     if config['layout']['no_singletons']:
         remove_singleton_members(tree)
-# ginlee tons
 
     # TODO move
     if config['layout']['family_colors']:
