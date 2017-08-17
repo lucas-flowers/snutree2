@@ -1,6 +1,5 @@
 import logging
 from snutree import dot
-from snutree.tree import Member
 from snutree.logging import logged
 from snutree.colors import ColorPicker
 from snutree.tree import TreeErrorCode, TreeError # TODO make writer errors
@@ -36,8 +35,8 @@ def add_colors(tree):
     # The nodes are sorted first, to ensure that the same colors are used
     # for the same input data.
     for key, node_dict in sorted(tree.graph.nodes_iter(data=True)):
-        if isinstance(node_dict['entity'], Member):
-            family_dict = node_dict['family']
+        family_dict = node_dict.get('family')
+        if family_dict is not None:
             if 'color' not in family_dict:
                 family_dict['color'] = next(color_picker)
 
