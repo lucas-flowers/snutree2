@@ -7,7 +7,6 @@ from snutree.colors import ColorPicker
 from snutree.tree import TreeError
 from ..cerberus import optional_boolean, nonempty_string, Validator
 
-
 ###############################################################################
 ###############################################################################
 #### Cerberus Schemas                                                      ####
@@ -75,7 +74,7 @@ DOT_SCHEMA = {
                 'type' : 'dict',
                 'schema' : {
                     'rank' : {
-                        'coerce' : 'rank',
+                        'coerce' : NotImplemented, # Will be filled below
                         },
                     'attributes' : {
                         'type' : 'dict',
@@ -111,22 +110,73 @@ DOT_SCHEMA = {
 
         }
 
-class UnidentifiedMember(TreeEntity):
+###############################################################################
+###############################################################################
+#### Main                                                                  ####
+###############################################################################
+###############################################################################
+
+@logged
+def to_dot_graph(tree, RankType, config):
     '''
-    All members are assumed to have parents. If a member does not have a known
-    parent. UnidentifiedMembers are given ranks one rank before the members
-    they are parents to, unless the rank is unknown, in which case it is left
-    null. (Assuming the "unknowns" option is selected.)
+    Convert the tree into an object representing a DOT file, then return
+    that object.
     '''
 
-    def __init__(self, member):
-        key = f'{member.key} Parent'
-        try:
-            rank = member.rank - 1
-        except TreeError:
-            rank = None
-        super().__init__(key, rank=rank)
+    DOT_SCHEMA['nodes']['valueschema']['schema']['rank']['coerce'] = RankType
+    validator = Validator(DOT_SCHEMA)
+    config = validator.validated(config)
 
+    add_attributes(tree)
+
+    if config['layout']['custom_nodes']:
+        add_custom_nodes(tree, config['nodes'])
+
+    if config['layout']['custom_edges']:
+        add_custom_edges(tree, config['edges'])
+
+    if config['layout']['no_singletons']:
+        remove_singleton_members(tree)
+
+    # TODO move
+    if config['layout']['family_colors']:
+        add_colors(tree, config['family_colors'])
+
+    if config['layout']['unknowns']:
+        node_attributes = config['node_defaults']['unknown']
+        edge_attributes = config['edge_defaults']['unknown']
+        add_orphan_parents(tree, node_attributes, edge_attributes)
+
+    members = create_tree_subgraph(tree, 'members', config['node_defaults']['member'])
+
+    graph_defaults = config['graph_defaults']['all']
+    dotgraph = dot.Graph('family_tree', 'digraph', attributes=graph_defaults)
+
+    node_defaults = dot.Defaults('node', config['node_defaults']['all'])
+    edge_defaults = dot.Defaults('edge', config['edge_defaults']['all'])
+
+    if config['layout']['ranks']:
+        min_rank, max_rank = tree.get_rank_bounds()
+        max_rank += 1 # always include one extra, blank rank at the end
+        node_attributes = config['node_defaults']['rank']
+        edge_attributes = config['edge_defaults']['rank']
+        dates_left = create_date_subgraph(tree, 'L', min_rank, max_rank, node_attributes, edge_attributes)
+        dates_right = create_date_subgraph(tree, 'R', min_rank, max_rank, node_attributes, edge_attributes)
+        ranks = create_ranks(tree, min_rank, max_rank)
+        dotgraph.children = [node_defaults, edge_defaults, dates_left, members, dates_right] + ranks
+
+    else:
+        dotgraph.children = [node_defaults, edge_defaults, members]
+
+    return dotgraph
+
+def add_attributes(tree):
+
+    for node in tree.nodes():
+        node['attributes'] = { 'label' : node['entity'].label }
+
+    for edge in tree.edges():
+        edge['attributes'] = {}
 
 @logged
 def add_custom_nodes(tree, nodes):
@@ -159,13 +209,19 @@ def add_custom_edges(tree, edges):
         edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
         tree.add_edges(edges, attributes=attributes)
 
-def add_attributes(tree):
+@logged
+def remove_singleton_members(tree):
+    '''
+    Remove all members in the tree whose nodes neither have parents nor
+    children, as determined by the node's degree (including both in-edges
+    and out-edges).
+    '''
 
-    for node in tree.nodes():
-        node['attributes'] = { 'label' : node['entity'].label }
+    # TODO protect singletons (e.g., refounders without littles) after a
+    # certain date so they don't disappear without at least a warning?
 
-    for edge in tree.edges():
-        edge['attributes'] = {}
+    keys = [singleton.key for singleton in tree.singletons()]
+    tree.remove(keys)
 
 @logged
 def add_colors(tree, family_colors):
@@ -226,71 +282,25 @@ def add_orphan_parents(tree, node_attributes, edge_attributes):
         tree.add_entity(parent, attributes=node_attributes)
         tree.add_edge(orphan.parent, orphan.key, attributes=edge_attributes)
 
-@logged
-def remove_singleton_members(tree):
+def create_tree_subgraph(tree, subgraph_key, node_defaults):
     '''
-    Remove all members in the tree whose nodes neither have parents nor
-    children, as determined by the node's degree (including both in-edges
-    and out-edges).
+    Create and return the DOT subgraph that will contain the member nodes
+    and their relationships.
     '''
 
-    # TODO protect singletons (e.g., refounders without littles) after a
-    # certain date so they don't disappear without at least a warning?
+    dotgraph = dot.Graph(subgraph_key, 'subgraph')
 
-    keys = [singleton.key for singleton in tree.singletons()]
-    tree.remove(keys)
+    node_defaults = dot.Defaults('node', node_defaults)
 
-@logged
-def to_dot_graph(tree, RankType, config):
-    '''
-    Convert the tree into an object representing a DOT file, then return
-    that object.
-    '''
+    nodes = []
+    for key, node_dict in tree.ordered_items():
+        nodes.append(dot.Node(key, node_dict['attributes'])) # TODO validate later
 
-    DOT_SCHEMA['nodes']['valueschema']['schema']['rank']['coerce'] = RankType
-    validator = Validator(DOT_SCHEMA)
-    config = validator.validated(config)
+    edges = []
+    for parent_key, child_key, edge_dict in tree.ordered_edges():
+        edges.append(dot.Edge(parent_key, child_key, edge_dict['attributes'])) # TODO validate later
 
-    add_attributes(tree)
-
-    if config['layout']['custom_nodes']:
-        add_custom_nodes(tree, config['nodes'])
-
-    if config['layout']['custom_edges']:
-        add_custom_edges(tree, config['edges'])
-
-    if config['layout']['no_singletons']:
-        remove_singleton_members(tree)
-
-    # TODO move
-    if config['layout']['family_colors']:
-        add_colors(tree, config['family_colors'])
-
-    if config['layout']['unknowns']:
-        node_attributes = config['node_defaults']['unknown']
-        edge_attributes = config['edge_defaults']['unknown']
-        add_orphan_parents(tree, node_attributes, edge_attributes)
-
-    members = create_tree_subgraph(tree, 'members', config['node_defaults']['member'])
-
-    graph_defaults = config['graph_defaults']['all']
-    dotgraph = dot.Graph('family_tree', 'digraph', attributes=graph_defaults)
-
-    node_defaults = dot.Defaults('node', config['node_defaults']['all'])
-    edge_defaults = dot.Defaults('edge', config['edge_defaults']['all'])
-
-    if config['layout']['ranks']:
-        min_rank, max_rank = tree.get_rank_bounds()
-        max_rank += 1 # always include one extra, blank rank at the end
-        node_attributes = config['node_defaults']['rank']
-        edge_attributes = config['edge_defaults']['rank']
-        dates_left = create_date_subgraph(tree, 'L', min_rank, max_rank, node_attributes, edge_attributes)
-        dates_right = create_date_subgraph(tree, 'R', min_rank, max_rank, node_attributes, edge_attributes)
-        ranks = create_ranks(tree, min_rank, max_rank)
-        dotgraph.children = [node_defaults, edge_defaults, dates_left, members, dates_right] + ranks
-
-    else:
-        dotgraph.children = [node_defaults, edge_defaults, members]
+    dotgraph.children = [node_defaults] + nodes + edges
 
     return dotgraph
 
@@ -321,28 +331,6 @@ def create_date_subgraph(tree, suffix, min_rank, max_rank, node_defaults, edge_d
 
     return subgraph
 
-def create_tree_subgraph(tree, subgraph_key, node_defaults):
-    '''
-    Create and return the DOT subgraph that will contain the member nodes
-    and their relationships.
-    '''
-
-    dotgraph = dot.Graph(subgraph_key, 'subgraph')
-
-    node_defaults = dot.Defaults('node', node_defaults)
-
-    nodes = []
-    for key, node_dict in tree.ordered_items():
-        nodes.append(dot.Node(key, node_dict['attributes'])) # TODO validate later
-
-    edges = []
-    for parent_key, child_key, edge_dict in tree.ordered_edges():
-        edges.append(dot.Edge(parent_key, child_key, edge_dict['attributes'])) # TODO validate later
-
-    dotgraph.children = [node_defaults] + nodes + edges
-
-    return dotgraph
-
 def create_ranks(tree, min_rank, max_rank):
     '''
     Create and return the DOT ranks
@@ -359,4 +347,27 @@ def create_ranks(tree, min_rank, max_rank):
         ranks[node['entity'].rank - min_rank].keys.append(key)
 
     return ranks
+
+###############################################################################
+###############################################################################
+#### Decorative Tree Nodes                                                 ####
+###############################################################################
+###############################################################################
+
+class UnidentifiedMember(TreeEntity):
+    '''
+    All members are assumed to have parents. If a member does not have a known
+    parent. UnidentifiedMembers are given ranks one rank before the members
+    they are parents to, unless the rank is unknown, in which case it is left
+    null. (Assuming the "unknowns" option is selected.)
+    '''
+
+    def __init__(self, member):
+        key = f'{member.key} Parent'
+        try:
+            rank = member.rank - 1
+        except TreeError:
+            rank = None
+        super().__init__(key, rank=rank)
+
 
