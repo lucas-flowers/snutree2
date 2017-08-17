@@ -29,9 +29,9 @@ CONFIG_VALIDATOR = Validator({
     'schema' : {
         'type' : 'dict',
         },
-    'output' : {
+    'tree' : {
         'type' : 'dict',
-        }
+        },
     })
 
 ###############################################################################
@@ -153,7 +153,7 @@ def generate(
         'schema' : {
             'name' : schema,
             },
-        'output' : {
+        'tree' : {
             'seed' : seed,
             }
         })
@@ -173,7 +173,7 @@ def generate(
     members = schema.to_Members(member_table, **config['schema'])
 
     logger.info('Building family tree')
-    tree = FamilyTree(members, schema.Rank, config['output'])
+    tree = FamilyTree(members, schema.Rank, config['tree'])
 
     logger.info('Building DOT graph')
     dot_graph = tree.to_dot_graph()
