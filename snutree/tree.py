@@ -5,33 +5,6 @@ from networkx import DiGraph
 from networkx.algorithms.components import weakly_connected_components
 from .errors import SnutreeError
 from .logging import logged
-from .cerberus import optional_boolean, nonempty_string, Validator
-
-###############################################################################
-###############################################################################
-#### Cerberus Schemas                                                      ####
-###############################################################################
-###############################################################################
-
-# Graphviz attributes
-graphviz_attributes = {
-        'type' : 'dict',
-        'default' : {},
-        'valueschema' : {
-            'type' : ['string', 'number', 'boolean']
-            }
-        }
-
-# Contains groups of attributes labeled by the strings in `allowed`
-attribute_defaults = lambda *allowed : {
-        'type' : 'dict',
-        'nullable' : False,
-        'default' : { a : {} for a in allowed },
-        'keyschema' : { 'allowed' : allowed },
-        'valueschema' : {
-            'type' : 'dict',
-            }
-        }
 
 ###############################################################################
 ###############################################################################
@@ -96,94 +69,6 @@ class TreeEntityAttributeError(SnutreeError):
 ###############################################################################
 ###############################################################################
 
-# Option flag names
-flags = [
-        'ranks',
-        'custom_edges',
-        'custom_nodes',
-        'no_singletons',
-        'family_colors',
-        'unknowns',
-        ]
-
-def create_settings_validator(RankType):
-    '''
-    Returns new validator for family tree settings which uses RankType to
-    validate the type of rank values.
-    '''
-
-    return Validator({
-
-        # Layout options
-        'layout' : {
-            'type' : 'dict',
-            'schema' : { flag : optional_boolean for flag in flags },
-            'default' : { flag : True for flag in flags },
-            },
-
-        # Default attributes for graphs, nodes, edges, and their subcategories
-        'graph_defaults' : attribute_defaults('all'),
-        'node_defaults' : attribute_defaults('all', 'rank', 'unknown', 'member'),
-        'edge_defaults' : attribute_defaults('all', 'rank', 'unknown'),
-
-        # A mapping of node keys to colors
-        'family_colors' : {
-            'type' : 'dict',
-            'default' : {},
-            'keyschema' : nonempty_string,
-            'valueschema' : nonempty_string,
-            },
-
-        # Custom nodes, each with Graphviz attributes and a rank
-        'nodes' : {
-            'type' : 'dict',
-            'default' : {},
-            'keyschema' : nonempty_string,
-            'valueschema' : {
-                'type' : 'dict',
-                'schema' : {
-                    'rank' : {
-                        'coerce' : RankType
-                        },
-                    'attributes' : {
-                        'type' : 'dict',
-                        'default' : {},
-                        }
-                    }
-                }
-            },
-
-        # Custom edges: Each entry in the list has a list of nodes, which are
-        # used to represent a path from which to create edges (which is why
-        # there must be at least two nodes in each list). There are also edge
-        # attributes applied to all edges in the path.
-        'edges' : {
-            'type' : 'list',
-            'default' : [],
-            'schema' : {
-                'type' : 'dict',
-                'schema' : {
-                    'nodes' : {
-                        'type' : 'list',
-                        'required' : True,
-                        'minlength' : 2,
-                        'schema' : nonempty_string,
-                        },
-                    'attributes' : {
-                        'type' : 'dict',
-                        'default' : {},
-                        }
-                    }
-                },
-            },
-
-        # Seed for the RNG, to provide consistent output
-        'seed': {
-                'default' : 71,
-                }
-
-        })
-
 class FamilyTree:
     '''
     Representation of the family tree. The tree is made of nodes connected by
@@ -203,8 +88,11 @@ class FamilyTree:
     def __init__(self, members, RankType=int, settings=None):
 
         self.graph = DiGraph()
-        TREE_VALIDATOR = create_settings_validator(RankType)
-        self.settings = TREE_VALIDATOR.validated(settings or {})
+        # TREE_VALIDATOR = create_settings_validator(RankType)
+        # TODO add new tree validator
+        # self.settings = TREE_VALIDATOR.validated(settings or {})
+        self.settings = settings or {}
+        self.settings.setdefault('seed', 0)
 
         # Add all the entities in the settings and member list provided
         self.add_members(members)
@@ -277,7 +165,7 @@ class FamilyTree:
 
         parent = self.graph.node[pkey]['entity']
 
-        if self.settings['layout']['ranks'] and member.rank < parent.rank:
+        if member.rank and parent.rank and member.rank < parent.rank:
             code = TreeErrorCode.PARENT_NOT_PRIOR
             msg = f'rank {member.rank!r} of member {ckey!r} cannot be prior to rank of parent {pkey!r}: {parent.rank!r}'
             raise TreeError(code, msg)

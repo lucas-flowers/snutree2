@@ -49,7 +49,7 @@ def test_unknown_edge_component(members):
         }]}
     tree = FamilyTree(members, settings=settings)
     from snutree.writers.dot import add_custom_edges
-    func = partial(add_custom_edges, tree)
+    func = partial(add_custom_edges, tree, settings['edges'])
     code = TreeErrorCode.UNKNOWN_EDGE_COMPONENT
     assert tree_error_code_of(func) == code
 
@@ -61,7 +61,7 @@ def test_family_color_conflict(members):
         }}
     tree = FamilyTree(members, settings=settings)
     from snutree.writers.dot import add_colors
-    func = partial(add_colors, tree)
+    func = partial(add_colors, tree, settings['family_colors'])
     code = TreeErrorCode.FAMILY_COLOR_CONFLICT
     assert tree_error_code_of(func) == code
 

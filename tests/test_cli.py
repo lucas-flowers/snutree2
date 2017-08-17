@@ -37,7 +37,7 @@ def run_example(
         config_params.append('--config')
         config_params.append(str(config))
 
-    setup_logger(verbose=False, debug=True, quiet=False)
+    # setup_logger(verbose=False, debug=True, quiet=False)
     result = invoke(config_params + [
         '--seed', seed,
         '--output', str(output),

@@ -4,6 +4,121 @@ from snutree.tree import TreeEntity, Member
 from snutree.logging import logged
 from snutree.colors import ColorPicker
 from snutree.tree import TreeEntityAttributeError, TreeErrorCode, TreeError # TODO make writer errors
+from ..cerberus import optional_boolean, nonempty_string, Validator
+
+###############################################################################
+###############################################################################
+#### Cerberus Schemas                                                      ####
+###############################################################################
+###############################################################################
+
+# Graphviz attributes
+graphviz_attributes = {
+        'type' : 'dict',
+        'default' : {},
+        'valueschema' : {
+            'type' : ['string', 'number', 'boolean']
+            }
+        }
+
+# Contains groups of attributes labeled by the strings in `allowed`
+attribute_defaults = lambda *allowed : {
+        'type' : 'dict',
+        'nullable' : False,
+        'default' : { a : {} for a in allowed },
+        'keyschema' : { 'allowed' : allowed },
+        'valueschema' : {
+            'type' : 'dict',
+            }
+        }
+
+# Option flag names
+flags = [
+        'ranks',
+        'custom_edges',
+        'custom_nodes',
+        'no_singletons',
+        'family_colors',
+        'unknowns',
+        ]
+
+def create_settings_validator(RankType):
+    '''
+    Returns new validator for family tree settings which uses RankType to
+    validate the type of rank values.
+    '''
+
+    return Validator({
+
+        # Layout options
+        'layout' : {
+            'type' : 'dict',
+            'schema' : { flag : optional_boolean for flag in flags },
+            'default' : { flag : True for flag in flags },
+            },
+
+        # Default attributes for graphs, nodes, edges, and their subcategories
+        'graph_defaults' : attribute_defaults('all'),
+        'node_defaults' : attribute_defaults('all', 'rank', 'unknown', 'member'),
+        'edge_defaults' : attribute_defaults('all', 'rank', 'unknown'),
+
+        # A mapping of node keys to colors
+        'family_colors' : {
+            'type' : 'dict',
+            'default' : {},
+            'keyschema' : nonempty_string,
+            'valueschema' : nonempty_string,
+            },
+
+        # Custom nodes, each with Graphviz attributes and a rank
+        'nodes' : {
+            'type' : 'dict',
+            'default' : {},
+            'keyschema' : nonempty_string,
+            'valueschema' : {
+                'type' : 'dict',
+                'schema' : {
+                    'rank' : {
+                        'coerce' : RankType
+                        },
+                    'attributes' : {
+                        'type' : 'dict',
+                        'default' : {},
+                        }
+                    }
+                }
+            },
+
+        # Custom edges: Each entry in the list has a list of nodes, which are
+        # used to represent a path from which to create edges (which is why
+        # there must be at least two nodes in each list). There are also edge
+        # attributes applied to all edges in the path.
+        'edges' : {
+            'type' : 'list',
+            'default' : [],
+            'schema' : {
+                'type' : 'dict',
+                'schema' : {
+                    'nodes' : {
+                        'type' : 'list',
+                        'required' : True,
+                        'minlength' : 2,
+                        'schema' : nonempty_string,
+                        },
+                    'attributes' : {
+                        'type' : 'dict',
+                        'default' : {},
+                        }
+                    }
+                },
+            },
+
+        # Seed for the RNG, to provide consistent output
+        'seed': {
+                'default' : 71,
+                }
+
+        })
 
 class UnidentifiedMember(TreeEntity):
     '''
@@ -23,23 +138,23 @@ class UnidentifiedMember(TreeEntity):
 
 
 @logged
-def add_custom_nodes(tree):
+def add_custom_nodes(tree, nodes):
     '''
     Add all custom nodes loaded from settings.
     '''
 
-    for key, value in tree.settings['nodes'].items():
+    for key, value in nodes.items():
         rank = value['rank']
         attributes = value['attributes']
         tree.add_entity(TreeEntity(key, rank=rank), attributes=attributes)
 
 @logged
-def add_custom_edges(tree):
+def add_custom_edges(tree, edges):
     '''
     Add all custom edges loaded from settings. All nodes in the edge list m
     '''
 
-    for path in tree.settings['edges']:
+    for path in edges:
 
         nodes = path['nodes']
         for key in nodes:
@@ -63,13 +178,12 @@ def add_attributes(tree):
         edge_dict['attributes'] = {}
 
 @logged
-def add_colors(tree):
+def add_colors(tree, family_colors):
     '''
     Add colors to member nodes, based on their family. Uses settings
     dictionary to provide initial colors, and generates the rest as needed.
     '''
 
-    family_colors = tree.settings['family_colors']
     color_picker = ColorPicker.from_graphviz()
 
     for key, color in family_colors.items():
@@ -100,7 +214,7 @@ def add_colors(tree):
             node_dict['attributes']['color'] = family_dict['color']
 
 @logged
-def add_orphan_parents(tree):
+def add_orphan_parents(tree, node_attributes, edge_attributes):
     '''
     Add custom entities as parents to members whose nodes have no parents,
     as determined by the nodes' in-degrees.
@@ -122,8 +236,8 @@ def add_orphan_parents(tree):
         parent = UnidentifiedMember(orphan)
 
         orphan.parent = parent.key
-        tree.add_entity(parent, attributes=tree.settings['node_defaults']['unknown'])
-        tree.graph.add_edge(orphan.parent, orphan_key, attributes=tree.settings['edge_defaults']['unknown'])
+        tree.add_entity(parent, attributes=node_attributes)
+        tree.graph.add_edge(orphan.parent, orphan_key, attributes=edge_attributes)
 
 @logged
 def remove_singleton_members(self):
@@ -141,44 +255,50 @@ def remove_singleton_members(self):
     self.graph.remove_nodes_from(singletons)
 
 @logged
-def to_dot_graph(tree):
+def to_dot_graph(tree, RankType, config):
     '''
     Convert the tree into an object representing a DOT file, then return
     that object.
     '''
 
+    config = create_settings_validator(RankType).validated(config)
+
     add_attributes(tree)
 
-    if tree.settings['layout']['custom_nodes']:
-        add_custom_nodes(tree)
+    if config['layout']['custom_nodes']:
+        add_custom_nodes(tree, config['nodes'])
 
-    if tree.settings['layout']['custom_edges']:
-        add_custom_edges(tree)
+    if config['layout']['custom_edges']:
+        add_custom_edges(tree, config['edges'])
 
-    if tree.settings['layout']['no_singletons']:
+    if config['layout']['no_singletons']:
         remove_singleton_members(tree)
 # ginlee tons
 
     # TODO move
-    if tree.settings['layout']['family_colors']:
-        add_colors(tree)
+    if config['layout']['family_colors']:
+        add_colors(tree, config['family_colors'])
 
-    if tree.settings['layout']['unknowns']:
-        add_orphan_parents(tree)
+    if config['layout']['unknowns']:
+        node_attributes = config['node_defaults']['unknown']
+        edge_attributes = config['edge_defaults']['unknown']
+        add_orphan_parents(tree, node_attributes, edge_attributes)
 
-    members = create_tree_subgraph(tree, 'members')
+    members = create_tree_subgraph(tree, 'members', config['node_defaults']['member'])
 
-    graph_defaults = tree.settings['graph_defaults']['all']
+    graph_defaults = config['graph_defaults']['all']
     dotgraph = dot.Graph('family_tree', 'digraph', attributes=graph_defaults)
 
-    node_defaults = dot.Defaults('node', tree.settings['node_defaults']['all'])
-    edge_defaults = dot.Defaults('edge', tree.settings['edge_defaults']['all'])
+    node_defaults = dot.Defaults('node', config['node_defaults']['all'])
+    edge_defaults = dot.Defaults('edge', config['edge_defaults']['all'])
 
-    if tree.settings['layout']['ranks']:
+    if config['layout']['ranks']:
         min_rank, max_rank = tree.get_rank_bounds()
         max_rank += 1 # always include one extra, blank rank at the end
-        dates_left = create_date_subgraph(tree, 'L', min_rank, max_rank)
-        dates_right = create_date_subgraph(tree, 'R', min_rank, max_rank)
+        node_attributes = config['node_defaults']['rank']
+        edge_attributes = config['edge_defaults']['rank']
+        dates_left = create_date_subgraph(tree, 'L', min_rank, max_rank, node_attributes, edge_attributes)
+        dates_right = create_date_subgraph(tree, 'R', min_rank, max_rank, node_attributes, edge_attributes)
         ranks = create_ranks(tree, min_rank, max_rank)
         dotgraph.children = [node_defaults, edge_defaults, dates_left, members, dates_right] + ranks
 
@@ -187,7 +307,7 @@ def to_dot_graph(tree):
 
     return dotgraph
 
-def create_date_subgraph(tree, suffix, min_rank, max_rank):
+def create_date_subgraph(tree, suffix, min_rank, max_rank, node_defaults, edge_defaults):
     '''
     Return a DOT subgraph containing the labels for each rank. The `suffix`
     is appended to the end of the keys of the subgraph's labels, so more
@@ -196,8 +316,8 @@ def create_date_subgraph(tree, suffix, min_rank, max_rank):
 
     subgraph = dot.Graph(f'dates{suffix}', 'subgraph')
 
-    node_defaults = dot.Defaults('node', tree.settings['node_defaults']['rank'])
-    edge_defaults = dot.Defaults('edge', tree.settings['edge_defaults']['rank'])
+    node_defaults = dot.Defaults('node', node_defaults)
+    edge_defaults = dot.Defaults('edge', edge_defaults)
 
     nodes, edges = [], []
     rank = min_rank
@@ -214,7 +334,7 @@ def create_date_subgraph(tree, suffix, min_rank, max_rank):
 
     return subgraph
 
-def create_tree_subgraph(tree, subgraph_key):
+def create_tree_subgraph(tree, subgraph_key, node_defaults):
     '''
     Create and return the DOT subgraph that will contain the member nodes
     and their relationships.
@@ -222,7 +342,7 @@ def create_tree_subgraph(tree, subgraph_key):
 
     dotgraph = dot.Graph(subgraph_key, 'subgraph')
 
-    node_defaults = dot.Defaults('node', tree.settings['node_defaults']['member'])
+    node_defaults = dot.Defaults('node', node_defaults)
 
     nodes = []
     for key, node_dict in tree.ordered_nodes():
