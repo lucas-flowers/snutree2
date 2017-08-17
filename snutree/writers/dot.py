@@ -336,7 +336,7 @@ def create_tree_subgraph(tree, subgraph_key, node_defaults):
     node_defaults = dot.Defaults('node', node_defaults)
 
     nodes = []
-    for key, node_dict in tree.ordered_nodes():
+    for key, node_dict in tree.ordered_items():
         nodes.append(dot.Node(key, node_dict['attributes'])) # TODO validate later
 
     edges = []
