@@ -3,6 +3,7 @@ digraph "family_tree" {
     pad=".5, .5";
     ranksep="0.3";
     ratio="compress";
+    size="80";
     node [fontname="dejavu sans",height="0.45",penwidth="2",shape="box",style="filled",width="2"];
     edge [arrowhead="none"];
     subgraph "datesL" {

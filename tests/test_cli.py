@@ -95,7 +95,7 @@ def test_sigmanu_example():
 def test_chapters():
     run_example(
             example_name='fake-chapter',
-            configs=['config.yaml'],
+            configs=['config-dot.yaml', 'config.yaml'],
             seed=76,
             inputs=['directory.csv'],
             )
