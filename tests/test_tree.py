@@ -50,12 +50,15 @@ def test_unknown_edge_component(members):
     code = TreeErrorCode.UNKNOWN_EDGE_COMPONENT
     assert tree_error_code_of(func) == code
 
+# TODO move?
 def test_family_color_conflict(members):
     settings = {'family_colors' : {
         'Bob Dole' : 'blue',
         'Rob Cole' : 'yellow'
         }}
-    func = partial(FamilyTree, members, settings=settings)
+    tree = FamilyTree(members, settings=settings)
+    from snutree.writers.dot import add_colors
+    func = partial(add_colors, tree)
     code = TreeErrorCode.FAMILY_COLOR_CONFLICT
     assert tree_error_code_of(func) == code
 

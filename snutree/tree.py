@@ -1,13 +1,10 @@
 import random
-import logging
 from enum import Enum
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta
 from networkx import DiGraph
 from networkx.algorithms.components import weakly_connected_components
-from . import dot
 from .errors import SnutreeError
 from .logging import logged
-from .colors import ColorPicker
 from .cerberus import optional_boolean, nonempty_string, Validator
 
 ###############################################################################
@@ -252,7 +249,6 @@ class FamilyTree:
         # Decorations
         self.remove_singleton_members()
         self.mark_families()
-        self.add_colors()
         self.add_orphan_parents()
 
     ###########################################################################
@@ -341,6 +337,20 @@ class FamilyTree:
             raise TreeError(code, msg)
 
         self.graph.add_edge(pkey, ckey, attributes=attributes or {})
+
+    def get_rank_bounds(self):
+        '''
+        Find and return the values of the highest and lowest ranks in use.
+        '''
+
+        min_rank, max_rank = float('inf'), float('-inf')
+        for _, entity in self.nodes_iter('entity'):
+            rank = entity.rank
+            if rank and min_rank > rank:
+                min_rank = rank
+            if rank and max_rank < rank:
+                max_rank = rank
+        return min_rank, max_rank
 
     ###########################################################################
     #### Decoration                                                        ####
@@ -459,156 +469,6 @@ class FamilyTree:
             orphan.parent = parent.key
             self.add_entity(parent)
             self.graph.add_edge(orphan.parent, orphan_key, attributes=self.settings['edge_defaults']['unknown'])
-
-    ###########################################################################
-    #### Convert to DOT                                                    ####
-    ###########################################################################
-
-    @option('family_colors')
-    @logged
-    def add_colors(self):
-        '''
-        Add colors to member nodes, based on their family. Uses settings
-        dictionary to provide initial colors, and generates the rest as needed.
-        '''
-
-        family_colors = self.settings['family_colors']
-        color_picker = ColorPicker.from_graphviz()
-
-        for key, color in family_colors.items():
-
-            if key not in self.graph.node:
-                msg = f'family color map includes nonexistent member: {key!r}'
-                logging.getLogger(__name__).warning(msg)
-
-            else:
-
-                family = self.graph.node[key]['family']
-                if 'color' in family:
-                    code = TreeErrorCode.FAMILY_COLOR_CONFLICT
-                    msg = f'family of member {key!r} already assigned the color {color!r}'
-                    raise TreeError(code, msg)
-
-                color_picker.use(color)
-                self.graph.node[key]['family']['color'] = color
-
-        # The nodes are sorted first, to ensure that the same colors are used
-        # for the same input data.
-        for key, node_dict in sorted(self.graph.nodes_iter(data=True)):
-            if isinstance(node_dict['entity'], Member):
-                family_dict = node_dict['family']
-                if 'color' not in family_dict:
-                    family_dict['color'] = next(color_picker)
-
-                node_dict['attributes'].get('dot', {})['color'] = family_dict['color']
-
-    @logged
-    def to_dot_graph(self):
-        '''
-        Convert the tree into an object representing a DOT file, then return
-        that object.
-        '''
-
-        tree = self.create_tree_subgraph('members')
-
-        graph_defaults = self.settings['graph_defaults']['all']['dot']
-        dotgraph = dot.Graph('family_tree', 'digraph', attributes=graph_defaults)
-
-        node_defaults = dot.Defaults('node', self.settings['node_defaults']['all']['dot'])
-        edge_defaults = dot.Defaults('edge', self.settings['edge_defaults']['all']['dot'])
-
-        if self.settings['layout']['ranks']:
-            min_rank, max_rank = self.get_rank_bounds()
-            max_rank += 1 # always include one extra, blank rank at the end
-            dates_left = self.create_date_subgraph('L', min_rank, max_rank)
-            dates_right = self.create_date_subgraph('R', min_rank, max_rank)
-            ranks = self.create_ranks(min_rank, max_rank)
-            dotgraph.children = [node_defaults, edge_defaults, dates_left, tree, dates_right] + ranks
-
-        else:
-            dotgraph.children = [node_defaults, edge_defaults, tree]
-
-        return dotgraph
-
-    def get_rank_bounds(self):
-        '''
-        Find and return the values of the highest and lowest ranks in use.
-        '''
-
-        min_rank, max_rank = float('inf'), float('-inf')
-        for _, entity in self.nodes_iter('entity'):
-            rank = entity.rank
-            if rank and min_rank > rank:
-                min_rank = rank
-            if rank and max_rank < rank:
-                max_rank = rank
-        return min_rank, max_rank
-
-    def create_date_subgraph(self, suffix, min_rank, max_rank):
-        '''
-        Return a DOT subgraph containing the labels for each rank. The `suffix`
-        is appended to the end of the keys of the subgraph's labels, so more
-        than one subgraph can be made, using different suffixes.
-        '''
-
-        subgraph = dot.Graph(f'dates{suffix}', 'subgraph')
-
-        node_defaults = dot.Defaults('node', self.settings['node_defaults']['rank']['dot'])
-        edge_defaults = dot.Defaults('edge', self.settings['edge_defaults']['rank']['dot'])
-
-        nodes, edges = [], []
-        rank = min_rank
-        while rank < max_rank:
-            this_rank_key = f'{rank}{suffix}'
-            next_rank_key = f'{rank+1}{suffix}'
-            nodes.append(dot.Node(this_rank_key, {'label' : rank}))
-            edges.append(dot.Edge(this_rank_key, next_rank_key))
-            rank += 1
-
-        nodes.append(dot.Node(f'{rank}{suffix}', {'label' : rank}))
-
-        subgraph.children = [node_defaults, edge_defaults] + nodes + edges
-
-        return subgraph
-
-    def create_tree_subgraph(self, subgraph_key):
-        '''
-        Create and return the DOT subgraph that will contain the member nodes
-        and their relationships.
-        '''
-
-        dotgraph = dot.Graph(subgraph_key, 'subgraph')
-
-        node_defaults = dot.Defaults('node', self.settings['node_defaults']['member']['dot'])
-
-        nodes = []
-        for key, node_dict in self.ordered_nodes():
-            nodes.append(dot.Node(key, node_dict['attributes'].get('dot'))) # TODO validate later
-
-        edges = []
-        for parent_key, child_key, edge_dict in self.ordered_edges():
-            edges.append(dot.Edge(parent_key, child_key, edge_dict['attributes'].get('dot'))) # TODO validate later
-
-        dotgraph.children = [node_defaults] + nodes + edges
-
-        return dotgraph
-
-    def create_ranks(self, min_rank, max_rank):
-        '''
-        Create and return the DOT ranks
-        '''
-
-        # `while` instead of `range` because ranks might not be true integers
-        ranks = []
-        i = min_rank
-        while i < max_rank:
-            ranks.append(dot.Rank([f'{i}L', f'{i}R']))
-            i += 1
-
-        for key, entity in self.nodes_iter('entity'):
-            ranks[entity.rank - min_rank].keys.append(key)
-
-        return ranks
 
     ###########################################################################
     #### Ordering                                                          ####
