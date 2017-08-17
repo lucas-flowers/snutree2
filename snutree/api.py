@@ -181,7 +181,7 @@ def generate(
 
     logger.info('Building DOT graph')
     from snutree.writers import dot
-    dot_graph = dot.to_dot_graph(tree, schema.Rank, config['tree'])
+    dot_graph = dot.from_FamilyTree(tree, schema.Rank, config['tree'])
 
     logger.info('Composing DOT source code')
     dot_src = dot_graph.to_dot()
