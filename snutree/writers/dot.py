@@ -1,9 +1,26 @@
 import logging
 from snutree import dot
-from snutree.tree import Custom, UnidentifiedMember, Member
+from snutree.tree import TreeEntity, Member
 from snutree.logging import logged
 from snutree.colors import ColorPicker
-from snutree.tree import TreeErrorCode, TreeError # TODO make writer errors
+from snutree.tree import TreeEntityAttributeError, TreeErrorCode, TreeError # TODO make writer errors
+
+class UnidentifiedMember(TreeEntity):
+    '''
+    All members are assumed to have parents. If a member does not have a known
+    parent. UnidentifiedMembers are given ranks one rank before the members
+    they are parents to, unless the rank is unknown, in which case it is left
+    null. (Assuming the "unknowns" option is selected.)
+    '''
+
+    def __init__(self, member):
+        key = f'{member.key} Parent'
+        try:
+            rank = member.rank - 1
+        except TreeEntityAttributeError:
+            rank = None
+        super().__init__(key, rank=rank)
+
 
 @logged
 def add_custom_nodes(tree):
@@ -13,8 +30,8 @@ def add_custom_nodes(tree):
 
     for key, value in tree.settings['nodes'].items():
         rank = value['rank']
-        attributes = {'dot' : value['attributes']}
-        tree.add_entity(Custom(key, rank=rank, attributes=attributes))
+        attributes = value['attributes']
+        tree.add_entity(TreeEntity(key, rank=rank), attributes=attributes)
 
 @logged
 def add_custom_edges(tree):
@@ -32,10 +49,18 @@ def add_custom_edges(tree):
                 msg = f'custom {path_or_edge} {nodes} has undefined node: {key!r}'
                 raise TreeError(code, msg)
 
-        attributes = {'dot' : path['attributes']}
+        attributes = path['attributes']
 
         edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
         tree.graph.add_edges_from(edges, attributes=attributes)
+
+def add_attributes(tree):
+
+    for _, entity, node_dict in tree.nodes_iter('entity', node_dict=True):
+        node_dict['attributes'] = { 'label' : entity.label } 
+
+    for pkey, ckey, edge_dict in tree.graph.edges_iter(data=True):
+        edge_dict['attributes'] = {}
 
 @logged
 def add_colors(tree):
@@ -72,7 +97,7 @@ def add_colors(tree):
             if 'color' not in family_dict:
                 family_dict['color'] = next(color_picker)
 
-            node_dict['attributes']['dot']['color'] = family_dict['color']
+            node_dict['attributes']['color'] = family_dict['color']
 
 @logged
 def add_orphan_parents(tree):
@@ -94,11 +119,11 @@ def add_orphan_parents(tree):
 
         orphan = tree.graph.node[orphan_key]['entity']
 
-        parent = UnidentifiedMember(orphan, attributes={'dot' : tree.settings['node_defaults']['unknown']})
+        parent = UnidentifiedMember(orphan)
 
         orphan.parent = parent.key
-        tree.add_entity(parent)
-        tree.graph.add_edge(orphan.parent, orphan_key, attributes={'dot' : tree.settings['edge_defaults']['unknown']})
+        tree.add_entity(parent, attributes=tree.settings['node_defaults']['unknown'])
+        tree.graph.add_edge(orphan.parent, orphan_key, attributes=tree.settings['edge_defaults']['unknown'])
 
 @logged
 def remove_singleton_members(self):
@@ -121,6 +146,8 @@ def to_dot_graph(tree):
     Convert the tree into an object representing a DOT file, then return
     that object.
     '''
+
+    add_attributes(tree)
 
     if tree.settings['layout']['custom_nodes']:
         add_custom_nodes(tree)
@@ -199,11 +226,11 @@ def create_tree_subgraph(tree, subgraph_key):
 
     nodes = []
     for key, node_dict in tree.ordered_nodes():
-        nodes.append(dot.Node(key, node_dict['attributes']['dot'])) # TODO validate later
+        nodes.append(dot.Node(key, node_dict['attributes'])) # TODO validate later
 
     edges = []
     for parent_key, child_key, edge_dict in tree.ordered_edges():
-        edges.append(dot.Edge(parent_key, child_key, edge_dict['attributes']['dot'])) # TODO validate later
+        edges.append(dot.Edge(parent_key, child_key, edge_dict['attributes'])) # TODO validate later
 
     dotgraph.children = [node_defaults] + nodes + edges
 

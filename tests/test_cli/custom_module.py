@@ -33,8 +33,8 @@ class SubMember(Member):
         self.parent = pid
 
     @property
-    def attributes(self):
-        return {'dot' : { 'label' : self.key }}
+    def label(self):
+        return self.key
 
     @classmethod
     def from_dict(cls, dct):

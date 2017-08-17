@@ -280,7 +280,7 @@ class SigmaNuMember(Member, metaclass=ABCMeta):
 
     @property
     @abstractmethod
-    def attributes(self):
+    def label(self):
         pass
 
     @classmethod
@@ -331,9 +331,9 @@ class Knight(SigmaNuMember):
         self.affiliations = set(affiliations or []) | {Affiliation(self.chapter, int(badge))}
 
     @property
-    def attributes(self):
+    def label(self):
         affiliations = ', '.join([str(s) for s in sorted(self.affiliations)])
-        return { 'dot' : { 'label' : f'{self.name}\\n{affiliations}' } }
+        return  f'{self.name}\\n{affiliations}'
 
 class Brother(SigmaNuMember):
     '''
@@ -376,8 +376,8 @@ class Brother(SigmaNuMember):
         Brother.bid += 1
 
     @property
-    def attributes(self):
-        return { 'dot' : { 'label' :  f'{self.name}\\n{self.chapter} Brother' } }
+    def label(self):
+        return f'{self.name}\\n{self.chapter} Brother'
 
 class Candidate(SigmaNuMember):
     '''
@@ -417,8 +417,8 @@ class Candidate(SigmaNuMember):
         Candidate.cid += 1
 
     @property
-    def attributes(self):
-        return { 'dot' : { 'label' : f'{self.name}\\n{self.chapter} Candidate' } }
+    def label(self):
+        return f'{self.name}\\n{self.chapter} Candidate'
 
 class Expelled(Knight):
     '''
@@ -459,8 +459,8 @@ class Expelled(Knight):
         self.affiliations = affiliations or []
 
     @property
-    def attributes(self):
-        return { 'dot' : { 'label' : f'{self.name}\\n{self.key}' } }
+    def label(self):
+        return f'{self.name}\\n{self.key}'
 
 class Reaffiliate:
     '''

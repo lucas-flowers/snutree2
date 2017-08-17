@@ -58,6 +58,6 @@ class KeyedMember(Member):
         return cls(**cls.validate_dict(dct))
 
     @property
-    def attributes(self):
-        return { 'dot' : { 'label' : self.name } }
+    def label(self):
+        return self.name
 

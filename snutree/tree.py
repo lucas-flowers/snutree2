@@ -1,6 +1,6 @@
 import random
 from enum import Enum
-from abc import ABCMeta
+from abc import ABCMeta, abstractmethod
 from networkx import DiGraph
 from networkx.algorithms.components import weakly_connected_components
 from .errors import SnutreeError
@@ -57,14 +57,13 @@ class TreeEntity(metaclass=ABCMeta):
         integers can be added to). This field might be allowed to remain
         unset, though it will raise an error if used before it is set.
 
-        + attributes: Dictionary of attributes that a writing module use.
+        + label: Label used in drawing the node
 
     '''
 
-    def __init__(self, key, rank=None, attributes=None):
+    def __init__(self, key, rank=None):
         self.key = key
         self._rank = rank
-        self.attributes = attributes
 
     @property
     def rank(self):
@@ -78,37 +77,15 @@ class TreeEntity(metaclass=ABCMeta):
     def rank(self, value):
         self._rank = value
 
-class Custom(TreeEntity):
-    '''
-    TreeEntities used for decoration.
-    '''
-
-    def __init__(self, key, rank=None, attributes=None):
-        self.key = key
-        self.rank = rank
-        self.attributes = attributes.copy() if attributes else {}
-
-class UnidentifiedMember(Custom):
-    '''
-    All members are assumed to have parents. If a member does not have a known
-    parent. UnidentifiedMembers are given ranks one rank before the members
-    they are parents to, unless the rank is unknown, in which case it is left
-    null. (Assuming the "unknowns" option is selected.)
-    '''
-
-    def __init__(self, member, attributes=None):
-        key = f'{member.key} Parent'
-        try:
-            rank = member.rank - 1
-        except TreeEntityAttributeError:
-            rank = None
-        super().__init__(key, rank, attributes)
-
 class Member(TreeEntity, metaclass=ABCMeta):
     '''
     A member of the organization.
     '''
-    pass
+
+    @property
+    @abstractmethod
+    def label(self):
+        pass
 
 class TreeEntityAttributeError(SnutreeError):
     pass
@@ -271,7 +248,7 @@ class FamilyTree:
         return (k for k, in_degree in in_degrees if in_degree == 0
                 and isinstance(self.graph.node[k]['entity'], Member))
 
-    def add_entity(self, entity):
+    def add_entity(self, entity, **attributes):
         '''
         Add the TreeEntity to the tree, catching any duplicates.
         '''
@@ -281,14 +258,13 @@ class FamilyTree:
             code = TreeErrorCode.DUPLICATE_ENTITY
             msg = f'duplicate entity key: {key!r}'
             raise TreeError(code, msg)
-        self.graph.add_node(key, entity=entity, attributes=entity.attributes)
+        self.graph.add_node(key, entity=entity, **attributes)
 
-    def add_big_relationship(self, member, attributes=None):
+    def add_big_relationship(self, member):
         '''
-        Add an edge for the member and its parent to the tree, with any
-        provided DOT edge attributes. Ensure that the parent actually exists in
-        the tree already and that the parent is on the same rank or on a rank
-        before the member.
+        Add an edge for the member and its parent to the tree. Ensure that the
+        parent actually exists in the tree already and that the parent is on
+        the same rank or on a rank before the member.
         '''
 
         ckey = member.key
@@ -306,7 +282,7 @@ class FamilyTree:
             msg = f'rank {member.rank!r} of member {ckey!r} cannot be prior to rank of parent {pkey!r}: {parent.rank!r}'
             raise TreeError(code, msg)
 
-        self.graph.add_edge(pkey, ckey, attributes=attributes or {'dot' : {}})
+        self.graph.add_edge(pkey, ckey)
 
     def get_rank_bounds(self):
         '''

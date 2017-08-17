@@ -45,8 +45,8 @@ class Chapter(Member):
         self.parent = parent
 
     @property
-    def attributes(self):
-        return { 'dot' : { 'label' : self.key } }
+    def label(self):
+        return self.key
 
     @classmethod
     def validate_dict(cls, dct):
