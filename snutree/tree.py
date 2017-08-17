@@ -102,7 +102,7 @@ class FamilyTree:
         arguments in the same order asked. If nodes=True, then a the entire node
         dictionary is also provided at the end of the tuple.
         '''
-        for key, node in list(self.graph.nodes_iter(data=True)):
+        for key, node in self.graph.nodes_iter(data=True):
             yielded = (
                     *((key,) if keys else ()),
                     *tuple([node[attr] for attr in attributes]),
@@ -150,7 +150,7 @@ class FamilyTree:
         Yields all members who are not connected to any node in the tree at
         all, whether they be bigs, littles, or decorative nodes.
         '''
-        for key, degree in list(self.graph.degree_iter()):
+        for key, degree in self.graph.degree_iter():
             entity = self[key]['entity']
             if degree == 0 and isinstance(entity, Member):
                 yield entity
@@ -221,7 +221,7 @@ class FamilyTree:
             msg = f'rank {member.rank!r} of member {ckey!r} cannot be prior to rank of parent {pkey!r}: {parent.rank!r}'
             raise TreeError(code, msg)
 
-        self.graph.add_edge(pkey, ckey)
+        self.add_edge(pkey, ckey)
 
     def get_rank_bounds(self):
         '''
@@ -317,7 +317,7 @@ class FamilyTree:
 
         for component in components:
             for key in sorted(component, key=str):
-                yield key, self.graph.node[key]
+                yield key, self[key]
 
     def ordered_edges(self):
         '''

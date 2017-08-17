@@ -242,7 +242,7 @@ def remove_singleton_members(tree):
     # TODO protect singletons (e.g., refounders without littles) after a
     # certain date so they don't disappear without at least a warning?
 
-    keys = (singleton.key for singleton in tree.singletons())
+    keys = [singleton.key for singleton in tree.singletons()]
     tree.remove(keys)
 
 @logged
