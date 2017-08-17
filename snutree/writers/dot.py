@@ -40,7 +40,7 @@ def add_colors(tree):
             if 'color' not in family_dict:
                 family_dict['color'] = next(color_picker)
 
-            node_dict['attributes'].get('dot', {})['color'] = family_dict['color']
+            node_dict['attributes']['dot']['color'] = family_dict['color']
 
 @logged
 def to_dot_graph(tree):
@@ -55,11 +55,11 @@ def to_dot_graph(tree):
 
     members = create_tree_subgraph(tree, 'members')
 
-    graph_defaults = tree.settings['graph_defaults']['all']['dot']
+    graph_defaults = tree.settings['graph_defaults']['all']
     dotgraph = dot.Graph('family_tree', 'digraph', attributes=graph_defaults)
 
-    node_defaults = dot.Defaults('node', tree.settings['node_defaults']['all']['dot'])
-    edge_defaults = dot.Defaults('edge', tree.settings['edge_defaults']['all']['dot'])
+    node_defaults = dot.Defaults('node', tree.settings['node_defaults']['all'])
+    edge_defaults = dot.Defaults('edge', tree.settings['edge_defaults']['all'])
 
     if tree.settings['layout']['ranks']:
         min_rank, max_rank = tree.get_rank_bounds()
@@ -83,8 +83,8 @@ def create_date_subgraph(tree, suffix, min_rank, max_rank):
 
     subgraph = dot.Graph(f'dates{suffix}', 'subgraph')
 
-    node_defaults = dot.Defaults('node', tree.settings['node_defaults']['rank']['dot'])
-    edge_defaults = dot.Defaults('edge', tree.settings['edge_defaults']['rank']['dot'])
+    node_defaults = dot.Defaults('node', tree.settings['node_defaults']['rank'])
+    edge_defaults = dot.Defaults('edge', tree.settings['edge_defaults']['rank'])
 
     nodes, edges = [], []
     rank = min_rank
@@ -109,15 +109,15 @@ def create_tree_subgraph(tree, subgraph_key):
 
     dotgraph = dot.Graph(subgraph_key, 'subgraph')
 
-    node_defaults = dot.Defaults('node', tree.settings['node_defaults']['member']['dot'])
+    node_defaults = dot.Defaults('node', tree.settings['node_defaults']['member'])
 
     nodes = []
     for key, node_dict in tree.ordered_nodes():
-        nodes.append(dot.Node(key, node_dict['attributes'].get('dot'))) # TODO validate later
+        nodes.append(dot.Node(key, node_dict['attributes']['dot'])) # TODO validate later
 
     edges = []
     for parent_key, child_key, edge_dict in tree.ordered_edges():
-        edges.append(dot.Edge(parent_key, child_key, edge_dict['attributes'].get('dot'))) # TODO validate later
+        edges.append(dot.Edge(parent_key, child_key, edge_dict['attributes']['dot'])) # TODO validate later
 
     dotgraph.children = [node_defaults] + nodes + edges
 

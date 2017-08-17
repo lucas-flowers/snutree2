@@ -7,47 +7,39 @@ tree:
   # Defaults style for Graphviz graphs and subgraphs
   graph_defaults:
     all:
-      dot:
-        ratio: compress
-        pad: .5, .5
-        ranksep: .3
-        concentrate: false
+      ratio: compress
+      pad: .5, .5
+      ranksep: .3
+      concentrate: false
 
   # Default style for Graphviz nodes
   node_defaults:
     all:
-      dot:
-        style: filled
-        shape: box
-        penwidth: 2
-        width: 2
-        height: .45
-        fontname: dejavu sans
+      style: filled
+      shape: box
+      penwidth: 2
+      width: 2
+      height: .45
+      fontname: dejavu sans
     member:
-      dot:
-        fillcolor: .11 .71 1. # A goldish color
+      fillcolor: .11 .71 1. # A goldish color
     rank:
-      dot:
-        color: none
-        fontsize: 20
-        fontname: georgia
+      color: none
+      fontsize: 20
+      fontname: georgia
     unknown:
-      dot:
-        height: 0
-        width: 0
-        style: invis
+      height: 0
+      width: 0
+      style: invis
 
   # Default style for Graphviz edges
   edge_defaults:
     all:
-      dot:
-        arrowhead: none
+      arrowhead: none
     rank:
-      dot:
-        style: invis
+      style: invis
     unknown:
-      dot:
-        style: dotted
+      style: dotted
 
   layout:
     ranks: True

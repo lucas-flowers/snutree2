@@ -34,7 +34,7 @@ class SubMember(Member):
 
     @property
     def attributes(self):
-        return { 'label' : self.key }
+        return {'dot' : { 'label' : self.key }}
 
     @classmethod
     def from_dict(cls, dct):

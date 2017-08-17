@@ -30,9 +30,6 @@ attribute_defaults = lambda *allowed : {
         'keyschema' : { 'allowed' : allowed },
         'valueschema' : {
             'type' : 'dict',
-            'schema' : {
-                'dot' : graphviz_attributes
-                }
             }
         }
 
@@ -174,9 +171,6 @@ def create_settings_validator(RankType):
                     'attributes' : {
                         'type' : 'dict',
                         'default' : {},
-                        'schema' : {
-                            'dot' : graphviz_attributes,
-                            }
                         }
                     }
                 }
@@ -201,9 +195,6 @@ def create_settings_validator(RankType):
                     'attributes' : {
                         'type' : 'dict',
                         'default' : {},
-                        'schema' : {
-                            'dot' : graphviz_attributes,
-                            }
                         }
                     }
                 },
@@ -336,7 +327,7 @@ class FamilyTree:
             msg = f'rank {member.rank!r} of member {ckey!r} cannot be prior to rank of parent {pkey!r}: {parent.rank!r}'
             raise TreeError(code, msg)
 
-        self.graph.add_edge(pkey, ckey, attributes=attributes or {})
+        self.graph.add_edge(pkey, ckey, attributes=attributes or {'dot' : {}})
 
     def get_rank_bounds(self):
         '''
@@ -373,7 +364,9 @@ class FamilyTree:
         '''
 
         for key, value in self.settings['nodes'].items():
-            self.add_entity(Custom(key, **value))
+            rank = value['rank']
+            attributes = {'dot' : value['attributes']}
+            self.add_entity(Custom(key, rank=rank, attributes=attributes))
 
     @logged
     def add_member_relationships(self):
@@ -404,7 +397,7 @@ class FamilyTree:
                     msg = f'custom {path_or_edge} {nodes} has undefined node: {key!r}'
                     raise TreeError(code, msg)
 
-            attributes = path['attributes']
+            attributes = {'dot' : path['attributes']}
 
             edges = [(u, v) for u, v in zip(nodes[:-1], nodes[1:])]
             self.graph.add_edges_from(edges, attributes=attributes)
@@ -464,11 +457,11 @@ class FamilyTree:
 
             orphan = self.graph.node[orphan_key]['entity']
 
-            parent = UnidentifiedMember(orphan, self.settings['node_defaults']['unknown'])
+            parent = UnidentifiedMember(orphan, attributes={'dot' : self.settings['node_defaults']['unknown']})
 
             orphan.parent = parent.key
             self.add_entity(parent)
-            self.graph.add_edge(orphan.parent, orphan_key, attributes=self.settings['edge_defaults']['unknown'])
+            self.graph.add_edge(orphan.parent, orphan_key, attributes={'dot' : self.settings['edge_defaults']['unknown']})
 
     ###########################################################################
     #### Ordering                                                          ####
