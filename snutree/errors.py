@@ -8,6 +8,12 @@ class SnutreeReaderError(SnutreeError):
     '''
     pass
 
+class SnutreeWriterError(SnutreeError):
+    '''
+    Problems with creating output files.
+    '''
+    pass
+
 class SnutreeSchemaError(SnutreeError):
     '''
     Problems when attempting to convert a table row into a Member. Allows the

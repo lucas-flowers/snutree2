@@ -22,15 +22,11 @@ class TreeEntity(metaclass=ABCMeta):
 
         + key: The key to be used in DOT
 
-        + parent: The key of the entity's parent node
-
         + _rank: A private field storing a rank ID, which is assumed to be
         some kind of integer-compatible object (e.g., actual integers
         representing years, a Semester object, or other ordered types that
         integers can be added to). This field might be allowed to remain
         unset, though it will raise an error if used before it is set.
-
-        + label: Label used in drawing the node
 
     '''
 
@@ -43,8 +39,9 @@ class TreeEntity(metaclass=ABCMeta):
         if self._rank:
             return self._rank
         else:
+            code = TreeErrorCode.ACCESS_MISSING_RANK
             msg = f'missing rank value for entity {self.key!r}'
-            raise TreeEntityAttributeError(msg)
+            raise TreeError(code, msg)
 
     @rank.setter
     def rank(self, value):
@@ -52,16 +49,14 @@ class TreeEntity(metaclass=ABCMeta):
 
 class Member(TreeEntity, metaclass=ABCMeta):
     '''
-    A member of the organization.
+    The node for a member of the organization. Subclasses should implement the
+    label property, which produces a labels for drawing.
     '''
 
     @property
     @abstractmethod
     def label(self):
         pass
-
-class TreeEntityAttributeError(SnutreeError):
-    pass
 
 ###############################################################################
 ###############################################################################
@@ -71,12 +66,12 @@ class TreeEntityAttributeError(SnutreeError):
 
 class FamilyTree:
     '''
-    Representation of the family tree. The tree is made of nodes connected by
-    edges (duh). Every node must store a TreeEntity object in node['entity'],
-    and TreeEntities may either be Members or non-Members. All entities must
-    have a valid rank field when the tree is printed (unless ranks are ignored
-    in the settings dictionary). The type of the rank field (such as int,
-    Semester, or a custom type) is provided to the constructor.
+    Representation of the family tree. Every node must store a TreeEntity
+    object in node['entity'], and TreeEntities may either be Members or
+    non-Members. All entities must have a valid rank field when the tree is
+    printed (unless ranks are ignored in the settings dictionary). The type of
+    the rank field (such as int, Semester, or a custom type) is provided to the
+    constructor.
 
     Members have big-little relationships, determined by the parent field. This
     relationship determines the edges between them. Non-Members do *not* have
@@ -300,10 +295,9 @@ class TreeError(SnutreeError):
         return self.message
 
 TreeErrorCode = Enum('TreeErrorCode', (
+        'ACCESS_MISSING_RANK',
         'DUPLICATE_ENTITY',
         'PARENT_UNKNOWN',
         'PARENT_NOT_PRIOR',
-        'UNKNOWN_EDGE_COMPONENT',
-        'FAMILY_COLOR_CONFLICT',
         ))
 

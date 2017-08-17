@@ -1,9 +1,10 @@
 import logging
 from snutree import dot
+from snutree.errors import SnutreeWriterError
 from snutree.tree import TreeEntity, Member
 from snutree.logging import logged
 from snutree.colors import ColorPicker
-from snutree.tree import TreeEntityAttributeError, TreeErrorCode, TreeError # TODO make writer errors
+from snutree.tree import TreeError
 from ..cerberus import optional_boolean, nonempty_string, Validator
 
 ###############################################################################
@@ -127,7 +128,7 @@ class UnidentifiedMember(TreeEntity):
         key = f'{member.key} Parent'
         try:
             rank = member.rank - 1
-        except TreeEntityAttributeError:
+        except TreeError:
             rank = None
         super().__init__(key, rank=rank)
 
@@ -154,10 +155,9 @@ def add_custom_edges(tree, edges):
         nodes = path['nodes']
         for key in nodes:
             if key not in tree.graph:
-                code = TreeErrorCode.UNKNOWN_EDGE_COMPONENT
                 path_or_edge = 'path' if len(nodes) > 2 else 'edge'
                 msg = f'custom {path_or_edge} {nodes} has undefined node: {key!r}'
-                raise TreeError(code, msg)
+                raise SnutreeWriterError(msg)
 
         attributes = path['attributes']
 
@@ -191,9 +191,8 @@ def add_colors(tree, family_colors):
 
             family = tree.graph.node[key]['family']
             if 'color' in family:
-                code = TreeErrorCode.FAMILY_COLOR_CONFLICT
                 msg = f'family of member {key!r} already assigned the color {color!r}'
-                raise TreeError(code, msg)
+                raise SnutreeWriterError(msg)
 
             color_picker.use(color)
             tree.graph.node[key]['family']['color'] = color
