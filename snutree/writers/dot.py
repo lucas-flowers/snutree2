@@ -73,7 +73,7 @@ DOT_SCHEMA = {
                 'type' : 'dict',
                 'schema' : {
                     'rank' : {
-                        'coerce' : NotImplemented, # Will be filled below
+                        'coerce' : 'rank_type',
                         },
                     'attributes' : {
                         'type' : 'dict',
@@ -121,8 +121,7 @@ def from_FamilyTree(tree, RankType, config):
     that object.
     '''
 
-    DOT_SCHEMA['nodes']['valueschema']['schema']['rank']['coerce'] = RankType
-    validator = Validator(DOT_SCHEMA)
+    validator = Validator(DOT_SCHEMA, RankType=RankType)
     config = validator.validated(config)
 
     decorate(tree, config)

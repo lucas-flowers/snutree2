@@ -9,6 +9,10 @@ from .errors import SnutreeError
 
 class Validator(cerberus.Validator):
 
+    def __init__(self, *args, **kwargs):
+        self.RankType = kwargs.get('RankType')
+        super().__init__(*args, **kwargs)
+
     def validated(self, *args, **kwargs):
         '''
         Validate the dict with the cerberus validator provided. Return the
@@ -23,6 +27,14 @@ class Validator(cerberus.Validator):
             raise SnutreeError(msg)
 
         return dct
+
+    def _normalize_coerce_rank_type(self, value):
+        if not self.RankType:
+            raise ValueError('cannot coerce rank value: validator RankType field not defined')
+        return self.RankType(value)
+
+    def _normalize_coerce_optional_rank_type(self, value):
+        return value and self._normalize_coerce_rank_type(value)
 
 # A required string; must be nonempty and not None
 nonempty_string = {
