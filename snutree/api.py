@@ -12,6 +12,7 @@ from .errors import SnutreeError
 from .logging import logged
 from .tree import FamilyTree
 from .cerberus import Validator
+from .writers import dot
 
 ###############################################################################
 ###############################################################################
@@ -28,6 +29,13 @@ CONFIG_VALIDATOR = Validator({
         },
     'schema' : {
         'type' : 'dict',
+        'allow_unknown' : True,
+        'schema' : {
+            'name' : {
+                'type' : 'string',
+                'default' : 'basic'
+                }
+            }
         },
     'tree' : {
         'type' : 'dict',
@@ -168,7 +176,7 @@ def generate(
 
     logger.info('Loading member schema module')
     # TODO move GET to a validator
-    schema = get_schema_module(config['schema'].get('name', 'basic'))
+    schema = get_schema_module(config['schema']['name'])
 
     logger.info('Reading member table from data sources')
     member_table = get_member_table(input_files, config['readers'])
@@ -180,7 +188,6 @@ def generate(
     tree = FamilyTree(members, config['seed'])
 
     logger.info('Building DOT graph')
-    from snutree.writers import dot
     dot_graph = dot.from_FamilyTree(tree, schema.Rank, config['tree'])
 
     logger.info('Composing DOT source code')
