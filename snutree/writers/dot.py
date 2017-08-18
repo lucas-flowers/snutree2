@@ -10,6 +10,8 @@ from snutree.colors import ColorPicker
 from snutree.tree import TreeError
 from snutree.cerberus import optional_boolean, nonempty_string, Validator
 
+logger_name = 'snutree.writers.dot'
+
 ###############################################################################
 ###############################################################################
 #### API                                                                   ####
@@ -25,7 +27,7 @@ filetypes = {
 
 def write_tree(tree, RankType, config):
 
-    logger = logging.getLogger(__name__)
+    logger = logging.getLogger(logger_name)
 
     validator = Validator(DOT_SCHEMA, RankType=RankType)
     config = validator.validated(config)
@@ -35,8 +37,8 @@ def write_tree(tree, RankType, config):
     dot_graph = create_dot_graph(tree, config['ranks'], config['defaults'])
     dot_source = dot_graph.to_dot()
 
-    logger.info('Compiling to {config["filetype"]} file')
-    write_output(dot_source, config)
+    logger.info(f'Compiling to {config["filetype"]} file')
+    write_output(dot_source, config['filetype'], config['file'])
 
 ###############################################################################
 ###############################################################################
@@ -240,7 +242,7 @@ def remove_singleton_members(tree, warn_rank=None):
         rank = singleton.is_ranked() and singleton.rank
         if warn_rank is not None and warn_rank <= rank:
             msg = f'(warn_rank>={warn_rank!r}) singleton {key!r} with rank {rank!r} was dropped '
-            logging.getLogger(__name__).warning(msg)
+            logging.getLogger(logger_name).warning(msg)
     tree.remove(keys)
 
 @logged
@@ -259,7 +261,7 @@ def add_colors(tree, family_colors):
     for key, color in family_colors.items():
         if key not in tree:
             msg = f'family color map includes nonexistent member: {key!r}'
-            logging.getLogger(__name__).warning(msg)
+            logging.getLogger(logger_name).warning(msg)
             continue
         family = tree[key]['family']
         if 'color' in family:
@@ -413,7 +415,7 @@ def create_ranks(tree, min_rank, max_rank):
 ###############################################################################
 
 @logged
-def write_output(src, config):
+def write_output(src, filetype, path):
     '''
     If a path is provided: Use the path to determine the output format, then
     compile the DOT source code to the target format and write to the file.
@@ -421,13 +423,11 @@ def write_output(src, config):
     If no path is provided: Write DOT source code directly to sys.stdout.
     '''
 
-    filetype = config['filetype']
     if filetype == 'dot':
         compiled = compile_dot
     else:
         compiled = lambda src : compile_fmt(src, filetype)
 
-    path = config['file']
     if path:
         stream_open = lambda : path.open('wb+')
     else:
