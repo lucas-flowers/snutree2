@@ -13,7 +13,85 @@ from .cerberus import Validator
 
 ###############################################################################
 ###############################################################################
-#### Cerberus Schemas                                                      ####
+#### API                                                                   ####
+###############################################################################
+###############################################################################
+
+def generate(
+        input_files:List[IO[Any]],
+        output_path:Path,
+        config_paths:List[Path],
+        input_format:str,
+        schema:str,
+        writer:str,
+        seed:int,
+        ):
+    '''
+    Create a big-little family tree.
+    '''
+
+    logger = logging.getLogger(__name__)
+
+    config_defaults = {
+            'readers' : {
+                'stdin' : {
+                    'format' : None
+                    }
+                },
+            'schema' : {
+                'name' : 'basic',
+                },
+            'writer' : {
+                'filetype' : output_path.suffix[1:] if output_path is not None and output_path.suffix else 'dot',
+                'name' : None,
+                'file' : None,
+                },
+            'seed' : 71
+            }
+
+    # Parameters for this function that can also be included in config files
+    config_args = denullified({
+        'readers' : {
+            'stdin' : {
+                'format' : input_format,
+                },
+            },
+        'schema' : {
+            'name' : schema,
+            },
+        'writer' : {
+            'name' : writer,
+            'file' : output_path,
+            },
+        'seed' : seed,
+        })
+
+    logger.info('Loading configuration files')
+    config = get_config(config_defaults, config_paths, config_args)
+
+    logger.info('Loading member schema module')
+    schema = get_schema_module(config['schema']['name'])
+
+    logger.info('Reading member table from data sources')
+    member_table = get_member_table(input_files, config['readers'])
+
+    logger.info('Validating member table')
+    members = schema.to_Members(member_table, **config['schema'])
+
+    logger.info('Building family tree')
+    tree = FamilyTree(members, config['seed'])
+
+    logger.info('Loading writer module')
+    writer = find_writer_module(config['writer']['filetype'], config['writer']['name'])
+
+    logger.info('Running writer module')
+    writer.write_tree(tree, schema.Rank, config['writer'])
+
+    logger.info('Done')
+
+###############################################################################
+###############################################################################
+#### Configuration Schema                                                  ####
 ###############################################################################
 ###############################################################################
 
@@ -168,84 +246,6 @@ def get_writer_module(name):
 
 ###############################################################################
 ###############################################################################
-#### API                                                                   ####
-###############################################################################
-###############################################################################
-
-def generate(
-        input_files:List[IO[Any]],
-        output_path:Path,
-        config_paths:List[Path],
-        input_format:str,
-        schema:str,
-        writer:str,
-        seed:int,
-        ):
-    '''
-    Create a big-little family tree.
-    '''
-
-    logger = logging.getLogger(__name__)
-
-    config_defaults = {
-            'readers' : {
-                'stdin' : {
-                    'format' : None
-                    }
-                },
-            'schema' : {
-                'name' : 'basic',
-                },
-            'writer' : {
-                'filetype' : output_path.suffix[1:] if output_path is not None and output_path.suffix else 'dot',
-                'name' : None,
-                'file' : None,
-                },
-            'seed' : 71
-            }
-
-    # Parameters for this function that can also be included in config files
-    config_args = denullified({
-        'readers' : {
-            'stdin' : {
-                'format' : input_format,
-                },
-            },
-        'schema' : {
-            'name' : schema,
-            },
-        'writer' : {
-            'name' : writer,
-            'file' : output_path,
-            },
-        'seed' : seed,
-        })
-
-    logger.info('Loading configuration files')
-    config = get_config(config_defaults, config_paths, config_args)
-
-    logger.info('Loading member schema module')
-    schema = get_schema_module(config['schema']['name'])
-
-    logger.info('Reading member table from data sources')
-    member_table = get_member_table(input_files, config['readers'])
-
-    logger.info('Validating member table')
-    members = schema.to_Members(member_table, **config['schema'])
-
-    logger.info('Building family tree')
-    tree = FamilyTree(members, config['seed'])
-
-    logger.info('Loading writer module')
-    writer = find_writer_module(config['writer']['filetype'], config['writer']['name'])
-
-    logger.info('Running writer module')
-    writer.write_tree(tree, schema.Rank, config['writer'])
-
-    logger.info('Done')
-
-###############################################################################
-###############################################################################
 #### API Helper Functions                                                  ####
 ###############################################################################
 ###############################################################################
@@ -342,7 +342,7 @@ def find_writer_module(filetype, writer_name=None):
 
 ###############################################################################
 ###############################################################################
-#### Utilities                                                             ####
+#### General Utilities                                                     ####
 ###############################################################################
 ###############################################################################
 
