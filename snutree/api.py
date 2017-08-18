@@ -11,7 +11,7 @@ from pluginbase import PluginBase
 from .errors import SnutreeError
 from .logging import logged
 from .tree import FamilyTree
-from .cerberus import Validator, nonempty_string
+from .cerberus import Validator, optional_nonempty_string
 from .writers import dot
 
 ###############################################################################
@@ -52,11 +52,8 @@ CONFIG_VALIDATOR = Validator({
         'type' : 'dict',
         'allow_unknown' : True,
         'schema' : {
-            'filetype' : nonempty_string,
-            'name' : {
-                'type' : 'string',
-                'nullable' : True,
-                },
+            'filetype' : optional_nonempty_string,
+            'name' : optional_nonempty_string,
             }
         },
     'seed' : {
@@ -194,7 +191,7 @@ def generate(
                 },
             'writer' : {
                 'name' : None,
-                'filetype' : 'dot',
+                'filetype' : Path(output_path).suffix[1:] if output_path is not None else 'dot',
                 },
             'seed' : 71
             }
@@ -233,10 +230,8 @@ def generate(
     tree = FamilyTree(members, config['seed'])
 
     writers = {}
-    if output_path is not None:
-        filetype = Path(output_path).suffix[1:]
-    else:
-        filetype = config['writer']['filetype']
+    filetype = config['writer']['filetype']
+
     for writer in BUILTIN_WRITERS:
         module = get_writer_module(writer)
         for filetype in module.filetypes:

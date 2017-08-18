@@ -45,8 +45,9 @@ DOT_SCHEMA = {
 
         'filetype' : {
             'allowed' : list(filetypes),
+            'nullable' : True,
             },
-            
+
         # Flags
         **{ flag : optional_boolean for flag in [
             'ranks',
