@@ -12,7 +12,35 @@ from snutree.cerberus import optional_boolean, nonempty_string, Validator
 
 ###############################################################################
 ###############################################################################
-#### Cerberus Schema                                                       ####
+#### API                                                                   ####
+###############################################################################
+###############################################################################
+
+filetypes = {
+        'dot', # Printed directly
+        'eps',
+        'svg',
+        'pdf',
+        }
+
+def write_tree(tree, RankType, config):
+
+    logger = logging.getLogger(__name__)
+
+    validator = Validator(DOT_SCHEMA, RankType=RankType)
+    config = validator.validated(config)
+
+    logger.info('Converting to DOT format')
+    decorate(tree, config)
+    dot_graph = create_dot_graph(tree, config['ranks'], config['defaults'])
+    dot_source = dot_graph.to_dot()
+
+    logger.info('Compiling to {config["filetype"]} file')
+    write_output(dot_source, config)
+
+###############################################################################
+###############################################################################
+#### Configuration Schema                                                  ####
 ###############################################################################
 ###############################################################################
 
@@ -34,13 +62,6 @@ attribute_defaults = lambda *allowed : {
         'valueschema' : {
             'type' : 'dict',
             }
-        }
-
-filetypes = {
-        'dot', # Printed directly
-        'eps',
-        'svg',
-        'pdf',
         }
 
 DOT_SCHEMA = {
@@ -143,102 +164,6 @@ DOT_SCHEMA = {
             },
 
         }
-
-###############################################################################
-###############################################################################
-#### Main                                                                  ####
-###############################################################################
-###############################################################################
-
-def write_tree(tree, RankType, config):
-
-    logger = logging.getLogger(__name__)
-
-    logger.info('Converting to DOT format')
-    dot_graph = get_dot_graph(tree, RankType, config)
-    dot_source = dot_graph.to_dot()
-
-    logger.info('Compiling to {config["filetype"]} file')
-    write_output(dot_source, config)
-
-@logged
-def get_dot_graph(tree, RankType, config):
-    '''
-    Convert the tree into an object representing a DOT file, then return
-    that object.
-    '''
-
-    validator = Validator(DOT_SCHEMA, RankType=RankType)
-    config = validator.validated(config)
-
-    decorate(tree, config)
-    dotgraph = create_dot_graph(tree, config['ranks'], config['defaults'])
-
-    return dotgraph
-
-@logged
-def write_output(src, config):
-    '''
-    If a path is provided: Use the path to determine the output format, then
-    compile the DOT source code to the target format and write to the file.
-
-    If no path is provided: Write DOT source code directly to sys.stdout.
-    '''
-
-    filetype = config['filetype']
-    if filetype == 'dot':
-        compiled = compile_dot
-    else:
-        compiled = lambda src : compile_fmt(src, filetype)
-
-    path = config['file']
-    if path:
-        stream_open = lambda : path.open('wb+')
-    else:
-        # Buffer since we are writing binary
-        stream_open = contextmanager(lambda : (yield sys.stdout.buffer))
-
-    with stream_open() as f:
-        f.write(compiled(src))
-
-@logged
-def compile_fmt(src, filetype):
-    '''
-    Uses Graphviz dot to convert the DOT source into the appropriate filetype.
-    Returns the binary of that filetype.
-
-    Note: Although Graphviz supports many formats, only a handful of them are
-    permissible here. If you want to use those formats, pipe the DOT output of
-    snutree into dot itself.
-    '''
-
-    try:
-        # `shell=True` is necessary for Windows, but not for Linux. The command
-        # string is constant except for the validated {filetype}, so shell=True
-        # should be fine
-        assert filetype in filetypes, 'filetype not properly cleaned'
-        result = subprocess.run(f'dot -T{filetype}', check=True, shell=True,
-                # The input will be a str and the output will be binary, but
-                # subprocess.run requires they both be str or both be binary.
-                # So, use binary and send the source in as binary (with default
-                # encoding).
-                input=bytes(src, sys.getdefaultencoding()),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
-                )
-    except (OSError, subprocess.CalledProcessError) as exception:
-        msg = f'had a problem compiling to {filetype}:\n{exception}\nCaptured Standard Error:\n{exception.stderr}'
-        raise SnutreeWriterError(msg)
-
-    return result.stdout
-
-@logged
-def compile_dot(src):
-    '''
-    Converts the DOT source into bytes suitable for writing (bytes, not
-    characters, are expected by the main output writer).
-    '''
-    return bytes(src, sys.getdefaultencoding())
 
 ###############################################################################
 ###############################################################################
@@ -480,4 +405,74 @@ def create_ranks(tree, min_rank, max_rank):
         ranks[node['entity'].rank - min_rank].keys.append(key)
 
     return ranks
+
+###############################################################################
+###############################################################################
+#### Writing Output                                                        ####
+###############################################################################
+###############################################################################
+
+@logged
+def write_output(src, config):
+    '''
+    If a path is provided: Use the path to determine the output format, then
+    compile the DOT source code to the target format and write to the file.
+
+    If no path is provided: Write DOT source code directly to sys.stdout.
+    '''
+
+    filetype = config['filetype']
+    if filetype == 'dot':
+        compiled = compile_dot
+    else:
+        compiled = lambda src : compile_fmt(src, filetype)
+
+    path = config['file']
+    if path:
+        stream_open = lambda : path.open('wb+')
+    else:
+        # Buffer since we are writing binary
+        stream_open = contextmanager(lambda : (yield sys.stdout.buffer))
+
+    with stream_open() as f:
+        f.write(compiled(src))
+
+@logged
+def compile_fmt(src, filetype):
+    '''
+    Uses Graphviz dot to convert the DOT source into the appropriate filetype.
+    Returns the binary of that filetype.
+
+    Note: Although Graphviz supports many formats, only a handful of them are
+    permissible here. If you want to use those formats, pipe the DOT output of
+    snutree into dot itself.
+    '''
+
+    try:
+        # `shell=True` is necessary for Windows, but not for Linux. The command
+        # string is constant except for the validated {filetype}, so shell=True
+        # should be fine
+        assert filetype in filetypes, 'filetype not properly cleaned'
+        result = subprocess.run(f'dot -T{filetype}', check=True, shell=True,
+                # The input will be a str and the output will be binary, but
+                # subprocess.run requires they both be str or both be binary.
+                # So, use binary and send the source in as binary (with default
+                # encoding).
+                input=bytes(src, sys.getdefaultencoding()),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
+                )
+    except (OSError, subprocess.CalledProcessError) as exception:
+        msg = f'had a problem compiling to {filetype}:\n{exception}\nCaptured Standard Error:\n{exception.stderr}'
+        raise SnutreeWriterError(msg)
+
+    return result.stdout
+
+@logged
+def compile_dot(src):
+    '''
+    Converts the DOT source into bytes suitable for writing (bytes, not
+    characters, are expected by the main output writer).
+    '''
+    return bytes(src, sys.getdefaultencoding())
 
