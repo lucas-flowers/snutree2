@@ -234,9 +234,9 @@ def generate(
 
     writers = {}
     if output_path is not None:
-        filetype = Path(output_path).suffix[1:] # TODO option for stdout format
+        filetype = Path(output_path).suffix[1:]
     else:
-        filetype = 'dot'
+        filetype = config['writer']['filetype']
     for writer in BUILTIN_WRITERS:
         module = get_writer_module(writer)
         for filetype in module.filetypes:
