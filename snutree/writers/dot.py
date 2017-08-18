@@ -22,7 +22,6 @@ filetypes = {
         'eps',
         'svg',
         'pdf',
-        'txt',
         }
 
 def compile_tree(tree, RankType, config):
