@@ -9,13 +9,13 @@ from .errors import SnutreeError
 
 class Validator(cerberus.Validator):
 
-    def validated(self, dct):
+    def validated(self, *args, **kwargs):
         '''
         Validate the dict with the cerberus validator provided. Return the
         validated dict on success and provided error information on failure.
         '''
 
-        dct = super().validated(dct)
+        dct = super().validated(*args, **kwargs)
         if not dct:
             errors = pprint.pformat(self.errors)
             s = 's' if len(errors) != 1 else ''

@@ -6,7 +6,7 @@ from cerberus import Validator
 from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.error import Error
 from voluptuous.humanize import validate_with_humanized_errors
-from snutree.cerberus import nonempty_string, Validator
+from snutree.cerberus import nonempty_string
 from snutree.errors import SnutreeError, SnutreeSchemaError
 from snutree.semester import Semester
 from snutree.tree import Member

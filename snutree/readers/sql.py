@@ -1,5 +1,4 @@
 from contextlib import closing
-from cerberus import Validator
 from snutree.errors import SnutreeReaderError
 from snutree.cerberus import Validator, nonempty_string
 

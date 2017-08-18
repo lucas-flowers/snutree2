@@ -5,7 +5,7 @@ from snutree.tree import TreeEntity
 from snutree.logging import logged
 from snutree.colors import ColorPicker
 from snutree.tree import TreeError
-from ..cerberus import optional_boolean, nonempty_string, Validator
+from snutree.cerberus import optional_boolean, nonempty_string, Validator
 
 ###############################################################################
 ###############################################################################

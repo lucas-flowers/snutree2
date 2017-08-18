@@ -4,7 +4,6 @@ from pathlib import Path
 from click.testing import CliRunner
 from snutree.errors import SnutreeError, SnutreeSchemaError
 from snutree.cli import cli
-from snutree.logging import setup_logger
 
 TESTS_ROOT = Path(__file__).parent
 
@@ -37,7 +36,6 @@ def run_example(
         config_params.append('--config')
         config_params.append(str(config))
 
-    # setup_logger(verbose=False, debug=True, quiet=False)
     result = invoke(config_params + [
         '--seed', seed,
         '--output', str(output),
