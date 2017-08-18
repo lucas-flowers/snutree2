@@ -11,7 +11,7 @@ from pluginbase import PluginBase
 from .errors import SnutreeError
 from .logging import logged
 from .tree import FamilyTree
-from .cerberus import Validator
+from .cerberus import Validator, nonempty_string
 from .writers import dot
 
 ###############################################################################
@@ -52,9 +52,11 @@ CONFIG_VALIDATOR = Validator({
         'type' : 'dict',
         'allow_unknown' : True,
         'schema' : {
+            'filetype' : nonempty_string,
             'name' : {
                 'type' : 'string',
-                }
+                'nullable' : True,
+                },
             }
         },
     'seed' : {
@@ -191,7 +193,8 @@ def generate(
                 'name' : 'basic',
                 },
             'writer' : {
-                'name' : 'dot',
+                'name' : None,
+                'filetype' : 'dot',
                 },
             'seed' : 71
             }
@@ -406,15 +409,21 @@ def deep_update(original, update):
     Recursively updates the original dictionary with the update dictionary. The
     update dictionary overwrites keys that are also in the original dictionary,
     except for lists, which are extended with the elements in the update
-    dictionary.
+    dictionary. If an updated value is None where the old value was a sequence
+    or mapping, the old value is not updated.
     '''
-
     for key, new_value in update.items():
         old_value = original.get(key)
-        if isinstance(old_value, MutableMapping) and isinstance(new_value, MutableMapping):
+        old_map = isinstance(old_value, MutableMapping)
+        old_seq = isinstance(old_value, MutableSequence)
+        new_map = isinstance(new_value, MutableMapping)
+        new_seq = isinstance(new_value, MutableSequence)
+        if old_map and new_map:
             deep_update(old_value, new_value)
-        elif isinstance(old_value, MutableSequence) and isinstance(new_value, MutableSequence):
+        elif old_seq and new_seq:
             original[key].extend(new_value)
+        elif (old_map or old_seq) and new_value is None:
+            pass
         else:
             original[key] = new_value
 
