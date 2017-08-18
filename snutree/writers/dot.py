@@ -38,7 +38,7 @@ def compile_tree(tree, RankType, config):
 
     logger.info(f'Compiling to {config["filetype"]}')
     output = compiled(dot_source, config['filetype'])
-    
+
     return output
 
 ###############################################################################
@@ -434,11 +434,14 @@ def compile_fmt(src, filetype):
     snutree into dot itself.
     '''
 
+    # This should have been checked somewhere outside this function, but who knows?
+    assert filetype in filetypes, 'filetype not properly cleaned'
+
     try:
+
         # `shell=True` is necessary for Windows, but not for Linux. The command
         # string is constant except for the validated {filetype}, so shell=True
         # should be fine
-        assert filetype in filetypes, 'filetype not properly cleaned'
         result = subprocess.run(f'dot -T{filetype}', check=True, shell=True,
                 # The input will be a str and the output will be binary, but
                 # subprocess.run requires they both be str or both be binary.
