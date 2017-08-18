@@ -1,9 +1,7 @@
-import subprocess
 import logging
 import sys
 from typing import Any, List, IO
 from pathlib import Path
-from contextlib import contextmanager
 from collections import MutableSequence, MutableMapping
 import yaml
 from cerberus import Validator
@@ -165,7 +163,7 @@ def get_writer_module(name):
     Return the writer of the given name.
     '''
     return get_module(WRITERS_PLUGIN_BASE, name,
-            attributes=['filetypes', 'from_FamilyTree'],
+            attributes=['filetypes', 'write_tree'],
             descriptor='writer',
             custom=True)
 
@@ -239,51 +237,13 @@ def generate(
     logger.info('Building family tree')
     tree = FamilyTree(members, config['seed'])
 
-    def find_writer_module(filetype, writer_name=None):
-        '''
-        Returns the writer module with the given writer name. If no writer name
-        is given, use the filetype to guess.
-        '''
-
-        if writer_name is not None:
-            return get_writer_module(writer_name)
-
-        writers = {}
-        for name in BUILTIN_WRITERS:
-            module = get_writer_module(name)
-            for supported_type in module.filetypes:
-                writers.setdefault(supported_type, []).append((name, module))
-
-        filetype_writers = writers.get(filetype)
-        if filetype_writers and len(filetype_writers) == 1:
-            _, module = filetype_writers[0]
-            return module
-        elif not filetype_writers:
-            msg = f'format {filetype!r} has no supported writers'
-            raise SnutreeError(msg)
-        else:
-            conflicting_writers = {name for name, _ in filetype_writers}
-            msg = f'format {filetype!r} has multiple writers but none selected: {conflicting_writers!r}'
-            raise SnutreeError(msg)
-
-
-
+    logger.info('Loading writer module')
     writer = find_writer_module(config['writer']['filetype'], config['writer']['name'])
 
-    output = writer.from_FamilyTree(tree, schema.Rank, config['writer'])
-    src = output.to_dot()
-    write_output(src, config['writer']['file'])
+    logger.info('Running writer module')
+    output = writer.write_tree(tree, schema.Rank, config['writer'])
 
-
-
-    # logger.info('Building DOT graph')
-    # dot_graph = dot.from_FamilyTree(tree, schema.Rank, config['tree'])
-    #
-    # logger.info('Composing DOT source code')
-    # dot_src = dot_graph.to_dot()
-    #
-    # logger.info('Writing to output file')
-    # write_output(dot_src, output_path)
+    logger.info('Complete')
 
 ###############################################################################
 ###############################################################################
@@ -354,72 +314,32 @@ def get_member_table(files, reader_configs):
 
     return members
 
-@logged
-def write_output(src, path=None):
+def find_writer_module(filetype, writer_name=None):
     '''
-    If a path is provided: Use the path to determine the output format, then
-    compile the DOT source code to the target format and write to the file.
-
-    If no path is provided: Write DOT source code directly to sys.stdout.
+    Returns the writer module with the given writer name. If no writer name
+    is given, use the filetype to guess.
     '''
 
-    filetype = path.suffix[1:] if path else 'dot'
+    if writer_name is not None:
+        return get_writer_module(writer_name)
 
-    compiled = WRITERS.get(filetype)
-    if compiled is None:
-        msg = f'output filetype {filetype!r} not supported'
+    writers = {}
+    for name in BUILTIN_WRITERS:
+        module = get_writer_module(name)
+        for supported_type in module.filetypes:
+            writers.setdefault(supported_type, []).append((name, module))
+
+    filetype_writers = writers.get(filetype)
+    if filetype_writers and len(filetype_writers) == 1:
+        _, module = filetype_writers[0]
+        return module
+    elif not filetype_writers:
+        msg = f'format {filetype!r} has no supported writers'
         raise SnutreeError(msg)
-
-    if path:
-        stream_open = lambda : path.open('wb+')
     else:
-        # Buffer since we are writing binary
-        stream_open = contextmanager(lambda : (yield sys.stdout.buffer))
-
-    with stream_open() as f:
-        f.write(compiled(src))
-
-###############################################################################
-###############################################################################
-#### Output Helper Functions                                               ####
-###############################################################################
-###############################################################################
-
-def compile_pdf(src):
-    '''
-    Uses Graphviz dot to convert the DOT source into a PDF. Returns the PDF.
-    '''
-
-    try:
-        # `shell=True` is necessary for Windows, but not for Linux. The command
-        # string is constant, so shell=True should be fine
-        result = subprocess.run('dot -Tpdf', check=True, shell=True,
-                # The input will be a str and the output will be binary, but
-                # subprocess.run requires they both be str or both be binary.
-                # So, use binary and send the source in as binary (with default
-                # encoding).
-                input=bytes(src, sys.getdefaultencoding()),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
-                )
-    except OSError as exception:
-        msg = f'had a problem compiling to PDF:\n{exception}'
+        conflicting_writers = {name for name, _ in filetype_writers}
+        msg = f'format {filetype!r} has multiple writers; choose a writer from: {conflicting_writers!r}'
         raise SnutreeError(msg)
-
-    return result.stdout
-
-def compile_dot(src):
-    '''
-    Converts the DOT source into bytes suitable for writing (bytes, not
-    characters, are expected by the main output writer).
-    '''
-    return bytes(src, sys.getdefaultencoding())
-
-# Available output writers
-WRITERS = {
-        'dot' : compile_dot,
-        'pdf' : compile_pdf,
-        }
 
 ###############################################################################
 ###############################################################################
