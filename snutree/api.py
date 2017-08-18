@@ -169,8 +169,8 @@ def get_writer_module(name):
 
 def generate(
         input_files:List[IO[Any]],
-        output_path:str,
-        config_paths:List[str],
+        output_path:Path,
+        config_paths:List[Path],
         input_format:str,
         schema:str,
         writer:str,
@@ -191,7 +191,7 @@ def generate(
                 },
             'writer' : {
                 'name' : None,
-                'filetype' : Path(output_path).suffix[1:] if output_path is not None else 'dot',
+                'filetype' : output_path.suffix[1:] if output_path is not None else 'dot',
                 },
             'seed' : 71
             }
@@ -231,7 +231,6 @@ def generate(
 
     writers = {}
     filetype = config['writer']['filetype']
-
     for writer in BUILTIN_WRITERS:
         module = get_writer_module(writer)
         for filetype in module.filetypes:
@@ -289,7 +288,7 @@ def load_config_files(paths):
 
     configs = []
     for path in paths:
-        with open(path, 'r') as f:
+        with path.open('r') as f:
             try:
                 config = yaml.safe_load(f) or {}
             except yaml.YAMLError as e:
@@ -326,15 +325,14 @@ def get_member_table(files, reader_configs):
     return members
 
 @logged
-def write_output(src, filename=None):
+def write_output(src, path=None):
     '''
-    If a filename is provided: Use the filename to determine the output format,
-    then compile the DOT source code to the target format and write to the file.
+    If a path is provided: Use the path to determine the output format, then
+    compile the DOT source code to the target format and write to the file.
 
-    If no filename is provided: Write DOT source code directly to sys.stdout.
+    If no path is provided: Write DOT source code directly to sys.stdout.
     '''
 
-    path = Path(filename) if filename is not None else None
     filetype = path.suffix[1:] if path else 'dot'
 
     compiled = WRITERS.get(filetype)

@@ -1,6 +1,7 @@
 import logging
 import sys
 from functools import wraps
+from pathlib import Path
 import click
 from . import api
 from .errors import SnutreeError
@@ -27,6 +28,14 @@ def main():
         logger.critical('Unexpected error.', exc_info=True)
         sys.exit(1)
 
+def path_callback(context, parameter, value):
+    if value is None:
+        return None
+    elif isinstance(value, str):
+        return Path(value) if value is not None else None
+    else:
+        return [Path(s) if s is not None else None for s in value]
+
 options = [
         ('--verbose', '-v', {
             'is_flag' : True,
@@ -42,14 +51,17 @@ options = [
             }),
         ('log_path', '--log', '-l', {
             'type' : click.Path(exists=False),
+            'callback' : path_callback,
             'help' : 'Log file path'
             }),
         ('output_path', '--output', '-o', {
             'type' : click.Path(),
+            'callback' : path_callback,
             'help' : f'Instead of writing DOT code to stdout, send output to a file with one of the filetypes in TODO'
             }),
         ('config_paths', '--config', '-c', {
             'type' : click.Path(exists=True),
+            'callback' : path_callback,
             'multiple' : True,
             'help' : 'Program configuration files'
             }),
