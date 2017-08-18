@@ -197,7 +197,7 @@ def generate(
                 'name' : 'basic',
                 },
             'writer' : {
-                'filetype' : output_path.suffix[1:] if output_path is not None else 'dot',
+                'filetype' : output_path.suffix[1:] if output_path is not None and output_path.suffix else 'dot',
                 'name' : None,
                 'file' : None,
                 },

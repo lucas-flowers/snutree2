@@ -248,8 +248,8 @@ class SnutreeGUI(QWidget):
             with ExitStack() as stack:
 
                 input_files = [stack.enter_context(open(f)) for f in filenames]
-                output_path = LazyPath(self, 'Select output file', '', 'PDF (*.pdf);;Graphviz source (*.dot)')
-                configs = fancy_split(self.box_config.text())
+                output_path = LazyPath(self, 'Select output file', '', 'PDF (*.pdf)', '.pdf')
+                configs = [Path(s) for s in fancy_split(self.box_config.text())]
                 member_schema = self.box_member_schema.currentData()
                 seed = int(self.box_seed.text()) if self.box_seed.text() else 0
 
@@ -257,8 +257,9 @@ class SnutreeGUI(QWidget):
                         input_files=input_files,
                         output_path=output_path,
                         config_paths=configs,
-                        schema=member_schema,
                         input_format=None,
+                        schema=member_schema,
+                        writer='dot',
                         seed=seed,
                         )
 
@@ -362,23 +363,25 @@ def relative_path(path):
 
 class LazyPath:
     '''
-    A placeholder for some path. Waits until the very last minute (i.e., when
-    self.__fspath__() is called when interpreting this object as a path) to
-    determine an actual value. It determines the value by asking the user,
-    using a save file dialog box created from the arguments provided to the
-    LazyPath constructor.
+    A placeholder for some file with extension given in suffix. Waits until the
+    very last minute (i.e., when self.__fspath__() is called when interpreting
+    this object as a path) to determine an actual value. It determines the
+    value by asking the user, using a save file dialog box created from the
+    arguments provided to the LazyPath constructor.
 
     This allows api.generate to be called without knowing the output path
     beforehand, saving time if the generation fails.
     '''
 
-    def __init__(self, parent, caption, dir_, filter_):
+    def __init__(self, parent, caption, dir_, filter_, suffix):
         self.parent = parent
         self.caption = caption
         self.dir = dir_
         self.filter = filter_
+        self.suffix = suffix
 
     def __fspath__(self):
+        logging.getLogger(__name__).info('Asking user for a file path')
         return QFileDialog.getSaveFileName(self.parent, self.caption, self.dir, self.filter)[0]
 
 ###############################################################################
