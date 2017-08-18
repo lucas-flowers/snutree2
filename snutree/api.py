@@ -9,8 +9,7 @@ from pluginbase import PluginBase
 from .errors import SnutreeError
 from .logging import logged
 from .tree import FamilyTree
-from .cerberus import Validator, optional_nonempty_string
-from .writers import dot
+from .cerberus import Validator
 
 ###############################################################################
 ###############################################################################
@@ -241,9 +240,9 @@ def generate(
     writer = find_writer_module(config['writer']['filetype'], config['writer']['name'])
 
     logger.info('Running writer module')
-    output = writer.write_tree(tree, schema.Rank, config['writer'])
+    writer.write_tree(tree, schema.Rank, config['writer'])
 
-    logger.info('Complete')
+    logger.info('Done')
 
 ###############################################################################
 ###############################################################################

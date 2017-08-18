@@ -4,8 +4,8 @@ Additional functions for cerberus-style validation.
 '''
 
 import pprint
-import cerberus
 from pathlib import Path
+import cerberus
 from .errors import SnutreeError
 
 class Validator(cerberus.Validator):
