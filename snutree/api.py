@@ -50,9 +50,14 @@ CONFIG_VALIDATOR = Validator({
                 }
             }
         },
-    'tree' : {
+    'writer' : {
         'type' : 'dict',
-        'default' : {},
+        'allow_unknown' : True,
+        'schema' : {
+            'name' : {
+                'type' : 'string',
+                }
+            }
         },
     'seed' : {
         'type' : 'integer',
@@ -86,12 +91,12 @@ def get_plugin_builtins(plugin_base):
     return plugin_base.make_plugin_source(searchpath=[]).list_plugins()
 
 # Plugin bases for each of the possible types of plugins
-PLUGIN_BASES = tuple(get_plugin_base(p) for p in ('readers', 'schemas'))
-READERS_PLUGIN_BASE, SCHEMAS_PLUGIN_BASE = PLUGIN_BASES
+PLUGIN_BASES = tuple(get_plugin_base(p) for p in ('readers', 'schemas', 'writers'))
+READERS_PLUGIN_BASE, SCHEMAS_PLUGIN_BASE, WRITERS_PLUGIN_BASE = PLUGIN_BASES
 
 # Lists of the built-in plugins for each of the possible types of plugins
 BUILTIN_LISTS = tuple(get_plugin_builtins(p) for p in PLUGIN_BASES)
-BUILTIN_READERS, BUILTIN_SCHEMAS = BUILTIN_LISTS
+BUILTIN_READERS, BUILTIN_SCHEMAS, BUILTIN_WRITERS = BUILTIN_LISTS
 
 def get_module(plugin_base, name, attributes=None, descriptor='module', custom=True):
     '''
@@ -151,6 +156,15 @@ def get_reader_module(filetype):
             descriptor='input file format',
             custom=False)
 
+def get_writer_module(name):
+    '''
+    Return the writer of the given name.
+    '''
+    return get_module(WRITERS_PLUGIN_BASE, name,
+            attributes=['filetypes', 'from_FamilyTree'],
+            descriptor='writer',
+            custom=True)
+
 ###############################################################################
 ###############################################################################
 #### API                                                                   ####
@@ -161,8 +175,9 @@ def generate(
         input_files:List[IO[Any]],
         output_path:str,
         config_paths:List[str],
-        schema:str,
         input_format:str,
+        schema:str,
+        writer:str,
         seed:int,
         ):
     '''
@@ -178,6 +193,9 @@ def generate(
             },
         'schema' : {
             'name' : schema,
+            },
+        'writer' : {
+            'name' : writer,
             },
         'seed' : seed,
         })
@@ -199,14 +217,34 @@ def generate(
     logger.info('Building family tree')
     tree = FamilyTree(members, config['seed'])
 
-    logger.info('Building DOT graph')
-    dot_graph = dot.from_FamilyTree(tree, schema.Rank, config['tree'])
+    writers = {}
+    if output_path is not None:
+        filetype = Path(output_path).suffix[1:] # TODO option for stdout format
+    else:
+        filetype = 'dot'
+    for writer in BUILTIN_WRITERS:
+        module = get_writer_module(writer)
+        for filetype in module.filetypes:
+            writers.setdefault(filetype, []).append(module)
+    if filetype in writers:
+        if len(writers[filetype]) == 1:
+            output = writers[filetype][0].from_FamilyTree(tree, schema.Rank, config['writer'])
+            src = output.to_dot()
+            write_output(src, output_path)
+        else:
+            raise Exception('need explicit writer')
+    else:
+        raise Exception('no writers')
 
-    logger.info('Composing DOT source code')
-    dot_src = dot_graph.to_dot()
 
-    logger.info('Writing to output file')
-    write_output(dot_src, output_path)
+    # logger.info('Building DOT graph')
+    # dot_graph = dot.from_FamilyTree(tree, schema.Rank, config['tree'])
+    #
+    # logger.info('Composing DOT source code')
+    # dot_src = dot_graph.to_dot()
+    #
+    # logger.info('Writing to output file')
+    # write_output(dot_src, output_path)
 
 ###############################################################################
 ###############################################################################

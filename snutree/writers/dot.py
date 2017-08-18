@@ -35,6 +35,10 @@ attribute_defaults = lambda *allowed : {
 
 DOT_SCHEMA = {
 
+        'name' : {
+            'regex' : 'dot',
+            },
+
         # Flags
         **{ flag : optional_boolean for flag in [
             'ranks',
@@ -123,6 +127,8 @@ DOT_SCHEMA = {
 #### Main                                                                  ####
 ###############################################################################
 ###############################################################################
+
+filetypes = {'pdf', 'dot'}
 
 def from_FamilyTree(tree, RankType, config):
     '''

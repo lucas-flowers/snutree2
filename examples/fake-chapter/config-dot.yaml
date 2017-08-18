@@ -1,5 +1,7 @@
 
-tree:
+writer:
+
+  name: dot
 
   defaults:
 

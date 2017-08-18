@@ -2,3 +2,5 @@
 schema:
   name: keyed
 
+writer:
+  # nada
