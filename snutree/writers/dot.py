@@ -39,7 +39,6 @@ filetypes = {'pdf', 'dot'}
 DOT_SCHEMA = {
 
         'name' : {
-            'regex' : 'dot',
             'nullable' : True,
             },
 

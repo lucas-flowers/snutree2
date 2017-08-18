@@ -180,6 +180,8 @@ def generate(
     Create a big-little family tree.
     '''
 
+    logger = logging.getLogger(__name__)
+
     config_defaults = {
             'readers' : {
                 'stdin' : {
@@ -212,8 +214,6 @@ def generate(
         'seed' : seed,
         })
 
-    logger = logging.getLogger(__name__)
-
     logger.info('Loading configuration files')
     config = get_config(config_defaults, config_paths, config_args)
 
@@ -229,22 +229,40 @@ def generate(
     logger.info('Building family tree')
     tree = FamilyTree(members, config['seed'])
 
-    writers = {}
-    filetype = config['writer']['filetype']
-    for writer in BUILTIN_WRITERS:
-        module = get_writer_module(writer)
-        for filetype in module.filetypes:
-            writers.setdefault(filetype, []).append(module)
-    if filetype in writers:
-        if len(writers[filetype]) == 1:
-            output = writers[filetype][0].from_FamilyTree(tree, schema.Rank, config['writer'])
-            src = output.to_dot()
-            write_output(src, output_path)
-        else:
-            raise Exception('need explicit writer')
-    else:
-        raise Exception('no writers')
+    def find_writer_module(filetype, writer_name=None):
+        '''
+        Returns the writer module with the given writer name. If no writer name
+        is given, use the filetype to guess.
+        '''
 
+        if writer_name is not None:
+            return get_writer_module(writer_name)
+
+        writers = {}
+        for name in BUILTIN_WRITERS:
+            module = get_writer_module(name)
+            for supported_type in module.filetypes:
+                writers.setdefault(supported_type, []).append((name, module))
+
+        filetype_writers = writers.get(filetype)
+        if filetype_writers and len(filetype_writers) == 1:
+            _, module = filetype_writers[0]
+            return module
+        elif not filetype_writers:
+            msg = f'format {filetype!r} has no supported writers'
+            raise SnutreeError(msg)
+        else:
+            conflicting_writers = {name for name, _ in filetype_writers}
+            msg = f'format {filetype!r} has multiple writers but none selected: {conflicting_writers!r}'
+            raise SnutreeError(msg)
+
+
+
+    writer = find_writer_module(config['writer']['filetype'], config['writer']['name'])    
+
+    output = writer.from_FamilyTree(tree, schema.Rank, config['writer'])
+    src = output.to_dot()
+    write_output(src, output_path)
 
     # logger.info('Building DOT graph')
     # dot_graph = dot.from_FamilyTree(tree, schema.Rank, config['tree'])
