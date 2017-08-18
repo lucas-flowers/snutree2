@@ -45,6 +45,15 @@ DOT_SCHEMA = {
             'unknowns'
             ]},
 
+        # If no_singletons is enabled, any singleton member with a rank higher
+        # than this rank will trigger a warning before being dropped
+        'warn_rank' : {
+            'coerce' : 'optional_rank_type',
+            'nullable' : True,
+            'default' : None,
+            },
+
+
         # Default attributes for graphs, nodes, edges, and their subcategories
         'defaults' : {
             'type' : 'dict',
@@ -154,7 +163,7 @@ def decorate(tree, config):
     # pylint: disable=expression-not-assigned
     config['custom_nodes'] and add_custom_nodes(tree, config['nodes'])
     config['custom_edges'] and add_custom_edges(tree, config['edges'])
-    config['no_singletons'] and remove_singleton_members(tree)
+    config['no_singletons'] and remove_singleton_members(tree, config['warn_rank'])
     config['colors'] and add_colors(tree, config['family_colors'])
     config['unknowns'] and add_orphan_parents(tree, unknown_node_defaults, unknown_edge_defaults)
 
@@ -193,13 +202,18 @@ def add_custom_edges(tree, paths):
         tree.add_edges(edges, attributes=attributes)
 
 @logged
-def remove_singleton_members(tree):
+def remove_singleton_members(tree, warn_rank=None):
     '''
     Remove all members in the tree whose nodes neither have parents nor children.
     '''
-    # TODO protect singletons (e.g., refounders without littles) after a
-    # certain date so they don't disappear without at least a warning?
-    keys = [singleton.key for singleton in tree.singletons()]
+    keys = []
+    for singleton in tree.singletons():
+        key = singleton.key
+        keys.append(key)
+        rank = singleton.is_ranked() and singleton.rank
+        if warn_rank is not None and warn_rank <= rank:
+            msg = f'(warn_rank>={warn_rank!r}) singleton {key!r} with rank {rank!r} was dropped '
+            logging.getLogger(__name__).warning(msg)
     tree.remove(keys)
 
 @logged

@@ -32,6 +32,9 @@ tree:
   # likely cause problems.
   no_singletons: True
 
+  # Warnings will be displayed if there are orphans on or after this date
+  warn_rank: 'Fall 1987'
+
   # Color families differently
   colors: True
 

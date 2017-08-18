@@ -32,6 +32,9 @@ class TreeEntity(metaclass=ABCMeta):
         self.key = key
         self._rank = rank
 
+    def is_ranked(self):
+        return bool(self._rank)
+
     @property
     def rank(self):
         if self._rank:
