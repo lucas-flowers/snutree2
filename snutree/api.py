@@ -31,7 +31,6 @@ CONFIG_VALIDATOR = Validator({
                     'format' : {
                         'type' : 'string',
                         'nullable' : True,
-                        'default' : None
                         }
                     }
                 }
@@ -46,7 +45,6 @@ CONFIG_VALIDATOR = Validator({
         'schema' : {
             'name' : {
                 'type' : 'string',
-                'default' : 'basic'
                 }
             }
         },
@@ -61,7 +59,6 @@ CONFIG_VALIDATOR = Validator({
         },
     'seed' : {
         'type' : 'integer',
-        'default' : 71,
         },
     })
 
@@ -184,6 +181,21 @@ def generate(
     Create a big-little family tree.
     '''
 
+    config_defaults = {
+            'readers' : {
+                'stdin' : {
+                    'format' : None
+                    }
+                },
+            'schema' : {
+                'name' : 'basic',
+                },
+            'writer' : {
+                'name' : 'dot',
+                },
+            'seed' : 71
+            }
+
     # Parameters for this function that can also be included in config files
     config_args = denullified({
         'readers' : {
@@ -203,7 +215,7 @@ def generate(
     logger = logging.getLogger(__name__)
 
     logger.info('Loading configuration files')
-    config = get_config(config_paths, config_args)
+    config = get_config(config_defaults, config_paths, config_args)
 
     logger.info('Loading member schema module')
     schema = get_schema_module(config['schema']['name'])
@@ -253,18 +265,20 @@ def generate(
 ###############################################################################
 
 @logged
-def get_config(config_paths, config_args):
+def get_config(config_defaults, config_paths, config_args):
     '''
     Loads the YAML configuration files at the given paths and combines their
-    contents with the configuration arguments dictionary provided. Validates
-    the combined configurations and returns the result as a dictionary. If
-    there is overlap between configurations, keys from files earlier in the
-    list will be overwritten by those later in the list (anything in
-    config_args will overwrite any keys from the list itself). If there are
-    lists inside the configuration, those lists will be extended, not
-    overwritten.
+    contents with the configuration arguments and configuration defaults
+    provided. Validates the combined configurations and returns the result as a
+    dictionary.
+
+    When there is overlap between configurations, keys from dictionaries
+    processed earlier will be overwritten by those extended later (lists will
+    be extended, dictionaries recursively updated, and scalars replaced). The
+    defaults will always be processed first, and config_args will always be
+    processed last.
     '''
-    config = {}
+    config = config_defaults
     for c in load_config_files(config_paths) + [config_args]:
         deep_update(config, c)
     return CONFIG_VALIDATOR.validated(config)
