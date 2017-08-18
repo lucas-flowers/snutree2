@@ -188,7 +188,6 @@ def generate(
     config = get_config(config_paths, config_args)
 
     logger.info('Loading member schema module')
-    # TODO move GET to a validator
     schema = get_schema_module(config['schema']['name'])
 
     logger.info('Reading member table from data sources')
