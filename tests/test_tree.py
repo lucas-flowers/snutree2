@@ -3,9 +3,6 @@ import pytest
 from snutree.schemas.basic import KeylessMember
 from snutree.tree import FamilyTree, TreeError, TreeErrorCode
 
-from snutree.errors import SnutreeWriterError
-from snutree.writers.dot import add_colors, add_custom_edges
-
 # pylint: disable=redefined-outer-name
 
 @pytest.fixture
@@ -45,20 +42,4 @@ def test_parent_not_prior(members):
     func = partial(FamilyTree, members)
     code = TreeErrorCode.PARENT_NOT_PRIOR
     assert tree_error_code_of(func) == code
-
-def test_unknown_edge_component(members):
-    edges = [{ 'nodes' : ['Bob Dole', 'Rob Cole', 'Carmen Sandiego'] }]
-    tree = FamilyTree(members)
-    with pytest.raises(SnutreeWriterError):
-        add_custom_edges(tree, edges)
-
-# TODO move?
-def test_family_color_conflict(members):
-    family_colors = {
-            'Bob Dole' : 'blue',
-            'Rob Cole' : 'yellow'
-            }
-    tree = FamilyTree(members)
-    with pytest.raises(SnutreeWriterError):
-        add_colors(tree, family_colors)
 
