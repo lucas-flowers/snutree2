@@ -5,6 +5,7 @@ Additional functions for cerberus-style validation.
 
 import pprint
 import cerberus
+from pathlib import Path
 from .errors import SnutreeError
 
 class Validator(cerberus.Validator):
@@ -27,6 +28,9 @@ class Validator(cerberus.Validator):
             raise SnutreeError(msg)
 
         return dct
+
+    def _normalize_coerce_optional_path(self, value):
+        return value and Path(value)
 
     def _normalize_coerce_rank_type(self, value):
         if not self.RankType:

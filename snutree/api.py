@@ -52,8 +52,16 @@ CONFIG_VALIDATOR = Validator({
         'type' : 'dict',
         'allow_unknown' : True,
         'schema' : {
-            'filetype' : optional_nonempty_string,
-            'name' : optional_nonempty_string,
+            'filetype' : {
+                'type' : 'string'
+                },
+            'name' : {
+                'type' : 'string',
+                'nullable' : True
+                },
+            'file' : {
+                'nullable' : True
+                }
             }
         },
     'seed' : {
@@ -192,8 +200,9 @@ def generate(
                 'name' : 'basic',
                 },
             'writer' : {
-                'name' : None,
                 'filetype' : output_path.suffix[1:] if output_path is not None else 'dot',
+                'name' : None,
+                'file' : None,
                 },
             'seed' : 71
             }
@@ -210,6 +219,7 @@ def generate(
             },
         'writer' : {
             'name' : writer,
+            'file' : output_path,
             },
         'seed' : seed,
         })
@@ -258,11 +268,13 @@ def generate(
 
 
 
-    writer = find_writer_module(config['writer']['filetype'], config['writer']['name'])    
+    writer = find_writer_module(config['writer']['filetype'], config['writer']['name'])
 
     output = writer.from_FamilyTree(tree, schema.Rank, config['writer'])
     src = output.to_dot()
-    write_output(src, output_path)
+    write_output(src, config['writer']['file'])
+
+
 
     # logger.info('Building DOT graph')
     # dot_graph = dot.from_FamilyTree(tree, schema.Rank, config['tree'])

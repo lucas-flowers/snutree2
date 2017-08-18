@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path 
 from snutree import dot
 from snutree.errors import SnutreeWriterError
 from snutree.tree import TreeEntity
@@ -44,6 +45,11 @@ DOT_SCHEMA = {
 
         'filetype' : {
             'allowed' : list(filetypes),
+            'nullable' : True,
+            },
+
+        'file' : {
+            'coerce' : 'optional_path',
             'nullable' : True,
             },
 
