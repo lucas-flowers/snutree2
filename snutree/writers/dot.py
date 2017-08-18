@@ -1,7 +1,6 @@
 import logging
 import sys
 import subprocess
-from contextlib import contextmanager
 from snutree import dot
 from snutree.errors import SnutreeWriterError
 from snutree.tree import TreeEntity
@@ -23,9 +22,10 @@ filetypes = {
         'eps',
         'svg',
         'pdf',
+        'txt',
         }
 
-def write_tree(tree, RankType, config):
+def compile_tree(tree, RankType, config):
 
     logger = logging.getLogger(logger_name)
 
@@ -37,8 +37,10 @@ def write_tree(tree, RankType, config):
     dot_graph = create_dot_graph(tree, config['ranks'], config['defaults'])
     dot_source = dot_graph.to_dot()
 
-    logger.info(f'Compiling to {config["filetype"]} file')
-    write_output(dot_source, config['filetype'], config['file'])
+    logger.info(f'Compiling to {config["filetype"]}')
+    output = compiled(dot_source, config['filetype'])
+    
+    return output
 
 ###############################################################################
 ###############################################################################
@@ -415,27 +417,12 @@ def create_ranks(tree, min_rank, max_rank):
 ###############################################################################
 
 @logged
-def write_output(src, filetype, path):
+def compiled(src, filetype):
     '''
-    If a path is provided: Use the path to determine the output format, then
-    compile the DOT source code to the target format and write to the file.
-
-    If no path is provided: Write DOT source code directly to sys.stdout.
+    If the filetype is DOT, return the raw DOT source code. Otherwise, use
+    Graphviz to do the compiling.
     '''
-
-    if filetype == 'dot':
-        compiled = compile_dot
-    else:
-        compiled = lambda src : compile_fmt(src, filetype)
-
-    if path:
-        stream_open = lambda : path.open('wb+')
-    else:
-        # Buffer since we are writing binary
-        stream_open = contextmanager(lambda : (yield sys.stdout.buffer))
-
-    with stream_open() as f:
-        f.write(compiled(src))
+    return compile_dot(src) if filetype == 'dot' else compile_fmt(src, filetype)
 
 @logged
 def compile_fmt(src, filetype):

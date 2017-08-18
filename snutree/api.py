@@ -1,5 +1,6 @@
 import logging
 import sys
+from contextlib import contextmanager
 from typing import Any, List, IO
 from pathlib import Path
 from collections import MutableSequence, MutableMapping
@@ -85,7 +86,10 @@ def generate(
     writer = find_writer_module(config['writer']['filetype'], config['writer']['name'])
 
     logger.info('Running writer module')
-    writer.write_tree(tree, schema.Rank, config['writer'])
+    output = writer.compile_tree(tree, schema.Rank, config['writer'])
+
+    logger.info('Writing to file')
+    write_output(output, path = config['writer']['file'])
 
     logger.info('Done')
 
@@ -240,7 +244,7 @@ def get_writer_module(name):
     Return the writer of the given name.
     '''
     return get_module(WRITERS_PLUGIN_BASE, name,
-            attributes=['filetypes', 'write_tree'],
+            attributes=['filetypes', 'compile_tree'],
             descriptor='writer',
             custom=True)
 
@@ -339,6 +343,19 @@ def find_writer_module(filetype, writer_name=None):
         conflicting_writers = {name for name, _ in filetype_writers}
         msg = f'format {filetype!r} has multiple writers; choose a writer from: {conflicting_writers!r}'
         raise SnutreeError(msg)
+
+def write_output(output, path=None):
+    '''
+    Write the output to a file at the given path. If the path is None, then
+    write to stdout.
+    '''
+    if path:
+        stream_open = lambda : path.open('wb+')
+    else:
+        # Buffer since we are writing binary
+        stream_open = contextmanager(lambda : (yield sys.stdout.buffer))
+    with stream_open() as f:
+        f.write(output)
 
 ###############################################################################
 ###############################################################################
