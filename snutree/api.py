@@ -23,6 +23,19 @@ from .writers import dot
 CONFIG_VALIDATOR = Validator({
     'readers' : {
         'type' : 'dict',
+        'allow_unknown' : True,
+        'schema' : {
+            'stdin' : {
+                'type' : 'dict',
+                'schema' : {
+                    'format' : {
+                        'type' : 'string',
+                        'nullable' : True,
+                        'default' : None
+                        }
+                    }
+                }
+            },
         'valueschema' : {
             'type' : 'dict',
             }
@@ -251,7 +264,7 @@ def get_member_table(files, reader_configs):
 
         # Filetype is the path suffix or stdin's format if input is stdin
         if f.name == '<stdin>':
-            filetype = reader_configs.get('stdin', {}).get('format')
+            filetype = reader_configs['stdin']['format']
             if not filetype:
                 msg = f'data from stdin requires an input format'
                 raise SnutreeError(msg)
