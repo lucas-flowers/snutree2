@@ -1,5 +1,5 @@
 # -*- mode: python -*-
-# pylint: disable=E0602
+# pylint: disable=undefined-variable
 
 block_cipher = None
 
@@ -32,7 +32,7 @@ analysis_kwargs = dict(
         cipher=block_cipher
         )
 
-a_gui = Analysis(['snutree-gui.py'], **analysis_kwargs)
+a_qt = Analysis(['snutree-qt.py'], **analysis_kwargs)
 a_cli = Analysis(['snutree.py'], **analysis_kwargs)
 
 # Problem: snutree.py (the script) and snutree/ (the module) resolve to the
@@ -69,9 +69,9 @@ pyz_cli = PYZ(
         cipher=block_cipher
         )
 
-pyz_gui = PYZ(
-        a_gui.pure,
-        a_gui.zipped_data,
+pyz_qt = PYZ(
+        a_qt.pure,
+        a_qt.zipped_data,
         cipher=block_cipher
         )
 
@@ -92,12 +92,12 @@ exe_cli = EXE(pyz_cli,
         )
 
 # Compile GUI
-exe_gui = EXE(pyz_gui,
-        a_gui.scripts,
-        a_gui.binaries,
-        a_gui.zipfiles,
-        a_gui.datas,
-        name='snutree-gui',
+exe_qt = EXE(pyz_qt,
+        a_qt.scripts,
+        a_qt.binaries,
+        a_qt.zipfiles,
+        a_qt.datas,
+        name='snutree-qt',
         console=False,
         **exe_args
         )
