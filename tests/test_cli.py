@@ -6,7 +6,6 @@ from snutree.errors import SnutreeError, SnutreeSchemaError
 from snutree.cli import cli
 
 TESTS_ROOT = Path(__file__).parent
-
 runner = CliRunner()
 
 def invoke(args, infile=None):
@@ -18,18 +17,25 @@ def invoke(args, infile=None):
     return runner.invoke(cli, args, input=infile)
 
 def run_example(
+        tests_root=TESTS_ROOT,
         example_name=None,
         configs=None,
         seed=None,
         inputs=None,
         ):
 
-    example_root = TESTS_ROOT.parent/'examples'/example_name
-    example_configs = [example_root/config for config in configs] if configs else []
-    example_inputs = [example_root/input_file for input_file in inputs] if inputs else []
+    files = tests_root/'files'
+    trees = files/'trees'
+    example = trees/example_name
+    output = files/'output'
+    expected = output/'expected'
+    actual = output/'actual'
 
-    output = (TESTS_ROOT/'test_cli'/example_name).with_suffix('.dot')
-    expected = (TESTS_ROOT/'test_cli'/(example_name+'-expected')).with_suffix('.dot')
+    example_configs = [example/config for config in configs] if configs else []
+    example_inputs = [example/input_file for input_file in inputs] if inputs else []
+
+    output = (actual/example_name).with_suffix('.dot')
+    expected = (expected/f'{example_name}-expected').with_suffix('.dot')
 
     config_params = []
     for config in example_configs:
@@ -72,7 +78,7 @@ def test_simple():
 
 def test_custom_module():
     # The custom module should be in the same folder this test file is in
-    custom_module = str(Path(__file__).parent/'test_cli/custom_module.py')
+    custom_module = str(TESTS_ROOT/'files/custom_module.py')
     custom_csv = trim('''
         pid,cid,s
         A,B,5
