@@ -57,7 +57,7 @@ options = [
         ('output_path', '--output', '-o', {
             'type' : click.Path(),
             'callback' : path_callback,
-            'help' : f'Instead of writing DOT code to stdout, send output to a file with one of the filetypes in TODO'
+            'help' : f'Instead of writing DOT code to stdout, send output to the file given'
             }),
         ('config_paths', '--config', '-c', {
             'type' : click.Path(exists=True),
