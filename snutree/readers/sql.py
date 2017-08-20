@@ -15,6 +15,7 @@ SQL_CNF_VALIDATOR = Validator({
     'ssh' : {
         'type' : 'dict',
         'required' : False,
+        'nullable' : True,
         'schema' : {
             'host' : nonempty_string,
             'port' : { 'type' : 'integer', 'default' : 22 },
@@ -47,7 +48,7 @@ def get_members(query, config):
     config = SQL_CNF_VALIDATOR.validated(config)
     ssh_config = config.get('ssh')
     sql_config = config.copy()
-    del sql_config['ssh']
+    sql_config.pop('ssh', None)
     if ssh_config:
         return get_members_ssh(query, sql_config, ssh_config)
     else:
