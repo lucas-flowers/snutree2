@@ -1,13 +1,9 @@
----
-title: snutree
-...
-
 Introduction
 ============
 
-Some Greek-letter organizations assign big brothers or big sisters ("bigs") to
-new members ("littles"). This program visualizes such relationships as a family
-tree, using Graphviz.
+Some Greek-letter organizations assign big brothers or big sisters
+("bigs") to new members ("littles"). This program visualizes such
+relationships as a family tree, using Graphviz.
 
 Usage
 =====
@@ -15,98 +11,97 @@ Usage
 Command Line
 ------------
 
-### Basic Usage
+Basic Usage
+~~~~~~~~~~~
 
-The simplest usage of `snutree` is:
+The simplest usage of ``snutree`` is:
+
+.. code:: sh
 
     snutree -o output.pdf input1.csv input2.csv ...
 
-In this example, the CSV should have columns called `name`, `big_name`, and
-`semester` where `semester`s are strings starting with "Fall" or "Spring" and
-ending with a year (e.g., "Fall 2014" or "Spring 1956"). With this input,
-`snutree` will append all the input tables together, convert them into a tree,
-and output the tree using Graphviz. Each member will be put on a row
+In this example, the CSV should have columns called ``name``, ``big_name``, and
+``semester`` where ``semester``\s are strings starting with "Fall" or "Spring"
+and ending with a year (e.g., "Fall 2014" or "Spring 1956"). With this input,
+``snutree`` will append all the input tables together, convert them into a
+tree, and output the tree using Graphviz. Each member will be put on a row
 representing the semester they joined.
 
-### Schemas
+Schemas
+~~~~~~~
 
-The (`name`, `big_name`, `semester`) headers consist of the "basic" schema.
-There are a few other schemas available. They are:
+The (``name``, ``big_name``, ``semester``) headers consist of the
+"basic" schema. There are a few other schemas available. They are:
 
-| Schema  | Headers                                                                                 |
-|---------+-----------------------------------------------------------------------------------------|
-| basic   | name, big_name, semester                                                                |
-| keyed   | id, name, big_id, semester                                                              |
-| chapter | child, parent, founded                                                                  |
-| sigmanu | badge, first_name, preferred_name, last_name, big_badge, status, semester, affiliations |
++---------+------------------------------------------------------------------+
+| Schema  | Headers                                                          |
++=========+==================================================================+
+| basic   | name, big\_name, semester                                        |
++---------+------------------------------------------------------------------+
+| keyed   | id, name, big\_id, semester                                      |
++---------+------------------------------------------------------------------+
+| chapter | child, parent, founded                                           |
++---------+------------------------------------------------------------------+
+| sigmanu | badge, first\_name, preferred\_name, last\_name, big\_badge,     |
+|         | status, semester, affiliations                                   |
++---------+------------------------------------------------------------------+
 
-Changing schemas can be done with the `--schema` flag:
+Changing schemas can be done with the ``--schema`` flag:
+
+.. code:: sh
 
     snutree --schema chapter chapters.csv
 
 A custom Python module may be used as a schema:
 
+.. code:: sh
+
     snutree --schema /home/example/custom.py input.csv
 
-Custom modules should validate the tables themselves and turn them into an
-internal format `snutree` can read.
+Custom modules should validate the tables themselves and turn them into
+an internal format ``snutree`` can read.
 
-### SQL
+SQL
+~~~
 
 Input files can also be SQL queries:
 
+.. code:: sh
+
     snutree --config config.yaml -o output.pdf query.sql
 
-For a SQL query, a YAML configuration file with appropriate authentication
-options must be provided. Here is an example of the contents of such a file:
+For a SQL query, a YAML configuration file with appropriate
+authentication options must be provided. Here is an example of the
+contents of such a file:
 
-~~~yaml
-readers:
-  sql:
-    host: '127.0.0.1'
-    port: 3306
-    user: 'root'
-    passwd: 'secret'
-    db: 'database_name'
-    # Credentials for tunneling queries through SSH (recommended)
-    ssh:
-      host: 'example.com'
-      port: 22
-      user: 'example'
-      public_key: '/home/example/.ssh/id_rsa'
-~~~
+.. code:: yaml
 
-Note that the query must rename the column headers to match the `snutree` schema.
+    readers:
+      sql:
+        host: '127.0.0.1'
+        port: 3306
+        user: 'root'
+        passwd: 'secret'
+        db: 'database_name'
+        # Credentials for tunneling queries through SSH (recommended)
+        ssh:
+          host: 'example.com'
+          port: 22
+          user: 'example'
+          public_key: '/home/example/.ssh/id_rsa'
 
-<!-- TODO
-
-GUI
----
-
-Advanced Usage
-==============
-
-Installation
-============
-
-Prerequisites
--------------
-
-Installing
-----------
-
-Extra Features
---------------
-
--->
+Note that the query must rename the column headers to match the
+``snutree`` schema.
 
 Versioning
 ==========
 
-This project uses [Semantic Versioning](http://semver.org/).
+This project uses `Semantic Versioning <http://semver.org/>`__.
 
 License
 =======
 
-This project is licensed under [GPLv3](https://www.gnu.org/licenses/gpl-3.0.html).
+This project is licensed under
+`GPLv3 <https://www.gnu.org/licenses/gpl-3.0.html>`__.
 
+.. vim: filetype=rst
