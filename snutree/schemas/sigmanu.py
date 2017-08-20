@@ -271,7 +271,7 @@ AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
 
 class SigmaNuMember(Member, metaclass=ABCMeta):
     '''
-    A member of Sigma Nu. Each member has a name, a pledge semester, and
+    A member of Sigma Nu. Each member has a name, a semester, and
     potentially the badge of the member's big brother.
     '''
 
@@ -309,7 +309,7 @@ class Knight(SigmaNuMember):
         'preferred_name' : NonEmptyString,
         Required('last_name') : NonEmptyString,
         'big_badge' : NonEmptyString,
-        'pledge_semester' : Coerce(Rank),
+        'semester' : Coerce(Rank),
         'affiliations' : AffiliationsList,
         })
 
@@ -320,14 +320,14 @@ class Knight(SigmaNuMember):
             preferred_name=None,
             last_name=None,
             big_badge=None,
-            pledge_semester=None,
+            semester=None,
             affiliations=None,
             ):
 
         self.key = badge
         self.name = combine_names(first_name, preferred_name, last_name)
         self.parent = big_badge
-        self.rank = pledge_semester
+        self.rank = semester
         self.affiliations = set(affiliations or []) | {Affiliation(self.chapter, int(badge))}
 
     @property
@@ -351,7 +351,7 @@ class Brother(SigmaNuMember):
         'preferred_name' : NonEmptyString,
         Required('last_name') : NonEmptyString,
         'big_badge' : NonEmptyString,
-        'pledge_semester' : Coerce(Rank),
+        'semester' : Coerce(Rank),
         'affiliations' : IsFalse,
         })
 
@@ -363,12 +363,12 @@ class Brother(SigmaNuMember):
             preferred_name=None,
             last_name=None,
             big_badge=None,
-            pledge_semester=None,
+            semester=None,
             ):
 
         self.name = last_name
         self.parent = big_badge
-        self.rank = pledge_semester
+        self.rank = semester
         self.affiliations = []
 
         # Without badges, keys need to be generated
@@ -392,7 +392,7 @@ class Candidate(SigmaNuMember):
         'preferred_name' : NonEmptyString,
         Required('last_name') : NonEmptyString,
         'big_badge' : NonEmptyString,
-        'pledge_semester' : Coerce(Rank),
+        'semester' : Coerce(Rank),
         'affiliations' : IsFalse,
         })
 
@@ -404,12 +404,12 @@ class Candidate(SigmaNuMember):
             preferred_name=None,
             last_name=None,
             big_badge=None,
-            pledge_semester=None,
+            semester=None,
             ):
 
         self.name = combine_names(first_name, preferred_name, last_name)
         self.parent = big_badge
-        self.rank = pledge_semester
+        self.rank = semester
         self.affiliations = []
 
         # Without badges, keys need to be generated
@@ -437,7 +437,7 @@ class Expelled(Knight):
         'preferred_name' : NonEmptyString,
         'last_name' : NonEmptyString,
         'big_badge' : NonEmptyString,
-        'pledge_semester' : Coerce(Rank),
+        'semester' : Coerce(Rank),
         'affiliations' : AffiliationsList,
         })
 
@@ -448,14 +448,14 @@ class Expelled(Knight):
             preferred_name=None,
             last_name=None,
             big_badge=None,
-            pledge_semester=None,
+            semester=None,
             affiliations=None
             ):
 
         self.key = badge
         self.name = 'Member Expelled'
         self.parent = big_badge
-        self.rank = pledge_semester
+        self.rank = semester
         self.affiliations = affiliations or []
 
     @property
@@ -486,7 +486,7 @@ description = {
         'preferred_name' : 'Preferred name',
         'last_name' : 'Last name',
         'big_badge' : "Big brother's badge number",
-        'pledge_semester' : '''The brother's semester of candicacy (e.g., "Fall 2000" or "Spring 1999")''',
+        'semester' : '''The brother's semester of candicacy (e.g., "Fall 2000" or "Spring 1999")''',
         'affiliations' : '''Comma-separated list of chapter badges (e.g., "Alpha 5, Ω 15, HM(A)")''',
         }
 

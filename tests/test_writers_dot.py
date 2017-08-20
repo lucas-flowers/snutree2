@@ -11,12 +11,12 @@ def members():
     return [
             KeylessMember.from_dict({
                 'name' : 'Bob Dole',
-                'pledge_semester' : 'Fall 2000',
+                'semester' : 'Fall 2000',
                 # 'big_name' : None,
                 }),
             KeylessMember.from_dict({
                 'name' : 'Rob Cole',
-                'pledge_semester' : 'Fall 2001',
+                'semester' : 'Fall 2001',
                 'big_name' : 'Bob Dole',
                 })
             ]

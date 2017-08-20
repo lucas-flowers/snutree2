@@ -22,7 +22,7 @@ description = {
         'key' : "Member ID",
         'name' : "Member name",
         'big_key' : "ID of member's big",
-        'pledge_semester' : 'Semester the member joined (e.g., "Fall 2000" or "Spring 1999")',
+        'semester' : 'Semester the member joined (e.g., "Fall 2000" or "Spring 1999")',
         }
 
 class KeyedMember(Member):
@@ -34,19 +34,19 @@ class KeyedMember(Member):
             Required('key') : NonEmptyString,
             Required('name') : NonEmptyString,
             'big_key' : NonEmptyString,
-            Required('pledge_semester') : Coerce(Rank),
+            Required('semester') : Coerce(Rank),
             })
 
     def __init__(self,
             key=None,
             name=None,
-            pledge_semester=None,
+            semester=None,
             big_key=None
             ):
 
         self.key = key
         self.name = name
-        self.rank = pledge_semester
+        self.rank = semester
         self.parent = big_key
 
     @classmethod

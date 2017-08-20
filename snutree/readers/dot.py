@@ -64,7 +64,7 @@ def add_member_dicts(graph):
 def add_pledge_classes(pydot, graph):
     '''
     Retrieve ranks from each pydot subgraph that has "rank=same", then set the
-    pledge_semester field in each member's node attribute dictionary
+    semester field in each member's node attribute dictionary
     appropriately.
     '''
 
@@ -98,8 +98,8 @@ def add_pledge_classes(pydot, graph):
                 # Assume it's a member
                 pledge_class_members.add(name)
 
-    # Assign the pledge_semester field
+    # Assign the semester field
     for semester, members in pledge_classes.items():
         for member in members:
-            graph.node[member]['pledge_semester'] = semester
+            graph.node[member]['semester'] = semester
 

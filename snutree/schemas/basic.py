@@ -21,7 +21,7 @@ def to_Members(dicts, **config):
 description = {
         'name' : 'Member name',
         'big_name' : "Name of member's big",
-        'pledge_semester' : 'Semester the member joined (e.g., "Fall 2000" or "Spring 1999")',
+        'semester' : 'Semester the member joined (e.g., "Fall 2000" or "Spring 1999")',
         }
 
 class KeylessMember(Member):
@@ -32,17 +32,17 @@ class KeylessMember(Member):
     schema = Schema({
         Required('name') : NonEmptyString,
         'big_name' : NonEmptyString,
-        Required('pledge_semester') : Coerce(Rank),
+        Required('semester') : Coerce(Rank),
         })
 
     def __init__(self,
             name=None,
-            pledge_semester=None,
+            semester=None,
             big_name=None
             ):
 
         self.key = name
-        self.rank = pledge_semester
+        self.rank = semester
         self.parent = big_name
 
     @classmethod
