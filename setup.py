@@ -1,7 +1,6 @@
 
 from pathlib import Path
 from setuptools import setup, find_packages
-import pypandoc
 
 DIR = Path(__file__).parent
 with (DIR/'README.txt').open('r') as f:
@@ -12,9 +11,9 @@ setup(
         name='snutree',
         use_scm_version=True,
         setup_requires=['setuptools_scm'],
-        description='Big—Little Tree',
+        description='Big–Little Tree',
         long_description=long_description,
-        url='https://testpypi.python.org/pypi/snutree', # TODO Put a GitHub link here
+        url='https://github.com/lucas-flowers/snutree',
         author='Lucas Flowers',
         author_email='laf62@case.edu',
         license='GPLv3',
