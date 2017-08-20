@@ -25,6 +25,7 @@ def generate(
         input_format:str,
         schema:str,
         writer:str,
+        output_format:str,
         seed:int,
         ):
     '''
@@ -36,16 +37,16 @@ def generate(
     config_defaults = {
             'readers' : {
                 'stdin' : {
-                    'format' : None
-                    }
+                    'filetype' : 'csv',
+                    },
                 },
             'schema' : {
                 'name' : 'basic',
                 },
             'writer' : {
                 'filetype' : output_path.suffix[1:] if output_path is not None and output_path.suffix else 'dot',
-                'name' : None,
                 'file' : None,
+                'name' : None,
                 },
             'seed' : 71
             }
@@ -54,21 +55,25 @@ def generate(
     config_args = denullified({
         'readers' : {
             'stdin' : {
-                'format' : input_format,
+                'filetype' : input_format,
                 },
             },
         'schema' : {
             'name' : schema,
             },
         'writer' : {
-            'name' : writer,
+            'filetype' : output_format,
             'file' : output_path,
+            'name' : writer,
             },
         'seed' : seed,
         })
 
+
     logger.info('Loading configuration files')
     config = get_config(config_defaults, config_paths, config_args)
+
+    logger.info(config)
 
     logger.info('Loading member schema module')
     schema = get_schema_module(config['schema']['name'])
@@ -107,7 +112,7 @@ CONFIG_VALIDATOR = Validator({
             'stdin' : {
                 'type' : 'dict',
                 'schema' : {
-                    'format' : {
+                    'filetype' : {
                         'type' : 'string',
                         'nullable' : True,
                         }
@@ -296,7 +301,7 @@ def get_member_table(files, reader_configs):
     '''
     Retrieves a list of members from the provided files, using the file
     extensions to determine what format to interpret the inputs as (stdin will
-    use the format provided by reader_configs['stdin']['format']). The reader
+    use the format provided by reader_configs['stdin']['filetype']). The reader
     may use the dictionary reader_configs[READER_NAME] to configure itself.
     '''
 
@@ -305,7 +310,7 @@ def get_member_table(files, reader_configs):
 
         # Filetype is the path suffix or stdin's format if input is stdin
         if f.name == '<stdin>':
-            filetype = reader_configs['stdin']['format']
+            filetype = reader_configs['stdin']['filetype']
             if not filetype:
                 msg = f'data from stdin requires an input format'
                 raise SnutreeError(msg)

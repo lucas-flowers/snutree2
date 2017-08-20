@@ -1,6 +1,7 @@
 import io
 from inspect import cleandoc as trim
 from pathlib import Path
+import pytest
 from click.testing import CliRunner
 from snutree.errors import SnutreeError, SnutreeSchemaError
 from snutree.cli import cli
@@ -61,12 +62,11 @@ def test_simple():
         Bob,Sue,Fall 1967
         Sue,,Spring 1965
         ''')
-    result = invoke(['--format', 'csv', '-'], good_csv)
-    if result.exception:
-        raise result.exception
+    result = invoke(['--from', 'csv', '-'], good_csv)
+    assert not result.exception
 
     result = invoke(['-'], good_csv)
-    assert isinstance(result.exception, SnutreeError)
+    assert not result.exception
 
     bad_csv = trim('''
         name,big_name,pledge_semester
@@ -74,7 +74,9 @@ def test_simple():
         Sue,,Spring 1965
         ''')
     result = invoke(['-f', 'csv', '-'], bad_csv)
-    assert isinstance(result.exception, SnutreeSchemaError)
+    with pytest.raises(SnutreeSchemaError):
+        assert result.exception
+        raise result.exception
 
 def test_custom_module():
     # The custom module should be in the same folder this test file is in

@@ -39,25 +39,25 @@ def path_callback(context, parameter, value):
 options = [
         ('--verbose', '-v', {
             'is_flag' : True,
-            'help' : 'Print extra information on progress to stderr'
+            'help' : 'Print information to stderr.'
             }),
         ('--debug', '-d', {
             'is_flag' : True,
-            'help' : 'Print debug information to stderr'
+            'help' : 'Print debug information to stderr.'
             }),
         ('--quiet', '-q', {
             'is_flag' : True,
-            'help' : 'Only print errors to stderr, no warnings'
+            'help' : 'Only print errors to stderr; no warnings.'
             }),
         ('log_path', '--log', '-l', {
             'type' : click.Path(exists=False),
             'callback' : path_callback,
-            'help' : 'Log file path'
+            'help' : 'Log file path.'
             }),
         ('output_path', '--output', '-o', {
             'type' : click.Path(),
             'callback' : path_callback,
-            'help' : f'Instead of writing DOT code to stdout, send output to the file given'
+            'help' : f'Instead of writing DOT code to stdout, send output to the file given.'
             }),
         ('config_paths', '--config', '-c', {
             'type' : click.Path(exists=True),
@@ -65,21 +65,25 @@ options = [
             'multiple' : True,
             'help' : 'Program configuration files'
             }),
-        ('input_format','--format', '-f', {
+        ('input_format','--from', '-f', {
             'type' : str,
-            'help' : f'Input file format for stdin; one of {api.BUILTIN_READERS!r}'
+            'help' : f"File format for input coming through stdin. Must be one of {api.BUILTIN_READERS!r}. Assumed to be 'csv' if not given."
             }),
         ('--schema', '-m', {
             'type' : str,
-            'help' : f'Member table schema; one of {api.BUILTIN_SCHEMAS!r} or a custom Python module'
+            'help' : f"Member table schema. Must be one of {api.BUILTIN_SCHEMAS!r} or a custom Python module. Defaults to 'basic'."
             }),
         ('--writer', '-w', {
             'type' : str,
-            'help' : f'Writing module; one of {api.BUILTIN_WRITERS!r} or a custom Python module'
+            'help' : f"Writing module. One of {api.BUILTIN_WRITERS!r} or a custom Python module. Defaults to 'dot'."
+            }),
+        ('output_format', '--to', '-t', {
+            'type' : str,
+            'help' : f"File format for output. Must be supported by the writer. Defaults to the output's file extension if it is known or 'dot' if it is unknown.",
             }),
         ('--seed', '-S', {
             'type' : int,
-            'help' : 'Seed for the random number generator, used to move tree nodes around in a repeatable way'
+            'help' : 'Seed for the random number generator. Used to move tree nodes around in a repeatable way.'
             }),
         ]
 
