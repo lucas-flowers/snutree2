@@ -30,21 +30,21 @@ representing the semester they joined.
 
 ### Schemas
 
-The (`name`, `big_name`, `semester`) headers consist of the "basic"
-schema. There are a few other schemas available. They are:
+The (`name`, `big_name`, `semester`) headers consist of the "basic" schema.
+There are a few other schemas available. They are:
 
-| Schema  | Headers                                                                                        |
-|---------+------------------------------------------------------------------------------------------------|
+| Schema  | Headers                                                                                 |
+|---------+-----------------------------------------------------------------------------------------|
 | basic   | name, big_name, semester                                                                |
 | keyed   | id, name, big_id, semester                                                              |
-| chapter | child, parent, founded                                                                         |
+| chapter | child, parent, founded                                                                  |
 | sigmanu | badge, first_name, preferred_name, last_name, big_badge, status, semester, affiliations |
 
 Changing schemas can be done with the `--schema` flag:
 
     snutree --schema chapter chapters.csv
 
-In fact, a custom Python module may be used as a schema:
+A custom Python module may be used as a schema:
 
     snutree --schema /home/example/custom.py input.csv
 
@@ -53,12 +53,12 @@ internal format `snutree` can read.
 
 ### SQL
 
-The input format can be a SQL query:
+Input files can also be SQL queries:
 
     snutree --config config.yaml -o output.pdf query.sql
 
-For a SQL query, one must have set up a YAML configuration file with
-appropriate authentication options set. For example:
+For a SQL query, a YAML configuration file with appropriate authentication
+options must be provided. Here is an example of the contents of such a file:
 
 ~~~yaml
 readers:
