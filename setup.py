@@ -8,7 +8,7 @@ with (Path(__file__).parent/'README.txt').open('r') as f:
 setup(
 
         name='snutree',
-        version='0.1.0',
+        version='0.1.1',
         descripton='Big—Little Tree',
         long_description=long_description,
         url='', # TODO
@@ -49,8 +49,9 @@ setup(
             'read_dot' : ['pydotplus']
             },
 
-        # TODO?
         package_data={
+            '' : ['*.txt'],
+            'snutree' : ['readers/*.py', 'schemas/*.py', 'writers/*.py'],
             },
 
         entry_points={
