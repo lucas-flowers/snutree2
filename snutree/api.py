@@ -73,8 +73,6 @@ def generate(
     logger.info('Loading configuration files')
     config = get_config(config_defaults, config_paths, config_args)
 
-    logger.info(config)
-
     logger.info('Loading member schema module')
     schema = get_schema_module(config['schema']['name'])
 

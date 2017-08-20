@@ -260,6 +260,7 @@ class SnutreeGUI(QWidget):
                         input_format=None,
                         schema=member_schema,
                         writer='dot',
+                        output_format='pdf',
                         seed=seed,
                         )
 
@@ -379,10 +380,16 @@ class LazyPath:
         self.dir = dir_
         self.filter = filter_
         self.suffix = suffix
+        self.path = None
+
+    def open(self, *args, **kwargs):
+        return Path(self.path).open(*args, **kwargs)
 
     def __fspath__(self):
-        logging.getLogger(__name__).info('Asking user for a file path')
-        return QFileDialog.getSaveFileName(self.parent, self.caption, self.dir, self.filter)[0]
+        if self.path is None:
+            logging.getLogger(__name__).info('Asking user for a file path')
+            self.path = QFileDialog.getSaveFileName(self.parent, self.caption, self.dir, self.filter)[0]
+        return self.path
 
 ###############################################################################
 ###############################################################################
