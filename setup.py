@@ -2,13 +2,15 @@
 from pathlib import Path
 from setuptools import setup, find_packages
 
-with (Path(__file__).parent/'README.txt').open('r') as f:
+DIR = Path(__file__).parent
+with (DIR/'README.txt').open('r') as f:
     long_description = f.read()
 
 setup(
 
         name='snutree',
-        version='0.1.1',
+        use_scm_version=True,
+        setup_requires=['setuptools_scm'],
         descripton='Big—Little Tree',
         long_description=long_description,
         url='', # TODO
