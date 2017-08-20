@@ -1,10 +1,10 @@
 
 from pathlib import Path
 from setuptools import setup, find_packages
+import pypandoc
 
 DIR = Path(__file__).parent
-with (DIR/'README.txt').open('r') as f:
-    long_description = f.read()
+long_description = pypandoc.convert_file(str(DIR/'README.txt'), 'rst', format='md')
 
 setup(
 
