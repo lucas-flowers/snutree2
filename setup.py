@@ -11,9 +11,9 @@ setup(
         name='snutree',
         use_scm_version=True,
         setup_requires=['setuptools_scm'],
-        descripton='Big—Little Tree',
+        description='Big—Little Tree',
         long_description=long_description,
-        url='', # TODO
+        url='https://testpypi.python.org/pypi/snutree', # TODO Put a GitHub link here
         author='Lucas Flowers',
         author_email='laf62@case.edu',
         license='GPLv3',
