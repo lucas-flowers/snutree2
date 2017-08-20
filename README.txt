@@ -14,6 +14,12 @@ Alpha Chapter of Sigma Nu Fraternity.
 Usage
 =====
 
+Command Line
+------------
+
+GUI
+---
+
 Advanced Usage
 ==============
 
