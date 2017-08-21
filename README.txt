@@ -46,7 +46,7 @@ The (``name``, ``big_name``, ``semester``) headers consist of the
 |         | status, semester, affiliations                                   |
 +---------+------------------------------------------------------------------+
 
-Changing schemas can be done with the ``--schema`` flag:
+Changing schemas can be done with the ``--schema`` option:
 
 .. code:: sh
 
@@ -88,7 +88,7 @@ contents of such a file:
           host: 'example.com'
           port: 22
           user: 'example'
-          public_key: '/home/example/.ssh/id_rsa'
+          public_key: '/home/example/.ssh/id_rsa.pub'
 
 Note that the query must rename the column headers to match the
 ``snutree`` schema.
