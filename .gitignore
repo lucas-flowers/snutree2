@@ -1,0 +1,13 @@
+
+# Hidden and generated files
+.*
+*.dot
+*.pdf
+*.pyc
+__pycache__
+build/
+dist/
+*.egg-info
+
+# Testing configuration
+pytest.ini
