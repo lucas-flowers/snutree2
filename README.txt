@@ -1,9 +1,9 @@
 Introduction
 ============
 
-Some Greek-letter organizations assign big brothers or big sisters
-("bigs") to new members ("littles"). This program visualizes such
-relationships as a family tree, using Graphviz.
+Some Greek-letter organizations assign big brothers or big sisters ("bigs") to
+new members ("littles"). This program visualizes such relationships as a family
+tree, using Graphviz.
 
 Usage
 =====
@@ -16,7 +16,7 @@ Basic Usage
 
 The simplest usage of ``snutree`` is:
 
-.. code:: sh
+.. code:: bash
 
     snutree -o output.pdf input1.csv input2.csv ...
 
@@ -46,33 +46,35 @@ The (``name``, ``big_name``, ``semester``) headers consist of the
 |         | status, semester, affiliations                                   |
 +---------+------------------------------------------------------------------+
 
-Changing schemas can be done with the ``--schema`` option:
+Changing schemas can be done with the ``--schema`` option. For example, this
+will print the DOT source code of a family tree of chapters to the terminal:
 
-.. code:: sh
+.. code:: bash
 
     snutree --schema chapter chapters.csv
 
 A custom Python module may be used as a schema:
 
-.. code:: sh
+.. code:: bash
 
     snutree --schema /home/example/custom.py input.csv
 
-Custom modules should validate the tables themselves and turn them into
+Custom schema modules should validate the tables themselves and turn them into
 an internal format ``snutree`` can read.
 
 SQL
 ~~~
 
-Input files can also be SQL queries:
+Input files can also be SQL queries. This will run the query in ``query.sql``
+on the database described in ``config.yaml`` and save the resulting tree to
+``output.pdf``:
 
-.. code:: sh
+.. code:: bash
 
     snutree --config config.yaml -o output.pdf query.sql
 
-For a SQL query, a YAML configuration file with appropriate
-authentication options must be provided. Here is an example of the
-contents of such a file:
+For a SQL query, a YAML configuration file with appropriate authentication
+options must be provided. Here is an example of the contents of such a file:
 
 .. code:: yaml
 
@@ -90,13 +92,31 @@ contents of such a file:
           user: 'example'
           public_key: '/home/example/.ssh/id_rsa.pub'
 
-Note that the query must rename the column headers to match the
-``snutree`` schema.
+Note that the query must rename the column headers to match the schema used.
+
+Command Line Summary
+~~~~~~~~~~~~~~~~~~~~
+
+.. TODO INPUT HELP HERE
+
+GUI
+---
+
+The ``snutree`` package also includes a simple GUI called ``snutree-qt``. The
+GUI can take multiple input files of any supported format, pick schemas, output
+to PDF, and choose a seed for the random number generator.
+
+Configuration
+=============
+
+All configuration is done in YAML (or JSON) files. In the terminal, these files
+can be included with ``--config`` flags. Configuration files listed later
+override those that came earlier.
 
 Versioning
 ==========
 
-This project uses `Semantic Versioning <http://semver.org/>`__.
+This project loosely uses `Semantic Versioning <http://semver.org/>`__.
 
 License
 =======

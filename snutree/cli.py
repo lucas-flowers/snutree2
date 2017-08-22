@@ -36,6 +36,13 @@ def path_callback(context, parameter, value):
     else:
         return [Path(s) if s is not None else None for s in value]
 
+def metavars(allowed, module=False):
+    allowed = [str(s) for s in allowed]
+    if module:
+        allowed.append('MODULE')
+    return '[' + '|'.join(allowed) + ']'
+
+
 options = [
         ('--verbose', '-v', {
             'is_flag' : True,
@@ -67,19 +74,23 @@ options = [
             }),
         ('input_format','--from', '-f', {
             'type' : str,
-            'help' : f"File format for input coming through stdin. Must be one of {api.BUILTIN_READERS!r}. Assumed to be 'csv' if not given."
+            'help' : "File format for input coming through stdin. Assumed to be 'csv' if not given.",
+            'metavar' : metavars(api.BUILTIN_READERS, module=False)
             }),
         ('--schema', '-m', {
             'type' : str,
-            'help' : f"Member table schema. Must be one of {api.BUILTIN_SCHEMAS!r} or a custom Python module. Defaults to 'basic'."
+            'help' : "Member table schema. May be the path to a custom Python module. Defaults to 'basic'.",
+            'metavar' : metavars(api.BUILTIN_SCHEMAS, module=True)
             }),
         ('--writer', '-w', {
             'type' : str,
-            'help' : f"Writing module. One of {api.BUILTIN_WRITERS!r} or a custom Python module. Defaults to 'dot'."
+            'help' : f"Writing module. May be the path to a custom Python module. If no module is given, one is guessed based on the output filetype.",
+            'metavar' : metavars(api.BUILTIN_WRITERS, module=True)
             }),
         ('output_format', '--to', '-t', {
             'type' : str,
             'help' : f"File format for output. Must be supported by the writer. Defaults to the output's file extension if it is known or 'dot' if it is unknown.",
+            'metavar' : 'EXT',
             }),
         ('--seed', '-S', {
             'type' : int,
