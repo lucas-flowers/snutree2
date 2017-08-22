@@ -323,7 +323,7 @@ def create_dot_graph(tree, ranks, defaults):
     Use the FamilyTree to create a dot.Graph instance. Set ranks=True to enable
     putting the nodes in rows in order of their rank, instead of making a basic
     tree structure. The defaults dictionary contains default Graphviz
-    attributes for various types of items on the graph (see DOT_SCHEMA).
+    attributes for various types of items on the graph.
     '''
 
     members = create_tree_subgraph(tree, 'members', defaults['node']['member'])

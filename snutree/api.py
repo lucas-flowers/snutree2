@@ -69,7 +69,6 @@ def generate(
         'seed' : seed,
         })
 
-
     logger.info('Loading configuration files')
     config = get_config(config_defaults, config_paths, config_args)
 
