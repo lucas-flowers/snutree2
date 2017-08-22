@@ -34,23 +34,6 @@ def generate(
 
     logger = logging.getLogger(__name__)
 
-    config_defaults = {
-            'readers' : {
-                'stdin' : {
-                    'filetype' : 'csv',
-                    },
-                },
-            'schema' : {
-                'name' : 'basic',
-                },
-            'writer' : {
-                'filetype' : output_path.suffix[1:] if output_path is not None and output_path.suffix else 'dot',
-                'file' : None,
-                'name' : None,
-                },
-            'seed' : 71
-            }
-
     # Parameters for this function that can also be included in config files
     config_args = denullified({
         'readers' : {
@@ -70,7 +53,7 @@ def generate(
         })
 
     logger.info('Loading configuration files')
-    config = get_config(config_defaults, config_paths, config_args)
+    config = get_config(config_paths, config_args)
 
     logger.info('Loading member schema module')
     schema = get_schema_module(config['schema']['name'])
@@ -111,7 +94,7 @@ CONFIG_VALIDATOR = Validator({
                 'schema' : {
                     'filetype' : {
                         'type' : 'string',
-                        'nullable' : True,
+                        'default' : 'csv',
                         }
                     }
                 }
@@ -126,6 +109,7 @@ CONFIG_VALIDATOR = Validator({
         'schema' : {
             'name' : {
                 'type' : 'string',
+                'default' : 'basic',
                 }
             }
         },
@@ -134,19 +118,25 @@ CONFIG_VALIDATOR = Validator({
         'allow_unknown' : True,
         'schema' : {
             'filetype' : {
-                'type' : 'string'
+                'type' : 'string',
+                'default_setter' : lambda doc : doc['file'].suffix[1:] \
+                            if doc['file'] is not None and doc['file'].suffix \
+                            else 'dot'
                 },
             'name' : {
                 'type' : 'string',
-                'nullable' : True
+                'default' : None,
+                'nullable' : True,
                 },
             'file' : {
+                'default' : None,
                 'nullable' : True
                 }
             }
         },
     'seed' : {
         'type' : 'integer',
+        'default' : 71,
         },
     })
 
@@ -257,20 +247,18 @@ def get_writer_module(name):
 ###############################################################################
 
 @logged
-def get_config(config_defaults, config_paths, config_args):
+def get_config(config_paths, config_args):
     '''
     Loads the YAML configuration files at the given paths and combines their
-    contents with the configuration arguments and configuration defaults
-    provided. Validates the combined configurations and returns the result as a
-    dictionary.
+    contents with the configuration arguments provided. Validates the combined
+    configurations and returns the result as a dictionary.
 
     When there is overlap between configurations, keys from dictionaries
     processed earlier will be overwritten by those extended later (lists will
     be extended, dictionaries recursively updated, and scalars replaced). The
-    defaults will always be processed first, and config_args will always be
-    processed last.
+    values in config_args will always be processed last.
     '''
-    config = config_defaults
+    config = {}
     for c in load_config_files(config_paths) + [config_args]:
         deep_update(config, c)
     return CONFIG_VALIDATOR.validated(config)
