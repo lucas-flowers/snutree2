@@ -75,19 +75,22 @@ def __describe_schema(indent, schema):
 
 def __describe_dict_schema(indent, key, description, subschema, keyschema, valueschema):
 
-    KEY = keyschema.get('description', 'KEY')
+    KEY = keyschema.get('description', 'key')
     schema = dict(subschema, **({
-        f'<{KEY}1>' : valueschema,
+        f'<{KEY}1>' : dict(valueschema, **{
+            'description' : None,
+            'default' : f'<{valueschema["description"]}1>'
+            }),
         f'<{KEY}2>' : {'default' : '...'}
         } if valueschema else {}))
 
-    yield from __describe_scalar_schema(indent, key, None, description)
+    yield from __describe_scalar_schema(indent, key, None, description or None)
     with indent.indented():
         yield from __describe_schema(indent, schema)
 
 def __describe_list_schema(indent, key, description, listschema):
 
-    item_description = listschema.get('description', 'ITEM')
+    item_description = listschema.get('description', 'item')
 
     yield from __describe_scalar_schema(indent, key, None, description)
     with indent.indented():

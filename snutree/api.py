@@ -95,7 +95,7 @@ CONFIG_SCHEMA = {
                     'type' : 'dict',
                     'schema' : {
                         'filetype' : {
-                            'description' : 'type of files coming to stdin',
+                            'description' : 'type of files coming from stdin',
                             'type' : 'string',
                             'default' : 'csv',
                             }
@@ -103,10 +103,10 @@ CONFIG_SCHEMA = {
                     }
                 },
             'keyschema' : {
-                'description' : 'READER',
+                'description' : 'reader',
                 },
             'valueschema' : {
-                'description' : 'another reader',
+                'description' : 'options for another reader',
                 'type' : 'dict',
                 }
             },

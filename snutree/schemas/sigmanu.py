@@ -14,6 +14,7 @@ from snutree.voluptuous import NonEmptyString, Digits
 CONFIG_SCHEMA = {
         'name' : {
             'type' : 'string',
+            'default' : 'sigmanu',
             'regex' : 'sigmanu',
             },
         'chapter' : {

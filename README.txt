@@ -97,7 +97,35 @@ Note that the query must rename the column headers to match the schema used.
 Command Line Summary
 ~~~~~~~~~~~~~~~~~~~~
 
-.. TODO INPUT HELP HERE
+.. code::
+
+    Usage: cli [OPTIONS] [INPUT_FILES]...
+
+    Options:
+      -S, --seed INTEGER              Seed for the random number generator. Used to
+                                      move tree nodes around in a repeatable way.
+      -t, --to EXT                    File format for output. Must be supported by
+                                      the writer. Defaults to the output's file
+                                      extension if it is known or 'dot' if it is
+                                      unknown.
+      -w, --writer [dot|stats|MODULE]
+                                      Writing module. May be the path to a custom
+                                      Python module. If no module is given, one is
+                                      guessed based on the output filetype.
+      -m, --schema [basic|chapter|keyed|sigmanu|MODULE]
+                                      Member table schema. May be the path to a
+                                      custom Python module. Defaults to 'basic'.
+      -f, --from [csv|dot|sql]        File format for input coming through stdin.
+                                      Assumed to be 'csv' if not given.
+      -c, --config PATH               Program configuration files
+      -o, --output PATH               Instead of writing DOT code to stdout, send
+                                      output to the file given.
+      -l, --log PATH                  Log file path.
+      -q, --quiet                     Only print errors to stderr; no warnings.
+      -d, --debug                     Print debug information to stderr.
+      -v, --verbose                   Print information to stderr.
+      --help                          Show this message and exit.
+
 
 GUI
 ---
@@ -124,9 +152,9 @@ General
 
     readers: # reader module configuration
       stdin: # standard input reader configuration
-        filetype: csv # type of files coming to stdin
-      <READER1>: # another reader
-      <READER2>: ...
+        filetype: csv # type of files coming from stdin
+      <reader1>:
+      <reader2>: ...
     schema: # members schema module configuration
       name: basic # member schema module name
     writer: # writer module configuration
@@ -164,7 +192,7 @@ Sigma Nu
 
 .. code:: yaml
 
-    name:
+    name: sigmanu
     chapter: # the chapter whose family tree will be generated
 
 Writers
@@ -190,56 +218,56 @@ available DOT attributes.
     warn_rank: None # if no_singletons=True, singletons with rank>=warn_rank trigger warnings when dropped
     defaults: # default Graphviz attributes
       graph: # defaults for Graphviz graphs
-        all: # 
-          <ATTR1>: # attribute
-          <ATTR2>: ...
+        all:
+          <name1>: <value1>
+          <name2>: ...
       node: # defaults for Graphviz nodes
         all: # all nodes
-          <ATTR1>: # attribute
-          <ATTR2>: ...
+          <name1>: <value1>
+          <name2>: ...
         rank: # rank nodes
-          <ATTR1>: # attribute
-          <ATTR2>: ...
+          <name1>: <value1>
+          <name2>: ...
         unknown: # nodes of unknown parents
-          <ATTR1>: # attribute
-          <ATTR2>: ...
+          <name1>: <value1>
+          <name2>: ...
         member: # member nodes
-          <ATTR1>: # attribute
-          <ATTR2>: ...
+          <name1>: <value1>
+          <name2>: ...
       edge: # defaults for Graphviz edges
         all: # all edges
-          <ATTR1>: # attribute
-          <ATTR2>: ...
+          <name1>: <value1>
+          <name2>: ...
         rank: # edges between rank nodes
-          <ATTR1>: # attribute
-          <ATTR2>: ...
+          <name1>: <value1>
+          <name2>: ...
         unknown: # edges coming from unknown parents
-          <ATTR1>: # attribute
-          <ATTR2>: ...
+          <name1>: <value1>
+          <name2>: ...
     family_colors: # map of member keys to Graphviz colors
-      <MEMBER_KEY1>: # a Graphviz color
-      <MEMBER_KEY2>: ...
+      <key1>: <color1>
+      <key2>: ...
     nodes: # custom Graphviz nodes
-      <KEY1>: # a Graphviz node key
+      <key1>:
         rank: # the rank (i.e., year, semester, etc.) the node is in
         attributes: # Graphviz node attributes
-          <ATTR1>: # attribute
-          <ATTR2>: ...
-      <KEY2>: ...
+          <name1>: <value1>
+          <name2>: ...
+      <key2>: ...
     edges: # a list of custom Graphviz edges
-      - # EDGE1
+      - # edge1
         nodes: # keys of nodes connected by this edge
-          - # NODE_KEY1
+          - # key1
           - ...
         attributes: # Graphviz edge attributes
-          <ATTR1>: # attribute
-          <ATTR2>: ...
+          <name1>: <value1>
+          <name2>: ...
       - ...
 
 Versioning
 ==========
 
-Version ``0.1.6.dev10+g14e0560.d20170822``.
+Version ``0.1.6.dev11+g494420f.d20170822``.
 
 This project loosely uses `Semantic Versioning <http://semver.org/>`_.
 

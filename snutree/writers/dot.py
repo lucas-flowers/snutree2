@@ -58,10 +58,10 @@ attribute_defaults = lambda key, allowed : {
                 'type' : 'dict',
                 'default' : {},
                 'keyschema' : {
-                    'description' : 'ATTR',
+                    'description' : 'name',
                     },
                 'valueschema' : {
-                    'description' : 'attribute',
+                    'description' : 'value',
                     'type' : ['string', 'number', 'boolean'],
                     }
                 } for key, description in allowed
@@ -146,12 +146,12 @@ CONFIG_SCHEMA = {
                 'type' : 'dict',
                 'default' : {},
                 'keyschema' : {
-                    'description' : 'MEMBER_KEY',
+                    'description' : 'key',
                     'type' : 'string',
                     'required' : True,
                     },
                 'valueschema' : {
-                    'description' : 'a Graphviz color',
+                    'description' : 'color',
                     'type' : 'string',
                     'required' : True,
                     },
@@ -176,10 +176,10 @@ CONFIG_SCHEMA = {
                             'type' : 'dict',
                             'default' : {},
                             'keyschema' : {
-                                'description' : 'ATTR',
+                                'description' : 'name',
                                 },
                             'valueschema' : {
-                                'description' : 'attribute',
+                                'description' : 'value',
                                 },
                             }
                         }
@@ -195,7 +195,7 @@ CONFIG_SCHEMA = {
             'type' : 'list',
             'default' : [],
             'schema' : {
-                'description' : 'EDGE',
+                'description' : 'edge',
                 'type' : 'dict',
                 'schema' : {
                     'nodes' : {
@@ -204,7 +204,7 @@ CONFIG_SCHEMA = {
                         'required' : True,
                         'minlength' : 2,
                         'schema' : {
-                            'description' : 'NODE_KEY',
+                            'description' : 'key',
                             'type' : 'string',
                             }
                         },
@@ -213,10 +213,10 @@ CONFIG_SCHEMA = {
                         'type' : 'dict',
                         'default' : {},
                         'keyschema' : {
-                            'description' : 'ATTR',
+                            'description' : 'name',
                             },
                         'valueschema' : {
-                            'description' : 'attribute',
+                            'description' : 'value',
                             }
                         }
                     }

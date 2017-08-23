@@ -97,7 +97,9 @@ Note that the query must rename the column headers to match the schema used.
 Command Line Summary
 ~~~~~~~~~~~~~~~~~~~~
 
-.. TODO INPUT HELP HERE
+.. code::
+
+{CLI_HELP}
 
 GUI
 ---
