@@ -129,13 +129,6 @@ General
 Readers
 -------
 
-CSV Reader
-~~~~~~~~~~
-
-.. code:: yaml
-
-{CONFIG_READER_CSV}
-
 SQL Reader
 ~~~~~~~~~~
 

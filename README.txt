@@ -167,13 +167,6 @@ General
 Readers
 -------
 
-CSV Reader
-~~~~~~~~~~
-
-.. code:: yaml
-
-
-
 SQL Reader
 ~~~~~~~~~~
 

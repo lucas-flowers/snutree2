@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import sys
+import subprocess
 from pathlib import Path
 from textwrap import indent
 from click.testing import CliRunner
-from rstcheck import check
 from snutree import api
 from snutree.cli import cli
 from snutree.readers import csv, sql, dot
@@ -27,14 +27,20 @@ def main():
             CONFIG_WRITER_DOT=describe_schema(dot.CONFIG_SCHEMA, level=2),
             )
 
-    errors = '\n'.join(f'Line {N}: {error}' for N, error in check(readme))
-    if errors:
-        print('Did not write README. Bad format:', file=sys.stderr)
-        print(errors, file=sys.stderr)
-        sys.exit(1)
 
     with Path('README.txt').open('w+') as f:
         f.write(readme)
+
+    result = subprocess.run([
+        'python',
+        'setup.py',
+        'check',
+        '--restructuredtext',
+        '--strict',
+        ], stdout=subprocess.DEVNULL)
+
+
+    sys.exit(result.returncode)
 
 if __name__ == '__main__':
     main()
