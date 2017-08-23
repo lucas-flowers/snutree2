@@ -111,9 +111,11 @@ Configuration
 
 All configuration is done in YAML (or JSON) files. In the terminal, these files
 can be included with ``--config`` flags. Configuration files listed later
-override those that came earlier.
+override those that came earlier and command line options override all
+configuration files.
 
-Below are all the available options.
+Below are all of the available options along with descriptions in the comments
+and default values where applicable.
 
 General
 -------
@@ -127,6 +129,8 @@ Readers
 
 SQL
 ~~~
+
+If SSH is used, the SQL hostname should be ``127.0.0.1``.
 
 .. code:: yaml
 
@@ -148,6 +152,9 @@ Writers
 DOT
 ~~~
 
+See `Graphviz's documentation <http://graphviz.org/content/attrs>`_ for
+available DOT attributes.
+
 .. code:: yaml
 
 {CONFIG_WRITER_DOT}
@@ -155,12 +162,14 @@ DOT
 Versioning
 ==========
 
-This project loosely uses `Semantic Versioning <http://semver.org/>`__.
+Version ``{VERSION}``.
+
+This project loosely uses `Semantic Versioning <http://semver.org/>`_.
 
 License
 =======
 
 This project is licensed under
-`GPLv3 <https://www.gnu.org/licenses/gpl-3.0.html>`__.
+`GPLv3 <https://www.gnu.org/licenses/gpl-3.0.html>`_.
 
 .. vim: filetype=rst
