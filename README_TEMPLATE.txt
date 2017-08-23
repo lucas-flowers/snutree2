@@ -115,15 +115,19 @@ override those that came earlier.
 
 
 .. code:: yaml
+
 {CONFIG_API}
 
 .. code:: yaml
+
 {CONFIG_READER_SQL}
 
 .. code:: yaml
+
 {CONFIG_SCHEMA_SIGMANU}
 
 .. code:: yaml
+
 {CONFIG_WRITER_DOT}
 
 Versioning

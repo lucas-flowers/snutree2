@@ -115,6 +115,7 @@ override those that came earlier.
 
 
 .. code:: yaml
+
     readers: # reader module configuration
       stdin: # standard input reader configuration
         filetype: csv # type of files coming to stdin
@@ -129,6 +130,7 @@ override those that came earlier.
     seed: 71 # random number generator seed
 
 .. code:: yaml
+
     host: 127.0.0.1 # SQL server hostname
     user: root # SQL username
     passwd: # SQL user password
@@ -141,10 +143,12 @@ override those that came earlier.
       public_key: # SSH user keyfile
 
 .. code:: yaml
+
     name:
     chapter: # the chapter whose family tree will be generated
 
 .. code:: yaml
+
     name: dot # writer name
     filetype: # output filetype
     file: # output file name
