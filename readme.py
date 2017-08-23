@@ -2,7 +2,6 @@
 
 from pathlib import Path
 from textwrap import indent
-from setuptools_scm import get_version
 from click.testing import CliRunner
 from snutree import api
 from snutree.cli import cli
@@ -21,6 +20,5 @@ with Path('README.txt').open('w+') as f:
         CONFIG_READER_SQL=describe_schema(sql.CONFIG_SCHEMA, level=2),
         CONFIG_SCHEMA_SIGMANU=describe_schema(sigmanu.CONFIG_SCHEMA, level=2),
         CONFIG_WRITER_DOT=describe_schema(dot.CONFIG_SCHEMA, level=2),
-        VERSION=get_version(root=Path(__file__).parent),
         ))
 

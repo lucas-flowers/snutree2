@@ -164,8 +164,6 @@ available DOT attributes.
 Versioning
 ==========
 
-Version ``{VERSION}``.
-
 This project loosely uses `Semantic Versioning <http://semver.org/>`_.
 
 License
