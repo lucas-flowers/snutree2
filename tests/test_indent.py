@@ -8,14 +8,14 @@ from snutree.indent import Indent
     ('', Indent(tabstop=4, char='s'), 0),
     ('ssss', Indent(tabstop=4, char='s'), 1),
     ('ssssssss', Indent(tabstop=4, char='s'), 2),
-    ('\t\t\t', Indent(3, '\t'), 1),
+    ('\t\t\t', Indent(tabstop=3, char='\t'), 1),
     ('ssss', Indent(tabstop=2, char='ss'), 1),
-    ('ssss', Indent(2, 'ss'), 1),
+    ('ssss', Indent(tabstop=2, char='ss'), 1),
     ('', Indent(), 0),
     ('    ', Indent(), 1),
     ('        ', Indent(), 2),
     ('            ', Indent(), 3),
-    ('      ', Indent(3), 2),
+    ('      ', Indent(tabstop=3), 2),
     ])
 def test_Indent(expected, indent, level):
     for _ in range(level):

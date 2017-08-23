@@ -32,7 +32,7 @@ def test_Defaults():
     defaults = Defaults('node', attributes={'label': 'A label'})
     assert str(defaults) == 'node [label="A label"];'
 
-    indent = Indent(3)
+    indent = Indent(tabstop=3)
     indent.indent()
     assert defaults.to_dot(indent) == '   node [label="A label"];'
 
