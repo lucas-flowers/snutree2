@@ -113,18 +113,40 @@ All configuration is done in YAML (or JSON) files. In the terminal, these files
 can be included with ``--config`` flags. Configuration files listed later
 override those that came earlier.
 
+Below are all the available options.
+
+General
+-------
 
 .. code:: yaml
 
 {CONFIG_API}
 
+Readers
+-------
+
+SQL
+~~~
+
 .. code:: yaml
 
 {CONFIG_READER_SQL}
 
+Schemas
+-------
+
+Sigma Nu
+~~~~~~~~
+
 .. code:: yaml
 
 {CONFIG_SCHEMA_SIGMANU}
+
+Writers
+-------
+
+DOT
+~~~
 
 .. code:: yaml
 

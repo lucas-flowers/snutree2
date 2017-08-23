@@ -113,6 +113,10 @@ All configuration is done in YAML (or JSON) files. In the terminal, these files
 can be included with ``--config`` flags. Configuration files listed later
 override those that came earlier.
 
+Below are all the available options.
+
+General
+-------
 
 .. code:: yaml
 
@@ -129,6 +133,12 @@ override those that came earlier.
       file: None # output file name
     seed: 71 # random number generator seed
 
+Readers
+-------
+
+SQL
+~~~
+
 .. code:: yaml
 
     host: 127.0.0.1 # SQL server hostname
@@ -142,10 +152,22 @@ override those that came earlier.
       user: # SSH username
       public_key: # SSH user keyfile
 
+Schemas
+-------
+
+Sigma Nu
+~~~~~~~~
+
 .. code:: yaml
 
     name:
     chapter: # the chapter whose family tree will be generated
+
+Writers
+-------
+
+DOT
+~~~
 
 .. code:: yaml
 
