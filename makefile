@@ -22,8 +22,5 @@ build-clean:
 clean: py-clean test-clean build-clean
 
 test: py-clean
-	$(TEST) -k 'not private'
-
-priv-test: py-clean
 	$(TEST)
 
