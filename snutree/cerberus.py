@@ -45,12 +45,13 @@ class Validator(cerberus.Validator):
     def _normalize_coerce_optional_rank_type(self, value):
         return value and self._normalize_coerce_rank_type(value)
 
-def describe_schema(schema):
+def describe_schema(schema, **indent_args):
     '''
     Returns a string containing the descriptions of all the fields in the
     schema document, in a YAML-like format.
     '''
-    lines = __describe_schema(Indent(tabstop=2), schema)
+    indent_args.setdefault('tabstop', 2)
+    lines = __describe_schema(Indent(**indent_args), schema)
     return '\n'.join(lines)
 
 def __describe_schema(indent, schema):

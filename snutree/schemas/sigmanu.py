@@ -2,25 +2,27 @@ import difflib
 import pprint
 import re
 from abc import ABCMeta, abstractmethod
-from cerberus import Validator
 from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.error import Error
 from voluptuous.humanize import validate_with_humanized_errors
 from snutree.errors import SnutreeError, SnutreeSchemaError
 from snutree.semester import Semester
 from snutree.tree import Member
+from snutree.cerberus import Validator
 from snutree.voluptuous import NonEmptyString, Digits
 
-SIGMANU_VALIDATOR = Validator({
-    'name' : {
-        'type' : 'string',
-        'regex' : 'sigmanu',
-        },
-    'chapter' : {
-        'description' : 'the chapter whose family tree will be generated',
-        'type' : 'string',
+CONFIG_SCHEMA = {
+        'name' : {
+            'type' : 'string',
+            'regex' : 'sigmanu',
+            },
+        'chapter' : {
+            'description' : 'the chapter whose family tree will be generated',
+            'type' : 'string',
+            }
         }
-    })
+
+SIGMANU_VALIDATOR = Validator(CONFIG_SCHEMA)
 
 Rank = Semester
 

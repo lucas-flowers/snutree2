@@ -115,93 +115,16 @@ override those that came earlier.
 
 
 .. code:: yaml
-    readers: # reader module configuration
-      stdin: # standard input reader configuration
-        filetype: csv # type of files coming to stdin
-      <READER1>: # another reader
-      <READER2>: ...
-    schema: # members schema module configuration
-      name: basic # member schema module name
-    writer: # writer module configuration
-      filetype: # output filetype
-      name: dot # writer module name
-      file: None # output file name
-    seed: 71 # random number generator seed
+{CONFIG_API}
 
 .. code:: yaml
-    host: 127.0.0.1 # SQL server hostname
-    user: root # SQL username
-    passwd: # SQL user password
-    port: 3306 # SQL server port
-    db: # SQL database name
-    ssh: # credentials to encrypt SQL connection with SSH
-      host: # SSH server hostname
-      port: 22 # SSH server port
-      user: # SSH username
-      public_key: # SSH user keyfile
+{CONFIG_READER_SQL}
 
 .. code:: yaml
-    name:
-    chapter: # the chapter whose family tree will be generated
+{CONFIG_SCHEMA_SIGMANU}
 
 .. code:: yaml
-    name: dot # writer name
-    filetype: # output filetype
-    file: # output file name
-    ranks: True # enable ranks
-    custom_edges: True # enable custom edges
-    custom_nodes: True # enable custom nodes
-    no_singletons: True # delete member nodes with neither parent nor child nodes
-    colors: True # add color to member nodes
-    unknowns: True # add parent nodes to members without any
-    warn_rank: None # if no_singletons=True, singletons with rank>=warn_rank trigger warnings when dropped
-    defaults: # default Graphviz attributes
-      graph: # defaults for Graphviz graphs
-        all: # 
-          <ATTR1>: # attribute
-          <ATTR2>: ...
-      node: # defaults for Graphviz nodes
-        all: # all nodes
-          <ATTR1>: # attribute
-          <ATTR2>: ...
-        rank: # rank nodes
-          <ATTR1>: # attribute
-          <ATTR2>: ...
-        unknown: # nodes of unknown parents
-          <ATTR1>: # attribute
-          <ATTR2>: ...
-        member: # member nodes
-          <ATTR1>: # attribute
-          <ATTR2>: ...
-      edge: # defaults for Graphviz edges
-        all: # all edges
-          <ATTR1>: # attribute
-          <ATTR2>: ...
-        rank: # edges between rank nodes
-          <ATTR1>: # attribute
-          <ATTR2>: ...
-        unknown: # edges coming from unknown parents
-          <ATTR1>: # attribute
-          <ATTR2>: ...
-    family_colors: # map of member keys to Graphviz colors
-      <MEMBER_KEY1>: # a Graphviz color
-      <MEMBER_KEY2>: ...
-    nodes: # custom Graphviz nodes
-      <KEY1>: # a Graphviz node key
-        rank: # the rank (i.e., year, semester, etc.) the node is in
-        attributes: # Graphviz node attributes
-          <ATTR1>: # attribute
-          <ATTR2>: ...
-      <KEY2>: ...
-    edges: # a list of custom Graphviz edges
-      - # EDGE1
-        nodes: # keys of nodes connected by this edge
-          - # NODE_KEY1
-          - ...
-        attributes: # Graphviz edge attributes
-          <ATTR1>: # attribute
-          <ATTR2>: ...
-      - ...
+{CONFIG_WRITER_DOT}
 
 Versioning
 ==========
