@@ -3,7 +3,7 @@ from inspect import cleandoc as trim
 from pathlib import Path
 import pytest
 from click.testing import CliRunner
-from snutree.errors import SnutreeError, SnutreeSchemaError
+from snutree.errors import SnutreeSchemaError
 from snutree.cli import cli
 
 TESTS_ROOT = Path(__file__).parent

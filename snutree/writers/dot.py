@@ -7,7 +7,7 @@ from snutree.tree import TreeEntity
 from snutree.logging import logged
 from snutree.colors import ColorPicker
 from snutree.tree import TreeError
-from snutree.cerberus import optional_boolean, nonempty_string, Validator
+from snutree.cerberus import Validator
 
 logger_name = 'snutree.writers.dot'
 
@@ -28,7 +28,7 @@ def compile_tree(tree, RankType, config):
 
     logger = logging.getLogger(logger_name)
 
-    validator = Validator(DOT_SCHEMA, RankType=RankType)
+    validator = Validator(CONFIG_SCHEMA, RankType=RankType)
     config = validator.validated(config)
 
     logger.info('Converting to DOT format')
@@ -47,120 +47,177 @@ def compile_tree(tree, RankType, config):
 ###############################################################################
 ###############################################################################
 
-# Graphviz attributes
-graphviz_attributes = {
-        'type' : 'dict',
-        'default' : {},
-        'valueschema' : {
-            'type' : ['string', 'number', 'boolean']
-            }
-        }
-
 # Contains groups of attributes labeled by the strings in `allowed`
-attribute_defaults = lambda *allowed : {
+attribute_defaults = lambda key, allowed : {
+        'description' : f'defaults for Graphviz {key}s',
         'type' : 'dict',
-        'nullable' : False,
-        'default' : { a : {} for a in allowed },
-        'keyschema' : { 'allowed' : allowed },
-        'valueschema' : {
-            'type' : 'dict',
+        'default' : { key : {} for key, _ in allowed },
+        'schema' : {
+            key : {
+                'description' : description,
+                'type' : 'dict',
+                'default' : {},
+                'keyschema' : {
+                    'description' : 'ATTR',
+                    },
+                'valueschema' : {
+                    'description' : 'attribute',
+                    'type' : ['string', 'number', 'boolean'],
+                    }
+                } for key, description in allowed
             }
         }
 
-DOT_SCHEMA = {
-
-        # Writer name
+CONFIG_SCHEMA = {
         'name' : {
-            'nullable' : True,
+            'description' : 'writer name',
+            'regex' : 'dot',
+            'default' : 'dot',
             },
-
-        # Output file format
         'filetype' : {
+            'description' : 'output filetype',
             'allowed' : list(filetypes),
             'nullable' : True,
             },
-
-        # File path
         'file' : {
+            'description' : 'output file name',
             'coerce' : 'optional_path',
             'nullable' : True,
             },
-
-        # Flags
-        **{ flag : optional_boolean for flag in [
-            'ranks',
-            'custom_edges',
-            'custom_nodes',
-            'no_singletons',
-            'colors',
-            'unknowns'
-            ]},
-
-        # If no_singletons is enabled, any singleton member with a rank higher
-        # than this rank will trigger a warning before being dropped
+        'ranks' : {
+            'description' : 'enable ranks',
+            'type' : 'boolean',
+            'default' : True,
+            },
+        'custom_edges' : {
+            'description' : 'enable custom edges',
+            'type' : 'boolean',
+            'default' : True,
+            },
+        'custom_nodes' : {
+            'description' : 'enable custom nodes',
+            'type' : 'boolean',
+            'default' : True,
+            },
+        'no_singletons' : {
+            'description' : 'delete member nodes with neither parent nor child nodes',
+            'type' : 'boolean',
+            'default' : True,
+            },
+        'colors' : {
+            'description' : 'add color to member nodes',
+            'type' : 'boolean',
+            'default' : True,
+            },
+        'unknowns' : {
+            'description' : 'add parent nodes to members without any',
+            'type' : 'boolean',
+            'default' : True,
+            },
         'warn_rank' : {
+            'description' : 'if no_singletons=True, singletons with rank>=warn_rank trigger warnings when dropped',
             'coerce' : 'optional_rank_type',
-            'nullable' : True,
             'default' : None,
+            'nullable' : True,
             },
-
-        # Default attributes for graphs, nodes, edges, and their subcategories
         'defaults' : {
-            'type' : 'dict',
-            'default' : {},
-            'schema' : {
-                'graph' : attribute_defaults('all'),
-                'node' : attribute_defaults('all', 'rank', 'unknown', 'member'),
-                'edge' : attribute_defaults('all', 'rank', 'unknown'),
-                }
-            },
-
-        # A mapping of node keys to colors
-        'family_colors' : {
-            'type' : 'dict',
-            'default' : {},
-            'keyschema' : nonempty_string,
-            'valueschema' : nonempty_string,
-            },
-
-        # Custom nodes, each with Graphviz attributes and a rank
-        'nodes' : {
-            'type' : 'dict',
-            'default' : {},
-            'keyschema' : nonempty_string,
-            'valueschema' : {
+                'description' : 'default Graphviz attributes',
                 'type' : 'dict',
+                'default' : {},
                 'schema' : {
-                    'rank' : {
-                        'coerce' : 'rank_type',
-                        },
-                    'attributes' : {
-                        'type' : 'dict',
-                        'default' : {},
+                    'graph' : attribute_defaults('graph', allowed=[
+                        ('all', '')
+                        ]),
+                    'node' : attribute_defaults('node', allowed=[
+                        ('all', 'all nodes'),
+                        ('rank', 'rank nodes'),
+                        ('unknown', 'nodes of unknown parents'),
+                        ('member', 'member nodes')
+                        ]),
+                    'edge' : attribute_defaults('edge', allowed=[
+                        ('all', 'all edges'),
+                        ('rank', 'edges between rank nodes'),
+                        ('unknown', 'edges coming from unknown parents'),
+                        ]),
+                    }
+                },
+        'family_colors' : {
+                'description' : 'map of member keys to Graphviz colors',
+                'type' : 'dict',
+                'default' : {},
+                'keyschema' : {
+                    'description' : 'MEMBER_KEY',
+                    'type' : 'string',
+                    'required' : True,
+                    },
+                'valueschema' : {
+                    'description' : 'a Graphviz color',
+                    'type' : 'string',
+                    'required' : True,
+                    },
+                },
+        'nodes' : {
+                'description' : 'custom Graphviz nodes',
+                'type' : 'dict',
+                'default' : {},
+                'keyschema' : {
+                    'type' : 'string',
+                    },
+                'valueschema' : {
+                    'description' : 'a Graphviz node key',
+                    'type' : 'dict',
+                    'schema' : {
+                        'rank' : {
+                            'description' : 'the rank (i.e., year, semester, etc.) the node is in',
+                            'coerce' : 'rank_type',
+                            },
+                        'attributes' : {
+                            'description' : 'Graphviz node attributes',
+                            'type' : 'dict',
+                            'default' : {},
+                            'keyschema' : {
+                                'description' : 'ATTR',
+                                },
+                            'valueschema' : {
+                                'description' : 'attribute',
+                                },
+                            }
                         }
                     }
-                }
-            },
+                },
 
         # Custom edges: Each entry in the list has a list of nodes, which are
         # used to represent a path from which to create edges (which is why
         # there must be at least two nodes in each list). There are also edge
         # attributes applied to all edges in the path.
         'edges' : {
+            'description' : 'a list of custom Graphviz edges',
             'type' : 'list',
             'default' : [],
             'schema' : {
+                'description' : 'EDGE',
                 'type' : 'dict',
                 'schema' : {
                     'nodes' : {
+                        'description' : 'keys of nodes connected by this edge',
                         'type' : 'list',
                         'required' : True,
                         'minlength' : 2,
-                        'schema' : nonempty_string,
+                        'schema' : {
+                            'description' : 'NODE_KEY',
+                            'type' : 'string',
+                            }
                         },
                     'attributes' : {
+                        'description' : 'Graphviz edge attributes',
                         'type' : 'dict',
                         'default' : {},
+                        'keyschema' : {
+                            'description' : 'ATTR',
+                            },
+                        'valueschema' : {
+                            'description' : 'attribute',
+                            }
                         }
                     }
                 },

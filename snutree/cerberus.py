@@ -45,61 +45,65 @@ class Validator(cerberus.Validator):
     def _normalize_coerce_optional_rank_type(self, value):
         return value and self._normalize_coerce_rank_type(value)
 
-def description_schema(schema, descriptions=None):
-    '''
-    Return a dictionary of 'description' fields from the provided
-    Cerberus-style schema. Each element in the return dictionary has a schema
-    field containing the descriptions of its subkeys, and a description field
-    for itself.
-    '''
-    descriptions = descriptions if descriptions is not None else {}
-    for key, rules in schema.items():
-        description = rules.get('description', '')
-        default = rules.get('default')
-        if default is not None:
-            description = ' '.join([description, f'(default: {default!r})'])
-        descriptions[key] = {'description' : description}
-        if rules.get('type') == 'dict' and 'schema' in rules:
-            descriptions[key]['schema'] = description_schema(rules['schema'], {})
-    return descriptions
-
 def describe_schema(schema):
     '''
     Returns a string containing the descriptions of all the fields in the
-    schema document, formatted similarly to (but not the same as) YAML.
+    schema document, in a YAML-like format.
     '''
-    descriptions = description_schema(schema)
-    lines = __describe_schema(descriptions, Indent(tabstop=2))
+    lines = __describe_schema(Indent(tabstop=2), schema)
     return '\n'.join(lines)
 
-def __describe_schema(descriptions, indent):
-    for key, dct in descriptions.items():
-        description = dct['description']
-        schema = dct.get('schema')
-        yield f'{indent}{key}: {description}'
-        if schema:
-            with indent.indented():
-                yield from __describe_schema(schema, indent)
+def __describe_schema(indent, schema):
 
-# A required string; must be nonempty and not None
-nonempty_string = {
-        'type' : 'string',
-        'required' : True,
-        'empty' : False,
-        'nullable' : False,
-        }
+    for key, rules in schema.items():
 
-# An optional string defaulting to None; must be nonempty if it does exist
-optional_nonempty_string = {
-        'type' : 'string',
-        'default' : None,
-        'empty' : False,
-        'nullable' : True,
-        }
+        description = rules.get('description')
+        schema_type = rules.get('type')
 
-# Optional boolean with True default
-optional_boolean = {
-        'type' : 'boolean',
-        'default' : True,
-        }
+        if schema_type == 'dict':
+            subschema = rules.get('schema', {})
+            valueschema = rules.get('valueschema', {})
+            keyschema = rules.get('keyschema', {})
+            yield from __describe_dict_schema(indent, key, description, subschema, keyschema, valueschema)
+        elif schema_type == 'list':
+            listschema = rules.get('schema')
+            yield from __describe_list_schema(indent, key, description, listschema)
+        else:
+            default = str(rules['default']) if 'default' in rules else None
+            yield from __describe_scalar_schema(indent, key, default, description)
+
+def __describe_dict_schema(indent, key, description, subschema, keyschema, valueschema):
+
+    KEY = keyschema.get('description', 'KEY')
+    schema = dict(subschema, **({
+        f'<{KEY}1>' : valueschema,
+        f'<{KEY}2>' : {'default' : '...'}
+        } if valueschema else {}))
+
+    yield from __describe_scalar_schema(indent, key, None, description)
+    with indent.indented():
+        yield from __describe_schema(indent, schema)
+
+def __describe_list_schema(indent, key, description, listschema):
+
+    item_description = listschema.get('description', 'ITEM')
+
+    yield from __describe_scalar_schema(indent, key, None, description)
+    with indent.indented():
+        yield from __describe_row(indent, '-', None, f'{item_description}1')
+        with indent.indented():
+            yield from __describe_schema(indent, listschema.get('schema', {}))
+        yield from __describe_row(indent, '-', '...', None)
+
+def __describe_scalar_schema(indent, key, default, description):
+    yield from __describe_row(indent, f'{key}:', default, description)
+
+def __describe_row(indent, prefix, value, comment):
+    row = []
+    row.append(f'{indent}{prefix}')
+    if value is not None:
+        row.append(value)
+    if comment is not None:
+        row.append(f'# {comment}')
+    yield ' '.join(row)
 

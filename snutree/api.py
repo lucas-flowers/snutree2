@@ -84,61 +84,76 @@ def generate(
 ###############################################################################
 ###############################################################################
 
-CONFIG_VALIDATOR = Validator({
-    'readers' : {
-        'type' : 'dict',
-        'allow_unknown' : True,
-        'schema' : {
-            'stdin' : {
-                'type' : 'dict',
-                'schema' : {
-                    'filetype' : {
-                        'type' : 'string',
-                        'default' : 'csv',
+CONFIG_SCHEMA = {
+        'readers' : {
+            'description' : 'reader module configuration',
+            'type' : 'dict',
+            'allow_unknown' : True,
+            'schema' : {
+                'stdin' : {
+                    'description' : 'standard input reader configuration',
+                    'type' : 'dict',
+                    'schema' : {
+                        'filetype' : {
+                            'description' : 'type of files coming to stdin',
+                            'type' : 'string',
+                            'default' : 'csv',
+                            }
                         }
+                    }
+                },
+            'keyschema' : {
+                'description' : 'READER',
+                },
+            'valueschema' : {
+                'description' : 'another reader',
+                'type' : 'dict',
+                }
+            },
+        'schema' : {
+            'description' : 'members schema module configuration',
+            'type' : 'dict',
+            'allow_unknown' : True,
+            'schema' : {
+                'name' : {
+                    'description' : 'member schema module name',
+                    'type' : 'string',
+                    'default' : 'basic',
                     }
                 }
             },
-        'valueschema' : {
+        'writer' : {
+            'description' : 'writer module configuration',
             'type' : 'dict',
-            }
-        },
-    'schema' : {
-        'type' : 'dict',
-        'allow_unknown' : True,
-        'schema' : {
-            'name' : {
-                'type' : 'string',
-                'default' : 'basic',
-                }
-            }
-        },
-    'writer' : {
-        'type' : 'dict',
-        'allow_unknown' : True,
-        'schema' : {
-            'filetype' : {
-                'type' : 'string',
-                'default_setter' : lambda doc : doc['file'].suffix[1:] \
+            'allow_unknown' : True,
+            'schema' : {
+                'filetype' : {
+                    'description' : 'output filetype',
+                    'type' : 'string',
+                    'default_setter' : lambda doc : doc['file'].suffix[1:] \
                             if doc['file'] is not None and doc['file'].suffix \
                             else 'dot'
-                },
-            'name' : {
-                'type' : 'string',
-                'default' : None,
-                'nullable' : True,
-                },
-            'file' : {
-                'default' : None,
-                'nullable' : True
+                            },
+                'name' : {
+                    'description' : 'writer module name',
+                    'type' : 'string',
+                    'default' : 'dot',
+                    },
+                'file' : {
+                    'description' : 'output file name',
+                    'default' : None,
+                    'nullable' : True
+                    }
                 }
-            }
-        },
-    'seed' : {
-        'type' : 'integer',
-        'default' : 71,
-        },
-    })
+            },
+        'seed' : {
+                'description' : 'random number generator seed',
+                'type' : 'integer',
+                'default' : 71,
+                },
+        }
+
+CONFIG_VALIDATOR = Validator(CONFIG_SCHEMA)
 
 ###############################################################################
 ###############################################################################

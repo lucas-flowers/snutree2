@@ -1,29 +1,63 @@
 from contextlib import closing
 from snutree.errors import SnutreeReaderError
-from snutree.cerberus import Validator, nonempty_string
+from snutree.cerberus import Validator
 
-# Validates a configuration YAML file with SQL and ssh options
-SQL_CNF_VALIDATOR = Validator({
+CONFIG_SCHEMA = {
 
-    'host' : { 'type' : 'string', 'default' : '127.0.0.1' },
-    'user' : { 'type' : 'string', 'default' : 'root' },
-    'passwd' : nonempty_string,
-    'port' : { 'type': 'integer', 'default' : 3306 },
-    'db' : nonempty_string,
+        'host' : {
+            'description' : 'SQL server hostname',
+            'type' : 'string',
+            'default' : '127.0.0.1'
+            },
+        'user' : {
+            'description' : 'SQL username',
+            'type' : 'string',
+            'default' : 'root'
+            },
+        'passwd' : {
+            'description' : 'SQL user password',
+            'type' : 'string',
+            },
+        'port' : {
+            'description' : 'SQL server port',
+            'type': 'integer',
+            'default' : 3306
+            },
+        'db' : {
+            'description' : 'SQL database name',
+            'type' : 'string',
+            },
 
-    # SSH for remote SQL databases
-    'ssh' : {
-        'type' : 'dict',
-        'required' : False,
-        'nullable' : True,
-        'schema' : {
-            'host' : nonempty_string,
-            'port' : { 'type' : 'integer', 'default' : 22 },
-            'user' : nonempty_string,
-            'public_key' : nonempty_string,
+        # SSH for remote SQL databases
+        'ssh' : {
+            'description' : 'credentials to encrypt SQL connection with SSH',
+            'type' : 'dict',
+            'required' : False,
+            'nullable' : True,
+            'schema' : {
+                'host' : {
+                    'description' : 'SSH server hostname',
+                    'type' : 'string',
+                    },
+                'port' : {
+                    'description' : 'SSH server port',
+                    'type' : 'integer',
+                    'default' : 22
+                    },
+                'user' : {
+                    'description' : 'SSH username',
+                    'type' : 'string',
+                    },
+                'public_key' : {
+                    'description' : 'SSH user keyfile',
+                    'type' : 'string',
+                    },
+                }
             }
         }
-    })
+
+# Validates a configuration YAML file with SQL and ssh options
+CONFIG_VALIDATOR = Validator(CONFIG_SCHEMA)
 
 def get_table(query_stream, **config):
     '''
@@ -45,7 +79,7 @@ def get_members(query, config):
     members from the configuration's SQL database.
     '''
 
-    config = SQL_CNF_VALIDATOR.validated(config)
+    config = CONFIG_VALIDATOR.validated(config)
     ssh_config = config.get('ssh')
     sql_config = config.copy()
     sql_config.pop('ssh', None)

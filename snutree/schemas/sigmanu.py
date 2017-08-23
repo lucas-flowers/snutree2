@@ -6,7 +6,6 @@ from cerberus import Validator
 from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.error import Error
 from voluptuous.humanize import validate_with_humanized_errors
-from snutree.cerberus import nonempty_string
 from snutree.errors import SnutreeError, SnutreeSchemaError
 from snutree.semester import Semester
 from snutree.tree import Member
@@ -17,7 +16,10 @@ SIGMANU_VALIDATOR = Validator({
         'type' : 'string',
         'regex' : 'sigmanu',
         },
-    'chapter' : nonempty_string,
+    'chapter' : {
+        'description' : 'the chapter whose family tree will be generated',
+        'type' : 'string',
+        }
     })
 
 Rank = Semester
