@@ -31,6 +31,8 @@ def run_example(
     output = files/'output'
     expected = output/'expected'
     actual = output/'actual'
+    if not actual.exists():
+        actual.mkdir()
 
     example_configs = [example/config for config in configs] if configs else []
     example_inputs = [example/input_file for input_file in inputs] if inputs else []
