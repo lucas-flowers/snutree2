@@ -27,8 +27,8 @@ and ending with a year (e.g., "Fall 2014" or "Spring 1956"). With this input,
 tree, and output the tree using Graphviz. Each member will be put on a row
 representing the semester they joined.
 
-Schemas
-~~~~~~~
+Changing Schemas
+~~~~~~~~~~~~~~~~
 
 The (``name``, ``big_name``, ``semester``) headers consist of the
 "basic" schema. There are a few other schemas available. They are:
@@ -62,8 +62,8 @@ A custom Python module may be used as a schema:
 Custom schema modules should validate the tables themselves and turn them into
 an internal format ``snutree`` can read.
 
-SQL
-~~~
+SQL Queries
+~~~~~~~~~~~
 
 Input files can also be SQL queries. This will run the query in ``query.sql``
 on the database described in ``config.yaml`` and save the resulting tree to
@@ -129,15 +129,15 @@ General
 Readers
 -------
 
-CSV
-~~~
+CSV Reader
+~~~~~~~~~~
 
 .. code:: yaml
 
 {CONFIG_READER_CSV}
 
-SQL
-~~~
+SQL Reader
+~~~~~~~~~~
 
 If SSH is used, the SQL hostname should be ``127.0.0.1``.
 
@@ -148,8 +148,8 @@ If SSH is used, the SQL hostname should be ``127.0.0.1``.
 Schemas
 -------
 
-Sigma Nu
-~~~~~~~~
+Sigma Nu Schema
+~~~~~~~~~~~~~~~
 
 .. code:: yaml
 
@@ -158,8 +158,8 @@ Sigma Nu
 Writers
 -------
 
-DOT
-~~~
+DOT Writer
+~~~~~~~~~~
 
 See `Graphviz's documentation <http://graphviz.org/content/attrs>`_ for
 available DOT attributes.
