@@ -22,7 +22,8 @@ def generate_readme(template):
     result = subprocess.run(
             ['./snutree.py', '--help'],
             stdout=subprocess.PIPE,
-            encoding=sys.getdefaultencoding(),
+            universal_newlines=True, # Python 3.5
+            # encoding=sys.getdefaultencoding(), # Python 3.6
             )
     return_code = result.returncode
     if return_code:
