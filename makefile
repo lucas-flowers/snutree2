@@ -16,6 +16,9 @@ dist: clean
 upload-test:
 	twine upload -r testpypi dist/*
 
+upload:
+	twine upload -r pypi dist/*
+
 readme:
 	python readme.py
 
