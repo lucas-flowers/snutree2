@@ -56,7 +56,7 @@ def describe_schema(schema, **indent_args):
 
 def __describe_schema(indent, schema):
 
-    for key, rules in schema.items():
+    for key, rules in sorted(schema.items()): # `sorted` is unecessary in Python 3.6
 
         description = rules.get('description')
         schema_type = rules.get('type')
@@ -76,17 +76,18 @@ def __describe_schema(indent, schema):
 def __describe_dict_schema(indent, key, description, subschema, keyschema, valueschema):
 
     KEY = keyschema.get('description', 'key')
-    schema = dict(subschema, **({
-        '<{KEY}1>'.format(KEY=KEY) : dict(valueschema, **{
-            'description' : None,
-            'default' : '<{description}1>'.format(description=valueschema['description'])
-            }),
-        '<{KEY}2>'.format(KEY=KEY) : {'default' : '...'}
-        } if valueschema else {}))
+    extras_schema = {
+            '<{KEY}1>'.format(KEY=KEY) : dict(valueschema, **{
+                'description' : None,
+                'default' : '<{description}1>'.format(description=valueschema['description'])
+                }),
+            '<{KEY}2>'.format(KEY=KEY) : {'default' : '...'}
+            } if valueschema else {}
 
     yield from __describe_scalar_schema(indent, key, None, description or None)
     with indent.indented():
-        yield from __describe_schema(indent, schema)
+        yield from __describe_schema(indent, subschema)
+        yield from __describe_schema(indent, extras_schema)
 
 def __describe_list_schema(indent, key, description, listschema):
 
