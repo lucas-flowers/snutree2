@@ -108,6 +108,35 @@ The ``snutree`` package also includes a simple GUI called ``snutree-qt``. The
 GUI can take multiple input files of any supported format, pick schemas, output
 to PDF, and choose a seed for the random number generator.
 
+Installation
+============
+
+First, install the following applications for your operating system and ensure
+they are in your PATH:
+
+  - Python >=3.6
+
+  - `Graphviz <http://graphviz.org>`_ (be sure that ``dot`` is in your PATH)
+
+Then install ``snutree`` and its Python dependencies with Python's ``pip``:
+
+.. code:: bash
+
+    pip install snutree
+
+Optional Dependencies
+---------------------
+
+Use ``pip`` to install these packages for optional features:
+
+    - ``pyqt5``: Use the GUI
+
+    - ``mysqlclient``: Allow reading from MySQL databases
+
+        - ``sshtunnel``: Allow tunneling SQL queries through ssh
+
+    - ``pydotplus``: Allow reading data from DOT files (experimental)
+
 Configuration
 =============
 
