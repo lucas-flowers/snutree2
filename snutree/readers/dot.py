@@ -21,7 +21,8 @@ def get_table(f, **config):
     try:
         import pydotplus
     except ModuleNotFoundError:
-        raise SnutreeReaderError(f'could not read DOT file: missing pydotplus package')
+        msg = 'could not read DOT file: missing pydotplus package'
+        raise SnutreeReaderError(msg)
 
     # Pydotplus catches all of its ParseExceptions at the end of parse_dot_data
     # and doesn't bother to rethrow them or store the messages in a log.
@@ -35,7 +36,8 @@ def get_table(f, **config):
 
     if pydot is None:
         error_message = captured_stderr.getvalue()
-        raise SnutreeReaderError(f'could not read DOT file:\n{error_message}')
+        msg = 'could not read DOT file:\n{error_message}'.format(error_message=error_message)
+        raise SnutreeReaderError(msg)
     else:
         graph = pydot_to_nx(pydot)
         return [node_dict for _, node_dict in graph.nodes_iter(data=True)]
@@ -90,7 +92,7 @@ def add_pledge_classes(pydot, graph):
 
                 # I don't want to bother with these cases
                 if semester_name in pledge_classes:
-                    msg = f'two pledge classes in the same semester: {semester_name}'
+                    msg = 'two pledge classes in the same semester: {semester_name}'.format(semester_name=semester_name)
                     raise ValueError(msg)
 
                 pledge_classes[semester_name] = pledge_class_members

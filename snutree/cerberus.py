@@ -25,7 +25,7 @@ class Validator(cerberus.Validator):
         if not dct:
             errors = pprint.pformat(self.errors)
             s = 's' if len(errors) != 1 else ''
-            msg = f'Error{s} found in configuration:\n{errors}'
+            msg = 'Error{s} found in configuration:\n{errors}'.format(s=s, errors=errors)
             raise SnutreeError(msg)
 
         return dct
@@ -77,11 +77,11 @@ def __describe_dict_schema(indent, key, description, subschema, keyschema, value
 
     KEY = keyschema.get('description', 'key')
     schema = dict(subschema, **({
-        f'<{KEY}1>' : dict(valueschema, **{
+        '<{KEY}1>'.format(KEY=KEY) : dict(valueschema, **{
             'description' : None,
-            'default' : f'<{valueschema["description"]}1>'
+            'default' : '<{description}1>'.format(description=valueschema['description'])
             }),
-        f'<{KEY}2>' : {'default' : '...'}
+        '<{KEY}2>'.format(KEY=KEY) : {'default' : '...'}
         } if valueschema else {}))
 
     yield from __describe_scalar_schema(indent, key, None, description or None)
@@ -94,20 +94,20 @@ def __describe_list_schema(indent, key, description, listschema):
 
     yield from __describe_scalar_schema(indent, key, None, description)
     with indent.indented():
-        yield from __describe_row(indent, '-', None, f'{item_description}1')
+        yield from __describe_row(indent, '-', None, '{item_description}1'.format(item_description=item_description))
         with indent.indented():
             yield from __describe_schema(indent, listschema.get('schema', {}))
         yield from __describe_row(indent, '-', '...', None)
 
 def __describe_scalar_schema(indent, key, default, description):
-    yield from __describe_row(indent, f'{key}:', default, description)
+    yield from __describe_row(indent, '{key}:'.format(key=key), default, description)
 
 def __describe_row(indent, prefix, value, comment):
     row = []
-    row.append(f'{indent}{prefix}')
+    row.append('{indent}{prefix}'.format(indent=indent, prefix=prefix))
     if value is not None:
         row.append(value)
     if comment is not None:
-        row.append(f'# {comment}')
+        row.append('# {comment}'.format(comment=comment))
     yield ' '.join(row)
 

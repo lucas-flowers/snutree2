@@ -23,7 +23,7 @@ class Semester(int):
                 year = int(match.group(2))
                 value = 2 * year + season
             else:
-                msg = f'semester names must match "{Semester.matcher.pattern}"'
+                msg = 'semester names must match "{pattern}"'.format(pattern=Semester.matcher.pattern)
                 raise ValueError(msg)
 
         elif len(arg) == 2 and isinstance(arg[0], str) and isinstance(arg[1], int):
@@ -44,7 +44,7 @@ class Semester(int):
     def __repr__(self):
         year, is_fall = divmod(self, 2)
         season = 'Fall' if is_fall else 'Spring'
-        return f'{season} {year}'
+        return '{season} {year}'.format(season=season, year=year)
 
     def __str__(self):
         return repr(self)

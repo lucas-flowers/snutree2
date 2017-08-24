@@ -41,7 +41,7 @@ class TreeEntity(metaclass=ABCMeta):
             return self._rank
         else:
             code = TreeErrorCode.ACCESS_MISSING_RANK
-            msg = f'missing rank value for entity {self.key!r}'
+            msg = 'missing rank value for entity {key!r}'.format(key=self.key)
             raise TreeError(code, msg)
 
     @rank.setter
@@ -118,14 +118,14 @@ class FamilyTree:
 
         if pkey not in self:
             code = TreeErrorCode.PARENT_UNKNOWN
-            msg = f'member {ckey!r} has unknown parent: {pkey!r}'
+            msg = 'member {ckey!r} has unknown parent: {pkey!r}'.format(ckey=ckey, pkey=pkey)
             raise TreeError(code, msg)
 
         parent = self[pkey]['entity']
 
         if member.rank and parent.rank and member.rank < parent.rank:
             code = TreeErrorCode.PARENT_NOT_PRIOR
-            msg = f'rank {member.rank!r} of member {ckey!r} cannot be prior to rank of parent {pkey!r}: {parent.rank!r}'
+            msg = 'rank {rank!r} of member {ckey!r} cannot be prior to rank of parent {pkey!r}: {parent_rank!r}'.format(rank=member.rank, ckey=ckey, pkey=pkey, parent_rank=parent.rank)
             raise TreeError(code, msg)
 
         self.add_edge(pkey, ckey)
@@ -166,7 +166,7 @@ class FamilyTree:
         key = entity.key
         if key in self:
             code = TreeErrorCode.DUPLICATE_ENTITY
-            msg = f'duplicate entity key: {key!r}'
+            msg = 'duplicate entity key: {key!r}'.format(key=key)
             raise TreeError(code, msg)
         self.graph.add_node(key, entity=entity, **attributes)
 

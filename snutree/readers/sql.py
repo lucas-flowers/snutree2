@@ -107,7 +107,8 @@ def get_members_local(query, sql_config):
                 cursor.execute(query)
                 return cursor.fetchall()
     except MySQLdb.MySQLError as e:
-        raise SnutreeReaderError(f'problem reading SQL database:\n{e}')
+        msg = 'problem reading SQL database:\n{e}'.format(e=e)
+        raise SnutreeReaderError(msg)
 
 def get_members_ssh(query, sql, ssh):
     '''
@@ -138,5 +139,6 @@ def get_members_ssh(query, sql, ssh):
     # The sshtunnel module lets invalid assertions and value errors go
     # untouched, so catch them too
     except (BaseSSHTunnelForwarderError, AssertionError, ValueError) as e:
-        raise SnutreeReaderError(f'problem connecting via ssh:\n{e}')
+        msg = 'problem connecting via ssh:\n{e}'.format(e=e)
+        raise SnutreeReaderError(msg)
 

@@ -33,7 +33,7 @@ def compile_tree(tree, RankType, config):
             'most_littles' : most_littles,
             }
 
-    output = '\n'.join(f'{key}={value}' for key, value in output_fields.items())
+    output = '\n'.join('{key}={value}'.format(key=key, value=value) for key, value in output_fields.items())
 
     return bytes(output, encoding=sys.getdefaultencoding())
 

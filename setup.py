@@ -39,7 +39,7 @@ setup(
             'voluptuous',
             ],
 
-        python_requires='>=3.6',
+        python_requires='>=3.5',
 
         extras_require={
             'test' : ['pytest'],

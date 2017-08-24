@@ -38,7 +38,7 @@ def run_example(
     example_inputs = [example/input_file for input_file in inputs] if inputs else []
 
     output = (actual/example_name).with_suffix('.dot')
-    expected = (expected/f'{example_name}-expected').with_suffix('.dot')
+    expected = (expected/(example_name + '-expected')).with_suffix('.dot')
 
     config_params = []
     for config in example_configs:

@@ -36,8 +36,9 @@ def compile_tree(tree, RankType, config):
     dot_graph = create_dot_graph(tree, config['ranks'], config['defaults'])
     dot_source = dot_graph.to_dot()
 
-    logger.info(f'Compiling to {config["filetype"]}')
-    output = compiled(dot_source, config['filetype'])
+    filetype = config["filetype"]
+    logger.info('Compiling to {filetype}'.format(filetype=filetype))
+    output = compiled(dot_source, filetype)
 
     return output
 
@@ -49,7 +50,7 @@ def compile_tree(tree, RankType, config):
 
 # Contains groups of attributes labeled by the strings in `allowed`
 attribute_defaults = lambda key, allowed : {
-        'description' : f'defaults for Graphviz {key}s',
+        'description' : 'defaults for Graphviz {key}s'.format(key=key),
         'type' : 'dict',
         'default' : { key : {} for key, _ in allowed },
         'schema' : {
@@ -280,7 +281,7 @@ def add_custom_edges(tree, paths):
         for key in nodes:
             if key not in tree:
                 path_or_edge = 'path' if len(nodes) > 2 else 'edge'
-                msg = f'custom {path_or_edge} {nodes} has undefined node: {key!r}'
+                msg = 'custom {path_or_edge} {nodes} has undefined node: {key!r}'.format(path_or_edge=path_or_edge, nodes=nodes, key=key)
                 raise SnutreeWriterError(msg)
 
         # Add edges in this path
@@ -307,10 +308,11 @@ def remove_singleton_members(tree, warn_rank=None):
         if warn_rank is not None and warn_rank <= rank:
             if not warned:
                 logger = logging.getLogger(logger_name)
-                msg = f'Member nodes with no parents, no children, and rank >= warn_rank == {warn_rank!r} were dropped:'
+                msg = 'Member nodes with no parents, no children, and rank >= warn_rank == {warn_rank!r} were dropped:'.format(warn_rank=warn_rank)
                 logger.warning(msg)
                 warned = True
-            logger.warning(f'Dropped (key={key!r}, label={singleton.label!r}, rank={rank!r})')
+            msg = 'Dropped (key={key!r}, label={label!r}, rank={rank!r})'.format(key=key, label=singleton.label, rank=rank)
+            logger.warning(msg)
 
     tree.remove(keys)
 
@@ -329,12 +331,12 @@ def add_colors(tree, family_colors):
     # Take note of the family-color mappings in family_color
     for key, color in family_colors.items():
         if key not in tree:
-            msg = f'family color map includes nonexistent member: {key!r}'
+            msg = 'family color map includes nonexistent member: {key!r}'.format(key=key)
             logging.getLogger(logger_name).warning(msg)
             continue
         family = tree[key]['family']
         if 'color' in family:
-            msg = f'family of member {key!r} already assigned the color {color!r}'
+            msg = 'family of member {key!r} already assigned the color {color!r}'.format(key=key, color=color)
             raise SnutreeWriterError(msg)
         color_picker.use(color)
         tree[key]['family']['color'] = color
@@ -372,7 +374,7 @@ class UnidentifiedMember(TreeEntity):
     '''
 
     def __init__(self, member):
-        key = f'{member.key} Parent'
+        key = '{key} Parent'.format(key=member.key)
         try:
             rank = member.rank - 1
         except TreeError:
@@ -441,20 +443,20 @@ def create_date_subgraph(tree, suffix, min_rank, max_rank, node_defaults, edge_d
     than one subgraph can be made, using different suffixes.
     '''
 
-    subgraph = dot.Graph(f'dates{suffix}', 'subgraph')
+    subgraph = dot.Graph('dates{suffix}'.format(suffix=suffix), 'subgraph')
     node_defaults = dot.Defaults('node', node_defaults)
     edge_defaults = dot.Defaults('edge', edge_defaults)
 
     nodes, edges = [], []
     rank = min_rank
     while rank < max_rank:
-        this_rank_key = f'{rank}{suffix}'
-        next_rank_key = f'{rank+1}{suffix}'
+        this_rank_key = '{rank}{suffix}'.format(rank=rank, suffix=suffix)
+        next_rank_key = '{rank}{suffix}'.format(rank=rank+1, suffix=suffix)
         nodes.append(dot.Node(this_rank_key, attributes={'label' : rank}))
         edges.append(dot.Edge(this_rank_key, next_rank_key))
         rank += 1
 
-    nodes.append(dot.Node(f'{rank}{suffix}', attributes={'label' : rank}))
+    nodes.append(dot.Node('{rank}{suffix}'.format(rank=rank, suffix=suffix), attributes={'label' : rank}))
 
     subgraph.children = [node_defaults, edge_defaults] + nodes + edges
 
@@ -469,7 +471,7 @@ def create_ranks(tree, min_rank, max_rank):
     ranks = []
     i = min_rank
     while i < max_rank:
-        ranks.append(dot.Rank([f'{i}L', f'{i}R']))
+        ranks.append(dot.Rank(['{i}L'.format(i=i), '{i}R'.format(i=i)]))
         i += 1
 
     for key, node in tree.items():
@@ -510,7 +512,7 @@ def compile_fmt(src, filetype):
         # `shell=True` is necessary for Windows, but not for Linux. The command
         # string is constant except for the validated {filetype}, so shell=True
         # should be fine
-        result = subprocess.run(f'dot -T{filetype}', check=True, shell=True,
+        result = subprocess.run('dot -T{filetype}'.format(filetype=filetype), check=True, shell=True,
                 # The input will be a str and the output will be binary, but
                 # subprocess.run requires they both be str or both be binary.
                 # So, use binary and send the source in as binary (with default
@@ -520,7 +522,7 @@ def compile_fmt(src, filetype):
                 stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
                 )
     except (OSError, subprocess.CalledProcessError) as exception:
-        msg = f'had a problem compiling to {filetype}:\n{exception}\nCaptured Standard Error:\n{exception.stderr}'
+        msg = 'had a problem compiling to {filetype}:\n{exception}\nCaptured Standard Error:\n{stderr}'.format(filetype=filetype, exception=exception, stderr=exception.stderr)
         raise SnutreeWriterError(msg)
 
     return result.stdout

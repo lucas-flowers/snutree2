@@ -63,7 +63,7 @@ options = [
         ('output_path', '--output', '-o', {
             'type' : click.Path(),
             'callback' : path_callback,
-            'help' : f'Instead of writing DOT code to stdout, send output to the file given.'
+            'help' : 'Instead of writing DOT code to stdout, send output to the file given.'
             }),
         ('config_paths', '--config', '-c', {
             'type' : click.Path(exists=True),
@@ -83,12 +83,12 @@ options = [
             }),
         ('--writer', '-w', {
             'type' : str,
-            'help' : f"Writing module. May be the path to a custom Python module. If no module is given, one is guessed based on the output filetype.",
+            'help' : 'Writing module. May be the path to a custom Python module. If no module is given, one is guessed based on the output filetype.',
             'metavar' : metavars(api.BUILTIN_WRITERS, module=True)
             }),
         ('output_format', '--to', '-t', {
             'type' : str,
-            'help' : f"File format for output. Must be supported by the writer. Defaults to the output's file extension if it is known or 'dot' if it is unknown.",
+            'help' : "File format for output. Must be supported by the writer. Defaults to the output's file extension if it is known or 'dot' if it is unknown.",
             'metavar' : 'EXT',
             }),
         ('--seed', '-S', {

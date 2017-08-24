@@ -48,7 +48,7 @@ def setup_logger(verbose, debug, quiet, log_path=None):
         try:
             file_handler = logging.FileHandler(log_path)
         except IOError as e:
-            msg = f'could not open log file:\n{e}'
+            msg = 'could not open log file:\n{e}'.format(e=e)
             raise SnutreeError(msg)
         file_handler.setLevel(min(logging.INFO, level))
         file_handler.setFormatter(formatter)

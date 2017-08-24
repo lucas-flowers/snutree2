@@ -172,7 +172,7 @@ def get_plugin_base(subpackage):
     '''
     Returns the plugin base of the subpackage whose name is a parameter.
     '''
-    return PluginBase(package=f'snutree.{subpackage}', searchpath=[str(SNUTREE_ROOT/f'{subpackage}')])
+    return PluginBase(package='snutree.{subpackage}'.format(subpackage=subpackage), searchpath=[str(SNUTREE_ROOT/'{subpackage}'.format(subpackage=subpackage))])
 
 def get_plugin_builtins(plugin_base):
     '''
@@ -219,11 +219,11 @@ def get_module(plugin_base, name, attributes=None, descriptor='module', custom=T
     except ModuleNotFoundError:
         _or_custom_module = ' or the path to a custom Python module' if custom else ''
         builtins = get_plugin_builtins(plugin_base)
-        msg = f'{descriptor} must be one of {builtins!r}{_or_custom_module}'
+        msg = '{descriptor} must be one of {builtins!r}{_or_custom_module}'.format(descriptor=descriptor, builtins=builtins, _or_custom_module=_or_custom_module)
         raise SnutreeError(msg)
 
     if not all([hasattr(module, a) for a in attributes or []]):
-        msg = f'{descriptor} module {module_name!r} must implement: {attributes!r}'
+        msg = '{descriptor} module {module_name!r} must implement: {attributes!r}'.format(descriptor=descriptor, module_name=module_name, attributes=attributes)
         raise SnutreeError(msg)
 
     return module
@@ -290,7 +290,7 @@ def load_config_files(paths):
             try:
                 config = yaml.safe_load(f) or {}
             except yaml.YAMLError as e:
-                msg = f'problem reading configuration file {path!r}:\n{e}'
+                msg = 'problem reading configuration file {path!r}:\n{e}'.format(path=path, e=e)
                 raise SnutreeError(msg)
             configs.append(config)
 
@@ -312,7 +312,7 @@ def get_member_table(files, reader_configs):
         if f.name == '<stdin>':
             filetype = reader_configs['stdin']['filetype']
             if not filetype:
-                msg = f'data from stdin requires an input format'
+                msg = 'data from stdin requires an input format'
                 raise SnutreeError(msg)
         else:
             filetype = Path(f.name).suffix[1:] # ignore first element (a dot)
@@ -342,11 +342,11 @@ def find_writer_module(filetype, writer_name=None):
         _, module = filetype_writers[0]
         return module
     elif not filetype_writers:
-        msg = f'format {filetype!r} has no supported writers'
+        msg = 'format {filetype!r} has no supported writers'.format(filetype=filetype)
         raise SnutreeError(msg)
     else:
         conflicting_writers = {name for name, _ in filetype_writers}
-        msg = f'format {filetype!r} has multiple writers; choose a writer from: {conflicting_writers!r}'
+        msg = 'format {filetype!r} has multiple writers; choose a writer from: {conflicting_writers!r}'.format(filetype=filetype, conflicting_writers=conflicting_writers)
         raise SnutreeError(msg)
 
 def write_output(output, path=None):

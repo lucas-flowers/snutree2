@@ -51,7 +51,7 @@ def to_Members(dicts, **config):
 
             if status not in MemberTypes:
                 valid_statuses, member = VALID_STATUSES, pprint.pformat(dct)
-                msg = f'status must be one of {valid_statuses}, in:\n{member}'
+                msg = 'status must be one of {valid_statuses}, in:\n{member}'.format(valid_statuses=valid_statuses, member=member)
                 raise SnutreeError(msg)
 
             if status == 'Reaffiliate':
@@ -61,7 +61,7 @@ def to_Members(dicts, **config):
 
             for affiliation in member.affiliations:
                 if affiliation in used_affiliations:
-                    msg = f'found duplicate affiliation: {affiliation!r}'
+                    msg = 'found duplicate affiliation: {affiliation!r}'.format(affiliation=affiliation)
                     raise SnutreeError(msg)
                 used_affiliations.add(affiliation)
 
@@ -173,7 +173,7 @@ class Affiliation:
     DESIGNATION_TOKEN = '|'.join([re.escape(s) for s in DESIGNATION_TOKENS])
 
     # Matches a single Greek-letter chapter designation
-    DESIGNATION_MATCHER = re.compile(f'^({DESIGNATION_TOKEN})+$')
+    DESIGNATION_MATCHER = re.compile('^({DESIGNATION_TOKEN})+$'.format(DESIGNATION_TOKEN=DESIGNATION_TOKEN))
 
     def __init__(self, *args):
         '''
@@ -196,7 +196,8 @@ class Affiliation:
             # Split into the name half and the digit half, ignoring whitespace
             match = self.AFFILIATION_MATCHER.match(args[0].strip())
             if not match:
-                msg = f'expected a chapter name followed by a badge number but got {args[0]!r}'
+                arg = args[0]
+                msg = 'expected a chapter name followed by a badge number but got {arg!r}'.format(arg=arg)
                 raise ValueError(msg)
 
             designation = self.str_to_designation(match.group('chapter_id'))
@@ -206,7 +207,7 @@ class Affiliation:
             designation, badge = args
 
         else:
-            msg = f'expected *(str,) or *(str, int) but got *{args}'
+            msg = 'expected *(str,) or *(str, int) but got *{args}'.format(args=args)
             raise TypeError(msg)
 
         self.designation = designation
@@ -242,13 +243,13 @@ class Affiliation:
             msg = ('expected a chapter name in one of the two forms:\n'
                     '    1. names of Greek letters separated by spaces (e.g., "Delta Alpha 100")\n'
                     '    2. several actual Greek letters together (e.g., "ΔA 100")\n'
-                    f'but got {string!r}\n')
+                    'but got {string!r}\n'.format(string=string))
             raise ValueError(msg)
 
         return designation
 
     def __str__(self):
-        return f'{self.designation} {self.badge}'
+        return '{designation} {badge}'.format(designation=self.designation, badge=self.badge)
 
     def __repr__(self):
         return str(self)
@@ -338,7 +339,7 @@ class Knight(SigmaNuMember):
     @property
     def label(self):
         affiliations = ', '.join([str(s) for s in sorted(self.affiliations)])
-        return  f'{self.name}\\n{affiliations}'
+        return  '{name}\\n{affiliations}'.format(name=self.name, affiliations=affiliations)
 
 class Brother(SigmaNuMember):
     '''
@@ -377,12 +378,12 @@ class Brother(SigmaNuMember):
         self.affiliations = []
 
         # Without badges, keys need to be generated
-        self.key = f'Brother {Brother.bid}'
+        self.key = 'Brother {bid}'.format(bid=Brother.bid)
         Brother.bid += 1
 
     @property
     def label(self):
-        return f'{self.name}\\n{self.chapter} Brother'
+        return '{name}\\n{chapter} Brother'.format(name=self.name, chapter=self.chapter)
 
 class Candidate(SigmaNuMember):
     '''
@@ -418,12 +419,12 @@ class Candidate(SigmaNuMember):
         self.affiliations = []
 
         # Without badges, keys need to be generated
-        self.key = f'Candidate {Candidate.cid}'
+        self.key = 'Candidate {cid}'.format(cid=Candidate.cid)
         Candidate.cid += 1
 
     @property
     def label(self):
-        return f'{self.name}\\n{self.chapter} Candidate'
+        return '{name}\\n{chapter} Candidate'.format(name=self.name, chapter=self.chapter)
 
 class Expelled(Knight):
     '''
@@ -465,7 +466,7 @@ class Expelled(Knight):
 
     @property
     def label(self):
-        return f'{self.name}\\n{self.key}'
+        return '{name}\\n{key}'.format(name=self.name, key=self.key)
 
 class Reaffiliate:
     '''
@@ -485,7 +486,7 @@ for MemberType in [Candidate, Brother, Knight, Expelled, Reaffiliate]:
 VALID_STATUSES = MemberTypes.keys()
 
 description = {
-        'status' : (lambda valid_statuses : f'One of "{valid_statuses}"')('", "'.join(VALID_STATUSES)),
+        'status' : (lambda valid_statuses : 'One of "{valid_statuses}"'.format(valid_statuses=valid_statuses))('", "'.join(VALID_STATUSES)),
         'badge' : 'Badge number',
         'first_name' : 'First name',
         'preferred_name' : 'Preferred name',
@@ -529,5 +530,5 @@ def combine_names(first_name, preferred_name, last_name, threshold=.5):
     elif difflib.SequenceMatcher(None, preferred_name, last_name).ratio() < threshold:
         first_name = preferred_name
 
-    return f'{first_name} {last_name}'
+    return '{first_name} {last_name}'.format(first_name=first_name, last_name=last_name)
 

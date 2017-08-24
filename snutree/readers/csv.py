@@ -11,7 +11,8 @@ def get_table(stream, **config):
     try:
         rows = list(csv.DictReader(stream, strict=True))
     except csv.Error as e:
-        raise SnutreeReaderError(f'could not read csv:\n{e}')
+        msg = 'could not read csv:\n{e}'.format(e=e)
+        raise SnutreeReaderError(msg)
 
     for row in rows:
         # Delete falsy values to simplify validation

@@ -15,7 +15,7 @@ class DotCommon(metaclass=ABCMeta):
     def to_dot(self, indent=None):
         indent = indent or Indent()
         self_dot = str(self)
-        return f'{indent}{self_dot}' if self_dot else ''
+        return '{indent}{self_dot}'.format(indent=indent, self_dot=self_dot) if self_dot else ''
 
     def attributes_to_dot(self, sep=','):
         '''
@@ -29,7 +29,7 @@ class DotCommon(metaclass=ABCMeta):
         for key, value in sorted(self.attributes.items()):
             # If the value is a string bracketed by '<' and '>', use those instead
             bracketed = isinstance(value, str) and len(value) > 1 and value[0::len(value)-1] == '<>'
-            kv_pair = f'{key}="{value}"' if not bracketed else f'{key}={value}'
+            kv_pair = '{key}="{value}"'.format(key=key, value=value) if not bracketed else '{key}={value}'.format(key=key, value=value)
             attributes.append(kv_pair)
 
         return sep.join(attributes)
@@ -41,7 +41,7 @@ class Graph(DotCommon):
     def __init__(self, key, graph_type, attributes=None, children=None):
 
         if graph_type not in Graph.graph_types:
-            msg = f'Expected graph type in {Graph.graph_types}, but received: {graph_type}'
+            msg = 'Expected graph type in {graph_types}, but received: {graph_type}'.format(graph_types=Graph.graph_types, graph_type=graph_type)
             raise ValueError(msg)
 
         self.graph_type = graph_type
@@ -53,16 +53,16 @@ class Graph(DotCommon):
         lines = []
         indent = indent or Indent()
 
-        lines.append(f'{indent}{self.graph_type} "{self.key}" {{')
+        lines.append('{indent}{graph_type} "{key}" {{'.format(indent=indent, graph_type=self.graph_type, key=self.key))
         with indent.indented():
             if self.attributes:
-                attributes = self.attributes_to_dot(sep=f';\n{indent}')
-                lines.append(f'{indent}{attributes};')
+                attributes = self.attributes_to_dot(sep=';\n{indent}'.format(indent=indent))
+                lines.append('{indent}{attributes};'.format(indent=indent, attributes=attributes))
             for child in self.children:
                 line = child.to_dot(indent)
                 if line: # some children might represent empty strings
                     lines.append(line)
-        lines.append(f'{indent}}}')
+        lines.append('{indent}}}'.format(indent=indent))
 
         return '\n'.join(lines)
 
@@ -72,20 +72,20 @@ class Defaults(DotCommon):
 
     def __init__(self, key, attributes=None):
         if key not in Defaults.defaults_types:
-            msg = f'Expected defaults type in {Defaults.defaults_types}, but received: {key}'
+            msg = 'Expected defaults type in {defaults_types}, but received: {key}'.format(defaults_types=Defaults.defaults_types, key=key)
             raise ValueError(msg)
         super().__init__(key, attributes)
 
     def __str__(self):
         kv_pairs = self.attributes_to_dot()
-        return f'{self.key} [{kv_pairs}];' if kv_pairs else ''
+        return '{key} [{kv_pairs}];'.format(key=self.key, kv_pairs=kv_pairs) if kv_pairs else ''
 
 class Node(DotCommon):
 
     def __str__(self):
         kv_pairs = self.attributes_to_dot()
-        attributes = f' [{kv_pairs}]' if kv_pairs else ''
-        return f'"{self.key}"{attributes};'
+        attributes = ' [{kv_pairs}]'.format(kv_pairs=kv_pairs) if kv_pairs else ''
+        return '"{key}"{attributes};'.format(key=self.key, attributes=attributes)
 
 class Edge(DotCommon):
 
@@ -96,8 +96,8 @@ class Edge(DotCommon):
 
     def __str__(self):
         kv_pairs = self.attributes_to_dot()
-        attributes = f' [{kv_pairs}]' if kv_pairs else ''
-        return f'"{self.key.parent}" -> "{self.key.child}"{attributes};'
+        attributes = ' [{kv_pairs}]'.format(kv_pairs=kv_pairs) if kv_pairs else ''
+        return '"{pkey}" -> "{ckey}"{attributes};'.format(pkey=self.key.parent, ckey=self.key.child, attributes=attributes)
 
 class Rank(DotCommon):
 
@@ -105,6 +105,6 @@ class Rank(DotCommon):
         self.keys = keys or []
 
     def __str__(self):
-        keys = ' '.join([f'"{key}"' for key in sorted(self.keys, key=str)])
-        return f'{{rank=same {keys}}};';
+        keys = ' '.join(['"{key}"'.format(key=key) for key in sorted(self.keys, key=str)])
+        return '{{rank=same {keys}}};'.format(keys=keys)
 

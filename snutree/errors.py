@@ -28,5 +28,5 @@ class SnutreeSchemaError(SnutreeError):
         self.data = data
 
     def __str__(self):
-        return f'{self.error}. In:\n{self.data}'
+        return '{error}. In:\n{data}'.format(error=self.error, data=self.data)
 
