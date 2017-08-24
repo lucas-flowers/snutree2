@@ -30,7 +30,7 @@ setup(
             ],
 
         keywords='big little brother sister family tree',
-        packages=find_packages(exclude=['tests', 'private']),
+        packages=find_packages(exclude=['tests']),
 
         install_requires=[
             'Cerberus',
