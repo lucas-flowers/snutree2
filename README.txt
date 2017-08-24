@@ -142,7 +142,7 @@ Installation
 First, install the following applications for your operating system and ensure
 they are in your PATH:
 
-  - Python >=3.6
+  - Python >=3.5
 
   - `Graphviz <http://graphviz.org>`_ (be sure that ``dot`` is in your PATH)
 

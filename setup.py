@@ -24,7 +24,7 @@ setup(
             'Topic :: Other/Nonlisted Topic',
             'Topic :: Utilities',
             'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.5',
             ],
 
         keywords='big little brother sister family tree',
