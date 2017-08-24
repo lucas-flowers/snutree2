@@ -11,7 +11,7 @@ setup(
         name='snutree',
         use_scm_version=True,
         setup_requires=['setuptools_scm'],
-        description='Big–Little Tree',
+        description='Visualize big–little brother/sister relationships in Greek-letter organizations',
         long_description=long_description,
         url='https://github.com/lucas-flowers/snutree',
         author='Lucas Flowers',
