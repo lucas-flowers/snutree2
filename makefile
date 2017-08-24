@@ -1,12 +1,22 @@
 
 CC = pyinstaller
 TEST = pytest
+SETUP = python setup.py
 
 snutree: clean
 	$(CC) snutree.spec
 
 snutree-onefile: clean
 	$(CC) --onefile snutree.spec
+
+dist: clean
+	$(SETUP) bdist_wheel
+
+upload-test:
+	twine upload -r testpypi dist/*
+
+readme:
+	python readme.py
 
 test-clean:
 	find . -name '*-actual.dot' -exec rm {} +
