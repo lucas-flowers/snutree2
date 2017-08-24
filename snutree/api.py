@@ -216,7 +216,7 @@ def get_module(plugin_base, name, attributes=None, descriptor='module', custom=T
 
     try:
         module = plugin_source.load_plugin(module_name)
-    except ModuleNotFoundError:
+    except ImportError: # 3.6: ModuleNotFoundError:
         _or_custom_module = ' or the path to a custom Python module' if custom else ''
         builtins = get_plugin_builtins(plugin_base)
         msg = '{descriptor} must be one of {builtins!r}{_or_custom_module}'.format(descriptor=descriptor, builtins=builtins, _or_custom_module=_or_custom_module)

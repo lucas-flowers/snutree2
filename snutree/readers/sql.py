@@ -95,7 +95,7 @@ def get_members_local(query, sql_config):
 
     try:
         import MySQLdb
-    except ModuleNotFoundError:
+    except ImportError: # 3.6: ModuleNotFoundError:
         msg = 'could not read SQL database: missing MySQLdb package'
         raise SnutreeReaderError(msg)
 
@@ -125,7 +125,7 @@ def get_members_ssh(query, sql, ssh):
 
     try:
         from sshtunnel import SSHTunnelForwarder, BaseSSHTunnelForwarderError
-    except ModuleNotFoundError:
+    except ImportError: # 3.6: ModuleNotFoundError:
         msg = 'could not connect to SQL server via ssh: missing sshtunnel package'
         raise SnutreeReaderError(msg)
 

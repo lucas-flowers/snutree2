@@ -20,7 +20,7 @@ def get_table(f, **config):
 
     try:
         import pydotplus
-    except ModuleNotFoundError:
+    except ImportError: # 3.6: ModuleNotFoundError:
         msg = 'could not read DOT file: missing pydotplus package'
         raise SnutreeReaderError(msg)
 
