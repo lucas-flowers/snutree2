@@ -22,8 +22,6 @@ setup(
             'Development Status :: 4 - Beta',
             'Intended Audience :: Other Audience',
             'Topic :: Other/Nonlisted Topic',
-            'Topic :: Sociology :: Genealogy',
-            'Topic :: Sociology :: History',
             'Topic :: Utilities',
             'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
             'Programming Language :: Python :: 3.6',
@@ -64,7 +62,4 @@ setup(
             }
 
         )
-
-
-
 
