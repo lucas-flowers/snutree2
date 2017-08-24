@@ -383,7 +383,7 @@ class LazyPath:
         self.path = None
 
     def open(self, *args, **kwargs):
-        return Path(self.path).open(*args, **kwargs)
+        return Path(self.__fspath__()).open(*args, **kwargs)
 
     def __fspath__(self):
         if self.path is None:

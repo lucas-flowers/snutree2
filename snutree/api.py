@@ -354,7 +354,7 @@ def write_output(output, path=None):
     Write the output to a file at the given path. If the path is None, then
     write to stdout.
     '''
-    if path:
+    if path is not None:
         stream_open = lambda : path.open('wb+')
     else:
         # Buffer since we are writing binary

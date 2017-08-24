@@ -35,7 +35,12 @@ class Validator(cerberus.Validator):
         pass
 
     def _normalize_coerce_optional_path(self, value):
-        return value and Path(value)
+        if value is None:
+            return value
+        elif hasattr(value, '__fspath__'): # For the LazyPath class in qt.py; remove in Python 3.6
+            return value
+        else:
+            return Path(value)
 
     def _normalize_coerce_rank_type(self, value):
         if not self.RankType:
