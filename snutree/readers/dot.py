@@ -9,6 +9,8 @@ from contextlib import redirect_stdout
 import networkx.drawing.nx_pydot as nx_pydot
 from snutree.errors import SnutreeReaderError
 
+CONFIG_SCHEMA = {} # No configuration
+
 def get_table(f, **config):
     '''
     Read a DOT file into a pydotplus graph, convert that graph into an

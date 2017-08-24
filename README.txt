@@ -90,7 +90,7 @@ options must be provided. Here is an example of the contents of such a file:
           host: 'example.com'
           port: 22
           user: 'example'
-          public_key: '/home/example/.ssh/id_rsa.pub'
+          private_key: '/home/example/.ssh/id_rsa'
 
 Note that the query must rename the column headers to match the schema used.
 
@@ -166,6 +166,13 @@ General
 Readers
 -------
 
+CSV
+~~~
+
+.. code:: yaml
+
+
+
 SQL
 ~~~
 
@@ -182,7 +189,7 @@ If SSH is used, the SQL hostname should be ``127.0.0.1``.
       host: # SSH server hostname
       port: 22 # SSH server port
       user: # SSH username
-      public_key: # SSH user keyfile
+      private_key: # SSH private keyfile path
 
 Schemas
 -------
@@ -266,8 +273,6 @@ available DOT attributes.
 
 Versioning
 ==========
-
-Version ``0.1.6.dev11+g494420f.d20170822``.
 
 This project loosely uses `Semantic Versioning <http://semver.org/>`_.
 

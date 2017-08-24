@@ -48,8 +48,8 @@ CONFIG_SCHEMA = {
                     'description' : 'SSH username',
                     'type' : 'string',
                     },
-                'public_key' : {
-                    'description' : 'SSH user keyfile',
+                'private_key' : {
+                    'description' : 'SSH private keyfile path',
                     'type' : 'string',
                     },
                 }

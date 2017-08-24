@@ -1,6 +1,8 @@
 import csv
 from snutree.errors import SnutreeReaderError
 
+CONFIG_SCHEMA = {} # No configuration
+
 def get_table(stream, **config):
     '''
     Read a CSV from the stream and return a list of member dictionaries.

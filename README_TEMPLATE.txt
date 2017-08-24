@@ -90,7 +90,7 @@ options must be provided. Here is an example of the contents of such a file:
           host: 'example.com'
           port: 22
           user: 'example'
-          public_key: '/home/example/.ssh/id_rsa.pub'
+          private_key: '/home/example/.ssh/id_rsa'
 
 Note that the query must rename the column headers to match the schema used.
 
@@ -128,6 +128,13 @@ General
 
 Readers
 -------
+
+CSV
+~~~
+
+.. code:: yaml
+
+{CONFIG_READER_CSV}
 
 SQL
 ~~~
