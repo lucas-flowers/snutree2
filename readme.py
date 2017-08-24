@@ -4,43 +4,60 @@ import sys
 import subprocess
 from pathlib import Path
 from textwrap import indent
-from click.testing import CliRunner
 from snutree import api
-from snutree.cli import cli
-from snutree.readers import csv, sql, dot
-from snutree.schemas import sigmanu
-from snutree.writers import dot
+import snutree.readers.csv as reader_csv
+import snutree.readers.sql as reader_sql
+import snutree.readers.dot as reader_dot
+import snutree.schemas.sigmanu as schema_sigmanu
+import snutree.writers.dot as writer_dot
 from snutree.cerberus import describe_schema
 
-def main():
-
+def get_template():
     with Path('README_TEMPLATE.txt').open('r') as f:
-        template = f.read()
+        return f.read()
 
-    readme = template.format(
-            CLI_HELP=indent(CliRunner().invoke(cli, ['--help']).output, ' '*4),
+def generate_readme(template):
+
+    # Get usage information
+    result = subprocess.run(
+            ['./snutree.py', '--help'],
+            stdout=subprocess.PIPE,
+            encoding=sys.getdefaultencoding(),
+            )
+    return_code = result.returncode
+    if return_code:
+        sys.exit(return_code)
+    usage = result.stdout
+
+    return template.format(
+            CLI_HELP=indent(usage, ' '*4),
             CONFIG_API=describe_schema(api.CONFIG_SCHEMA, level=2),
-            CONFIG_READER_CSV=describe_schema(csv.CONFIG_SCHEMA, level=2),
-            CONFIG_READER_SQL=describe_schema(sql.CONFIG_SCHEMA, level=2),
-            CONFIG_READER_DOT=describe_schema(dot.CONFIG_SCHEMA, level=2),
-            CONFIG_SCHEMA_SIGMANU=describe_schema(sigmanu.CONFIG_SCHEMA, level=2),
-            CONFIG_WRITER_DOT=describe_schema(dot.CONFIG_SCHEMA, level=2),
+            CONFIG_READER_CSV=describe_schema(reader_csv.CONFIG_SCHEMA, level=2),
+            CONFIG_READER_SQL=describe_schema(reader_sql.CONFIG_SCHEMA, level=2),
+            CONFIG_READER_DOT=describe_schema(reader_dot.CONFIG_SCHEMA, level=2),
+            CONFIG_SCHEMA_SIGMANU=describe_schema(schema_sigmanu.CONFIG_SCHEMA, level=2),
+            CONFIG_WRITER_DOT=describe_schema(writer_dot.CONFIG_SCHEMA, level=2),
             )
 
-
+def write_readme(readme):
     with Path('README.txt').open('w+') as f:
         f.write(readme)
 
-    result = subprocess.run([
+def check_readme():
+    return subprocess.run([
         'python',
         'setup.py',
         'check',
         '--restructuredtext',
         '--strict',
-        ], stdout=subprocess.DEVNULL)
+        ], stdout=subprocess.DEVNULL).returncode
 
-
-    sys.exit(result.returncode)
+def main():
+    template = get_template()
+    readme = generate_readme(template)
+    write_readme(readme)
+    return_code = check_readme()
+    sys.exit(return_code)
 
 if __name__ == '__main__':
     main()

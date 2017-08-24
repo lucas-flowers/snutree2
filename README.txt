@@ -99,12 +99,13 @@ Command Line Summary
 
 .. code::
 
-    Usage: cli [OPTIONS] [INPUT_FILES]...
+    Usage: snutree.py [OPTIONS] [INPUT_FILES]...
 
     Options:
       --version                       Show the version and exit.
-      -S, --seed INTEGER              Seed for the random number generator. Used to
-                                      move tree nodes around in a repeatable way.
+      -S, --seed INTEGER              Seed for the random number generator. Used
+                                      to move tree nodes around in a repeatable
+                                      way.
       -t, --to EXT                    File format for output. Must be supported by
                                       the writer. Defaults to the output's file
                                       extension if it is known or 'dot' if it is
