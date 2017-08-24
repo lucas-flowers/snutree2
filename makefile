@@ -11,6 +11,7 @@ snutree-onefile: clean
 
 dist: clean
 	$(SETUP) bdist_wheel
+	$(SETUP) sdist
 
 upload-test:
 	twine upload -r testpypi dist/*
