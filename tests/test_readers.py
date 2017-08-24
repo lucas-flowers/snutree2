@@ -19,7 +19,7 @@ def test_sql_mysql_error():
         sql.get_members_local('', {})
 
 def test_sql_ssh_error():
-    conf = { 'host' : '', 'port' : 0, 'user' : '', 'public_key' : '' }
+    conf = { 'host' : '', 'port' : 0, 'user' : '', 'private_key' : '' }
     with pytest.raises(SnutreeReaderError):
         sql.get_members_ssh('', conf, conf)
 

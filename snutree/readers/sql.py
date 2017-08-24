@@ -118,7 +118,7 @@ def get_members_ssh(query, sql, ssh):
     options = {
             'ssh_address_or_host' : (ssh['host'], ssh['port']),
             'ssh_username' : ssh['user'],
-            'ssh_pkey' : ssh['public_key'],
+            'ssh_pkey' : ssh['private_key'],
             'remote_bind_address' : (sql['host'], sql['port'])
             }
 
