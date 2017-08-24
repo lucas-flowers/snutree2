@@ -182,17 +182,17 @@ General
 .. code:: yaml
 
     readers: # reader module configuration
-      <reader1>:
       stdin: # standard input reader configuration
         filetype: csv # type of files coming from stdin
+      <reader1>:
       <reader2>: ...
-    writer: # writer module configuration
-      filetype: # output filetype
-      name: dot # writer module name
-      file: None # output file name
     schema: # members schema module configuration
       name: basic # member schema module name
     seed: 71 # random number generator seed
+    writer: # writer module configuration
+      file: None # output file name
+      filetype: # output filetype
+      name: dot # writer module name
 
 Readers
 -------
@@ -204,16 +204,16 @@ If SSH is used, the SQL hostname should be ``127.0.0.1``.
 
 .. code:: yaml
 
+    db: # SQL database name
     host: 127.0.0.1 # SQL server hostname
+    passwd: # SQL user password
+    port: 3306 # SQL server port
     ssh: # credentials to encrypt SQL connection with SSH
       host: # SSH server hostname
-      user: # SSH username
       port: 22 # SSH server port
       private_key: # SSH private keyfile path
-    port: 3306 # SQL server port
+      user: # SSH username
     user: root # SQL username
-    passwd: # SQL user password
-    db: # SQL database name
 
 Schemas
 -------
@@ -237,16 +237,28 @@ available DOT attributes.
 
 .. code:: yaml
 
-    filetype: # output filetype
-    family_colors: # map of member keys to Graphviz colors
-      <key2>: ...
-      <key1>: <color1>
     colors: True # add color to member nodes
-    ranks: True # enable ranks
-    warn_rank: None # if no_singletons=True, singletons with rank>=warn_rank trigger warnings when dropped
     custom_edges: True # enable custom edges
+    custom_nodes: True # enable custom nodes
     defaults: # default Graphviz attributes
+      edge: # defaults for Graphviz edges
+        all: # all edges
+          <name1>: <value1>
+          <name2>: ...
+        rank: # edges between rank nodes
+          <name1>: <value1>
+          <name2>: ...
+        unknown: # edges coming from unknown parents
+          <name1>: <value1>
+          <name2>: ...
+      graph: # defaults for Graphviz graphs
+        all:
+          <name1>: <value1>
+          <name2>: ...
       node: # defaults for Graphviz nodes
+        all: # all nodes
+          <name1>: <value1>
+          <name2>: ...
         member: # member nodes
           <name1>: <value1>
           <name2>: ...
@@ -256,44 +268,32 @@ available DOT attributes.
         unknown: # nodes of unknown parents
           <name1>: <value1>
           <name2>: ...
-        all: # all nodes
-          <name1>: <value1>
-          <name2>: ...
-      graph: # defaults for Graphviz graphs
-        all:
-          <name1>: <value1>
-          <name2>: ...
-      edge: # defaults for Graphviz edges
-        rank: # edges between rank nodes
-          <name1>: <value1>
-          <name2>: ...
-        unknown: # edges coming from unknown parents
-          <name1>: <value1>
-          <name2>: ...
-        all: # all edges
-          <name1>: <value1>
-          <name2>: ...
-    nodes: # custom Graphviz nodes
-      <key2>: ...
-      <key1>:
-        rank: # the rank (i.e., year, semester, etc.) the node is in
-        attributes: # Graphviz node attributes
-          <name1>: <value1>
-          <name2>: ...
-    unknowns: True # add parent nodes to members without any
-    custom_nodes: True # enable custom nodes
     edges: # a list of custom Graphviz edges
       - # edge1
-        nodes: # keys of nodes connected by this edge
-          - # key1
-          - ...
         attributes: # Graphviz edge attributes
           <name1>: <value1>
           <name2>: ...
+        nodes: # keys of nodes connected by this edge
+          - # key1
+          - ...
       - ...
-    no_singletons: True # delete member nodes with neither parent nor child nodes
-    name: dot # writer name
+    family_colors: # map of member keys to Graphviz colors
+      <key1>: <color1>
+      <key2>: ...
     file: # output file name
+    filetype: # output filetype
+    name: dot # writer name
+    no_singletons: True # delete member nodes with neither parent nor child nodes
+    nodes: # custom Graphviz nodes
+      <key1>:
+        attributes: # Graphviz node attributes
+          <name1>: <value1>
+          <name2>: ...
+        rank: # the rank (i.e., year, semester, etc.) the node is in
+      <key2>: ...
+    ranks: True # enable ranks
+    unknowns: True # add parent nodes to members without any
+    warn_rank: None # if no_singletons=True, singletons with rank>=warn_rank trigger warnings when dropped
 
 Versioning
 ==========
