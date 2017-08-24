@@ -2,6 +2,7 @@ import logging
 import sys
 from functools import wraps
 from pathlib import Path
+from setuptools_scm import get_version
 import click
 from . import api
 from .errors import SnutreeError
@@ -41,7 +42,6 @@ def metavars(allowed, module=False):
     if module:
         allowed.append('MODULE')
     return '[' + '|'.join(allowed) + ']'
-
 
 options = [
         ('--verbose', '-v', {
@@ -117,6 +117,7 @@ class collect_options:
 
 @click.command()
 @click.argument('input_files', nargs=-1, type=click.File('r'))
+@click.version_option(version=get_version(root=Path(__file__).parent/'..'))
 @collect_options(options)
 @logged
 def cli(verbose, debug, quiet, log_path, *args, **kwargs):
