@@ -3,7 +3,7 @@ import sys
 from functools import wraps
 from pathlib import Path
 import click
-from . import api
+from . import api, version
 from .errors import SnutreeError
 from .logging import setup_logger, logged
 
@@ -41,13 +41,6 @@ def metavars(allowed, module=False):
     if module:
         allowed.append('MODULE')
     return '[' + '|'.join(allowed) + ']'
-
-def get_version():
-    from pkg_resources import get_distribution, DistributionNotFound
-    try:
-        return get_distribution(__name__).version
-    except DistributionNotFound:
-        return 'unknown: package not installed'
 
 options = [
         ('--verbose', '-v', {
@@ -123,7 +116,7 @@ class collect_options:
 
 @click.command()
 @click.argument('input_files', nargs=-1, type=click.File('r'))
-@click.version_option(version=get_version())
+@click.version_option(version=version)
 @collect_options(options)
 @logged
 def cli(verbose, debug, quiet, log_path, *args, **kwargs):
