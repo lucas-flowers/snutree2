@@ -182,16 +182,16 @@ General
 .. code:: yaml
 
     readers: # reader module configuration
+      <reader1>:
       stdin: # standard input reader configuration
         filetype: csv # type of files coming from stdin
-      <reader1>:
       <reader2>: ...
-    schema: # members schema module configuration
-      name: basic # member schema module name
     writer: # writer module configuration
       filetype: # output filetype
       name: dot # writer module name
       file: None # output file name
+    schema: # members schema module configuration
+      name: basic # member schema module name
     seed: 71 # random number generator seed
 
 Readers
@@ -205,15 +205,15 @@ If SSH is used, the SQL hostname should be ``127.0.0.1``.
 .. code:: yaml
 
     host: 127.0.0.1 # SQL server hostname
-    user: root # SQL username
-    passwd: # SQL user password
-    port: 3306 # SQL server port
-    db: # SQL database name
     ssh: # credentials to encrypt SQL connection with SSH
       host: # SSH server hostname
-      port: 22 # SSH server port
       user: # SSH username
+      port: 22 # SSH server port
       private_key: # SSH private keyfile path
+    port: 3306 # SQL server port
+    user: root # SQL username
+    passwd: # SQL user password
+    db: # SQL database name
 
 Schemas
 -------
@@ -223,8 +223,8 @@ Sigma Nu Schema
 
 .. code:: yaml
 
-    name: sigmanu
     chapter: # the chapter whose family tree will be generated
+    name: sigmanu
 
 Writers
 -------
@@ -237,23 +237,17 @@ available DOT attributes.
 
 .. code:: yaml
 
-    name: dot # writer name
     filetype: # output filetype
-    file: # output file name
-    ranks: True # enable ranks
-    custom_edges: True # enable custom edges
-    custom_nodes: True # enable custom nodes
-    no_singletons: True # delete member nodes with neither parent nor child nodes
+    family_colors: # map of member keys to Graphviz colors
+      <key2>: ...
+      <key1>: <color1>
     colors: True # add color to member nodes
-    unknowns: True # add parent nodes to members without any
+    ranks: True # enable ranks
     warn_rank: None # if no_singletons=True, singletons with rank>=warn_rank trigger warnings when dropped
+    custom_edges: True # enable custom edges
     defaults: # default Graphviz attributes
-      graph: # defaults for Graphviz graphs
-        all:
-          <name1>: <value1>
-          <name2>: ...
       node: # defaults for Graphviz nodes
-        all: # all nodes
+        member: # member nodes
           <name1>: <value1>
           <name2>: ...
         rank: # rank nodes
@@ -262,29 +256,32 @@ available DOT attributes.
         unknown: # nodes of unknown parents
           <name1>: <value1>
           <name2>: ...
-        member: # member nodes
+        all: # all nodes
+          <name1>: <value1>
+          <name2>: ...
+      graph: # defaults for Graphviz graphs
+        all:
           <name1>: <value1>
           <name2>: ...
       edge: # defaults for Graphviz edges
-        all: # all edges
-          <name1>: <value1>
-          <name2>: ...
         rank: # edges between rank nodes
           <name1>: <value1>
           <name2>: ...
         unknown: # edges coming from unknown parents
           <name1>: <value1>
           <name2>: ...
-    family_colors: # map of member keys to Graphviz colors
-      <key1>: <color1>
-      <key2>: ...
+        all: # all edges
+          <name1>: <value1>
+          <name2>: ...
     nodes: # custom Graphviz nodes
+      <key2>: ...
       <key1>:
         rank: # the rank (i.e., year, semester, etc.) the node is in
         attributes: # Graphviz node attributes
           <name1>: <value1>
           <name2>: ...
-      <key2>: ...
+    unknowns: True # add parent nodes to members without any
+    custom_nodes: True # enable custom nodes
     edges: # a list of custom Graphviz edges
       - # edge1
         nodes: # keys of nodes connected by this edge
@@ -294,6 +291,9 @@ available DOT attributes.
           <name1>: <value1>
           <name2>: ...
       - ...
+    no_singletons: True # delete member nodes with neither parent nor child nodes
+    name: dot # writer name
+    file: # output file name
 
 Versioning
 ==========
