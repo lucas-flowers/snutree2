@@ -293,14 +293,25 @@ def remove_singleton_members(tree, warn_rank=None):
     '''
     Remove all members in the tree whose nodes neither have parents nor children.
     '''
+
+    # Find singletons
     keys = []
+    warned = False
     for singleton in tree.singletons():
+
         key = singleton.key
         keys.append(key)
+
+        # Warnings
         rank = singleton.is_ranked() and singleton.rank
         if warn_rank is not None and warn_rank <= rank:
-            msg = f'(warn_rank>={warn_rank!r}) singleton {key!r} with rank {rank!r} was dropped '
-            logging.getLogger(logger_name).warning(msg)
+            if not warned:
+                logger = logging.getLogger(logger_name)
+                msg = f'Member nodes with no parents, no children, and rank >= warn_rank == {warn_rank!r} were dropped:'
+                logger.warning(msg)
+                warned = True
+            logger.warning(f'Dropped (key={key!r}, label={singleton.label!r}, rank={rank!r})')
+
     tree.remove(keys)
 
 @logged
