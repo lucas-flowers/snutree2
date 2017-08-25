@@ -182,7 +182,9 @@ def get_plugin_base(subpackage):
     '''
     Returns the plugin base of the subpackage whose name is a parameter.
     '''
-    return PluginBase(package='snutree.{subpackage}'.format(subpackage=subpackage), searchpath=[str(SNUTREE_ROOT/'{subpackage}'.format(subpackage=subpackage))])
+    package = 'snutree.{subpackage}'.format(subpackage=subpackage)
+    searchpath = [str(SNUTREE_ROOT/'{subpackage}'.format(subpackage=subpackage))]
+    return PluginBase(package=package, searchpath=searchpath)
 
 def get_plugin_builtins(plugin_base):
     '''
