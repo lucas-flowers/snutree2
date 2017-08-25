@@ -65,10 +65,10 @@ def generate(
     members = schema.to_Members(member_table, **config['schema'])
 
     logger.info('Loading writer module')
-    writer = find_writer_module(config['writer']['filetype'], config['writer']['name'])
+    writer_name, writer = find_writer_module(config['writer']['filetype'], config['writer']['name'])
 
     # Standard usage
-    if config['writer']['name'] != 'table':
+    if writer_name != 'table':
 
         logger.info('Building family tree')
         tree = FamilyTree(members, config['seed'])
@@ -146,7 +146,8 @@ CONFIG_SCHEMA = {
                 'name' : {
                     'description' : 'writer module name',
                     'type' : 'string',
-                    'default' : 'dot',
+                    'default' : None,
+                    'nullable' : True,
                     },
                 'file' : {
                     'description' : 'output file name',
@@ -338,7 +339,7 @@ def find_writer_module(filetype, writer_name=None):
     '''
 
     if writer_name is not None:
-        return get_writer_module(writer_name)
+        return writer_name, get_writer_module(writer_name)
 
     writers = {}
     for name in BUILTIN_WRITERS:
@@ -348,8 +349,8 @@ def find_writer_module(filetype, writer_name=None):
 
     filetype_writers = writers.get(filetype)
     if filetype_writers and len(filetype_writers) == 1:
-        _, module = filetype_writers[0]
-        return module
+        writer_name, module = filetype_writers[0]
+        return writer_name, module
     elif not filetype_writers:
         msg = 'format {filetype!r} has no supported writers'.format(filetype=filetype)
         raise SnutreeError(msg)
