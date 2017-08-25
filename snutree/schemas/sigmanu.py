@@ -20,6 +20,7 @@ CONFIG_SCHEMA = {
         'chapter' : {
             'description' : 'the chapter whose family tree will be generated',
             'type' : 'string',
+            'required' : True,
             }
         }
 
