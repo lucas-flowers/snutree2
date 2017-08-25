@@ -192,7 +192,7 @@ General
     writer: # writer module configuration
       file: None # output file name
       filetype: # output filetype
-      name: dot # writer module name
+      name: None # writer module name
 
 Readers
 -------
