@@ -110,7 +110,7 @@ Command Line Summary
                                       the writer. Defaults to the output's file
                                       extension if it is known or 'dot' if it is
                                       unknown.
-      -w, --writer [dot|stats|MODULE]
+      -w, --writer [dot|stats|table|MODULE]
                                       Writing module. May be the path to a custom
                                       Python module. If no module is given, one is
                                       guessed based on the output filetype.

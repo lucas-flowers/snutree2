@@ -64,14 +64,23 @@ def generate(
     logger.info('Validating member table')
     members = schema.to_Members(member_table, **config['schema'])
 
-    logger.info('Building family tree')
-    tree = FamilyTree(members, config['seed'])
-
     logger.info('Loading writer module')
     writer = find_writer_module(config['writer']['filetype'], config['writer']['name'])
 
-    logger.info('Running writer module')
-    output = writer.compile_tree(tree, schema.Rank, config['writer'])
+    # Standard usage
+    if config['writer']['name'] != 'table':
+
+        logger.info('Building family tree')
+        tree = FamilyTree(members, config['seed'])
+
+        logger.info('Running writer module')
+        output = writer.compile_tree(tree, schema.Rank, config['writer'])
+
+    # Special handling for raw table output
+    else:
+
+        logger.warning('Bypassing tree generation and using raw table')
+        output = writer.compile_table(member_table)
 
     logger.info('Writing to file')
     write_output(output, path = config['writer']['file'])
