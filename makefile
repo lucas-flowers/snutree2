@@ -32,6 +32,7 @@ py-clean:
 build-clean:
 	rm --force --recursive build/
 	rm --force --recursive dist/
+	rm --force --recursive *.egg-info/
 
 clean: py-clean test-clean build-clean
 
