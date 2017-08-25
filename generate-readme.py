@@ -13,7 +13,7 @@ import snutree.writers.dot as writer_dot
 from snutree.cerberus import describe_schema
 
 def get_template():
-    with Path('README_TEMPLATE.txt').open('r') as f:
+    with Path('README_TEMPLATE.rst').open('r') as f:
         return f.read()
 
 def generate_readme(template):
@@ -41,7 +41,7 @@ def generate_readme(template):
             )
 
 def write_readme(readme):
-    with Path('README.txt').open('w+') as f:
+    with Path('README.rst').open('w+') as f:
         f.write(readme)
 
 def check_readme():
@@ -62,6 +62,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
 

@@ -3,7 +3,7 @@ from pathlib import Path
 from setuptools import setup, find_packages
 
 DIR = Path(__file__).parent
-with (DIR/'README.txt').open('r') as f:
+with (DIR/'README.rst').open('r') as f:
     long_description = f.read()
 
 setup(
