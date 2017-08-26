@@ -114,9 +114,9 @@ Installation
 First, install the following applications for your operating system and ensure
 they are in your PATH:
 
-  - Python >=3.5
+- Python >=3.5
 
-  - `Graphviz <http://graphviz.org>`_ (be sure that ``dot`` is in your PATH)
+- `Graphviz <http://graphviz.org>`_ (be sure that ``dot`` is in your PATH)
 
 Then install ``snutree`` and its Python dependencies with Python's ``pip``:
 
@@ -129,13 +129,13 @@ Optional Dependencies
 
 Use ``pip`` to install these packages for optional features:
 
-    - ``pyqt5``: Use the GUI
+- ``pyqt5``: Use the GUI
 
-    - ``mysqlclient``: Allow reading from MySQL databases
+- ``mysqlclient``: Allow reading from MySQL databases
 
-        - ``sshtunnel``: Allow tunneling SQL queries through ssh
+    - ``sshtunnel``: Allow tunneling SQL queries through ssh
 
-    - ``pydotplus``: Allow reading data from DOT files (experimental)
+- ``pydotplus``: Allow reading data from DOT files (experimental)
 
 Configuration
 =============
@@ -201,4 +201,3 @@ License
 This project is licensed under
 `GPLv3 <https://www.gnu.org/licenses/gpl-3.0.html>`_.
 
-.. vim: filetype=rst
