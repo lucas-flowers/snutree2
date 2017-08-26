@@ -201,7 +201,7 @@ class Affiliation:
                 msg = 'expected a chapter name followed by a badge number but got {arg!r}'.format(arg=arg)
                 raise ValueError(msg)
 
-            designation = self.str_to_designation(match.group('chapter_id'))
+            designation = match.group('chapter_id')
             badge = int(match.group('badge'))
 
         elif len(args) == 2 and isinstance(args[0], str) and isinstance(args[1], int):
@@ -211,7 +211,7 @@ class Affiliation:
             msg = 'expected *(str,) or *(str, int) but got *{args}'.format(args=args)
             raise TypeError(msg)
 
-        self.designation = designation
+        self.designation = self.str_to_designation(designation)
         self.badge = badge
 
     @classmethod

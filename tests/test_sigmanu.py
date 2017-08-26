@@ -83,6 +83,17 @@ def test_constructor_type_failure(args):
     with pytest.raises(TypeError):
         sn.Affiliation(*args)
 
+@pytest.mark.parametrize('chapter', ['A', 'Α', 'α', 'Alpha', 'alpha', 'AlPhA'])
+@pytest.mark.parametrize('badge', ['123', '00000000123', 123])
+@pytest.mark.parametrize('join', [True, False])
+@pytest.mark.parametrize('expected', [sn.Affiliation('Α', 123)])
+def test_constructor_consistency(expected, chapter, badge, join):
+    if join:
+        args = ('{chapter} {badge}'.format(chapter=chapter, badge=badge),)
+    else:
+        args = (chapter, int(badge))
+    assert expected == sn.Affiliation(*args)
+
 def test_sorting():
     # Sorting. Primary chapter goes first
     sn.SigmaNuMember.chapter = sn.Affiliation.str_to_designation('ΔA')
