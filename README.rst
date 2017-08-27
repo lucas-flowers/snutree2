@@ -73,8 +73,9 @@ on the database described in ``config.yaml`` and save the resulting tree to
 
     snutree --config config.yaml -o output.pdf query.sql
 
-For a SQL query, a YAML configuration file with appropriate authentication
-options must be provided. Here is an example of the contents of such a file:
+For a SQL query, a `YAML <http://www.yaml.org/start.html>`_ configuration file
+with appropriate authentication options must be provided. Here is an example of
+the contents of such a file:
 
 .. code:: yaml
 
@@ -85,7 +86,7 @@ options must be provided. Here is an example of the contents of such a file:
         user: 'root'
         passwd: 'secret'
         db: 'database_name'
-        # Credentials for tunneling queries through SSH (recommended)
+        # Credentials for tunneling queries through SSH
         ssh:
           host: 'example.com'
           port: 22
@@ -106,10 +107,10 @@ Command Line Summary
       -S, --seed INTEGER              Seed for the random number generator. Used
                                       to move tree nodes around in a repeatable
                                       way.
-      -t, --to EXT                    File format for output. Must be supported by
-                                      the writer. Defaults to the output's file
-                                      extension if it is known or 'dot' if it is
-                                      unknown.
+      -t, --to EXT                    File format for output. If a writer is also
+                                      given, it must support this format. Defaults
+                                      to the output's file extension if it is
+                                      known or 'dot' if it is unknown.
       -w, --writer [dot|stats|table|MODULE]
                                       Writing module. May be the path to a custom
                                       Python module. If no module is given, one is
@@ -119,7 +120,8 @@ Command Line Summary
                                       custom Python module. Defaults to 'basic'.
       -f, --from [csv|dot|sql]        File format for input coming through stdin.
                                       Assumed to be 'csv' if not given.
-      -c, --config PATH               Program configuration files
+      -c, --config PATH               Configuration file paths. Earlier files
+                                      override later ones.
       -o, --output PATH               Instead of writing DOT code to stdout, send
                                       output to the file given.
       -l, --log PATH                  Log file path.
@@ -139,18 +141,40 @@ to PDF, and choose a seed for the random number generator.
 Installation
 ============
 
-First, install the following applications for your operating system and ensure
-they are in your PATH:
+Linux
+-----
 
-- Python >=3.5
+These instructions are based on Ubuntu and Debian-based installations. You may
+need to modify them for your own system.
 
-- `Graphviz <http://graphviz.org>`_ (be sure that ``dot`` is in your PATH)
-
-Then install ``snutree`` and its Python dependencies with Python's ``pip``:
+First, install Python (>=3.5), Python's ``pip`` package manager, and `Graphviz
+<http://graphviz.org>`_:
 
 .. code:: bash
 
-    pip install snutree
+    # apt install python3 python3-pip graphviz
+
+At this point, ``python3``, ``pip3``, and ``dot`` should be in your PATH:
+
+.. code:: bash
+
+    $ python3 --version
+    Python 3.X.X
+    $ pip3 --version
+    pip X.X.X from /path/to/python3/packages (python 3.5)
+    $ dot -V
+    dot - graphviz version X.XX.X (20XXXXXX.XXXX)
+
+Now install ``snutree`` with:
+
+.. code:: bash
+
+    $ pip3 install --user snutree
+
+This will install ``snutree`` and its required Python dependencies to your home
+directory. Make sure that ``~/.local/bin`` is in your PATH. You might run
+``pip`` without the ``--user`` flag to install it system-wide, but this will
+require root.
 
 Optional Dependencies
 ---------------------
@@ -161,7 +185,7 @@ Use ``pip`` to install these packages for optional features:
 
 - ``mysqlclient``: Allow reading from MySQL databases
 
-    - ``sshtunnel``: Allow tunneling SQL queries through ssh
+- ``sshtunnel``: Allow tunneling SQL queries through ssh
 
 - ``pydotplus``: Allow reading data from DOT files (experimental)
 
@@ -199,8 +223,6 @@ Readers
 
 SQL Reader
 ~~~~~~~~~~
-
-If SSH is used, the SQL hostname should be ``127.0.0.1``.
 
 .. code:: yaml
 

@@ -69,7 +69,7 @@ options = [
             'type' : click.Path(exists=True),
             'callback' : path_callback,
             'multiple' : True,
-            'help' : 'Program configuration files'
+            'help' : 'Configuration file paths. Earlier files override later ones.'
             }),
         ('input_format','--from', '-f', {
             'type' : str,
@@ -88,7 +88,7 @@ options = [
             }),
         ('output_format', '--to', '-t', {
             'type' : str,
-            'help' : "File format for output. Must be supported by the writer. Defaults to the output's file extension if it is known or 'dot' if it is unknown.",
+            'help' : "File format for output. If a writer is also given, it must support this format. Defaults to the output's file extension if it is known or 'dot' if it is unknown.",
             'metavar' : 'EXT',
             }),
         ('--seed', '-S', {
