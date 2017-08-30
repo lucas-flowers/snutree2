@@ -52,12 +52,12 @@ def compile_tree(tree, RankType, config):
 attribute_defaults = lambda key, allowed : {
         'description' : 'defaults for Graphviz {key}s'.format(key=key),
         'type' : 'dict',
-        'default' : { key : {} for key, _ in allowed },
+        'default' : { key : defaults for key, _, defaults in allowed },
         'schema' : {
             key : {
                 'description' : description,
                 'type' : 'dict',
-                'default' : {},
+                'default' : defaults,
                 'keyschema' : {
                     'description' : 'name',
                     },
@@ -65,7 +65,7 @@ attribute_defaults = lambda key, allowed : {
                     'description' : 'value',
                     'type' : ['string', 'number', 'boolean'],
                     }
-                } for key, description in allowed
+                } for key, description, defaults in allowed
             }
         }
 
@@ -127,18 +127,18 @@ CONFIG_SCHEMA = {
                 'default' : {},
                 'schema' : {
                     'graph' : attribute_defaults('graph', allowed=[
-                        ('all', '')
+                        ('all', '', {})
                         ]),
                     'node' : attribute_defaults('node', allowed=[
-                        ('all', 'all nodes'),
-                        ('rank', 'rank nodes'),
-                        ('unknown', 'nodes of unknown parents'),
-                        ('member', 'member nodes')
+                        ('all', 'all nodes', {}),
+                        ('rank', 'rank nodes', {'color' : 'none'}),
+                        ('unknown', 'nodes of unknown parents', {'style':'invis'}),
+                        ('member', 'member nodes', {})
                         ]),
                     'edge' : attribute_defaults('edge', allowed=[
-                        ('all', 'all edges'),
-                        ('rank', 'edges between rank nodes'),
-                        ('unknown', 'edges coming from unknown parents'),
+                        ('all', 'all edges', {'arrowhead':'none'}),
+                        ('rank', 'edges between rank nodes', {'style':'invis'}),
+                        ('unknown', 'edges coming from unknown parents', {}),
                         ]),
                     }
                 },
