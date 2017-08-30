@@ -42,6 +42,7 @@ setup(
         python_requires='>=3.5',
 
         extras_require={
+            'develop' : ['pytest', 'docutils', 'faker'],
             'test' : ['pytest'],
             'qt' : ['PyQt5'],
             'read_sql' : ['mysqlclient'],
