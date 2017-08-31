@@ -1,0 +1,55 @@
+
+# Random seed for ordering family placement
+seed: 54
+
+writer:
+
+  name: dot
+
+  defaults:
+
+    # Defaults style for Graphviz graphs and subgraphs
+    graph:
+      all:
+        size: 80
+        ratio: compress
+        pad: .5, .5
+        ranksep: .3
+        concentrate: false
+
+    # Default style for Graphviz nodes
+    node:
+      all:
+        style: filled
+        shape: box
+        penwidth: 2
+        width: 2
+        height: .45
+        fontname: dejavu sans
+      member:
+        fillcolor: .11 .71 1. # A goldish color
+      rank:
+        color: none
+        fontsize: 20
+        fontname: georgia
+      unknown:
+        height: 0
+        width: 0
+        style: invis
+
+    # Default style for Graphviz edges
+    edge:
+      all:
+        arrowhead: none
+      rank:
+        style: invis
+      unknown:
+        style: dotted
+
+  ranks: True
+  custom_nodes: True
+  custom_edges: True
+  no_singletons: False
+  colors: True
+  unknowns: True
+

@@ -1,0 +1,200 @@
+# This is a YAML file; nested settings are indented by two spaces. Everything
+# after '#' symbols are comments.
+
+###############################################################################
+###############################################################################
+#### OUTPUT                                                                ####
+###############################################################################
+###############################################################################
+
+# If the tree's layout looks ugly, try changing this value to something else.
+# This seed is overridden by the seed provided in the normal settings, if
+# provided.
+seed: 6584
+
+writer:
+
+  name: dot
+
+  #############################################################################
+  ## LAYOUT                                                                  ##
+  #############################################################################
+
+  # Put pledge classes on their own rows corresponding to their pledge class
+  # rank. Use False for a traditional tree layout.
+  ranks: True
+
+  # Include the custom nodes and edges in this settings file.
+  custom_nodes: True
+  custom_edges: True
+
+  # Exclude brothers with no bigs or littles. NOTE: Not all brothers have a
+  # pledge class rank set in this directory, so setting this to False will
+  # likely cause problems.
+  no_singletons: True
+
+  # Warnings will be displayed if there are orphans on or after this date
+  warn_rank: 'Fall 1987'
+
+  # Color families differently
+  colors: True
+
+  # Add dashed lines above brothers with unknown bigs
+  unknowns: True
+
+  # Colors for specific families; each badge is the badge of family's head. A
+  # single family cannot have more than one color. See Graphviz documentation for
+  # possible colors.
+  family_colors:
+    '663': deeppink
+    '760': brown1
+    '722': red4
+    '726': lightsteelblue
+    '673': midnightblue
+    '716': purple
+    '702': indianred4
+    '735': limegreen
+    '757': darkgreen
+    '740': royalblue4
+    '986': yellow
+    '1043': slategrey
+    '1044': orangered4
+    '1045': crimson # Dea family
+    '1046': chartreuse4
+    '1047': cyan2
+    '1048': sienna2
+    '1049': salmon2
+    '1050': cadetblue
+    '1051': dodgerblue # Ochi family
+
+  #############################################################################
+  ## GRAPHVIZ SETTINGS                                                       ##
+  #############################################################################
+
+  # See Graphviz's documentation for options
+
+  defaults:
+
+    # Defaults style for the overall Graphviz graph
+    graph:
+      all:
+        size: 80
+        ratio: compress
+        pad: .5, .5
+        ranksep: .15
+        nodesep: .5
+        label: 'Family Tree: Delta Alpha Chapter of Sigma Nu Fraternity'
+        labelloc: 't'
+        fontsize: 110
+        concentrate: false
+
+    # Default style for Graphviz nodes
+    node:
+
+      # *All* node defaults
+      all:
+        style: filled
+        shape: box
+        penwidth: 2
+        width: 1.63
+        fontname: dejavu sans
+
+      # Defaults for brother nodes
+      member:
+        fillcolor: .11 .71 1. # A goldish color
+
+      # Defaults for rank labels
+      rank:
+        color: none
+        fontsize: 20
+        fontname: dejavu serif
+
+      # Defaults for unknown big brothers
+      unknown:
+        height: 0
+        width: 0
+        style: invis
+
+    # Default style for Graphviz edges
+    edge:
+
+      # *All* edge defaults
+      all:
+        arrowhead: none
+
+      # Defaults for the edges connecting rank labels
+      rank:
+        style: invis
+
+      # Defaults for edges connecting unknown big brothers to their littles
+      unknown:
+        style: dotted
+
+  #############################################################################
+  ## CUSTOM NODES AND EDGES                                                  ##
+  #############################################################################
+
+  # Nodes requiring special handling
+
+  # Custom nodes
+  nodes:
+
+    # Chapter's reorganization
+    'Reorganization':
+      rank: 'Spring 1989'
+      attributes:
+        height: .6
+        label: 'Reorganization'
+        shape: oval
+
+    # Make the Reorganization rank larger with an invisible, tall node
+    'Spacer':
+      rank: 'Spring 1989'
+      attributes:
+        height: 1.5
+        style: invis
+        width: 0
+
+    # The home chapter of ΔA 986, who transferred to CWRU from Duquesne
+    'Kappa Delta':
+      rank: 'Fall 1982'
+      attributes:
+        label: 'Kappa Delta Chapter\nDuquesne University'
+        color: none
+        fillcolor: none
+
+  # A list of custom edges. Each item in the list contains a `nodes` value (a
+  # list of node keys representing each node on the edge, in order) and an
+  # `attributes` value (a dictionary of Graphviz edge attributes).
+  edges:
+
+    # Connect ΔA 986 to his home chapter
+    - nodes: ['Kappa Delta', '986']
+
+    # Connect refounders from the old chapter to Reorganization
+    - nodes: ['Reorganization', '1031']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1034']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1035']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1036']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1038']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1039']
+      attributes: {style: dashed}
+    - nodes: ['Reorganization', '1041']
+      attributes: {style: dashed}
+
+    # Make Reorganization the "big" of the new refounders
+    - nodes: ['Reorganization', '1043']
+    - nodes: ['Reorganization', '1044']
+    - nodes: ['Reorganization', '1045']
+    - nodes: ['Reorganization', '1046']
+    - nodes: ['Reorganization', '1047']
+    - nodes: ['Reorganization', '1048']
+    - nodes: ['Reorganization', '1049']
+    - nodes: ['Reorganization', '1050']
+    - nodes: ['Reorganization', '1051']
+

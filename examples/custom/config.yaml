@@ -1,0 +1,8 @@
+
+seed: 4543
+
+schema:
+  name: custom_module.py
+  start_year: 1940 # First year with named classes
+  last_year: 1999 # Last year with named classes
+ 
