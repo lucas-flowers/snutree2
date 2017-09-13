@@ -100,35 +100,53 @@ Command Line Summary
 
 .. code::
 
-    Usage: snutree.py [OPTIONS] [INPUT_FILES]...
+    usage: snutree [-h] [-o <path>] [-f <filetype>] [-t <filetype>] [-m <schema>]
+                   [-w <writer>] [-c <path>] [-S <int>] [-l <path>] [-q] [-v] [-d]
+                   [-V]
+                   [<input> [<input> ...]]
 
-    Options:
-      --version                       Show the version and exit.
-      -S, --seed INTEGER              Seed for the random number generator. Used
-                                      to move tree nodes around in a repeatable
-                                      way.
-      -t, --to EXT                    File format for output. If a writer is also
-                                      given, it must support this format. Defaults
-                                      to the output's file extension if it is
-                                      known or 'dot' if it is unknown.
-      -w, --writer [dot|stats|table|MODULE]
-                                      Writing module. May be the path to a custom
-                                      Python module. If no module is given, one is
-                                      guessed based on the output filetype.
-      -m, --schema [basic|chapter|keyed|sigmanu|MODULE]
-                                      Member table schema. May be the path to a
-                                      custom Python module. Defaults to 'basic'.
-      -f, --from [csv|dot|sql]        File format for input coming through stdin.
-                                      Assumed to be 'csv' if not given.
-      -c, --config PATH               Configuration file paths. Earlier files
-                                      override later ones.
-      -o, --output PATH               Instead of writing DOT code to stdout, send
-                                      output to the file given.
-      -l, --log PATH                  Log file path.
-      -q, --quiet                     Only print errors to stderr; no warnings.
-      -d, --debug                     Print debug information to stderr.
-      -v, --verbose                   Print information to stderr.
-      --help                          Show this message and exit.
+    Visualizes big-little brother/sister relationships in Greek-letter
+    organizations. Input file data is read from stdin and/or any provided
+    positional <input> arguments. Each input <filetype> has a corresponding
+    reader, which converts the file into a table of the given <schema> and adds it
+    to the rest of the input data. The <schema> module then turns the the
+    resulting table into a tree data structure. The tree is processed and finally
+    written to the output <path> using the given <writer> and output <filetype>.
+    Additional options can be provided in configuration files.
+
+    positional arguments:
+      <input>               an input file path or '-' for stdin; default is stdin
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -o <path>, --output <path>
+                            the output file; default is stdout
+      -f <filetype>, --from <filetype>
+                            expected filetype of stdin, which must be one of
+                            {csv,dot,sql}; default is csv
+      -t <filetype>, --to <filetype>
+                            filetype of the output file, which must be supported
+                            by the writer; default is the output file's extension
+                            (if known) or 'dot'
+      -m <schema>, --schema <schema>
+                            member table schema, which must be in
+                            {basic,chapter,keyed,sigmanu,*.py}; default is 'basic'
+      -w <writer>, --writer <writer>
+                            writer module, which must be in
+                            {dot,stats,table,*.py}; default is a guess based on
+                            the output file format
+      -c <path>, --config <path>
+                            configuration file <path(s)>; files listed earlier
+                            override later ones
+      -S <int>, --seed <int>
+                            random number generator seed, for moving tree nodes
+                            around in a repeatable way
+      -l <path>, --log <path>
+                            write logger output to the file at <path>
+      -q, --quiet           write only errors to stderr; suppress warnings
+      -v, --verbose         print more information to stderr
+      -d, --debug           print debug-level information to stderr
+      -V, --version         show program's version number and exit
 
 
 GUI
