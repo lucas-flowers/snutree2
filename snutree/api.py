@@ -18,16 +18,15 @@ from .cerberus import Validator
 ###############################################################################
 ###############################################################################
 
-def generate(
-        input_files:List[IO[Any]],
-        output_path:Path,
-        config_paths:List[IO[Any]],
-        input_format:str,
-        schema:str,
-        writer:str,
-        output_format:str,
-        seed:int,
-        ):
+def generate(input_files: List[IO[Any]],
+             output_path: Path,
+             config_paths: List[IO[Any]],
+             input_format: str,
+             schema: str,
+             writer: str,
+             output_format: str,
+             seed: int,
+            ):
     '''
     Create a big-little family tree.
     '''
@@ -83,7 +82,7 @@ def generate(
         output = writer.compile_table(member_table)
 
     logger.info('Writing to file')
-    write_output(output, path = config['writer']['file'])
+    write_output(output, path=config['writer']['file'])
 
     logger.info('Done')
 
@@ -94,74 +93,79 @@ def generate(
 ###############################################################################
 
 CONFIG_SCHEMA = {
-        'readers' : {
-            'description' : 'reader module configuration',
-            'type' : 'dict',
-            'allow_unknown' : True,
-            'schema' : {
-                'stdin' : {
-                    'description' : 'standard input reader configuration',
-                    'type' : 'dict',
-                    'schema' : {
-                        'filetype' : {
-                            'description' : 'type of files coming from stdin',
-                            'type' : 'string',
-                            'default' : 'csv',
-                            }
+
+    'readers' : {
+        'description' : 'reader module configuration',
+        'type' : 'dict',
+        'allow_unknown' : True,
+        'schema' : {
+            'stdin' : {
+                'description' : 'standard input reader configuration',
+                'type' : 'dict',
+                'schema' : {
+                    'filetype' : {
+                        'description' : 'type of files coming from stdin',
+                        'type' : 'string',
+                        'default' : 'csv',
                         }
                     }
-                },
-            'keyschema' : {
-                'description' : 'reader',
-                },
-            'valueschema' : {
-                'description' : 'options for another reader',
-                'type' : 'dict',
                 }
             },
+        'keyschema' : {
+            'description' : 'reader',
+            },
+        'valueschema' : {
+            'description' : 'options for another reader',
+            'type' : 'dict',
+            }
+        },
+
+    'schema' : {
+        'description' : 'members schema module configuration',
+        'type' : 'dict',
+        'allow_unknown' : True,
         'schema' : {
-            'description' : 'members schema module configuration',
-            'type' : 'dict',
-            'allow_unknown' : True,
-            'schema' : {
-                'name' : {
-                    'description' : 'member schema module name',
-                    'type' : 'string',
-                    'default' : 'basic',
-                    }
+            'name' : {
+                'description' : 'member schema module name',
+                'type' : 'string',
+                'default' : 'basic',
                 }
-            },
-        'writer' : {
-            'description' : 'writer module configuration',
-            'type' : 'dict',
-            'allow_unknown' : True,
-            'schema' : {
-                'filetype' : {
-                    'description' : 'output filetype',
-                    'type' : 'string',
-                    'default_setter' : lambda doc : doc['file'].suffix[1:] \
-                            if doc['file'] is not None and doc['file'].suffix \
-                            else 'dot'
-                            },
-                'name' : {
-                    'description' : 'writer module name',
-                    'type' : 'string',
-                    'default' : None,
-                    'nullable' : True,
-                    },
-                'file' : {
-                    'description' : 'output file name',
-                    'default' : None,
-                    'nullable' : True
-                    }
-                }
-            },
-        'seed' : {
-                'description' : 'random number generator seed',
-                'type' : 'integer',
-                'default' : 71,
+            }
+        },
+
+    'writer' : {
+        'description' : 'writer module configuration',
+        'type' : 'dict',
+        'allow_unknown' : True,
+        'schema' : {
+            'filetype' : {
+                'description' : 'output filetype',
+                'type' : 'string',
+                'default_setter' : lambda doc: doc['file'].suffix[1:] \
+                        if doc['file'] is not None and doc['file'].suffix \
+                        else 'dot'
                 },
-        }
+            'name' : {
+                'description' : 'writer module name',
+                'type' : 'string',
+                'default' : None,
+                'nullable' : True,
+                },
+            'file' : {
+                'description' : 'output file name',
+                'default' : None,
+                'nullable' : True
+                }
+            }
+        },
+
+    'seed' : {
+        'description' : 'random number generator seed',
+        'type' : 'integer',
+        'default' : 71,
+        },
+
+    }
 
 CONFIG_VALIDATOR = Validator(CONFIG_SCHEMA)
 
@@ -172,11 +176,9 @@ CONFIG_VALIDATOR = Validator(CONFIG_SCHEMA)
 ###############################################################################
 
 # The folder this file is located in (used for importing member formats)
-if getattr(sys, 'frozen', False):
-    # pylint: disable=no-member,protected-access
-    SNUTREE_ROOT = Path(sys._MEIPASS)
-else:
-    SNUTREE_ROOT = Path(__file__).parent
+SNUTREE_ROOT = Path(__file__).parent \
+    if not getattr(sys, 'frozen', False) \
+    else Path(sys._MEIPASS) # pylint: disable=no-member,protected-access
 
 def get_plugin_base(subpackage):
     '''
@@ -245,27 +247,27 @@ def get_schema_module(name):
     Return the member table schema module of the given name.
     '''
     return get_module(SCHEMAS_PLUGIN_BASE, name,
-            attributes=['Rank', 'to_Members', 'description'],
-            descriptor='member schema',
-            custom=True)
+                      attributes=['Rank', 'to_Members', 'description'],
+                      descriptor='member schema',
+                      custom=True)
 
 def get_reader_module(filetype):
     '''
     Return the reader module for the given filetype.
     '''
     return get_module(READERS_PLUGIN_BASE, filetype,
-            attributes=['get_table'],
-            descriptor='input file format',
-            custom=False)
+                      attributes=['get_table'],
+                      descriptor='input file format',
+                      custom=False)
 
 def get_writer_module(name):
     '''
     Return the writer of the given name.
     '''
     return get_module(WRITERS_PLUGIN_BASE, name,
-            attributes=['filetypes', 'compile_tree'],
-            descriptor='writer',
-            custom=True)
+                      attributes=['filetypes', 'compile_tree'],
+                      descriptor='writer',
+                      custom=True)
 
 ###############################################################################
 ###############################################################################
@@ -367,10 +369,10 @@ def write_output(output, path=None):
     write to stdout.
     '''
     if path is not None:
-        stream_open = lambda : path.open('wb+')
+        stream_open = lambda: path.open('wb+')
     else:
         # Buffer since we are writing binary
-        stream_open = contextmanager(lambda : (yield sys.stdout.buffer))
+        stream_open = contextmanager(lambda: (yield sys.stdout.buffer))
     with stream_open() as f:
         f.write(output)
 
