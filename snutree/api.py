@@ -21,7 +21,7 @@ from .cerberus import Validator
 def generate(
         input_files:List[IO[Any]],
         output_path:Path,
-        config_paths:List[Path],
+        config_paths:List[IO[Any]],
         input_format:str,
         schema:str,
         writer:str,
@@ -274,11 +274,11 @@ def get_writer_module(name):
 ###############################################################################
 
 @logged
-def get_config(config_paths, config_args):
+def get_config(config_files, config_args):
     '''
-    Loads the YAML configuration files at the given paths and combines their
-    contents with the configuration arguments provided. Validates the combined
-    configurations and returns the result as a dictionary.
+    Loads the YAML configuration files and combines their contents with the
+    configuration arguments provided. Validates the combined configurations and
+    returns the result as a dictionary.
 
     When there is overlap between configurations, keys from dictionaries
     processed earlier will be overwritten by those extended later (lists will
@@ -286,25 +286,25 @@ def get_config(config_paths, config_args):
     values in config_args will always be processed last.
     '''
     config = {}
-    for c in load_config_files(config_paths) + [config_args]:
+    for c in load_config_files(config_files) + [config_args]:
         deep_update(config, c)
     return CONFIG_VALIDATOR.validated(config)
 
-def load_config_files(paths):
+def load_config_files(files):
     '''
-    Load configuration YAML files from the given paths. Returns a list of
+    Load configuration YAML files from the given files. Returns a list of
     dictionaries representing each configuraton file.
     '''
 
     configs = []
-    for path in paths:
-        with path.open('r') as f:
-            try:
-                config = yaml.safe_load(f) or {}
-            except yaml.YAMLError as e:
-                msg = 'problem reading configuration file {path!r}:\n{e}'.format(path=path, e=e)
-                raise SnutreeError(msg)
-            configs.append(config)
+    for f in files:
+        try:
+            config = yaml.safe_load(f) or {}
+        except yaml.YAMLError as e:
+            path = f.name
+            msg = 'problem reading configuration file {path!r}:\n{e}'.format(path=path, e=e)
+            raise SnutreeError(msg)
+        configs.append(config)
 
     return configs
 

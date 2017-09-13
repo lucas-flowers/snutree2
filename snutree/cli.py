@@ -151,7 +151,7 @@ options = OrderedDict([
     ('config', (['-c', '--config'], {
         'metavar' : '<path>',
         'dest' : 'config_paths',
-        'type' : Path,
+        'type' : argparse.FileType('r'),
         'default' : [],
         'action' : 'append',
         'help' : 'configuration file <path(s)>; files listed earlier override later ones',
