@@ -4,7 +4,7 @@
 Wrapper for running the fmaily tree program through a simple GUI.
 '''
 
-from snutree.qt import main
+from snutree.gui import main
 
 if __name__ == '__main__':
     main()
