@@ -32,7 +32,6 @@ setup(
 
         install_requires=[
             'Cerberus',
-            'click',
             'networkx',
             'pluginbase',
             'PyYAML',

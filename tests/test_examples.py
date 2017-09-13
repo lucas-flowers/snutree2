@@ -1,21 +1,27 @@
-import io
+import sys
+from io import StringIO
 from inspect import cleandoc as trim
 from pathlib import Path
+from contextlib import contextmanager
 import pytest
-from click.testing import CliRunner
 from snutree.errors import SnutreeSchemaError
-from snutree.cli import cli
+from snutree.cli import cli, parse_args
 
 EXAMPLES_ROOT = Path(__file__).parent/'../examples'
-runner = CliRunner()
 
-def invoke(args, infile=None):
-    if infile:
-        infile = io.BytesIO(bytes(infile, 'utf-8'))
-        infile.name = '<stdin>'
-    else:
-        infile = None
-    return runner.invoke(cli, args, input=infile)
+def invoke(args):
+    cli(**vars(parse_args(args)))
+
+@contextmanager
+def redirect_stdin(string):
+    '''
+    Temporarily replace stdin with the provided string as a text stream.
+    '''
+    stdin = sys.stdin
+    sys.stdin = StringIO(string)
+    sys.stdin.name = '<stdin>'
+    yield
+    sys.stdin = stdin
 
 def run_example(examples_root=EXAMPLES_ROOT,
                 schema=None,
@@ -42,39 +48,39 @@ def run_example(examples_root=EXAMPLES_ROOT,
         schema_params.append('--schema')
         schema_params.append(str(schema))
 
-    result = invoke(config_params + schema_params + [
+    invoke(config_params + schema_params + [
         '--output', str(output),
         '--debug',
         *[str(p) for p in input_paths]
     ])
 
-    if result.exception:
-        raise result.exception
-
     assert output.read_text() == expected.read_text()
 
-def test_simple():
-
+@pytest.mark.parametrize('args', [
+    ['--from', 'csv', '-'],
+    ['-'],
+])
+def test_simple(args):
     good_csv = trim('''
         name,big_name,semester
         Bob,Sue,Fall 1967
         Sue,,Spring 1965
-        ''')
-    result = invoke(['--from', 'csv', '-'], good_csv)
-    assert not result.exception
+    ''')
+    with redirect_stdin(good_csv):
+        invoke(args)
 
-    result = invoke(['-'], good_csv)
-    assert not result.exception
-
+@pytest.mark.parametrize('args', [
+    ['-f', 'csv', '-'],
+])
+def test_simple_bad(args):
     bad_csv = trim('''
         name,big_name,semester
         ,Sue,Fall 1967
         Sue,,Spring 1965
-        ''')
-    result = invoke(['-f', 'csv', '-'], bad_csv)
-    with pytest.raises(SnutreeSchemaError):
-        assert result.exception
-        raise result.exception
+    ''')
+    with redirect_stdin(bad_csv):
+        with pytest.raises(SnutreeSchemaError):
+            invoke(args)
 
 def test_custom_module():
     run_example(
