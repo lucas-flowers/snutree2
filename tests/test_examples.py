@@ -4,13 +4,10 @@ from inspect import cleandoc as trim
 from pathlib import Path
 from contextlib import contextmanager
 import pytest
+from snutree import cli
 from snutree.errors import SnutreeSchemaError
-from snutree.cli import cli, parse_args
 
 EXAMPLES_ROOT = Path(__file__).parent/'../examples'
-
-def invoke(args):
-    cli(**vars(parse_args(args)))
 
 @contextmanager
 def redirect_stdin(string):
@@ -48,7 +45,7 @@ def run_example(examples_root=EXAMPLES_ROOT,
         schema_params.append('--schema')
         schema_params.append(str(schema))
 
-    invoke(config_params + schema_params + [
+    cli.invoke(config_params + schema_params + [
         '--output', str(output),
         '--debug',
         *[str(p) for p in input_paths]
@@ -67,7 +64,7 @@ def test_simple(args):
         Sue,,Spring 1965
     ''')
     with redirect_stdin(good_csv):
-        invoke(args)
+        cli.invoke(args)
 
 @pytest.mark.parametrize('args', [
     ['-f', 'csv', '-'],
@@ -80,7 +77,7 @@ def test_simple_bad(args):
     ''')
     with redirect_stdin(bad_csv):
         with pytest.raises(SnutreeSchemaError):
-            invoke(args)
+            cli.invoke(args)
 
 def test_custom_module():
     run_example(
