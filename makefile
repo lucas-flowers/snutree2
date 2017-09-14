@@ -3,11 +3,13 @@ CC = pyinstaller
 TEST = pytest
 SETUP = python setup.py
 
-snutree: clean
+snutree: cli gui
+
+cli:
 	$(CC) snutree.spec
 
-snutree-onefile: clean
-	$(CC) --onefile snutree.spec
+gui:
+	SNUTREE_GUI=1 $(CC) snutree.spec
 
 dist: clean
 	$(SETUP) bdist_wheel

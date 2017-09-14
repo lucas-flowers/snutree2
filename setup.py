@@ -43,7 +43,7 @@ setup(
         extras_require={
             'develop' : ['pytest', 'docutils', 'faker'],
             'test' : ['pytest'],
-            'qt' : ['PyQt5'],
+            'gui' : ['gooey', 'psutil'], # psutil appears to be an unlisted dependency of gooey
             'read_sql' : ['mysqlclient'],
             'read_sql_ssh' : ['mysqlclient', 'sshtunnel'],
             'read_dot' : ['pydotplus']
@@ -57,7 +57,7 @@ setup(
         entry_points={
             'console_scripts' : [
                 'snutree=snutree.cli:main',
-                'snutree-qt=snutree.qt:main',
+                'snutree-gui=snutree.gui:main',
                 ]
             }
 
