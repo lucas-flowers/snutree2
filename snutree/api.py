@@ -306,6 +306,11 @@ def load_config_files(files):
             path = f.name
             msg = 'problem reading configuration file {path!r}:\n{e}'.format(path=path, e=e)
             raise SnutreeError(msg)
+        if not isinstance(config, dict):
+            path = f.name
+            msg = 'configuration YAML file must represent a dict, not a {type}:\n{path}'.format(type=type(config), path=path)
+            raise SnutreeError(msg)
+
         configs.append(config)
 
     return configs
