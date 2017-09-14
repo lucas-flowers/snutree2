@@ -53,49 +53,55 @@ def get_gui_options():
     modifications to the CLI argument parser arguments.
     '''
 
-    # ArgumentParser kwargs overrides
-    gui_overrides = {
+    # ArgumentParser kwargs overrides. Only these arguments will be permitted
+    # in the GUI.
+    gui_overrides = OrderedDict([
 
-        'input' : {
+        ('input', {
             'metavar' : 'Input Files',
             'widget' : 'MultiFileChooser',
-            'nargs' : '+',
+            'nargs' : '+', # keeps GUI users away from stdin (unless '-' provided)
             'help' : None,
-        },
+        }),
 
-        'output' : {
+        ('output', {
             'metavar' : 'Output File',
             'widget' : 'FileSaver',
-            'required' : True,
+            'required' : True, # keeps GUI users away from stdout
             'help' : None,
-        },
+        }),
 
-        'schema' : {
+        # Users can still enter file paths, just not with a file chooser
+        ('schema', {
             'metavar' : 'Schema',
             'default' : 'basic',
             'help' : None,
-        },
+        }),
 
-        'config' : {
+        # MultiFileChooser has form '--config arg1 arg2 ...', which is unlike
+        # snutree CLI's config flag form of '--config arg1 --config arg2'. To
+        # adjust for this, 'nargs' is added and 'action' has been set to
+        # 'store' from 'append'.
+        ('config', {
             'metavar' : 'Configuration Files',
             'widget' : 'MultiFileChooser',
+            'nargs' : '*',
+            'action' : 'store',
             'help' : None,
-        },
+        }),
 
-        'seed' : {
+        ('seed', {
             'metavar' : 'Seed',
             'default' : 1,
             'help' : None,
-        },
+        }),
 
-    }
+    ])
 
     gui_options = OrderedDict()
-    for key, value in cli.options.items():
-        if key in gui_overrides:
-            args, kwargs = value
-            kwargs.update(gui_overrides[key])
-            gui_options[key] = args, kwargs
+    for key, gui_kwargs in gui_overrides.items():
+        args, cli_kwargs = cli.options[key]
+        gui_options[key] = args, dict(cli_kwargs, **gui_kwargs)
 
     return gui_options
 
