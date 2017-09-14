@@ -20,7 +20,7 @@ from .cerberus import Validator
 
 def generate(input_files: List[IO[Any]],
              output_path: Path,
-             config_paths: List[IO[Any]],
+             config_files: List[IO[Any]],
              input_format: str,
              schema: str,
              writer: str,
@@ -52,7 +52,7 @@ def generate(input_files: List[IO[Any]],
         })
 
     logger.info('Loading configuration files')
-    config = get_config(config_paths, config_args)
+    config = get_config(config_files, config_args)
 
     logger.info('Loading member schema module')
     schema = get_schema_module(config['schema']['name'])
