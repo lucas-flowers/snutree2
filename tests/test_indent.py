@@ -1,5 +1,5 @@
 import pytest
-from snutree.indent import Indent
+from snutree.utilities.indent import Indent
 
 @pytest.mark.parametrize('expected, indent, level', [
     ('', Indent(tabstop=1, char='\t'), 0),

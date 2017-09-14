@@ -18,7 +18,7 @@ from collections import OrderedDict
 from pathlib import Path
 from . import api, version
 from .errors import SnutreeError
-from .logging import setup_logger, logged
+from .utilities.logging import setup_logger, logged
 
 def main():
     '''

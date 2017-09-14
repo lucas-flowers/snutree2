@@ -8,9 +8,9 @@ import logging
 from collections import OrderedDict
 import gooey
 from snutree import api
-from snutree.errors import SnutreeError
-from snutree.logging import setup_logger
-from snutree import cli
+from . import cli
+from .errors import SnutreeError
+from .utilities.logging import setup_logger
 
 @gooey.Gooey()
 def main():

@@ -3,7 +3,7 @@ import logging
 import time
 import inspect
 from functools import wraps
-from .errors import SnutreeError
+from ..errors import SnutreeError
 
 def setup_logger(verbose, debug, quiet, log_path=None):
     '''

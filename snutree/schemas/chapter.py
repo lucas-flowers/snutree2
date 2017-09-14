@@ -3,7 +3,7 @@ from voluptuous.error import Error
 from voluptuous.humanize import validate_with_humanized_errors
 from snutree.errors import SnutreeSchemaError
 from snutree.tree import Member
-from snutree.voluptuous import NonEmptyString
+from snutree.utilities.voluptuous import NonEmptyString
 
 Rank = int
 

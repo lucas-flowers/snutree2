@@ -5,7 +5,7 @@ from abc import ABCMeta, abstractmethod
 from networkx import DiGraph
 from networkx.algorithms.components import weakly_connected_components
 from .errors import SnutreeError
-from .logging import logged
+from .utilities.logging import logged
 
 ###############################################################################
 ###############################################################################

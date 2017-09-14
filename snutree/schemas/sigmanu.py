@@ -6,10 +6,10 @@ from voluptuous import Schema, Required, In, Coerce, IsFalse
 from voluptuous.error import Error
 from voluptuous.humanize import validate_with_humanized_errors
 from snutree.errors import SnutreeError, SnutreeSchemaError
-from snutree.semester import Semester
 from snutree.tree import Member
-from snutree.cerberus import Validator
-from snutree.voluptuous import NonEmptyString, Digits
+from snutree.utilities.cerberus import Validator
+from snutree.utilities.voluptuous import NonEmptyString, Digits
+from snutree.utilities.semester import Semester
 
 CONFIG_SCHEMA = {
         'name' : {

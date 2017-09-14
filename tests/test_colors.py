@@ -1,4 +1,4 @@
-from snutree.colors import ColorPicker
+from snutree.utilities.colors import ColorPicker
 
 def test_use_next():
     # pylint: disable=protected-access

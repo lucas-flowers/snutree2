@@ -1,6 +1,6 @@
 from itertools import permutations
 import pytest
-from snutree.semester import Semester
+from snutree.utilities.semester import Semester
 
 a = Semester('Fall 1900')
 b = Semester('Fall 1994')

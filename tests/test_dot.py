@@ -2,8 +2,8 @@ from functools import partial
 from itertools import product
 from inspect import cleandoc as trim
 import pytest
-from snutree.dot import Defaults, Node, Edge, Rank, Graph
-from snutree.indent import Indent
+from snutree.utilities.dot import Defaults, Node, Edge, Rank, Graph
+from snutree.utilities.indent import Indent
 
 class TestAttributes:
     '''

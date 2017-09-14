@@ -1,6 +1,6 @@
 from itertools import product
 from voluptuous import Schema, Required, Coerce
-from snutree.voluptuous import NonEmptyString
+from snutree.utilities.voluptuous import NonEmptyString
 from snutree.tree import Member
 
 def to_Members(dicts, **conf):

@@ -1,13 +1,13 @@
 import logging
 import sys
 import subprocess
-from snutree import dot
 from snutree.errors import SnutreeWriterError
 from snutree.tree import TreeEntity
-from snutree.logging import logged
-from snutree.colors import ColorPicker
 from snutree.tree import TreeError
-from snutree.cerberus import Validator
+from snutree.utilities import dot
+from snutree.utilities.cerberus import Validator
+from snutree.utilities.logging import logged
+from snutree.utilities.colors import ColorPicker
 
 logger_name = 'snutree.writers.dot'
 

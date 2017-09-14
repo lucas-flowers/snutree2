@@ -8,9 +8,9 @@ import yaml
 from cerberus import Validator
 from pluginbase import PluginBase
 from .errors import SnutreeError
-from .logging import logged
 from .tree import FamilyTree
-from .cerberus import Validator
+from .utilities.logging import logged
+from .utilities.cerberus import Validator
 
 ###############################################################################
 ###############################################################################

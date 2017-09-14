@@ -1,6 +1,6 @@
 from contextlib import closing
 from snutree.errors import SnutreeReaderError
-from snutree.cerberus import Validator
+from snutree.utilities.cerberus import Validator
 
 CONFIG_SCHEMA = {
 

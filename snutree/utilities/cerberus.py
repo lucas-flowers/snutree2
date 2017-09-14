@@ -5,11 +5,11 @@ Additional functions for cerberus-style validation.
 
 import pprint
 from pathlib import Path
-import cerberus
-from .errors import SnutreeError
-from .indent import Indent
+from cerberus import Validator as cerberus_Validator
+from snutree.errors import SnutreeError
+from snutree.utilities.indent import Indent
 
-class Validator(cerberus.Validator):
+class Validator(cerberus_Validator):
 
     def __init__(self, schema, *args, **kwargs):
         self.RankType = kwargs.get('RankType')
