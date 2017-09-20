@@ -112,11 +112,13 @@ features.
 Installation
 ============
 
-Linux
------
+With PIP
+--------
 
-These instructions are based on Ubuntu and Debian-based installations. You may
-need to modify them for your own system.
+These instructions are based on Ubuntu and Debian-based installations, but they
+can be made to apply to any Unix-like system (including macOS) with what should
+be minor modifications. (These instructions are also applicable to Windows,
+though after less minor modifications.)
 
 First, install Python (>=3.5), Python's ``pip`` package manager, and `Graphviz
 <http://graphviz.org>`_:
@@ -146,6 +148,16 @@ This will install ``snutree`` and its required Python dependencies to your home
 directory. Make sure that ``~/.local/bin`` is in your PATH. You might run
 ``pip`` without the ``--user`` flag to install it system-wide, but this will
 require root.
+
+Windows
+-------
+
+Since installation on Windows is less straightforward, Windows executables have
+been compiled and are available `here
+<https://github.com/lucas-flowers/snutree/releases>`_. After downloading the
+executable, you must install Graphviz and add ``C:\Program Files
+(x86)\GraphvizX.XX\bin`` (or equivalent) to your Windows PATH. You can now run
+the command-line or GUI executables.
 
 Optional Dependencies
 ---------------------
