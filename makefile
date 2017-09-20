@@ -29,7 +29,7 @@ upload:
 	twine upload -r pypi dist/*
 
 readme:
-	python generate-readme.py
+	python docs/readme-generate.py
 
 test-clean: py-clean
 	find . -name '*-actual.dot' -exec rm {} +

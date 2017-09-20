@@ -105,9 +105,9 @@ Command Line Summary
 GUI
 ---
 
-The ``snutree`` package also includes a simple GUI called ``snutree-qt``. The
-GUI can take multiple input files of any supported format, pick schemas, output
-to PDF, and choose a seed for the random number generator.
+There is also a simple GUI script called ``snutree-gui``. It is a simple
+wrapper over the command-line version and implements most of the command-line
+features.
 
 Installation
 ============
@@ -152,7 +152,7 @@ Optional Dependencies
 
 Use ``pip`` to install these packages for optional features:
 
-- ``pyqt5``: Use the GUI
+- ``gooey``: Use the GUI version
 
 - ``mysqlclient``: Allow reading from MySQL databases
 
