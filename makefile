@@ -1,7 +1,14 @@
 
-CC = pyinstaller
 TEST = pytest
 SETUP = python setup.py
+
+ifeq ($(OS),Windows_NT)
+	CC = pyinstaller.exe
+	SET_SNUTREE_GUI = set SNUTREE_GUI=1 &&
+else
+	CC = pyinstaller
+	SET_SNUTREE_GUI = SNUTREE_GUI=1
+endif
 
 snutree: cli gui
 
@@ -9,7 +16,7 @@ cli:
 	$(CC) snutree.spec
 
 gui:
-	SNUTREE_GUI=1 $(CC) snutree.spec
+	$(SET_SNUTREE_GUI) $(CC) snutree.spec
 
 dist: clean
 	$(SETUP) bdist_wheel
@@ -24,7 +31,7 @@ upload:
 readme:
 	python generate-readme.py
 
-test-clean:
+test-clean: py-clean
 	find . -name '*-actual.dot' -exec rm {} +
 
 py-clean:
@@ -38,6 +45,6 @@ build-clean:
 
 clean: py-clean test-clean build-clean
 
-test: py-clean
+test:
 	$(TEST)
 
