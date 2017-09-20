@@ -32,7 +32,7 @@ setup(
 
     install_requires=[
         'Cerberus',
-        'networkx',
+        'networkx<2',
         'pluginbase',
         'PyYAML',
         'voluptuous',
