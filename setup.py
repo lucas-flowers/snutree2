@@ -41,7 +41,7 @@ setup(
     python_requires='>=3.5',
 
     extras_require={
-        'develop' : ['pytest', 'docutils', 'faker'],
+        'develop' : ['pytest', 'docutils', 'faker', 'twine'],
         'test' : ['pytest'],
         'gui' : ['gooey', 'psutil'], # psutil appears to be an unlisted dependency of gooey
         'sql' : ['mysqlclient'],
