@@ -51,7 +51,7 @@ def run_example(examples_root=EXAMPLES_ROOT,
         *[str(p) for p in input_paths]
     ])
 
-    assert output.read_text() == expected.read_text()
+    assert output.read_text(encoding='utf-8') == expected.read_text(encoding='utf-8')
 
 @pytest.mark.parametrize('args', [
     ['--from', 'csv', '-'],

@@ -111,7 +111,7 @@ options = OrderedDict([
 
     ('input', (['input_files'], {
         'metavar' : '<input>',
-        'type' : argparse.FileType('r'),
+        'type' : argparse.FileType('r', encoding='utf-8'),
         'nargs' : '*',
         'help' : "an input file path or '-' for stdin; default is stdin",
     })),
@@ -151,7 +151,7 @@ options = OrderedDict([
     ('config', (['-c', '--config'], {
         'metavar' : '<path>',
         'dest' : 'config_files',
-        'type' : argparse.FileType('r'),
+        'type' : argparse.FileType('r', encoding='utf-8'),
         'default' : [],
         'action' : 'append',
         'help' : 'configuration file <path(s)>; files listed earlier override later ones',
