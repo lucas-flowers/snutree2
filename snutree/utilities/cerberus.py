@@ -22,7 +22,7 @@ class Validator(cerberus_Validator):
         '''
 
         dct = super().validated(*args, **kwargs)
-        if not dct:
+        if dct is None:
             errors = pprint.pformat(self.errors)
             s = 's' if len(errors) != 1 else ''
             msg = 'Error{s} found in configuration:\n{errors}'.format(s=s, errors=errors)
