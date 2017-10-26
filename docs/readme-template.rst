@@ -1,14 +1,18 @@
+=======
+snutree
+=======
+
+.. contents::
+    :backlinks: none
+
+.. sectnum::
+
 Introduction
 ============
 
 Some Greek-letter organizations assign big brothers or big sisters ("bigs") to
 new members ("littles"). This program visualizes such relationships as a family
 tree, using Graphviz.
-
-.. contents::
-    :backlinks: none
-
-.. sectnum::
 
 Usage
 =====
