@@ -41,9 +41,17 @@ setup(
     python_requires='>=3.5',
 
     extras_require={
-        'develop' : ['pytest', 'docutils', 'faker', 'twine'],
-        'test' : ['pytest'],
-        'gui' : ['gooey', 'psutil'], # psutil appears to be an unlisted dependency of gooey
+        'dev' : [
+            'pytest', # tests
+            'docutils', # documentation
+            'pygments', # documentation
+            'faker', # examples
+            'twine', # distribution
+        ],
+        'gui' : [
+            'gooey',
+            'psutil' # psutil appears to be an unlisted dependency of gooey
+        ],
         'sql' : ['mysqlclient'],
         'ssh' : ['sshtunnel'],
         'dot' : ['pydotplus']
