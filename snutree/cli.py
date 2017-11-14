@@ -101,35 +101,53 @@ class AllowedModules:
     def __str__(self):
         return '{{{allowed}}}'.format(allowed=','.join(self))
 
-
-class FileType(argparse.FileType):
-    '''
-    Like argparse.FileType, but attempts to force encoding on the file if the
-    file is stdin or stdout (instead of using stdin/stdout's encoding).
-
-    The encoding keyword argument for argparse.FileType is only used if it
-    needs to open a file. This means that when '-' is passed, stdin/stdout are
-    used directly, i.e., with their default encoding. This wrapper ensures that
-    even stdin/stdout are read with the desired encoding, if possible.
-
-    (Note: If stdin/stdout don't have an underlying buffer attribute, then they
-    were at some point replaced by a stream without one (for example, by a
-    StringIO for testing). In such cases, the stream will be returned
-    unmodified, as it would in argparse.FileType.)
-    '''
-
-    def __call__(self, string):
-        stream = super().__call__(string)
-        if (stream is sys.stdin or stream is sys.stdout) \
-                and self._encoding is not None \
-                and hasattr(stream, 'buffer'):
-            stream = io.TextIOWrapper(stream.buffer, encoding=self._encoding)
-        return stream
-
 # Allowable values for different arguments
 CHOICES_READER = AllowedModules(api.BUILTIN_READERS, pattern=None)
 CHOICES_SCHEMA = AllowedModules(api.BUILTIN_SCHEMAS, pattern='*.py')
 CHOICES_WRITER = AllowedModules(api.BUILTIN_WRITERS, pattern='*.py')
+
+class FileType(argparse.FileType):
+    '''
+    Subclass of argparse.FileType that handles stdin and stdout in a more
+    expected way.
+
+    More specifically: In argparse.FileType, stdin and stdout are only ever
+    returned directly---even if binary mode is requested or an encoding is
+    provided. With this function, stdin/stdout's underlying buffer is returned
+    when binary mode is requested, and a TextIOWrapper over that buffer is
+    provided if an encoding is provided.
+    '''
+
+    def __call__(self, string):
+
+        # Override stdin and stdout handling
+        if string == '-':
+
+            if 'r' in self._mode:
+                stdio = sys.stdin
+            elif 'w' in self._mode:
+                stdio = sys.stdout
+            else:
+                stdio = None
+
+            if stdio is not None:
+                # The hasattr checks are here because stdin/stdout might not
+                # have an underlying buffer. This might happen if sys.stdin or
+                # sys.stdout was at some point replaced (for example, by
+                # StringIO in some test). In such situations, let
+                # argparse.FileType handle it.
+                if 'b' in self._mode and hasattr(stdio, 'buffer'):
+                    # Binary mode: Use stdin/stdout's binary buffer
+                    return stdio.buffer
+                elif self._encoding is None:
+                    # Text mode: Use stdin/stdout with its own default encoding
+                    return stdio
+                elif hasattr(stdio, 'buffer'):
+                    # Text mode: Wrap stdin/stdout's binary buffer with the
+                    # desired encoding
+                    return io.TextIOWrapper(stdio.buffer, encoding=self._encoding)
+
+        return super().__call__(string)
 
 # In Python 3.6, options can just be set as a dict and the order will be as
 # expected. (We need a dict now to interact with Gooey.)
@@ -137,7 +155,7 @@ options = OrderedDict([
 
     ('input', (['input_files'], {
         'metavar' : '<input>',
-        'type' : FileType('r', encoding='utf-8'),
+        'type' : FileType('rb'),
         'nargs' : '*',
         'help' : "an input file path or '-' for stdin; default is stdin",
     })),

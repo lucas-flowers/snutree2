@@ -1,5 +1,5 @@
 import sys
-from io import StringIO
+from io import BytesIO
 from inspect import cleandoc as trim
 from pathlib import Path
 from contextlib import contextmanager
@@ -15,7 +15,7 @@ def redirect_stdin(string):
     Temporarily replace stdin with the provided string as a text stream.
     '''
     stdin = sys.stdin
-    sys.stdin = StringIO(string)
+    sys.stdin = BytesIO(bytes(string, encoding='utf-8'))
     sys.stdin.name = '<stdin>'
     yield
     sys.stdin = stdin

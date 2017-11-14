@@ -1,3 +1,4 @@
+import io
 from contextlib import closing
 from snutree.errors import SnutreeReaderError
 from snutree.utilities.cerberus import Validator
@@ -59,13 +60,16 @@ CONFIG_SCHEMA = {
 # Validates a configuration YAML file with SQL and ssh options
 CONFIG_VALIDATOR = Validator(CONFIG_SCHEMA)
 
-def get_table(query_stream, **config):
+def get_table(bytesio, **config):
     '''
     Read a YAML table with query, SQL and, optionally, ssh information. Use the
     information to get a list of member dictionaries.
     '''
 
-    rows = get_members(query_stream.read(), config)
+    textio = io.TextIOWrapper(bytesio, encoding='utf-8')
+    query = textio.read()
+
+    rows = get_members(query, config)
     for row in rows:
         # Delete falsy values to simplify validation
         for key, field in list(row.items()):

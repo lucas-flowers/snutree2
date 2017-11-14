@@ -4,14 +4,14 @@ the DOT file is place nice and is friendly, as this is mainly for testing.
 '''
 
 import re
-from io import StringIO
+import io
 from contextlib import redirect_stdout
 import networkx.drawing.nx_pydot as nx_pydot
 from snutree.errors import SnutreeReaderError
 
 CONFIG_SCHEMA = {} # No configuration
 
-def get_table(f, **config):
+def get_table(bytesio, **config):
     '''
     Read a DOT file into a pydotplus graph, convert that graph into an
     intermediate networkx graph (they're easier to deal with), and return a
@@ -24,13 +24,15 @@ def get_table(f, **config):
         msg = 'could not read DOT file: missing pydotplus package'
         raise SnutreeReaderError(msg)
 
+    textio = io.TextIOWrapper(bytesio, encoding='utf-8')
+
     # Pydotplus catches all of its ParseExceptions at the end of parse_dot_data
     # and doesn't bother to rethrow them or store the messages in a log.
     # Instead, it prints the messages directly to stdout. So, we have to
     # capture stdout from parse_dot_data if there are any problems (indicated
     # by a return value of None).
-    dot_code = f.read()
-    captured_stderr = StringIO()
+    dot_code = textio.read()
+    captured_stderr = io.StringIO()
     with redirect_stdout(captured_stderr):
         pydot = pydotplus.parser.parse_dot_data(dot_code)
 

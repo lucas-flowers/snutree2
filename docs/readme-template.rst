@@ -17,11 +17,8 @@ tree, using Graphviz.
 Usage
 =====
 
-Command Line
-------------
-
 Basic Usage
-~~~~~~~~~~~
+-----------
 
 The simplest usage of ``snutree`` is:
 
@@ -37,7 +34,7 @@ tree, and output the tree using Graphviz. Each member will be put on a row
 representing the semester they joined.
 
 Changing Schemas
-~~~~~~~~~~~~~~~~
+----------------
 
 The (``name``, ``big_name``, ``semester``) headers consist of the
 "basic" schema. There are a few other schemas available. They are:
@@ -72,7 +69,7 @@ Custom schema modules should validate the tables themselves and turn them into
 an internal format ``snutree`` can read.
 
 SQL Queries
-~~~~~~~~~~~
+-----------
 
 Input files can also be SQL queries. This will run the query in ``query.sql``
 on the database described in ``config.yaml`` and save the resulting tree to
@@ -105,7 +102,7 @@ the contents of such a file:
 Note that the query must rename the column headers to match the schema used.
 
 Command Line Summary
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
 .. code::
 
@@ -117,6 +114,13 @@ GUI
 There is also a simple GUI script called ``snutree-gui``. It is a simple
 wrapper over the command-line version and implements most of the command-line
 features.
+
+Note on Text Encoding
+---------------------
+
+All of ``snutree``'s built-in readers and writers use UTF-8, and all of
+``snutree``'s configuration files should be encoded in UTF-8. Use ``iconv`` or
+similar tools to convert to and from UTF-8 as needed.
 
 Installation
 ============

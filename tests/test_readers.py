@@ -1,15 +1,15 @@
-from io import StringIO
+from io import BytesIO
 import pytest
 from snutree.errors import SnutreeReaderError
 from snutree.readers import csv, dot, sql
 
 def test_csv_no_error():
-    csv_stream = StringIO('"A","B bb B","C"\nx')
+    csv_stream = BytesIO(b'"A","B bb B","C"\nx')
     row_generator = csv.get_table(csv_stream)
     next(row_generator)
 
 def test_csv_error():
-    csv_stream = StringIO('"A";"B "bb" B";"C"\nx')
+    csv_stream = BytesIO(b'"A";"B "bb" B";"C"\nx')
     row_generator = csv.get_table(csv_stream)
     with pytest.raises(SnutreeReaderError):
         next(row_generator)
@@ -24,11 +24,11 @@ def test_sql_ssh_error():
         sql.get_members_ssh('', conf, conf)
 
 def test_dot_no_error():
-    dot_stream = StringIO('digraph { a -> b; }')
+    dot_stream = BytesIO(b'digraph { a -> b; }')
     dot.get_table(dot_stream)
 
 def test_dot_error():
-    dot_stream = StringIO('digraph { \n a------ \n }')
+    dot_stream = BytesIO(b'digraph { \n a------ \n }')
     with pytest.raises(SnutreeReaderError):
         dot.get_table(dot_stream)
 
