@@ -27,7 +27,7 @@ def generate_readme(template):
         [str(SNUTREE_ROOT/'snutree.py'), '--help'],
         stdout=subprocess.PIPE,
         universal_newlines=True, # Python 3.5
-        # encoding=sys.getdefaultencoding(), # Python 3.6
+        # encoding='utf-8', # Python 3.6
     )
     return_code = result.returncode
     if return_code:

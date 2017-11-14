@@ -33,5 +33,5 @@ def compile_table(table):
     for row in table:
         writer.writerow(row)
 
-    return bytes(output.getvalue(), encoding=sys.getdefaultencoding())
+    return bytes(output.getvalue(), encoding='utf-8')
 

@@ -35,8 +35,5 @@ def compile_tree(tree, RankType, config):
 
     output = '\n'.join('{key}={value}'.format(key=key, value=value) for key, value in output_fields.items())
 
-    return bytes(output, encoding=sys.getdefaultencoding())
-
-
-
+    return bytes(output, encoding='utf-8')
 

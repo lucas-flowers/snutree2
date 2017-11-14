@@ -515,9 +515,9 @@ def compile_fmt(src, filetype):
         result = subprocess.run('dot -T{filetype}'.format(filetype=filetype), check=True, shell=True,
                 # The input will be a str and the output will be binary, but
                 # subprocess.run requires they both be str or both be binary.
-                # So, use binary and send the source in as binary (with default
-                # encoding).
-                input=bytes(src, sys.getdefaultencoding()),
+                # So, use binary and send the source in as binary (encoded
+                # appropriately).
+                input=bytes(src, encoding='utf-8'),
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
                 )
@@ -533,5 +533,5 @@ def compile_dot(src):
     Converts the DOT source into bytes suitable for writing (bytes, not
     characters, are expected by the main output writer).
     '''
-    return bytes(src, sys.getdefaultencoding())
+    return bytes(src, encoding='utf-8')
 

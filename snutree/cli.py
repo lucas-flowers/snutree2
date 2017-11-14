@@ -11,6 +11,7 @@ options can be provided in configuration files.
 '''
 
 import logging
+import io
 import sys
 import argparse
 from argparse import ArgumentParser
@@ -100,6 +101,31 @@ class AllowedModules:
     def __str__(self):
         return '{{{allowed}}}'.format(allowed=','.join(self))
 
+
+class FileType(argparse.FileType):
+    '''
+    Like argparse.FileType, but attempts to force encoding on the file if the
+    file is stdin or stdout (instead of using stdin/stdout's encoding).
+
+    The encoding keyword argument for argparse.FileType is only used if it
+    needs to open a file. This means that when '-' is passed, stdin/stdout are
+    used directly, i.e., with their default encoding. This wrapper ensures that
+    even stdin/stdout are read with the desired encoding, if possible.
+
+    (Note: If stdin/stdout don't have an underlying buffer attribute, then they
+    were at some point replaced by a stream without one (for example, by a
+    StringIO for testing). In such cases, the stream will be returned
+    unmodified, as it would in argparse.FileType.)
+    '''
+
+    def __call__(self, string):
+        stream = super().__call__(string)
+        if (stream is sys.stdin or stream is sys.stdout) \
+                and self._encoding is not None \
+                and hasattr(stream, 'buffer'):
+            stream = io.TextIOWrapper(stream.buffer, encoding=self._encoding)
+        return stream
+
 # Allowable values for different arguments
 CHOICES_READER = AllowedModules(api.BUILTIN_READERS, pattern=None)
 CHOICES_SCHEMA = AllowedModules(api.BUILTIN_SCHEMAS, pattern='*.py')
@@ -111,7 +137,7 @@ options = OrderedDict([
 
     ('input', (['input_files'], {
         'metavar' : '<input>',
-        'type' : argparse.FileType('r', encoding='utf-8'),
+        'type' : FileType('r', encoding='utf-8'),
         'nargs' : '*',
         'help' : "an input file path or '-' for stdin; default is stdin",
     })),
@@ -151,7 +177,7 @@ options = OrderedDict([
     ('config', (['-c', '--config'], {
         'metavar' : '<path>',
         'dest' : 'config_files',
-        'type' : argparse.FileType('r', encoding='utf-8'),
+        'type' : FileType('r', encoding='utf-8'),
         'default' : [],
         'action' : 'append',
         'help' : 'configuration file <path(s)>; files listed earlier override later ones',
