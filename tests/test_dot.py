@@ -12,11 +12,11 @@ class TestAttributes:
     '''
 
     constructors = [
-            partial(Graph, 1, 'graph'),
-            partial(Defaults, 'node'),
-            partial(Node, 2),
-            partial(Edge, 3, 4)
-            ]
+        partial(Graph, 1, 'graph'),
+        partial(Defaults, 'node'),
+        partial(Node, 2),
+        partial(Edge, 3, 4)
+    ]
     attributes = [{'blah' : 999}, {}, None]
     parameters = [(f(x), x) for f, x in product(constructors, attributes)]
 
@@ -73,20 +73,20 @@ def test_Graph():
     sub_edge_defaults = Defaults('edge', {'label': 'this'})
 
     subgraph = Graph(
-            'something',
-            'subgraph',
-            children=[sub_edge_defaults, Node('S1', {'label' : 5}), Node('S2')],
-            )
+        'something',
+        'subgraph',
+        children=[sub_edge_defaults, Node('S1', {'label' : 5}), Node('S2')],
+    )
 
     node_defaults = Defaults('node', {'width' : 4, 'penwidth' : '5'})
     edge_defaults = Defaults('edge', {'width' : 5, 'penwidth' : '4'})
 
     graph = Graph(
-            'tree',
-            'digraph',
-            attributes={'size' : 5, 'width' : 'gold'},
-            children=[node_defaults, edge_defaults, node1, edge, node2, subgraph, rank],
-            )
+        'tree',
+        'digraph',
+        attributes={'size' : 5, 'width' : 'gold'},
+        children=[node_defaults, edge_defaults, node1, edge, node2, subgraph, rank],
+    )
 
     assert graph.to_dot() == trim('''
         digraph "tree" {

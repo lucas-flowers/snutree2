@@ -18,10 +18,10 @@ def to_Members(dicts, **config):
         raise SnutreeSchemaError(exc, dct)
 
 description = {
-        'child' : 'Chapter name',
-        'parent' : "Name of the chapter's parent chapter",
-        'founded' : 'Year the chapter was founded',
-        }
+    'child' : 'Chapter name',
+    'parent' : "Name of the chapter's parent chapter",
+    'founded' : 'Year the chapter was founded',
+}
 
 class Chapter(Member):
     '''
@@ -35,10 +35,10 @@ class Chapter(Member):
         })
 
     def __init__(self,
-            parent=None,
-            child=None,
-            founded=None,
-            ):
+                 parent=None,
+                 child=None,
+                 founded=None,
+                ):
 
         self.key = child
         self.rank = founded

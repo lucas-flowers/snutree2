@@ -1,5 +1,4 @@
 import logging
-import sys
 import subprocess
 from snutree.errors import SnutreeWriterError
 from snutree.tree import TreeEntity
@@ -18,11 +17,11 @@ logger_name = 'snutree.writers.dot'
 ###############################################################################
 
 filetypes = {
-        'dot', # Printed directly
-        'eps',
-        'svg',
-        'pdf',
-        }
+    'dot', # Printed directly
+    'eps',
+    'svg',
+    'pdf',
+}
 
 def compile_tree(tree, RankType, config):
 
@@ -49,182 +48,187 @@ def compile_tree(tree, RankType, config):
 ###############################################################################
 
 # Contains groups of attributes labeled by the strings in `allowed`
-attribute_defaults = lambda key, allowed : {
-        'description' : 'defaults for Graphviz {key}s'.format(key=key),
+attribute_defaults = lambda key, allowed: {
+    'description' : 'defaults for Graphviz {key}s'.format(key=key),
+    'type' : 'dict',
+    'default' : {key : defaults for key, _, defaults in allowed},
+    'schema' : {
+        key : {
+            'description' : description,
+            'type' : 'dict',
+            'default' : defaults,
+            'keyschema' : {
+                'description' : 'name',
+            },
+            'valueschema' : {
+                'description' : 'value',
+                'type' : ['string', 'number', 'boolean'],
+            }
+        } for key, description, defaults in allowed
+    }
+}
+
+CONFIG_SCHEMA = {
+
+    'name' : {
+        'description' : 'writer name',
+        'regex' : 'dot',
+        'default' : 'dot',
+    },
+    'filetype' : {
+        'description' : 'output filetype',
+        'allowed' : list(filetypes),
+        'nullable' : True,
+    },
+    'file' : {
+        'description' : 'output file name',
+        'coerce' : 'optional_path',
+        'nullable' : True,
+    },
+    'ranks' : {
+        'description' : 'enable ranks',
+        'type' : 'boolean',
+        'default' : True,
+    },
+    'custom_edges' : {
+        'description' : 'enable custom edges',
+        'type' : 'boolean',
+        'default' : True,
+    },
+    'custom_nodes' : {
+        'description' : 'enable custom nodes',
+        'type' : 'boolean',
+        'default' : True,
+    },
+    'no_singletons' : {
+        'description' : 'delete member nodes with neither parent nor child nodes',
+        'type' : 'boolean',
+        'default' : True,
+    },
+    'colors' : {
+        'description' : 'add color to member nodes',
+        'type' : 'boolean',
+        'default' : True,
+    },
+    'unknowns' : {
+        'description' : 'add parent nodes to members without any',
+        'type' : 'boolean',
+        'default' : True,
+    },
+    'warn_rank' : {
+        'description' : 'if no_singletons=True, singletons with rank>=warn_rank trigger warnings when dropped',
+        'coerce' : 'optional_rank_type',
+        'default' : None,
+        'nullable' : True,
+    },
+
+    'defaults' : {
+        'description' : 'default Graphviz attributes',
         'type' : 'dict',
-        'default' : { key : defaults for key, _, defaults in allowed },
+        'default' : {},
         'schema' : {
-            key : {
-                'description' : description,
-                'type' : 'dict',
-                'default' : defaults,
-                'keyschema' : {
-                    'description' : 'name',
+            'graph' : attribute_defaults('graph', allowed=[
+                ('all', '', {})
+            ]),
+            'node' : attribute_defaults('node', allowed=[
+                ('all', 'all nodes', {}),
+                ('rank', 'rank nodes', {'color' : 'none'}),
+                ('unknown', 'nodes of unknown parents', {'style':'invis'}),
+                ('member', 'member nodes', {})
+            ]),
+            'edge' : attribute_defaults('edge', allowed=[
+                ('all', 'all edges', {'arrowhead':'none'}),
+                ('rank', 'edges between rank nodes', {'style':'invis'}),
+                ('unknown', 'edges coming from unknown parents', {}),
+            ]),
+        }
+    },
+
+    'family_colors' : {
+        'description' : 'map of member keys to Graphviz colors',
+        'type' : 'dict',
+        'default' : {},
+        'keyschema' : {
+            'description' : 'key',
+            'type' : 'string',
+            'required' : True,
+        },
+        'valueschema' : {
+            'description' : 'color',
+            'type' : 'string',
+            'required' : True,
+        },
+    },
+
+    'nodes' : {
+        'description' : 'custom Graphviz nodes',
+        'type' : 'dict',
+        'default' : {},
+        'keyschema' : {
+            'type' : 'string',
+        },
+        'valueschema' : {
+            'description' : 'a Graphviz node key',
+            'type' : 'dict',
+            'schema' : {
+                'rank' : {
+                    'description' : 'the rank (i.e., year, semester, etc.) the node is in',
+                    'coerce' : 'rank_type',
+                },
+                'attributes' : {
+                    'description' : 'Graphviz node attributes',
+                    'type' : 'dict',
+                    'default' : {},
+                    'keyschema' : {
+                        'description' : 'name',
                     },
-                'valueschema' : {
-                    'description' : 'value',
-                    'type' : ['string', 'number', 'boolean'],
-                    }
-                } for key, description, defaults in allowed
+                    'valueschema' : {
+                        'description' : 'value',
+                    },
+                }
             }
         }
 
-CONFIG_SCHEMA = {
-        'name' : {
-            'description' : 'writer name',
-            'regex' : 'dot',
-            'default' : 'dot',
-            },
-        'filetype' : {
-            'description' : 'output filetype',
-            'allowed' : list(filetypes),
-            'nullable' : True,
-            },
-        'file' : {
-            'description' : 'output file name',
-            'coerce' : 'optional_path',
-            'nullable' : True,
-            },
-        'ranks' : {
-            'description' : 'enable ranks',
-            'type' : 'boolean',
-            'default' : True,
-            },
-        'custom_edges' : {
-            'description' : 'enable custom edges',
-            'type' : 'boolean',
-            'default' : True,
-            },
-        'custom_nodes' : {
-            'description' : 'enable custom nodes',
-            'type' : 'boolean',
-            'default' : True,
-            },
-        'no_singletons' : {
-            'description' : 'delete member nodes with neither parent nor child nodes',
-            'type' : 'boolean',
-            'default' : True,
-            },
-        'colors' : {
-            'description' : 'add color to member nodes',
-            'type' : 'boolean',
-            'default' : True,
-            },
-        'unknowns' : {
-            'description' : 'add parent nodes to members without any',
-            'type' : 'boolean',
-            'default' : True,
-            },
-        'warn_rank' : {
-            'description' : 'if no_singletons=True, singletons with rank>=warn_rank trigger warnings when dropped',
-            'coerce' : 'optional_rank_type',
-            'default' : None,
-            'nullable' : True,
-            },
-        'defaults' : {
-                'description' : 'default Graphviz attributes',
-                'type' : 'dict',
-                'default' : {},
-                'schema' : {
-                    'graph' : attribute_defaults('graph', allowed=[
-                        ('all', '', {})
-                        ]),
-                    'node' : attribute_defaults('node', allowed=[
-                        ('all', 'all nodes', {}),
-                        ('rank', 'rank nodes', {'color' : 'none'}),
-                        ('unknown', 'nodes of unknown parents', {'style':'invis'}),
-                        ('member', 'member nodes', {})
-                        ]),
-                    'edge' : attribute_defaults('edge', allowed=[
-                        ('all', 'all edges', {'arrowhead':'none'}),
-                        ('rank', 'edges between rank nodes', {'style':'invis'}),
-                        ('unknown', 'edges coming from unknown parents', {}),
-                        ]),
-                    }
-                },
-        'family_colors' : {
-                'description' : 'map of member keys to Graphviz colors',
-                'type' : 'dict',
-                'default' : {},
-                'keyschema' : {
-                    'description' : 'key',
-                    'type' : 'string',
-                    'required' : True,
-                    },
-                'valueschema' : {
-                    'description' : 'color',
-                    'type' : 'string',
-                    'required' : True,
-                    },
-                },
-        'nodes' : {
-                'description' : 'custom Graphviz nodes',
-                'type' : 'dict',
-                'default' : {},
-                'keyschema' : {
-                    'type' : 'string',
-                    },
-                'valueschema' : {
-                    'description' : 'a Graphviz node key',
-                    'type' : 'dict',
-                    'schema' : {
-                        'rank' : {
-                            'description' : 'the rank (i.e., year, semester, etc.) the node is in',
-                            'coerce' : 'rank_type',
-                            },
-                        'attributes' : {
-                            'description' : 'Graphviz node attributes',
-                            'type' : 'dict',
-                            'default' : {},
-                            'keyschema' : {
-                                'description' : 'name',
-                                },
-                            'valueschema' : {
-                                'description' : 'value',
-                                },
-                            }
-                        }
-                    }
-                },
+    },
 
-        # Custom edges: Each entry in the list has a list of nodes, which are
-        # used to represent a path from which to create edges (which is why
-        # there must be at least two nodes in each list). There are also edge
-        # attributes applied to all edges in the path.
-        'edges' : {
-            'description' : 'a list of custom Graphviz edges',
-            'type' : 'list',
-            'default' : [],
+    # Custom edges: Each entry in the list has a list of nodes, which are
+    # used to represent a path from which to create edges (which is why
+    # there must be at least two nodes in each list). There are also edge
+    # attributes applied to all edges in the path.
+    'edges' : {
+        'description' : 'a list of custom Graphviz edges',
+        'type' : 'list',
+        'default' : [],
+        'schema' : {
+            'description' : 'edge',
+            'type' : 'dict',
             'schema' : {
-                'description' : 'edge',
-                'type' : 'dict',
-                'schema' : {
-                    'nodes' : {
-                        'description' : 'keys of nodes connected by this edge',
-                        'type' : 'list',
-                        'required' : True,
-                        'minlength' : 2,
-                        'schema' : {
-                            'description' : 'key',
-                            'type' : 'string',
-                            }
-                        },
-                    'attributes' : {
-                        'description' : 'Graphviz edge attributes',
-                        'type' : 'dict',
-                        'default' : {},
-                        'keyschema' : {
-                            'description' : 'name',
-                            },
-                        'valueschema' : {
-                            'description' : 'value',
-                            }
-                        }
+                'nodes' : {
+                    'description' : 'keys of nodes connected by this edge',
+                    'type' : 'list',
+                    'required' : True,
+                    'minlength' : 2,
+                    'schema' : {
+                        'description' : 'key',
+                        'type' : 'string',
                     }
                 },
-            },
+                'attributes' : {
+                    'description' : 'Graphviz edge attributes',
+                    'type' : 'dict',
+                    'default' : {},
+                    'keyschema' : {
+                        'description' : 'name',
+                    },
+                    'valueschema' : {
+                        'description' : 'value',
+                    }
+                }
+            }
+        },
+    },
 
-        }
+}
 
 ###############################################################################
 ###############################################################################
@@ -240,7 +244,7 @@ def decorate(tree, config):
 
     # Add DOT attributes
     for node in tree.nodes():
-        node['attributes'] = { 'label' : node['entity'].label }
+        node['attributes'] = {'label' : node['entity'].label}
     for edge in tree.edges():
         edge['attributes'] = {}
 
@@ -408,8 +412,8 @@ def create_dot_graph(tree, ranks, defaults):
         max_rank += 1 # always include one extra, blank rank at the end
         node_attributes = defaults['node']['rank']
         edge_attributes = defaults['edge']['rank']
-        dates_left = create_date_subgraph(tree, 'L', min_rank, max_rank, node_attributes, edge_attributes)
-        dates_right = create_date_subgraph(tree, 'R', min_rank, max_rank, node_attributes, edge_attributes)
+        dates_left = create_date_subgraph('L', min_rank, max_rank, node_attributes, edge_attributes)
+        dates_right = create_date_subgraph('R', min_rank, max_rank, node_attributes, edge_attributes)
         ranks = create_ranks(tree, min_rank, max_rank)
         dotgraph.children = [node_defaults, edge_defaults, dates_left, members, dates_right] + ranks
 
@@ -436,7 +440,7 @@ def create_tree_subgraph(tree, subgraph_key, node_defaults):
 
     return dotgraph
 
-def create_date_subgraph(tree, suffix, min_rank, max_rank, node_defaults, edge_defaults):
+def create_date_subgraph(suffix, min_rank, max_rank, node_defaults, edge_defaults):
     '''
     Return a DOT subgraph containing the labels for each rank. The `suffix`
     is appended to the end of the keys of the subgraph's labels, so more
@@ -512,15 +516,16 @@ def compile_fmt(src, filetype):
         # `shell=True` is necessary for Windows, but not for Linux. The command
         # string is constant except for the validated {filetype}, so shell=True
         # should be fine
-        result = subprocess.run('dot -T{filetype}'.format(filetype=filetype), check=True, shell=True,
-                # The input will be a str and the output will be binary, but
-                # subprocess.run requires they both be str or both be binary.
-                # So, use binary and send the source in as binary (encoded
-                # appropriately).
-                input=bytes(src, encoding='utf-8'),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
-                )
+        result = subprocess.run(
+            'dot -T{filetype}'.format(filetype=filetype), check=True, shell=True,
+            # The input will be a str and the output will be binary, but
+            # subprocess.run requires they both be str or both be binary.
+            # So, use binary and send the source in as binary (encoded
+            # appropriately).
+            input=bytes(src, encoding='utf-8'),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE # Windows doesn't like it when stderr is left alone
+        )
     except (OSError, subprocess.CalledProcessError) as exception:
         msg = 'had a problem compiling to {filetype}:\n{exception}\nCaptured Standard Error:\n{stderr}'.format(filetype=filetype, exception=exception, stderr=exception.stderr)
         raise SnutreeWriterError(msg)

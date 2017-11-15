@@ -25,7 +25,7 @@ def run_example(examples_root=EXAMPLES_ROOT,
                 example_name=None,
                 configs=None,
                 inputs=None,
-                ):
+               ):
 
     example = examples_root/example_name
 

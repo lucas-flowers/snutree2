@@ -32,34 +32,34 @@ def test_immutable_mapping():
 
 def test_simple():
     dict1 = dict(
-            a=1,
-            b=2,
-            c=None,
-            d=dict(
-                e=3,
-                d=5,
-                f=[1, 2, None, 3]
-                )
-            )
+        a=1,
+        b=2,
+        c=None,
+        d=dict(
+            e=3,
+            d=5,
+            f=[1, 2, None, 3]
+        )
+    )
     dict2 = dict(
-            e=5,
-            d=dict(
-                e=4,
-                d=2,
-                f=[5, 2]
-                )
-            )
+        e=5,
+        d=dict(
+            e=4,
+            d=2,
+            f=[5, 2]
+        )
+    )
     updated = dict(
-            a=1,
-            b=2,
-            c=None,
-            d=dict(
-                e=4,
-                d=2,
-                f=[1, 2, None, 3, 5, 2]
-                ),
-            e=5
-            )
+        a=1,
+        b=2,
+        c=None,
+        d=dict(
+            e=4,
+            d=2,
+            f=[1, 2, None, 3, 5, 2]
+        ),
+        e=5
+    )
     deep_update(dict1, dict2)
     assert dict1 == updated
 

@@ -19,11 +19,11 @@ def to_Members(dicts, **config):
         raise SnutreeSchemaError(exc, dct)
 
 description = {
-        'key' : "Member ID",
-        'name' : "Member name",
-        'big_key' : "ID of member's big",
-        'semester' : 'Semester the member joined (e.g., "Fall 2000" or "Spring 1999")',
-        }
+    'key' : "Member ID",
+    'name' : "Member name",
+    'big_key' : "ID of member's big",
+    'semester' : 'Semester the member joined (e.g., "Fall 2000" or "Spring 1999")',
+}
 
 class KeyedMember(Member):
     '''
@@ -31,18 +31,18 @@ class KeyedMember(Member):
     '''
 
     schema = Schema({
-            Required('key') : NonEmptyString,
-            Required('name') : NonEmptyString,
-            'big_key' : NonEmptyString,
-            Required('semester') : Coerce(Rank),
-            })
+        Required('key') : NonEmptyString,
+        Required('name') : NonEmptyString,
+        'big_key' : NonEmptyString,
+        Required('semester') : Coerce(Rank),
+    })
 
     def __init__(self,
-            key=None,
-            name=None,
-            semester=None,
-            big_key=None
-            ):
+                 key=None,
+                 name=None,
+                 semester=None,
+                 big_key=None
+                ):
 
         self.key = key
         self.name = name

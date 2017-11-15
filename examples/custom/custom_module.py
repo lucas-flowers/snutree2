@@ -8,11 +8,11 @@ def to_Members(dicts, **conf):
     yield from (SubMember.from_dict(dct) for dct in dicts)
 
 description = {
-        'key' : 'Member ID',
-        'name' : 'Member name',
-        'big_key' : 'Big ID',
-        'year' : 'Year',
-        }
+    'key' : 'Member ID',
+    'name' : 'Member name',
+    'big_key' : 'Big ID',
+    'year' : 'Year',
+}
 
 class Class(int):
 
@@ -57,11 +57,11 @@ class SubMember(Member):
         })
 
     def __init__(self,
-            key=None,
-            name=None,
-            big_key=None,
-            year=None,
-            ):
+                 key=None,
+                 name=None,
+                 big_key=None,
+                 year=None,
+                ):
 
         self.name = name
         self.key = key

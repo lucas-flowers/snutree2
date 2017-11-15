@@ -203,10 +203,10 @@ class FamilyTree:
         '''
         for key, node in self.graph.nodes_iter(data=True):
             yielded = (
-                    *((key,) if keys else ()),
-                    *tuple([node[attr] for attr in attributes]),
-                    *((node,) if nodes else ())
-                    )
+                *((key,) if keys else ()),
+                *tuple([node[attr] for attr in attributes]),
+                *((node,) if nodes else ())
+            )
             yield yielded[0] if len(yielded) == 1 else yielded
 
     def keys(self):
@@ -232,7 +232,7 @@ class FamilyTree:
         Yields all the Member objects in the tree's nodes.
         '''
         for entity in self._iter('entity', keys=False):
-            if isinstance(entity, Member) :
+            if isinstance(entity, Member):
                 yield entity
 
     def orphans(self):
@@ -297,7 +297,7 @@ class FamilyTree:
         the components are then returned in lexicographical order.
         '''
         components = weakly_connected_components(self.graph)
-        components = sorted(components, key = lambda component : min(component, key=str))
+        components = sorted(components, key=lambda component: min(component, key=str))
         rng = random.Random(self.seed)
         rng.shuffle(components)
         for component in components:
@@ -353,6 +353,7 @@ class TreeError(SnutreeError):
     '''
 
     def __init__(self, errno, msg=None):
+        super().__init__()
         self.errno = errno
         self.message = msg
 
@@ -360,9 +361,9 @@ class TreeError(SnutreeError):
         return self.message
 
 TreeErrorCode = Enum('TreeErrorCode', (
-        'ACCESS_MISSING_RANK',
-        'DUPLICATE_ENTITY',
-        'PARENT_UNKNOWN',
-        'PARENT_NOT_PRIOR',
-        ))
+    'ACCESS_MISSING_RANK',
+    'DUPLICATE_ENTITY',
+    'PARENT_UNKNOWN',
+    'PARENT_NOT_PRIOR',
+))
 

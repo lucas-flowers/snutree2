@@ -15,7 +15,7 @@ def test_sorting(p):
 
 def test_total_ordering():
     assert b != c
-    assert e  > c
+    assert e > c
     assert e >= c
     assert e >= e
 

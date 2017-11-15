@@ -8,17 +8,17 @@ from snutree.tree import FamilyTree, TreeError, TreeErrorCode
 @pytest.fixture
 def members():
     return [
-            KeylessMember.from_dict({
-                'name' : 'Bob Dole',
-                'semester' : 'Fall 2000',
-                # 'big_name' : None,
-                }),
-            KeylessMember.from_dict({
-                'name' : 'Rob Cole',
-                'semester' : 'Fall 2001',
-                'big_name' : 'Bob Dole',
-                })
-            ]
+        KeylessMember.from_dict({
+            'name' : 'Bob Dole',
+            'semester' : 'Fall 2000',
+            # 'big_name' : None,
+        }),
+        KeylessMember.from_dict({
+            'name' : 'Rob Cole',
+            'semester' : 'Fall 2001',
+            'big_name' : 'Bob Dole',
+        })
+    ]
 
 def tree_error_code_of(func):
     with pytest.raises(TreeError) as exc_info:

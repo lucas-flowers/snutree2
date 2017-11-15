@@ -30,7 +30,7 @@ class RowGenerator(metaclass=ABCMeta):
                  generations=None, # number of ranks a parent-child relationship can span
                  seed=0, # rng and faker seed
                  orphan_probability=0, # probability that a member will be an orphan given that there are eligible parents
-                 ):
+                ):
 
         self.ranks = rank_range
         self.rank_size_min = rank_size_min

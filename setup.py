@@ -18,7 +18,7 @@ setup(
     author_email='laf62@case.edu',
     license='GPLv3',
 
-    classifiers = [
+    classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Other Audience',
         'Topic :: Other/Nonlisted Topic',

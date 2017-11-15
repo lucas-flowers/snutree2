@@ -12,17 +12,17 @@ from snutree.utilities.voluptuous import NonEmptyString, Digits
 from snutree.utilities.semester import Semester
 
 CONFIG_SCHEMA = {
-        'name' : {
-            'type' : 'string',
-            'default' : 'sigmanu',
-            'regex' : 'sigmanu',
-            },
-        'chapter' : {
-            'description' : 'the chapter whose family tree will be generated',
-            'type' : 'string',
-            'required' : True,
-            }
-        }
+    'name' : {
+        'type' : 'string',
+        'default' : 'sigmanu',
+        'regex' : 'sigmanu',
+    },
+    'chapter' : {
+        'description' : 'the chapter whose family tree will be generated',
+        'type' : 'string',
+        'required' : True,
+    }
+}
 
 SIGMANU_VALIDATOR = Validator(CONFIG_SCHEMA)
 
@@ -100,55 +100,55 @@ class Affiliation:
 
     # English words (titlecaps) to Unicode Greek letters
     ENGLISH_TO_GREEK = {
-            'Alpha' :'Α', # This is an *Alpha*, not an A; similar for other lookalikes
-            'Beta' :'Β',
-            'Gamma' :'Γ',
-            'Delta' :'Δ',
-            'Epsilon' :'Ε',
-            'Zeta' :'Ζ',
-            'Eta' :'Η',
-            'Theta' :'Θ',
-            'Iota' :'Ι',
-            'Kappa' :'Κ',
-            'Lambda' :'Λ',
-            'Mu' :'Μ',
-            'Nu' :'Ν',
-            'Xi' :'Ξ',
-            'Omicron' :'Ο',
-            'Pi' :'Π',
-            'Rho' :'Ρ',
-            'Sigma' :'Σ',
-            'Tau' :'Τ',
-            'Upsilon' :'Υ',
-            'Phi' :'Φ',
-            'Chi' :'Χ',
-            'Psi' :'Ψ',
-            'Omega' :'Ω',
-            '(A)' : '(A)', # Because of Eta Mu (A) Chapter
-            '(B)' : '(B)', # Because of Eta Mu (B) Chapter
-            }
+        'Alpha' :'Α', # This is an *Alpha*, not an A; similar for other lookalikes
+        'Beta' :'Β',
+        'Gamma' :'Γ',
+        'Delta' :'Δ',
+        'Epsilon' :'Ε',
+        'Zeta' :'Ζ',
+        'Eta' :'Η',
+        'Theta' :'Θ',
+        'Iota' :'Ι',
+        'Kappa' :'Κ',
+        'Lambda' :'Λ',
+        'Mu' :'Μ',
+        'Nu' :'Ν',
+        'Xi' :'Ξ',
+        'Omicron' :'Ο',
+        'Pi' :'Π',
+        'Rho' :'Ρ',
+        'Sigma' :'Σ',
+        'Tau' :'Τ',
+        'Upsilon' :'Υ',
+        'Phi' :'Φ',
+        'Chi' :'Χ',
+        'Psi' :'Ψ',
+        'Omega' :'Ω',
+        '(A)' : '(A)', # Because of Eta Mu (A) Chapter
+        '(B)' : '(B)', # Because of Eta Mu (B) Chapter
+    }
 
     # Latin letters that look like the Unicode Greek letters they are keys for.
     # Note how they are all capital letters.
     LATIN_TO_GREEK = {
-            # Latin : Greek
-            'A' : 'Α',
-            'B' : 'Β',
-            'E' : 'Ε',
-            'Z' : 'Ζ',
-            'H' : 'Η',
-            'I' : 'Ι',
-            'K' : 'Κ',
-            'M' : 'Μ',
-            'N' : 'Ν',
-            'O' : 'Ο',
-            'P' : 'Ρ',
-            'T' : 'Τ',
-            'Y' : 'Υ',
-            'X' : 'Χ',
-            '(A)' : '(A)', # Because of Eta Mu (A) Chapter
-            '(B)' : '(B)', # Because of Eta Mu (B) Chapter
-            }
+        # Latin : Greek
+        'A' : 'Α',
+        'B' : 'Β',
+        'E' : 'Ε',
+        'Z' : 'Ζ',
+        'H' : 'Η',
+        'I' : 'Ι',
+        'K' : 'Κ',
+        'M' : 'Μ',
+        'N' : 'Ν',
+        'O' : 'Ο',
+        'P' : 'Ρ',
+        'T' : 'Τ',
+        'Y' : 'Υ',
+        'X' : 'Χ',
+        '(A)' : '(A)', # Because of Eta Mu (A) Chapter
+        '(B)' : '(B)', # Because of Eta Mu (B) Chapter
+    }
 
     # Matcher for affiliations (chapter identifer, then spaces, then a badge)
     AFFILIATION_MATCHER = re.compile(r'(?P<chapter_id>.*)\s+(?P<badge>\d+)')
@@ -156,19 +156,19 @@ class Affiliation:
     # Valid tokens for chapter designations
     DESIGNATION_TOKENS = set.union(
 
-            # Capital Greek letters, plus '(A)' and '(B)'
-            set(ENGLISH_TO_GREEK.values()),
+        # Capital Greek letters, plus '(A)' and '(B)'
+        set(ENGLISH_TO_GREEK.values()),
 
-            # Lowercase Greek letters, plus '(a)' and '(b)'
-            {c.lower() for c in ENGLISH_TO_GREEK.values()},
+        # Lowercase Greek letters, plus '(a)' and '(b)'
+        {c.lower() for c in ENGLISH_TO_GREEK.values()},
 
-            # Alternative lowercase sigma
-            {'ς'},
+        # Alternative lowercase sigma
+        {'ς'},
 
-            # Latin letters that look like Greek letters
-            set(LATIN_TO_GREEK.keys()),
+        # Latin letters that look like Greek letters
+        set(LATIN_TO_GREEK.keys()),
 
-            )
+    )
 
     # A regex pattern for matching a single chapter designation token
     DESIGNATION_TOKEN = '|'.join([re.escape(s) for s in DESIGNATION_TOKENS])
@@ -242,9 +242,9 @@ class Affiliation:
 
         else:
             msg = ('expected a chapter name in one of the two forms:\n'
-                    '    1. names of Greek letters separated by spaces (e.g., "Delta Alpha 100")\n'
-                    '    2. several actual Greek letters together (e.g., "ΔA 100")\n'
-                    'but got {string!r}\n'.format(string=string))
+                   '    1. names of Greek letters separated by spaces (e.g., "Delta Alpha 100")\n'
+                   '    2. several actual Greek letters together (e.g., "ΔA 100")\n'
+                   'but got {string!r}\n'.format(string=string))
             raise ValueError(msg)
 
         return designation
@@ -274,7 +274,7 @@ class Affiliation:
         return hash((self.designation, self.badge))
 
 # Voluptuous schema for a list of chapter affiliations
-AffiliationsList = lambda s : [Affiliation(a) for a in s.split(',')]
+AffiliationsList = lambda s: [Affiliation(a) for a in s.split(',')]
 
 class SigmaNuMember(Member, metaclass=ABCMeta):
     '''
@@ -321,15 +321,15 @@ class Knight(SigmaNuMember):
         })
 
     def __init__(self,
-            status=None,
-            badge=None,
-            first_name=None,
-            preferred_name=None,
-            last_name=None,
-            big_badge=None,
-            semester=None,
-            affiliations=None,
-            ):
+                 status=None,
+                 badge=None,
+                 first_name=None,
+                 preferred_name=None,
+                 last_name=None,
+                 big_badge=None,
+                 semester=None,
+                 affiliations=None,
+                ):
 
         self.key = badge
         self.name = combine_names(first_name, preferred_name, last_name)
@@ -365,13 +365,13 @@ class Brother(SigmaNuMember):
     bid = 0
 
     def __init__(self,
-            status=None,
-            first_name=None,
-            preferred_name=None,
-            last_name=None,
-            big_badge=None,
-            semester=None,
-            ):
+                 status=None,
+                 first_name=None,
+                 preferred_name=None,
+                 last_name=None,
+                 big_badge=None,
+                 semester=None,
+                ):
 
         self.name = last_name
         self.parent = big_badge
@@ -406,13 +406,13 @@ class Candidate(SigmaNuMember):
     cid = 0
 
     def __init__(self,
-            status=None,
-            first_name=None,
-            preferred_name=None,
-            last_name=None,
-            big_badge=None,
-            semester=None,
-            ):
+                 status=None,
+                 first_name=None,
+                 preferred_name=None,
+                 last_name=None,
+                 big_badge=None,
+                 semester=None,
+                ):
 
         self.name = combine_names(first_name, preferred_name, last_name)
         self.parent = big_badge
@@ -449,15 +449,15 @@ class Expelled(Knight):
         })
 
     def __init__(self,
-            status=None,
-            badge=None,
-            first_name=None,
-            preferred_name=None,
-            last_name=None,
-            big_badge=None,
-            semester=None,
-            affiliations=None
-            ):
+                 status=None,
+                 badge=None,
+                 first_name=None,
+                 preferred_name=None,
+                 last_name=None,
+                 big_badge=None,
+                 semester=None,
+                 affiliations=None
+                ):
 
         self.key = badge
         self.name = 'Member Expelled'
@@ -487,15 +487,15 @@ for MemberType in [Candidate, Brother, Knight, Expelled, Reaffiliate]:
 VALID_STATUSES = MemberTypes.keys()
 
 description = {
-        'status' : (lambda valid_statuses : 'One of "{valid_statuses}"'.format(valid_statuses=valid_statuses))('", "'.join(VALID_STATUSES)),
-        'badge' : 'Badge number',
-        'first_name' : 'First name',
-        'preferred_name' : 'Preferred name',
-        'last_name' : 'Last name',
-        'big_badge' : "Big brother's badge number",
-        'semester' : '''The brother's semester of candicacy (e.g., "Fall 2000" or "Spring 1999")''',
-        'affiliations' : '''Comma-separated list of chapter badges (e.g., "Alpha 5, Ω 15, HM(A)")''',
-        }
+    'status' : (lambda valid_statuses: 'One of "{valid_statuses}"'.format(valid_statuses=valid_statuses))('", "'.join(VALID_STATUSES)),
+    'badge' : 'Badge number',
+    'first_name' : 'First name',
+    'preferred_name' : 'Preferred name',
+    'last_name' : 'Last name',
+    'big_badge' : "Big brother's badge number",
+    'semester' : '''The brother's semester of candicacy (e.g., "Fall 2000" or "Spring 1999")''',
+    'affiliations' : '''Comma-separated list of chapter badges (e.g., "Alpha 5, Ω 15, HM(A)")''',
+}
 
 def combine_names(first_name, preferred_name, last_name, threshold=.5):
     '''

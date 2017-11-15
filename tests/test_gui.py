@@ -1,10 +1,8 @@
 
 import os
 from pathlib import Path
-
 import pytest
 pytest.importorskip('gooey')
-
 from snutree import gui
 
 

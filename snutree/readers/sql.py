@@ -5,57 +5,61 @@ from snutree.utilities.cerberus import Validator
 
 CONFIG_SCHEMA = {
 
-        'host' : {
-            'description' : 'SQL server hostname',
-            'type' : 'string',
-            'default' : '127.0.0.1'
-            },
-        'user' : {
-            'description' : 'SQL username',
-            'type' : 'string',
-            'default' : 'root'
-            },
-        'passwd' : {
-            'description' : 'SQL user password',
-            'type' : 'string',
-            },
-        'port' : {
-            'description' : 'SQL server port',
-            'type': 'integer',
-            'default' : 3306
-            },
-        'db' : {
-            'description' : 'SQL database name',
-            'type' : 'string',
-            },
+    'host' : {
+        'description' : 'SQL server hostname',
+        'type' : 'string',
+        'default' : '127.0.0.1'
+    },
 
-        # SSH for remote SQL databases
-        'ssh' : {
-            'description' : 'credentials to encrypt SQL connection with SSH',
-            'type' : 'dict',
-            'required' : False,
-            'nullable' : True,
-            'schema' : {
-                'host' : {
-                    'description' : 'SSH server hostname',
-                    'type' : 'string',
-                    },
-                'port' : {
-                    'description' : 'SSH server port',
-                    'type' : 'integer',
-                    'default' : 22
-                    },
-                'user' : {
-                    'description' : 'SSH username',
-                    'type' : 'string',
-                    },
-                'private_key' : {
-                    'description' : 'SSH private keyfile path',
-                    'type' : 'string',
-                    },
-                }
-            }
+    'user' : {
+        'description' : 'SQL username',
+        'type' : 'string',
+        'default' : 'root'
+    },
+
+    'passwd' : {
+        'description' : 'SQL user password',
+        'type' : 'string',
+    },
+
+    'port' : {
+        'description' : 'SQL server port',
+        'type': 'integer',
+        'default' : 3306
+    },
+
+    'db' : {
+        'description' : 'SQL database name',
+        'type' : 'string',
+    },
+
+    # SSH for remote SQL databases
+    'ssh' : {
+        'description' : 'credentials to encrypt SQL connection with SSH',
+        'type' : 'dict',
+        'required' : False,
+        'nullable' : True,
+        'schema' : {
+            'host' : {
+                'description' : 'SSH server hostname',
+                'type' : 'string',
+            },
+            'port' : {
+                'description' : 'SSH server port',
+                'type' : 'integer',
+                'default' : 22
+            },
+            'user' : {
+                'description' : 'SSH username',
+                'type' : 'string',
+            },
+            'private_key' : {
+                'description' : 'SSH private keyfile path',
+                'type' : 'string',
+            },
         }
+    }
+}
 
 # Validates a configuration YAML file with SQL and ssh options
 CONFIG_VALIDATOR = Validator(CONFIG_SCHEMA)
@@ -121,11 +125,11 @@ def get_members_ssh(query, sql, ssh):
     '''
 
     options = {
-            'ssh_address_or_host' : (ssh['host'], ssh['port']),
-            'ssh_username' : ssh['user'],
-            'ssh_pkey' : ssh['private_key'],
-            'remote_bind_address' : (sql['host'], sql['port'])
-            }
+        'ssh_address_or_host' : (ssh['host'], ssh['port']),
+        'ssh_username' : ssh['user'],
+        'ssh_pkey' : ssh['private_key'],
+        'remote_bind_address' : (sql['host'], sql['port']),
+    }
 
     try:
         from sshtunnel import SSHTunnelForwarder, BaseSSHTunnelForwarderError

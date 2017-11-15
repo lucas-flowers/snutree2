@@ -24,6 +24,7 @@ class SnutreeSchemaError(SnutreeError):
         '''
         Store the original validation error along with the data that caused.
         '''
+        super().__init__()
         self.error = error
         self.data = data
 

@@ -2,8 +2,6 @@
 Outputs statistics on the family tree.
 '''
 
-import sys
-
 ###############################################################################
 ###############################################################################
 #### API                                                                   ####
@@ -11,8 +9,8 @@ import sys
 ###############################################################################
 
 filetypes = {
-        'txt',
-        }
+    'txt',
+}
 
 def compile_tree(tree, RankType, config):
 
@@ -26,12 +24,12 @@ def compile_tree(tree, RankType, config):
             most_littles.append(key)
 
     output_fields = {
-            'members' : tree.graph.number_of_nodes(),
-            'relationships' : tree.graph.number_of_edges(),
-            'singletons' : len(list(tree.singletons())),
-            'max_littles' : max_littles,
-            'most_littles' : most_littles,
-            }
+        'members' : tree.graph.number_of_nodes(),
+        'relationships' : tree.graph.number_of_edges(),
+        'singletons' : len(list(tree.singletons())),
+        'max_littles' : max_littles,
+        'most_littles' : most_littles,
+    }
 
     output = '\n'.join('{key}={value}'.format(key=key, value=value) for key, value in output_fields.items())
 

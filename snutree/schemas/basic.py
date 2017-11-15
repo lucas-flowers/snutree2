@@ -19,10 +19,10 @@ def to_Members(dicts, **config):
         raise SnutreeSchemaError(exc, dct)
 
 description = {
-        'name' : 'Member name',
-        'big_name' : "Name of member's big",
-        'semester' : 'Semester the member joined (e.g., "Fall 2000" or "Spring 1999")',
-        }
+    'name' : 'Member name',
+    'big_name' : "Name of member's big",
+    'semester' : 'Semester the member joined (e.g., "Fall 2000" or "Spring 1999")',
+}
 
 class KeylessMember(Member):
     '''
@@ -36,10 +36,10 @@ class KeylessMember(Member):
         })
 
     def __init__(self,
-            name=None,
-            semester=None,
-            big_name=None
-            ):
+                 name=None,
+                 semester=None,
+                 big_name=None
+                ):
 
         self.key = name
         self.rank = semester

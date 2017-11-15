@@ -67,7 +67,7 @@ def logged(function):
         logger.debug('%s started . . .', function.__name__)
         start_time = time.time()
         result = function(*args, **kwargs)
-        logger.debug('%s finished in ~%.2f ms', function.__name__, (time.time() - start_time) * 1000 )
+        logger.debug('%s finished in ~%.2f ms', function.__name__, (time.time() - start_time) * 1000)
         return result
 
     return wrapped

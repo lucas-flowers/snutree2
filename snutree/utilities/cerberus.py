@@ -82,12 +82,12 @@ def __describe_dict_schema(indent, key, description, subschema, keyschema, value
 
     KEY = keyschema.get('description', 'key')
     extras_schema = {
-            '<{KEY}1>'.format(KEY=KEY) : dict(valueschema, **{
-                'description' : None,
-                'default' : '<{description}1>'.format(description=valueschema['description'])
-                }),
-            '<{KEY}2>'.format(KEY=KEY) : {'default' : '...'}
-            } if valueschema else {}
+        '<{KEY}1>'.format(KEY=KEY) : dict(valueschema, **{
+            'description' : None,
+            'default' : '<{description}1>'.format(description=valueschema['description'])
+        }),
+        '<{KEY}2>'.format(KEY=KEY) : {'default' : '...'}
+    } if valueschema else {}
 
     yield from __describe_scalar_schema(indent, key, None, description or None)
     with indent.indented():
