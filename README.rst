@@ -129,7 +129,7 @@ Command Line Summary
                             the output file; default is stdout
       -f <filetype>, --from <filetype>
                             expected filetype of stdin, which must be one of
-                            {csv,dot,sql}; default is csv
+                            {csv,dot,json,sql}; default is csv
       -t <filetype>, --to <filetype>
                             filetype of the output file, which must be supported
                             by the writer; default is the output file's extension

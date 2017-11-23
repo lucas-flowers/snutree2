@@ -112,6 +112,6 @@ def test_keyed():
     run_example(
         example_name='keyed',
         configs=['config.yaml'],
-        inputs=['keyed.csv'],
+        inputs=['keyed.json'],
     )
 
