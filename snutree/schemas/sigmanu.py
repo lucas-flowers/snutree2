@@ -250,7 +250,7 @@ class Affiliation:
         return designation
 
     def __str__(self):
-        return '{designation} {badge}'.format(designation=self.designation, badge=self.badge)
+        return '{designation}\N{NO-BREAK SPACE}{badge}'.format(designation=self.designation, badge=self.badge)
 
     def __repr__(self):
         return str(self)
@@ -384,7 +384,7 @@ class Brother(SigmaNuMember):
 
     @property
     def label(self):
-        return '{name}\\n{chapter} Brother'.format(name=self.name, chapter=self.chapter)
+        return '{name}\\n{chapter}\N{NO-BREAK SPACE}Brother'.format(name=self.name, chapter=self.chapter)
 
 class Candidate(SigmaNuMember):
     '''
@@ -425,7 +425,7 @@ class Candidate(SigmaNuMember):
 
     @property
     def label(self):
-        return '{name}\\n{chapter} Candidate'.format(name=self.name, chapter=self.chapter)
+        return '{name}\\n{chapter}\N{NO-BREAK SPACE}Candidate'.format(name=self.name, chapter=self.chapter)
 
 class Expelled(Knight):
     '''
