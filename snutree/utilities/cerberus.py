@@ -57,7 +57,7 @@ def describe_schema(schema, **indent_args):
     '''
     indent_args.setdefault('tabstop', 2)
     lines = __describe_schema(Indent(**indent_args), schema)
-    return '\n'.join(lines)
+    return ''.join(lines)
 
 def __describe_schema(indent, schema):
 
@@ -115,5 +115,6 @@ def __describe_row(indent, prefix, value, comment):
         row.append(value)
     if comment is not None:
         row.append('# {comment}'.format(comment=comment))
+    row.append('\n')
     yield ' '.join(row)
 

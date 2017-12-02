@@ -15,7 +15,7 @@ class DotCommon(metaclass=ABCMeta):
     def to_dot(self, indent=None):
         indent = indent or Indent()
         self_dot = str(self)
-        return '{indent}{self_dot}'.format(indent=indent, self_dot=self_dot) if self_dot else ''
+        return '{indent}{self_dot}\n'.format(indent=indent, self_dot=self_dot) if self_dot else ''
 
     def attributes_to_dot(self, sep=','):
         '''
@@ -53,18 +53,18 @@ class Graph(DotCommon):
         lines = []
         indent = indent or Indent()
 
-        lines.append('{indent}{graph_type} "{key}" {{'.format(indent=indent, graph_type=self.graph_type, key=self.key))
+        lines.append('{indent}{graph_type} "{key}" {{\n'.format(indent=indent, graph_type=self.graph_type, key=self.key))
         with indent.indented():
             if self.attributes:
                 attributes = self.attributes_to_dot(sep=';\n{indent}'.format(indent=indent))
-                lines.append('{indent}{attributes};'.format(indent=indent, attributes=attributes))
+                lines.append('{indent}{attributes};\n'.format(indent=indent, attributes=attributes))
             for child in self.children:
                 line = child.to_dot(indent)
                 if line: # some children might represent empty strings
                     lines.append(line)
-        lines.append('{indent}}}'.format(indent=indent))
+        lines.append('{indent}}}\n'.format(indent=indent))
 
-        return '\n'.join(lines)
+        return ''.join(lines)
 
 class Defaults(DotCommon):
 

@@ -34,7 +34,7 @@ def test_Defaults():
 
     indent = Indent(tabstop=3)
     indent.indent()
-    assert defaults.to_dot(indent) == '   node [label="A label"];'
+    assert defaults.to_dot(indent) == '   node [label="A label"];\n'
 
 def test_Node():
 
@@ -103,5 +103,5 @@ def test_Graph():
                 "S2";
             }
             {rank=same "Key One" "Key Two"};
-        }''')
+        }''') + '\n' # there is a final EOL that `trim` would normally trim
 
