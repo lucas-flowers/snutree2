@@ -286,6 +286,10 @@ class SigmaNuMember(Member, metaclass=ABCMeta):
     schema = NotImplemented
 
     @property
+    def name(self):
+        return combine_names(self.first_name, self.preferred_name, self.last_name)
+
+    @property
     @abstractmethod
     def label(self):
         pass
@@ -332,7 +336,9 @@ class Knight(SigmaNuMember):
                 ):
 
         self.key = badge
-        self.name = combine_names(first_name, preferred_name, last_name)
+        self.first_name = first_name
+        self.preferred_name = preferred_name
+        self.last_name = last_name
         self.parent = big_badge
         self.rank = semester
         self.affiliations = set(affiliations or []) | {Affiliation(self.chapter, int(badge))}
@@ -373,7 +379,7 @@ class Brother(SigmaNuMember):
                  semester=None,
                 ):
 
-        self.name = last_name
+        self.last_name = last_name
         self.parent = big_badge
         self.rank = semester
         self.affiliations = []
@@ -381,6 +387,10 @@ class Brother(SigmaNuMember):
         # Without badges, keys need to be generated
         self.key = 'Brother {bid}'.format(bid=Brother.bid)
         Brother.bid += 1
+
+    @property
+    def name(self):
+        return self.last_name
 
     @property
     def label(self):
@@ -414,7 +424,9 @@ class Candidate(SigmaNuMember):
                  semester=None,
                 ):
 
-        self.name = combine_names(first_name, preferred_name, last_name)
+        self.first_name = first_name
+        self.preferred_name = preferred_name
+        self.last_name = last_name
         self.parent = big_badge
         self.rank = semester
         self.affiliations = []
@@ -448,6 +460,8 @@ class Expelled(Knight):
         'affiliations' : AffiliationsList,
         })
 
+    name = 'Member Expelled'
+
     def __init__(self,
                  status=None,
                  badge=None,
@@ -460,7 +474,6 @@ class Expelled(Knight):
                 ):
 
         self.key = badge
-        self.name = 'Member Expelled'
         self.parent = big_badge
         self.rank = semester
         self.affiliations = affiliations or []
