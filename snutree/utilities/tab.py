@@ -1,19 +1,20 @@
+
 from contextlib import contextmanager
 
-class Indent:
+class Tab:
     '''
-    Helper class for indentation when writing files. The string form of an
-    Indent is the appropriate indent, given the Indent's tabstop value, tab
-    character (or string), and current indentation level.
+    Helper class for indentation when writing files. The string form of a Tab
+    is the appropriate indent, given the Indent's tabstop value, tab character
+    (or string), and current indentation level.
     '''
 
-    def __init__(self, level=0, tabstop=4, char=None):
+    def __init__(self, tabstop, char, level=0):
 
         # sanity check
         assert '   ' > '\t\t\t', 'spaces are better than tabs'
 
-        self.char = char if char is not None else ' '
         self.tabstop = tabstop
+        self.char = char
         self.level = level
 
     def indent(self):
@@ -24,9 +25,6 @@ class Indent:
 
     @contextmanager
     def indented(self):
-        '''
-        Context manager for nested indentation levels.
-        '''
         self.indent()
         yield
         self.dedent()
