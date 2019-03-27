@@ -63,11 +63,12 @@ class Component:
 
     def __str__(self):
 
-        identifiers = (
-            self.identifiers
-            if self.identifiers else
-            [self.component_type]
-        )
+        if self.identifiers:
+            is_attribute_statement = False
+            identifiers = self.identifiers
+        else:
+            is_attribute_statement = True
+            identifiers = [self.component_type]
 
         identifier_string = str(self.EDGE_OP).join(
             f'{identifier}' if isinstance(identifier, ComponentType) else f'"{identifier}"'
@@ -78,7 +79,7 @@ class Component:
 
         return (
             f'{identifier_string} [{attribute_string}]'
-            if attribute_string else
+            if attribute_string or is_attribute_statement else
             identifier_string
         )
 

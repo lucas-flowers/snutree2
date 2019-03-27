@@ -52,16 +52,11 @@ def Node(*identifiers, **attributes):
     '''
     Construct a Node defaults or Node statement.
     '''
-    if not identifiers and not attributes:
-        msg = f'Node defaults must contain attributes'
-        raise TypeError(msg)
-    elif not identifiers and attributes:
-        # Node(**attributes): Default node with attributes
+    if len(identifiers) <= 1:
+        # Node(identifier, **attributes): Node
+        # Node(**attributes): Node defaults
         return abstract.Component(ComponentType.NODE, identifiers, attributes)
-    elif len(identifiers) == 1:
-        # Node(identifier, **attributes): Node with or without attributes
-        return abstract.Component(ComponentType.NODE, identifiers, attributes)
-    else: # len(identifiers) > 1
+    else:
         msg = f'Node() takes 0 or 1 identifiers but {len(identifiers)} were given'
         raise TypeError(msg)
 
@@ -69,18 +64,13 @@ def Edge(*identifiers, **attributes):
     '''
     Construct a Edge defaults or Edges statement.
     '''
-    if not identifiers and not attributes:
-        msg = f'Edge defaults must contain attributes'
-        raise TypeError(msg)
-    elif not identifiers and attributes:
-        # Edge(**attributes): Default edge with attributes
+    if len(identifiers) != 1:
+        # Edge(*identifiers, **attributes): Edge(s)
+        # Edge(**attributes): Edge defaults
         return abstract.Component(ComponentType.EDGE, identifiers, attributes)
-    elif len(identifiers) == 1:
+    else:
         msg = f'Edge() takes 0 or >1 identifiers but {len(identifiers)} were given'
         raise TypeError(msg)
-    else: # len(identifiers) > 1
-        # Edge(*identifiers, **attributes): Edges with or without attributes
-        return abstract.Component(ComponentType.EDGE, identifiers, attributes)
 
 def Attribute(*args, **kwargs):
     '''

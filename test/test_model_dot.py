@@ -39,7 +39,7 @@ def trim(string):
     (lambda: Attribute(key=10), 'key=10'), # Integers
     (lambda: Attribute(key=1.5), 'key=1.5'), # Floats
 
-    # Too many attributes
+    # Wrong number of attributes
     (lambda: Attribute(), TypeError),
     (lambda: Attribute('key'), TypeError),
     (lambda: Attribute('key', 'value1', 'value2'), TypeError),
@@ -48,10 +48,8 @@ def trim(string):
 
     ## NODES
 
-    # Node defaults must have attributes
-    (lambda: Node(), TypeError),
-
     # Node(**attributes): Node defaults
+    (lambda: Node(), 'node []'),
     (lambda: Node(a='Test', b=5), 'node [a="Test",b=5]'),
 
     # Node(identifier, **attributes): Node
@@ -64,10 +62,8 @@ def trim(string):
 
     ## EDGES
 
-    # Edge defaults must have attributes
-    (lambda: Edge(), TypeError),
-
     # Edge(**attributes): Edge defaults
+    (lambda: Edge(), 'edge []'),
     (lambda: Edge(a='Test', b=5), 'edge [a="Test",b=5]'), # Defaults
 
     # Edge cannot have one Node
