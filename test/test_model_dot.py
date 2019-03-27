@@ -1,9 +1,9 @@
 
-from inspect import cleandoc
 from unittest.mock import patch
 
 import pytest
 
+from conftest import trim
 from snutree.model.dot import (
     abstract,
     Attribute,
@@ -15,13 +15,6 @@ from snutree.model.dot import (
     StrictDigraph,
     Subgraph,
 )
-
-def trim(string):
-    '''
-    Remove all leading whitespace, common indentation, and trailing whitespace
-    (except for the final, standard newline).
-    '''
-    return cleandoc(string) + '\n'
 
 @pytest.mark.parametrize('construct, expected', [
 
