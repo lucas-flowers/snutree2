@@ -84,7 +84,7 @@ class Write:
             # Maintain the class order in the config file, instead of using the
             # order found in the class list
             key: value.format(**data) if key == 'label' else value
-            for cls in self.config[component_type].keys()
+            for cls in self.config.get(component_type, {}).keys()
             if cls in classes
             for key, value in self.config[component_type][cls].items()
         }
