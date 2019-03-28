@@ -2,11 +2,11 @@
 from ..model.dot import Graph, Digraph, Subgraph, Attribute, Node, Edge
 
 def write(tree, config):
-    writer = Writer(config)
-    dot = writer.family_tree('family_tree', tree)
+    write = Write(config)
+    dot = write.family_tree('family_tree', tree)
     return str(dot)
 
-class Writer:
+class Write:
 
     def __init__(self, config):
         self.config = config
