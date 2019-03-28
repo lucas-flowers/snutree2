@@ -4,7 +4,9 @@ Underlying representations of DOT objects.
 '''
 
 import re
+from dataclasses import dataclass
 from enum import Enum
+from typing import List, Dict
 
 class StringEnum(Enum):
     def __str__(self):
@@ -26,11 +28,11 @@ class GraphType(StringEnum):
     STRICT_DIGRAPH = 'strict digraph'
     STRICT_GRAPH = 'strict graph'
 
+@dataclass
 class Attribute:
 
-    def __init__(self, key, value):
-        self.key = key
-        self.value = value
+    key: str
+    value: object
 
     def to_blocks(self):
         return [str(self) + ';']
@@ -42,14 +44,14 @@ class Attribute:
             f'{self.key}={self.value}'
         )
 
+@dataclass
 class Component:
 
-    EDGE_OP = EdgeOp.DIRECTED
+    component_type: ComponentType
+    identifiers: List[str]
+    _attributes: Dict[str, object]
 
-    def __init__(self, component_type, identifiers, attributes):
-        self.component_type = component_type
-        self.identifiers = identifiers
-        self._attributes = attributes
+    EDGE_OP = EdgeOp.DIRECTED
 
     @property
     def attributes(self):
@@ -83,15 +85,15 @@ class Component:
             identifier_string
         )
 
+@dataclass
 class Graph:
+
+    graph_type: GraphType
+    identifier: str
+    statements: List[object]
 
     TAB_STOP = 4
     TAB_CHAR = ' '
-
-    def __init__(self, graph_type, identifier, statements):
-        self.graph_type = graph_type
-        self.identifier = identifier
-        self.statements = statements
 
     def to_blocks(self):
 
