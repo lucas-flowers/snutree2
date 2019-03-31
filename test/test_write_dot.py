@@ -3,61 +3,8 @@ import pytest
 
 from conftest import trim
 from snutree.write import dot
-from snutree.model.dot import Node
+from snutree.model.dot import Graph, Node, Edge
 from snutree.model.tree import Entity, Relationship, Cohort, FamilyTree
-
-@pytest.fixture
-def config():
-    return {
-        'node': {
-            'emperor': {
-                'label': '{name}',
-                'color': 'purple',
-            },
-            'usurper': {
-                'label': '{name}: The Usurper',
-                'color': 'red',
-            },
-        },
-        'edge': {
-            'family_tree': {
-                'color': 'purple',
-            },
-            'usurper': {
-                'style': 'dotted',
-                'color': 'yellow',
-            },
-        },
-    }
-
-@pytest.fixture
-def tree():
-    return FamilyTree(
-        entities=[
-            Entity(id, classes, data)
-            for id, classes, data in [
-                ('N', {'emperor'}, {'name': 'Nikephoros Phokas'}),
-                ('J', {'emperor', 'usurper'}, {'name': 'John Tzimiskes'}),
-                ('B', {'emperor'}, {'name': 'Basil II'}),
-            ]
-        ],
-        relationships=[
-            Relationship(from_id, to_id, classes, data)
-            for from_id, to_id, classes, data in [
-                ('N', 'J', {'usurper', 'succession'}, {}),
-                ('J', 'B', {'succession'}, {}),
-            ]
-        ],
-        cohorts= [
-            Cohort(rank, ids, classes, data)
-            for rank, ids, classes, data in [
-                ('960s', ['N', 'J'], {}, {}),
-                ('970s', ['B'], {}, {}),
-            ]
-        ],
-        classes=set(),
-        data={},
-    )
 
 @pytest.mark.parametrize('component_type, classes, data, config, expected', [
 
@@ -78,85 +25,281 @@ def tree():
     # Class is defined but not for the right component
     (
         'node', {'nonexistent'}, {},
-        {'edge': {'nonexistent': {'color': 'blue'}}},
+        {'class': {'edge': {'nonexistent': {'color': 'blue'}}}},
         {},
     ),
 
     # Class is defined but not used
     (
         'node', {}, {},
-        {'node': {'nonexistent': {'color': 'blue'}}},
+        {'class': {'node': {'nonexistent': {'color': 'blue'}}}},
         {},
     ),
 
     # Class is defined and used
     (
         'node', {'class'}, {},
-        {'node': {'class': {'color': 'blue'}}},
+        {'class': {'node': {'class': {'color': 'blue'}}}},
         {'color': 'blue'},
     ),
 
     # Order of attributes in the config dict is preserved
     (
         'node', {'class'}, {},
-        {'node': {'class': {'size': 10, 'color': 'blue'}}},
+        {'class': {'node': {'class': {'size': 10, 'color': 'blue'}}}},
         {'size': 10, 'color': 'blue'},
     ),
     (
         'node', {'class'}, {},
-        {'node': {'class': {'color': 'blue', 'size': 10}}},
+        {'class': {'node': {'class': {'color': 'blue', 'size': 10}}}},
         {'color': 'blue', 'size': 10},
     ),
 
     # The last class in the config takes priority when there are conflicts
     (
         'node', {'class_a', 'class_b'}, {},
-        {'node': {'class_a': {'color': 'blue'}, 'class_b': {'color': 'red'}}},
+        {'class': {'node': {'class_a': {'color': 'blue'}, 'class_b': {'color': 'red'}}}},
         {'color': 'red'},
     ),
     (
         'node', {'class_b', 'class_a'}, {},
-        {'node': {'class_b': {'color': 'red'}, 'class_a': {'color': 'blue'}}},
+        {'class': {'node': {'class_b': {'color': 'red'}, 'class_a': {'color': 'blue'}}}},
         {'color': 'blue'},
     ),
 
     # Attribute order still reflects config order when there are conflicts
     (
         'node', {'class_a', 'class_b'}, {},
-        {'node': {'class_a': {'A': 'a', 'B': 'b'}, 'class_b': {'B': 2, 'A': 1}}},
+        {'class': {'node': {'class_a': {'A': 'a', 'B': 'b'}, 'class_b': {'B': 2, 'A': 1}}}},
         {'A': 1, 'B': 2},
     ),
 
     # The 'label' field is a template whose values are filled by the data dict
     (
         'edge', {'class'}, {'name': 'Test'},
-        {'edge': {'class': {'label': 'Name is {name}', 'title': 'Title is {name}'}}},
+        {'class': {'edge': {'class': {'label': 'Name is {name}', 'title': 'Title is {name}'}}}},
         {'label': 'Name is Test', 'title': 'Title is {name}'},
+    ),
+
+    # Fields for classes corresponding to subgraphs are not included, since
+    # they are written as attribute statements for the whole subgraph....
+    (
+        'node', {'tree', 'other_class'}, {},
+        {'class': {'node': {'tree': {'color': 'red'}, 'other_class': {'fillcolor': 'blue'}}}},
+        {'fillcolor': 'blue'},
+    ),
+
+    # .... *except* for the label
+    (
+        'node', {'tree', 'other_class'}, {},
+        {'class': {'node': {'tree': {'label': 'The Label'}, 'other_class': {'fillcolor': 'blue'}}}},
+        {'label': 'The Label', 'fillcolor': 'blue'},
     ),
 
 ])
 def test_component_attributes(component_type, classes, data, config, expected):
     write = dot.Write(config)
-    component = write.component_attributes(component_type, classes, data)
+    component = write.attribute_list(component_type, classes, data)
     assert component == expected
 
-def test_dot_to_family_tree(tree, config):
+@pytest.mark.parametrize('graph_id, config, expected', [
+
+    # Empty config
+    (
+        '',
+        {},
+        [],
+    ),
+
+    # No attributes defined at all
+    (
+        'a_graph',
+        {},
+        [],
+    ),
+
+    # Attributes defined but not used
+    (
+        'a_graph',
+        {'class': {'graph': {'another_graph': {'a': 1}}}},
+        [],
+    ),
+
+    # Graph exists in config but is undefined
+    (
+        'a_graph',
+        {'class': {'graph': {'a_graph': {}}}},
+        [],
+    ),
+
+    # Attributes defined and used
+    (
+        'a_graph',
+        {'class': {'graph': {'a_graph': {'a': 1}}}},
+        [Graph(a=1)],
+    ),
+    (
+        'a_graph',
+        {'class': {'node': {'a_graph': {'a': 1}}}},
+        [Node(a=1)],
+    ),
+    (
+        'a_graph',
+        {'class': {'edge': {'a_graph': {'a': 1}}}},
+        [Edge(a=1)],
+    ),
+    (
+        'a_graph',
+        {'class': {'graph': {'a_graph': {'a': 1}}, 'node': {'a_graph': {'b': 2}}, 'edge': {'a_graph': {'c': 3}}}},
+        [Graph(a=1), Node(b=2), Edge(c=3)],
+    ),
+
+    # The 'label' attribute is not included in attribute statements for nodes
+    # and edges (since they will be included in attribute lists)
+    (
+        'a_graph',
+        {'class': {'graph': {'a_graph': {'label': 'The Label'}}}},
+        [Graph(label='The Label')],
+    ),
+    (
+        'a_graph',
+        {'class': {'node': {'a_graph': {'label': 'The Label'}}}},
+        [],
+    ),
+    (
+        'a_graph',
+        {'class': {'edge': {'a_graph': {'label': 'The Label'}}}},
+        [],
+    ),
+
+])
+def test_attribute_statements(graph_id, config, expected):
+    write = dot.Write(config)
+    component = write.attribute_statements(graph_id)
+    assert component == expected
+
+def test_family_tree_no_cohorts():
+
+    tree = FamilyTree(
+        entities=[
+            Entity(id, classes, data)
+            for id, classes, data in [
+                ('I', ['root', 'tree', 'emperor'], {'name': 'Irene Sarantapechaina'}),
+                ('N', ['root', 'tree', 'emperor'], {'name': 'Nikephoros I'}),
+            ]
+        ],
+        relationships=[
+            Relationship(from_id, to_id, classes, data)
+            for from_id, to_id, classes, data in [
+                ('I', 'N', ['root', 'tree'], {'name': 'Succession'}),
+            ]
+        ],
+        cohorts=None,
+        classes=[],
+        data={},
+    )
+
+    config = {
+        'class': {
+            'node': {
+                'emperor': {
+                    'label': '{name}',
+                },
+            },
+            'edge': {
+                'tree': {
+                    'label': '{name}',
+                    'color': 'red',
+                },
+            },
+            'graph': {
+                'root': {
+                    'rankdir': 'LR',
+                },
+            },
+        },
+    }
+
     assert dot.write(tree, config) == trim(r'''
-        digraph "family_tree" {
+        digraph "root" {
+            graph [rankdir="LR"];
+            subgraph "tree" {
+                edge [color="red"];
+                "I" [label="Irene Sarantapechaina"];
+                "N" [label="Nikephoros I"];
+                "I" -> "N" [label="Succession"];
+            }
+        }''')
+
+def test_family_tree_complete():
+
+    tree = FamilyTree(
+        entities=[
+            Entity(id, classes, data)
+            for id, classes, data in [
+                ('N', {'emperor'}, {'name': 'Nikephoros Phokas'}),
+                ('J', {'emperor', 'usurper'}, {'name': 'John Tzimiskes'}),
+                ('B', {'emperor'}, {'name': 'Basil II'}),
+            ]
+        ],
+        relationships=[
+            Relationship(from_id, to_id, classes, data)
+            for from_id, to_id, classes, data in [
+                ('N', 'J', {'usurper', 'succession'}, {}),
+                ('J', 'B', {'succession'}, {}),
+            ]
+        ],
+        cohorts=[
+            Cohort(rank, ids, classes, data)
+            for rank, ids, classes, data in [
+                ('960s', ['N', 'J'], {}, {}),
+                ('970s', ['B'], {}, {}),
+            ]
+        ],
+        classes=[],
+        data={},
+    )
+
+    config = {
+        'class': {
+            'node': {
+                'emperor': {
+                    'label': '{name}',
+                    'color': 'purple',
+                },
+                'usurper': {
+                    'label': '{name}: The Usurper',
+                    'color': 'red',
+                },
+            },
+            'edge': {
+                'root': {
+                    'color': 'purple',
+                },
+                'usurper': {
+                    'style': 'dotted',
+                    'color': 'yellow',
+                },
+            },
+        },
+    }
+
+    assert dot.write(tree, config) == trim(r'''
+        digraph "root" {
             edge [color="purple"];
-            subgraph "datesL" {
+            subgraph "rankL" {
                 "960sL";
                 "970sL";
                 "960sL" -> "970sL";
             }
-            subgraph "members" {
+            subgraph "tree" {
                 "N" [label="Nikephoros Phokas",color="purple"];
                 "J" [label="John Tzimiskes: The Usurper",color="red"];
                 "B" [label="Basil II",color="purple"];
                 "N" -> "J" [style="dotted",color="yellow"];
                 "J" -> "B";
             }
-            subgraph "datesR" {
+            subgraph "rankR" {
                 "960sR";
                 "970sR";
                 "960sR" -> "970sR";
@@ -175,5 +318,4 @@ def test_dot_to_family_tree(tree, config):
                 "B";
             }
         }''')
-
 
