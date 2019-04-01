@@ -78,8 +78,8 @@ class FamilyTree(NamedTuple):
     data: dict
 
     @classmethod
-    def from_members(members, ranks=None):
-        return FamilyTree(
+    def from_members(cls, members, ranks=None):
+        return cls(
             entities=list(map(Entity.from_member, members)),
             relationships=list(map(Relationship.from_member, members)),
             cohorts=Cohort.from_members(members, ranks) if ranks is not None else None,
