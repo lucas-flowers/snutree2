@@ -275,6 +275,19 @@ def test_family_tree_no_cohorts():
                 },
             },
         },
+        'custom': {
+            'node': {
+                'R': {
+                    'label': 'Nero',
+                    'color': 'pink',
+                },
+            },
+            'edge': {
+                'R,N': {
+                    'label': '???',
+                },
+            },
+        },
     }
 
     assert dot.write(tree, config) == trim(r'''
@@ -284,7 +297,9 @@ def test_family_tree_no_cohorts():
                 edge [color="red"];
                 "I" [label="Irene Sarantapechaina"];
                 "N" [label="Nikephoros I"];
+                "R" [label="Nero",color="pink"];
                 "I" -> "N" [label="Succession"];
+                "R" -> "N" [label="???"];
             }
         }''')
 

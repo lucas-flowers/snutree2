@@ -48,6 +48,24 @@ class Write:
     def __post_init__(self):
         validate(self.config)
 
+    @property
+    def custom_nodes(self):
+        return [
+            Node(identifier, **attributes)
+            for identifier, attributes
+            in get(self.config, 'custom', 'node').items()
+        ]
+
+    @property
+    def custom_edges(self):
+        return [
+            Edge(*identifiers.split(','), **attributes)
+            for identifiers, attributes
+            in get(self.config, 'custom', 'edge').items()
+        ]
+
+    # TODO Custom cohorts
+
     def attribute_list(self, component_type, classes, data):
         '''
         Combine the classes and data into node/edge/graph attributes.
@@ -141,7 +159,9 @@ class Write:
             'tree',
             *self.attribute_statements('tree'),
             *map(self.entity, entities),
+            *self.custom_nodes,
             *map(self.relationship, relationships),
+            *self.custom_edges,
         )
 
     def entity(self, entity):
