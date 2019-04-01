@@ -23,7 +23,7 @@ class Entity(NamedTuple):
     def from_member(cls, member):
         return cls(
             id=member.key,
-            classes=list({'root', 'tree'}.union(member.classes)),
+            classes=['root', 'tree'] + member.classes,
             data={'id': member.key}, # TODO ???
         )
 
@@ -39,7 +39,7 @@ class Relationship(NamedTuple):
         return cls(
             from_id=member.parent_key,
             to_id=member.id,
-            classes=list({'root', 'tree'}.union(member.classes)),
+            classes=['root', 'tree'] + member.classes,
             data={'from_id': member.parent_key, 'to_id': member.key},
         )
 
