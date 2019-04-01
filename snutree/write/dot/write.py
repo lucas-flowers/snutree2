@@ -2,7 +2,6 @@
 from dataclasses import dataclass
 
 from ...model.dot import Graph, Digraph, Subgraph, Attribute, Node, Edge
-from .config import WriteConfig
 
 # Graph identifiers, which are also classes (which require special handling)
 GRAPHS = [
