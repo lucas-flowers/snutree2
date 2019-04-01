@@ -170,62 +170,62 @@ def test_component_attributes(component_type, classes, data, config, expected):
 
     # No attributes defined at all
     (
-        'a_graph',
+        'root',
         {},
         [],
     ),
 
     # Attributes defined but not used
     (
-        'a_graph',
-        {'class': {'graph': {'another_graph': {'a': 1}}}},
+        'root',
+        {'class': {'node': {'tree': {'a': 1}}}},
         [],
     ),
 
     # Graph exists in config but is undefined
     (
-        'a_graph',
-        {'class': {'graph': {'a_graph': {}}}},
+        'root',
+        {'class': {'graph': {'root': {}}}},
         [],
     ),
 
     # Attributes defined and used
     (
-        'a_graph',
-        {'class': {'graph': {'a_graph': {'a': 1}}}},
+        'root',
+        {'class': {'graph': {'root': {'a': 1}}}},
         [Graph(a=1)],
     ),
     (
-        'a_graph',
-        {'class': {'node': {'a_graph': {'a': 1}}}},
+        'root',
+        {'class': {'node': {'root': {'a': 1}}}},
         [Node(a=1)],
     ),
     (
-        'a_graph',
-        {'class': {'edge': {'a_graph': {'a': 1}}}},
+        'root',
+        {'class': {'edge': {'root': {'a': 1}}}},
         [Edge(a=1)],
     ),
     (
-        'a_graph',
-        {'class': {'graph': {'a_graph': {'a': 1}}, 'node': {'a_graph': {'b': 2}}, 'edge': {'a_graph': {'c': 3}}}},
+        'root',
+        {'class': {'graph': {'root': {'a': 1}}, 'node': {'root': {'b': 2}}, 'edge': {'root': {'c': 3}}}},
         [Graph(a=1), Node(b=2), Edge(c=3)],
     ),
 
     # The 'label' attribute is not included in attribute statements for nodes
     # and edges (since they will be included in attribute lists)
     (
-        'a_graph',
-        {'class': {'graph': {'a_graph': {'label': 'The Label'}}}},
+        'root',
+        {'class': {'graph': {'root': {'label': 'The Label'}}}},
         [Graph(label='The Label')],
     ),
     (
-        'a_graph',
-        {'class': {'node': {'a_graph': {'label': 'The Label'}}}},
+        'root',
+        {'class': {'node': {'root': {'label': 'The Label'}}}},
         [],
     ),
     (
-        'a_graph',
-        {'class': {'edge': {'a_graph': {'label': 'The Label'}}}},
+        'root',
+        {'class': {'edge': {'root': {'label': 'The Label'}}}},
         [],
     ),
 

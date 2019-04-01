@@ -2,18 +2,7 @@
 from dataclasses import dataclass
 
 from ...model.dot import Graph, Digraph, Subgraph, Attribute, Node, Edge
-
-# Graph identifiers, which are also classes (which require special handling)
-GRAPHS = [
-    'root',
-    'tree',
-    'rank',
-]
-
-# Fields that are templates, also requiring special handling
-TEMPLATE_ATTRIBUTES = [
-    'label',
-]
+from .config import validate, GRAPHS, TEMPLATE_ATTRIBUTES
 
 def write(tree, config):
     write = Write(config)
@@ -55,6 +44,9 @@ class Write:
     '''
 
     config: dict
+
+    def __post_init__(self):
+        validate(self.config)
 
     def attribute_list(self, component_type, classes, data):
         '''

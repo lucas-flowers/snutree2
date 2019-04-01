@@ -3,7 +3,17 @@ from itertools import dropwhile
 
 from jsonschema import Draft7Validator, FormatChecker
 
-from .write import GRAPHS
+# Graph identifiers, which are also classes (which require special handling)
+GRAPHS = [
+    'root',
+    'tree',
+    'rank',
+]
+
+# Fields that are templates, also requiring special handling
+TEMPLATE_ATTRIBUTES = [
+    'label',
+]
 
 def validate(config):
 
