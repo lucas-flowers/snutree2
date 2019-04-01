@@ -23,7 +23,7 @@ class Entity(NamedTuple):
     def from_member(cls, member):
         return cls(
             id=member.key,
-            classes=member.classes, # TODO ???????
+            classes=list({'root', 'tree'}.union(member.classes)),
             data={'id': member.key}, # TODO ???
         )
 
@@ -39,7 +39,7 @@ class Relationship(NamedTuple):
         return cls(
             from_id=member.parent_key,
             to_id=member.id,
-            classes=None, # TODO ?????
+            classes=list({'root', 'tree'}.union(member.classes)),
             data={'from_id': member.parent_key, 'to_id': member.key},
         )
 
@@ -64,7 +64,7 @@ class Cohort(NamedTuple):
             cls(
                 rank=rank,
                 ids=ids,
-                classes=None, # TODO ???
+                classes=['root', 'rank'],
                 data={'rank': rank}, # TODO ???
             ) for rank, ids in rank_to_ids.items()
         ]
@@ -83,7 +83,7 @@ class FamilyTree(NamedTuple):
             entities=list(map(Entity.from_member, members)),
             relationships=list(map(Relationship.from_member, members)),
             cohorts=Cohort.from_members(members, ranks) if ranks is not None else None,
-            classes=None, # TODO ???
+            classes=['root'],
             data=None, # TODO ???
         )
 
