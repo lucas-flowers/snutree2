@@ -146,23 +146,35 @@ class Write:
             'root',
             *self.attribute_statements('root'),
             self.rank_labels('Left'[0], tree.cohorts) if tree.cohorts is not None else None,
-            self.tree(tree.entities, tree.relationships),
+            self.tree(tree),
             self.rank_labels('Right'[0], tree.cohorts) if tree.cohorts is not None else None,
             *(map(self.ranks, tree.cohorts) if tree.cohorts is not None else ()),
         )
 
-    def tree(self, entities, relationships):
+    def tree(self, tree):
         '''
         The actual entities and relationships in the tree.
         '''
         return Subgraph(
             'tree',
             *self.attribute_statements('tree'),
-            *map(self.entity, entities),
+            *self.nodes(tree),
             *self.custom_nodes,
-            *map(self.relationship, relationships),
+            *self.edges(tree),
             *self.custom_edges,
         )
+
+    def nodes(self, tree):
+        return [
+            self.entity(entity)
+            # TODO Sort
+            for family in tree.families
+            for entity in family
+        ]
+
+    def edges(self, tree):
+        # TODO Sort
+        return map(self.relationship, tree.relationships)
 
     def entity(self, entity):
         return Node(

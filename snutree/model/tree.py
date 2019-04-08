@@ -110,7 +110,10 @@ class FamilyTree:
 
     @property
     def families(self):
-        return weakly_connected_components(self._graph)
+        return [
+            [self._entities[entity_id] for entity_id in family_entity_ids]
+            for family_entity_ids in weakly_connected_components(self._graph)
+        ]
 
     @classmethod
     def from_members(cls, members, ranks=None):
