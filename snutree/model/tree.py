@@ -14,6 +14,8 @@ r'''
 from dataclasses import dataclass
 from typing import Sequence, Mapping
 
+from networkx import DiGraph, weakly_connected_components
+
 @dataclass
 class Entity:
 
@@ -82,11 +84,17 @@ class FamilyTree:
             entity.id: entity
             for entity in entities
         }
-
         self._relationships = {
             (relationship.from_id, relationship.to_id): relationship
             for relationship in relationships
         }
+
+        # We don't /need/ to store a full graph; all the necessary information
+        # is stored in entities and relationships. But this does make things
+        # easier (and maybe faster?)
+        self._graph = DiGraph()
+        self._graph.add_nodes_from(self._entities.keys())
+        self._graph.add_edges_from(self._relationships.keys())
 
         self.cohorts = cohorts
         self.classes = classes
@@ -99,6 +107,10 @@ class FamilyTree:
     @property
     def relationships(self):
         return self._relationships.values()
+
+    @property
+    def families(self):
+        return weakly_connected_components(self._graph)
 
     @classmethod
     def from_members(cls, members, ranks=None):
