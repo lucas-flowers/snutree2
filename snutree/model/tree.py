@@ -76,11 +76,29 @@ class Cohort:
 @dataclass
 class FamilyTree:
 
-    entities: Sequence[Entity]
-    relationships: Sequence[Relationship]
-    cohorts: Sequence[Cohort] # Or None
-    classes: Sequence[str]
-    data: Mapping
+    def __init__(self, entities, relationships, cohorts, classes, data):
+
+        self._entities = {
+            entity.id: entity
+            for entity in entities
+        }
+
+        self._relationships = {
+            (relationship.from_id, relationship.to_id): relationship
+            for relationship in relationships
+        }
+
+        self.cohorts = cohorts
+        self.classes = classes
+        self.data = data
+
+    @property
+    def entities(self):
+        return self._entities.values()
+
+    @property
+    def relationships(self):
+        return self._relationships.values()
 
     @classmethod
     def from_members(cls, members, ranks=None):
