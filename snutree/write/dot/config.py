@@ -56,6 +56,10 @@ schema = {
 
     'properties': {
 
+        'seed': {
+            'type': 'integer',
+        },
+
         'class': {
             'type': 'object',
             'additionalProperties': False,

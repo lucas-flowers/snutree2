@@ -1,5 +1,6 @@
 
 from dataclasses import dataclass
+from random import Random
 
 from ...model.dot import Graph, Digraph, Subgraph, Attribute, Node, Edge
 from .config import validate, GRAPHS, TEMPLATE_ATTRIBUTES
@@ -165,9 +166,14 @@ class Write:
         )
 
     def nodes(self, tree):
+        if self.config.get('seed'):
+            rng = Random(self.config['seed'])
+            shuffle = lambda families: rng.sample(families, k=len(families))
+        else:
+            shuffle = lambda families: families
         return [
             self.entity(entity)
-            for family in sorted(tree.families, key=min)
+            for family in shuffle(sorted(tree.families, key=min))
             for entity in sorted(family)
         ]
 
