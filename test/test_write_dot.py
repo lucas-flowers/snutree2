@@ -365,11 +365,11 @@ def test_family_tree_complete():
                 "960sL" -> "970sL";
             }
             subgraph "tree" {
-                "N" [label="Nikephoros Phokas",color="purple"];
-                "J" [label="John Tzimiskes: The Usurper",color="red"];
                 "B" [label="Basil II",color="purple"];
-                "N" -> "J" [style="dotted",color="yellow"];
+                "J" [label="John Tzimiskes: The Usurper",color="red"];
+                "N" [label="Nikephoros Phokas",color="purple"];
                 "J" -> "B";
+                "N" -> "J" [style="dotted",color="yellow"];
             }
             subgraph "rankR" {
                 "960sR";

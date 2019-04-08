@@ -16,7 +16,7 @@ from typing import Sequence, Mapping
 
 from networkx import DiGraph, weakly_connected_components
 
-@dataclass
+@dataclass(order=True)
 class Entity:
 
     id: str
@@ -31,7 +31,7 @@ class Entity:
             data={'id': member.key}, # TODO ???
         )
 
-@dataclass
+@dataclass(order=True)
 class Relationship:
 
     from_id: str

@@ -167,14 +167,12 @@ class Write:
     def nodes(self, tree):
         return [
             self.entity(entity)
-            # TODO Sort
-            for family in tree.families
-            for entity in family
+            for family in sorted(tree.families, key=min)
+            for entity in sorted(family)
         ]
 
     def edges(self, tree):
-        # TODO Sort
-        return map(self.relationship, tree.relationships)
+        return map(self.relationship, sorted(tree.relationships))
 
     def entity(self, entity):
         return Node(
