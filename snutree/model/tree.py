@@ -11,13 +11,15 @@ r'''
 
 '''
 
-from typing import NamedTuple, List
+from dataclasses import dataclass
+from typing import Sequence, Mapping
 
-class Entity(NamedTuple):
+@dataclass
+class Entity:
 
     id: str
-    classes: List[str]
-    data: dict
+    classes: Sequence[str]
+    data: Mapping
 
     @classmethod
     def from_member(cls, member):
@@ -27,12 +29,13 @@ class Entity(NamedTuple):
             data={'id': member.key}, # TODO ???
         )
 
-class Relationship(NamedTuple):
+@dataclass
+class Relationship:
 
     from_id: str
     to_id: str
-    classes: List[str]
-    data: dict
+    classes: Sequence[str]
+    data: Mapping
 
     @classmethod
     def from_member(cls, member):
@@ -43,12 +46,13 @@ class Relationship(NamedTuple):
             data={'from_id': member.parent_key, 'to_id': member.key},
         )
 
-class Cohort(NamedTuple):
+@dataclass
+class Cohort:
 
     rank: object
-    ids: List[str]
-    classes: List[str]
-    data: dict
+    ids: Sequence[str]
+    classes: Sequence[str]
+    data: Mapping
 
     @property
     def id(self):
@@ -69,13 +73,14 @@ class Cohort(NamedTuple):
             ) for rank, ids in rank_to_ids.items()
         ]
 
-class FamilyTree(NamedTuple):
+@dataclass
+class FamilyTree:
 
-    entities: List[Entity]
-    relationships: List[Relationship]
-    cohorts: List[Cohort] # Or None
-    classes: List[str]
-    data: dict
+    entities: Sequence[Entity]
+    relationships: Sequence[Relationship]
+    cohorts: Sequence[Cohort] # Or None
+    classes: Sequence[str]
+    data: Mapping
 
     @classmethod
     def from_members(cls, members, ranks=None):
