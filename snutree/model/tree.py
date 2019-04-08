@@ -76,7 +76,7 @@ class Cohort:
 @dataclass
 class FamilyTree:
 
-    def __init__(self, entities, relationships, cohorts, classes, data):
+    def __init__(self, entities, relationships, classes, data, cohorts=None):
 
         self._entities = {
             entity.id: entity
