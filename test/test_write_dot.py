@@ -1,4 +1,6 @@
 
+from itertools import repeat
+
 import pytest
 from jsonschema.exceptions import ValidationError
 
@@ -234,6 +236,93 @@ def test_attribute_statements(graph_id, config, expected):
     write = dot.Write(config)
     component = write.attribute_statements(graph_id)
     assert component == expected
+
+def test_family_tree_standard_order():
+    '''
+    Nodes are ordered by family, in ascending order of key. Edges are sorted by
+    ascending order of parent key, then by child key.
+    '''
+
+    tree = FamilyTree(
+        entities=[
+            Entity(id, [], {}) for id in [
+                'c3', 'c2', 'c1',
+                'b3', 'b2', 'b1',
+                'a3', 'a2', 'a1',
+            ]
+        ],
+        relationships=[
+            Relationship(from_id, to_id, [], {}) for from_id, to_id in [
+                ('b3', 'a2'),
+                ('c3', 'b2'), ('b2', 'a1'), ('c3', 'a1'),
+                ('c2', 'b1'),
+            ]
+        ],
+        classes=[],
+        data={}
+    )
+
+    assert dot.write(tree, {}) == trim(r'''
+        digraph "root" {
+            subgraph "tree" {
+                "a1";
+                "b2";
+                "c3";
+                "a2";
+                "b3";
+                "a3";
+                "b1";
+                "c2";
+                "c1";
+                "b2" -> "a1";
+                "b3" -> "a2";
+                "c2" -> "b1";
+                "c3" -> "a1";
+                "c3" -> "b2";
+            }
+        }
+    ''')
+
+@pytest.mark.parametrize('', repeat((), times=2))
+def test_family_tree_shuffled_order():
+    '''
+    When a seed is provided, nodes are grouped into internally-sorted families.
+    The families themselves are shuffled based on the seed. Resulting code is
+    consistent across different calls to dot.write.
+    '''
+
+    tree = FamilyTree(
+        entities=[
+            Entity(id, [], {}) for id in 'abcdefg'
+        ],
+        relationships=[
+            Relationship(from_id, to_id, [], {}) for from_id, to_id in [
+                'cd', 'ce'
+            ]
+        ],
+        classes=[],
+        data={},
+    )
+
+    config = {
+        'seed': 1066,
+    }
+
+    assert dot.write(tree, config) == trim(r'''
+        digraph "root" {
+            subgraph "tree" {
+                "f";
+                "g";
+                "c";
+                "d";
+                "e";
+                "b";
+                "a";
+                "c" -> "d";
+                "c" -> "e";
+            }
+        }
+    ''')
 
 def test_family_tree_no_cohorts():
 
