@@ -5,8 +5,8 @@ from random import Random
 from ...model.dot import Graph, Digraph, Subgraph, Attribute, Node, Edge
 from .config import validate, GRAPHS, TEMPLATE_ATTRIBUTES
 
-def write(tree, config):
-    write = Write(config)
+def write(tree, config=None):
+    write = Write(config or {})
     dot = write.root(tree)
     return str(dot)
 

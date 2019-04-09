@@ -245,24 +245,22 @@ def test_family_tree_standard_order():
 
     tree = FamilyTree(
         entities=[
-            Entity(id, [], {}) for id in [
+            Entity(id) for id in [
                 'c3', 'c2', 'c1',
                 'b3', 'b2', 'b1',
                 'a3', 'a2', 'a1',
             ]
         ],
         relationships=[
-            Relationship(from_id, to_id, [], {}) for from_id, to_id in [
+            Relationship(from_id, to_id) for from_id, to_id in [
                 ('b3', 'a2'),
                 ('c3', 'b2'), ('b2', 'a1'), ('c3', 'a1'),
                 ('c2', 'b1'),
             ]
         ],
-        classes=[],
-        data={}
     )
 
-    assert dot.write(tree, {}) == trim(r'''
+    assert dot.write(tree) == trim(r'''
         digraph "root" {
             subgraph "tree" {
                 "a1";
@@ -283,7 +281,7 @@ def test_family_tree_standard_order():
         }
     ''')
 
-@pytest.mark.parametrize('', repeat((), times=2))
+@pytest.mark.parametrize('', repeat((), times=10))
 def test_family_tree_shuffled_order():
     '''
     When a seed is provided, nodes are grouped into internally-sorted families.
@@ -293,15 +291,13 @@ def test_family_tree_shuffled_order():
 
     tree = FamilyTree(
         entities=[
-            Entity(id, [], {}) for id in 'abcdefg'
+            Entity(id)
+            for id in 'abcdefg'
         ],
         relationships=[
-            Relationship(from_id, to_id, [], {}) for from_id, to_id in [
-                'cd', 'ce'
-            ]
+            Relationship(from_id, to_id)
+            for from_id, to_id in ['cd', 'ce']
         ],
-        classes=[],
-        data={},
     )
 
     config = {
@@ -340,9 +336,6 @@ def test_family_tree_no_cohorts():
                 ('I', 'N', ['root', 'tree'], {'name': 'Succession'}),
             ]
         ],
-        cohorts=None,
-        classes=[],
-        data={},
     )
 
     config = {
@@ -417,8 +410,6 @@ def test_family_tree_complete():
                 ('970s', ['B'], {}, {}),
             ]
         ],
-        classes=[],
-        data={},
     )
 
     config = {

@@ -11,7 +11,7 @@ r'''
 
 '''
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Sequence, Mapping
 
 from networkx import DiGraph, weakly_connected_components
@@ -20,8 +20,8 @@ from networkx import DiGraph, weakly_connected_components
 class Entity:
 
     id: str
-    classes: Sequence[str]
-    data: Mapping
+    classes: Sequence[str] = field(default_factory=list)
+    data: Mapping = field(default_factory=dict)
 
     @classmethod
     def from_member(cls, member):
@@ -36,8 +36,8 @@ class Relationship:
 
     from_id: str
     to_id: str
-    classes: Sequence[str]
-    data: Mapping
+    classes: Sequence[str] = field(default_factory=list)
+    data: Mapping = field(default_factory=dict)
 
     @classmethod
     def from_member(cls, member):
@@ -53,8 +53,8 @@ class Cohort:
 
     rank: object
     ids: Sequence[str]
-    classes: Sequence[str]
-    data: Mapping
+    classes: Sequence[str] = field(default_factory=list)
+    data: Mapping = field(default_factory=dict)
 
     @property
     def id(self):
@@ -75,10 +75,9 @@ class Cohort:
             ) for rank, ids in rank_to_ids.items()
         ]
 
-@dataclass
 class FamilyTree:
 
-    def __init__(self, entities, relationships, classes, data, cohorts=None):
+    def __init__(self, entities, relationships, cohorts=None, classes=None, data=None):
 
         self._entities = {
             entity.id: entity
@@ -97,8 +96,8 @@ class FamilyTree:
         self._graph.add_edges_from(self._relationships.keys())
 
         self.cohorts = cohorts
-        self.classes = classes
-        self.data = data
+        self.classes = classes or []
+        self.data = data or {}
 
     @property
     def entities(self):
