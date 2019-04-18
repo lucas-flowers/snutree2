@@ -9,9 +9,6 @@ class Affiliation:
     designation: str
     badge: str
 
-    def __str__(self):
-        return f'{self.designation}\N{NO-BREAK SPACE}{self.badge}'
-
     # Map of titlecase designation names to a sequence of possible,
     # capitalized, abbreviations. The first abbreviation is the primary one.
     # Note that some possible abbreviations are Latin lookalikes.
@@ -98,4 +95,7 @@ class Affiliation:
         )
 
         return cls(priority, chapter_code, int(str(match.group('badge'))))
+
+    def __str__(self):
+        return f'{self.designation}\N{NO-BREAK SPACE}{self.badge}'
 

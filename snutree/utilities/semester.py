@@ -15,22 +15,6 @@ class Season(Enum):
     def __le__(self, other):
         return self == self.SPRING
 
-@singledispatch
-def _semester(value: int):
-    return value
-
-@_semester.register
-def _(season: Season, year: int):
-    return 2 * year + {Season.SPRING: 0, Season.FALL: 1}[season]
-
-@_semester.register
-def _(string: str):
-    match = Semester.PATTERN_SEMESTER.match(string)
-    return _semester( # pylint: disable=too-many-function-args
-        getattr(Season, match.group('season').upper()),
-        int(match.group('year')),
-    )
-
 class Semester(int):
 
     YEAR = r'\d+'
@@ -62,4 +46,20 @@ class Semester(int):
             return type(self)(super(type(self), self).__add__(other))
 
     __radd__ = __add__
+
+@singledispatch
+def _semester(value: int):
+    return value
+
+@_semester.register
+def _(season: Season, year: int):
+    return 2 * year + {Season.SPRING: 0, Season.FALL: 1}[season]
+
+@_semester.register
+def _(string: str):
+    match = Semester.PATTERN_SEMESTER.match(string)
+    return _semester( # pylint: disable=too-many-function-args
+        getattr(Season, match.group('season').upper()),
+        int(match.group('year')),
+    )
 
