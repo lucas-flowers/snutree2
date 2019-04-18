@@ -3,18 +3,13 @@ from dataclasses import dataclass
 from random import Random
 
 from ...model.dot import Graph, Digraph, Subgraph, Attribute, Node, Edge
+from ...utilities import get
 from .config import validate, GRAPHS, TEMPLATE_ATTRIBUTES
 
 def write(tree, config=None):
     write = Write(config or {})
     dot = write.root(tree)
     return str(dot)
-
-def get(mapping, *args):
-    value = mapping
-    for arg in args:
-        value = value.get(arg, {})
-    return value
 
 @dataclass
 class Write:

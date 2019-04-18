@@ -2,18 +2,12 @@
 from dataclasses import dataclass
 
 from ...model.member import Member
+from ...utilities import get
 from .config import validate, parse
 
 def read(rows, config=None):
     read = Read(config or {})
     return list(map(read.member, rows))
-
-# TODO Move to utilities
-def get(mapping, *args):
-    value = mapping
-    for arg in args:
-        value = value.get(arg, {})
-    return value
 
 @dataclass
 class Read:
