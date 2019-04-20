@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 
 from conftest import trim
-from snutree.model.dot import (
+from snutree.write.dot.model import (
     abstract,
     Attribute,
     Node,

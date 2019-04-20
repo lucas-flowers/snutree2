@@ -31,6 +31,7 @@ class Relationship:
 
 @dataclass
 class Cohort:
+
     rank: object
     ids: Sequence[str]
     classes: Sequence[str] = field(default_factory=list)

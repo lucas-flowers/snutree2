@@ -1,17 +1,15 @@
 
-from dataclasses import dataclass
 from random import Random
 
-from ...model.dot import Graph, Digraph, Subgraph, Attribute, Node, Edge
 from ...utilities import get
 from .config import validate, GRAPHS, TEMPLATE_ATTRIBUTES
+from .model import Graph, Digraph, Subgraph, Attribute, Node, Edge
 
 def write(tree, config=None):
     write = Write(config or {})
     dot = write.root(tree)
     return str(dot)
 
-@dataclass
 class Write:
     '''
     The configuration treats graphs and classes identical to each other. But
@@ -39,10 +37,9 @@ class Write:
     (namely, the 'label' field), since they'd be different for each node/edge.
     '''
 
-    config: dict
-
-    def __post_init__(self):
-        validate(self.config)
+    def __init__(self, config):
+        validate(config)
+        self.config = config
 
     @property
     def custom_nodes(self):

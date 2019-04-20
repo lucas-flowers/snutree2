@@ -5,7 +5,7 @@ import pytest
 
 from conftest import trim
 from snutree.write import dot
-from snutree.model.dot import Graph, Node, Edge
+from snutree.write.dot.model import Graph, Node, Edge
 from snutree.model.tree import Entity, Relationship, Cohort, FamilyTree
 
 @pytest.mark.parametrize('component_type, classes, data, config, expected', [
