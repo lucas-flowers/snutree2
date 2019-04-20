@@ -5,18 +5,22 @@ from dataclasses import dataclass
 
 from jsonschema import Draft7Validator
 
+from ...utilities.semester import Semester
+
 def validate(config):
     validator = Draft7Validator(schema)
     validator.validate(config)
 
-def parse(config):
-    parser = Parser({}) # TODO
-    return {
-        'classes': config['classes'], # TODO
-        'data': {
-            key: parser.parse(Token.tokenize(value))
-            for key, value in config['classes'].items()
-        },
+def parse_classes(classes):
+    return classes # TODO
+
+def parse_data(data):
+    parser = Parser({
+        'Semester': Semester,
+    })
+    return lambda row: {
+        key: parser.parse(Token.tokenize(value))(row)
+        for key, value in data.items()
     }
 
 schema = {
@@ -109,10 +113,6 @@ class Parser:
 
     def lookahead(self):
         return self._first_token
-
-    def until(self, literal):
-        while self.lookahead() != literal:
-            self.next()
 
     def expect(self, literal):
         token = self.next() if self.has_next() else None

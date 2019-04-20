@@ -1,9 +1,10 @@
 
+
 from dataclasses import dataclass
 
 from ...model.member import Member
 from ...utilities import get
-from .config import validate, parse
+from .config import validate, parse_classes, parse_data
 
 def read(rows, config=None):
     read = Read(config or {})
@@ -12,12 +13,16 @@ def read(rows, config=None):
 @dataclass
 class Read:
 
-    config: dict
+    _classes: list
+    _data: dict
 
     @classmethod
-    def from_dict(cls, dct):
-        validate(dct)
-        return cls(config=parse(dct))
+    def create(cls, config):
+        validate(config)
+        return cls(
+            classes=parse_classes(get(config, 'classes')),
+            data=parse_data(get(config, 'data')),
+        )
 
     def member(self, row):
         return Member(
@@ -28,7 +33,7 @@ class Read:
     def data(self, row):
         return {
             fieldname: function(row)
-            for fieldname, function in get(self.config, 'data').items()
+            for fieldname, function in self._data.items()
         }
 
     def classes(self, row):
