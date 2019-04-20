@@ -9,7 +9,7 @@ from ...utilities import get
 from .config import validate, GRAPHS, TEMPLATE_ATTRIBUTES
 from .create import Graph, Digraph, Subgraph, Attribute, Node, Edge
 
-def write(tree, steram, config=None):
+def write(tree, stream, config=None):
     raise NotImplementedError # TODO
 
 def write_str(tree, config=None):
