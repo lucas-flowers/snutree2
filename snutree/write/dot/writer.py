@@ -1,16 +1,21 @@
 
+'''
+Convert a FamilyTree to DOT code.
+'''
+
 from random import Random
 
 from ...utilities import get
 from .config import validate, GRAPHS, TEMPLATE_ATTRIBUTES
-from .model import Graph, Digraph, Subgraph, Attribute, Node, Edge
+from .create import Graph, Digraph, Subgraph, Attribute, Node, Edge
 
-def write(tree, config=None):
-    write = Write(config or {})
-    dot = write.root(tree)
-    return str(dot)
+def write(tree, steram, config=None):
+    raise NotImplementedError # TODO
 
-class Write:
+def write_str(tree, config=None):
+    return Writer(config or {}).write(tree)
+
+class Writer:
     '''
     The configuration treats graphs and classes identical to each other. But
     underneath, subgraphs are treated differently.
@@ -133,6 +138,9 @@ class Write:
                 )
             ) for cohort0, cohort1 in zip(cohorts[:-1], cohorts[1:])),
         )
+
+    def write(self, tree):
+        return str(self.root(tree))
 
     def root(self, tree):
         return Digraph(

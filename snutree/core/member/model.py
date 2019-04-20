@@ -1,11 +1,11 @@
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 @dataclass
 class Member:
 
-    classes: list
-    data: dict
+    classes: list = field(default_factory=list)
+    data: dict = field(default_factory=dict)
 
     @property
     def id(self):

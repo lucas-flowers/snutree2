@@ -3,8 +3,8 @@
 Functions to declaratively create DOT objects.
 '''
 
-from . import abstract
-from .abstract import ComponentType, GraphType
+from . import model
+from .model import ComponentType, GraphType
 
 def create_graph_factory(graph_type):
     def GraphFactory(*args):
@@ -12,7 +12,7 @@ def create_graph_factory(graph_type):
             identifier, statements = args[0], args[1:]
         else:
             identifier, statements = None, args
-        return abstract.Graph(graph_type, identifier, statements)
+        return model.Graph(graph_type, identifier, statements)
     return GraphFactory
 
 StrictGraph = create_graph_factory(GraphType.STRICT_GRAPH)
@@ -28,7 +28,7 @@ def Graph(*args, **kwargs):
         return create_graph_factory(GraphType.GRAPH)()
     elif not args and kwargs:
         # Graph(**attributes): Default graph with attributes
-        return abstract.Component(ComponentType.GRAPH, [], kwargs)
+        return model.Component(ComponentType.GRAPH, [], kwargs)
     elif args and not kwargs:
         # Graph(*statements): Nameless graph
         # Graph(identifier): Empty named graph
@@ -46,7 +46,7 @@ def Subgraph(*args):
         graph_type, identifier, statements = GraphType.SUBGRAPH, args[0], args[1:]
     else:
         graph_type, identifier, statements = None, None, args
-    return abstract.Graph(graph_type, identifier, statements)
+    return model.Graph(graph_type, identifier, statements)
 
 def Node(*identifiers, **attributes):
     '''
@@ -55,7 +55,7 @@ def Node(*identifiers, **attributes):
     if len(identifiers) <= 1:
         # Node(identifier, **attributes): Node
         # Node(**attributes): Node defaults
-        return abstract.Component(ComponentType.NODE, identifiers, attributes)
+        return model.Component(ComponentType.NODE, identifiers, attributes)
     else:
         msg = f'Node() takes 0 or 1 identifiers but {len(identifiers)} were given'
         raise TypeError(msg)
@@ -67,7 +67,7 @@ def Edge(*identifiers, **attributes):
     if len(identifiers) != 1:
         # Edge(*identifiers, **attributes): Edge(s)
         # Edge(**attributes): Edge defaults
-        return abstract.Component(ComponentType.EDGE, identifiers, attributes)
+        return model.Component(ComponentType.EDGE, identifiers, attributes)
     else:
         msg = f'Edge() takes 0 or >1 identifiers but {len(identifiers)} were given'
         raise TypeError(msg)
@@ -78,10 +78,10 @@ def Attribute(*args, **kwargs):
     '''
     if len(kwargs) == 1 and not args:
         # Attribute(key=value)
-        return abstract.Attribute(*kwargs.popitem())
+        return model.Attribute(*kwargs.popitem())
     elif len(args) == 2 and not kwargs:
         # Attribute(key, value)
-        return abstract.Attribute(*args)
+        return model.Attribute(*args)
     else:
         msg = f'Only Attribute(key, value) or Attribute(key=value) is permitted'
         raise TypeError(msg)

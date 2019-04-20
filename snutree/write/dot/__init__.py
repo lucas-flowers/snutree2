@@ -1,3 +1,3 @@
 
-from .write import Write, write
+from .writer import Writer, write, write_str
 

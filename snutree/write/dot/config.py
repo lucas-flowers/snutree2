@@ -1,4 +1,8 @@
 
+'''
+Schema for DOT writer configuration.
+'''
+
 from itertools import dropwhile
 
 from jsonschema import Draft7Validator, FormatChecker

@@ -4,8 +4,8 @@ from unittest.mock import patch
 import pytest
 
 from conftest import trim
-from snutree.write.dot.model import (
-    abstract,
+from snutree.write.dot import model
+from snutree.write.dot.create import (
     Attribute,
     Node,
     Edge,
@@ -80,12 +80,12 @@ def test_component(construct, expected):
         assert statement.to_blocks() == [f'{expected};']
 
 @pytest.mark.parametrize('edge_op, expected', [
-    (abstract.Component.EDGE_OP, '"a" -> "b"'),
-    (abstract.EdgeOp.DIRECTED, '"a" -> "b"'),
-    (abstract.EdgeOp.UNDIRECTED, '"a" -- "b"'),
+    (model.Component.EDGE_OP, '"a" -> "b"'),
+    (model.EdgeOp.DIRECTED, '"a" -> "b"'),
+    (model.EdgeOp.UNDIRECTED, '"a" -- "b"'),
 ])
 def test_EDGE_OP(edge_op, expected):
-    with patch.object(abstract.Component, 'EDGE_OP', new=edge_op):
+    with patch.object(model.Component, 'EDGE_OP', new=edge_op):
         assert str(Edge('a', 'b')) == expected
 
 @pytest.mark.parametrize('construct, expected', [

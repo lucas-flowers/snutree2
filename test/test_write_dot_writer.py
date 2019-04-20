@@ -3,10 +3,11 @@ from itertools import repeat
 
 import pytest
 
-from conftest import trim
+from snutree.core.tree import Entity, Relationship, Cohort, FamilyTree
 from snutree.write import dot
-from snutree.write.dot.model import Graph, Node, Edge
-from snutree.model.tree import Entity, Relationship, Cohort, FamilyTree
+from snutree.write.dot.create import Graph, Node, Edge
+
+from conftest import trim
 
 @pytest.mark.parametrize('component_type, classes, data, config, expected', [
 
@@ -100,8 +101,8 @@ from snutree.model.tree import Entity, Relationship, Cohort, FamilyTree
 
 ])
 def test_component_attributes(component_type, classes, data, config, expected):
-    write = dot.Write(config)
-    component = write.attribute_list(component_type, classes, data)
+    writer = dot.Writer(config)
+    component = writer.attribute_list(component_type, classes, data)
     assert component == expected
 
 @pytest.mark.parametrize('graph_id, config, expected', [
@@ -176,8 +177,8 @@ def test_component_attributes(component_type, classes, data, config, expected):
 
 ])
 def test_attribute_statements(graph_id, config, expected):
-    write = dot.Write(config)
-    component = write.attribute_statements(graph_id)
+    writer = dot.Writer(config)
+    component = writer.attribute_statements(graph_id)
     assert component == expected
 
 def test_family_tree_standard_order():
@@ -203,7 +204,7 @@ def test_family_tree_standard_order():
         ],
     )
 
-    assert dot.write(tree) == trim(r'''
+    assert dot.write_str(tree) == trim(r'''
         digraph "root" {
             subgraph "tree" {
                 "a1";
@@ -229,7 +230,7 @@ def test_family_tree_shuffled_order():
     '''
     When a seed is provided, nodes are grouped into internally-sorted families.
     The families themselves are shuffled based on the seed. Resulting code is
-    consistent across different calls to dot.write.
+    consistent across different calls to dot.write_str.
     '''
 
     tree = FamilyTree(
@@ -247,7 +248,7 @@ def test_family_tree_shuffled_order():
         'seed': 1066,
     }
 
-    assert dot.write(tree, config) == trim(r'''
+    assert dot.write_str(tree, config) == trim(r'''
         digraph "root" {
             subgraph "tree" {
                 "f";
@@ -315,7 +316,7 @@ def test_family_tree_no_cohorts():
         },
     }
 
-    assert dot.write(tree, config) == trim(r'''
+    assert dot.write_str(tree, config) == trim(r'''
         digraph "root" {
             graph [rankdir="LR"];
             subgraph "tree" {
@@ -379,7 +380,7 @@ def test_family_tree_complete():
         },
     }
 
-    assert dot.write(tree, config) == trim(r'''
+    assert dot.write_str(tree, config) == trim(r'''
         digraph "root" {
             edge [color="purple"];
             subgraph "rankL" {
