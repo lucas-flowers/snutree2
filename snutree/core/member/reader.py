@@ -1,17 +1,19 @@
 
+'''
+Create Member objects from lists of rows.
+'''
 
 from dataclasses import dataclass
 
-from ...model.member import Member
 from ...utilities import get
 from .config import validate, parse_classes, parse_data
+from .model import Member
 
 def read(rows, config=None):
-    read = Read(config or {})
-    return list(map(read.member, rows))
+    return Reader(config or {}).read(rows)
 
 @dataclass
-class Read:
+class Reader:
 
     _classes: list
     _data: dict
@@ -23,6 +25,9 @@ class Read:
             classes=parse_classes(get(config, 'classes')),
             data=parse_data(get(config, 'data')),
         )
+
+    def read(self, rows):
+        return list(map(self.member, rows))
 
     def member(self, row):
         return Member(

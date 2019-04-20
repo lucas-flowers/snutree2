@@ -1,4 +1,9 @@
 
+'''
+Cleaned-up, Pythonic representation of a row. Input data structure for creating
+a FamilyTree object.
+'''
+
 from dataclasses import dataclass, field
 
 @dataclass
