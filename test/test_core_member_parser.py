@@ -1,7 +1,8 @@
 
 import pytest
 
-from snutree.write.member.config import Token, Parser, TokenError, ParseError
+from snutree.core.member.parser import parse, Token, Parser, TokenError, ParseError
+from snutree.utilities.semester import Semester
 
 @pytest.mark.parametrize('string, expected', [
 
@@ -48,13 +49,22 @@ def test_tokenize_error(string):
         list(Token.tokenize(string))
 
 @pytest.mark.parametrize('string, expected', [
+
+    # Simple
     ('a', 1),
     ('b', 2),
     ('c', 3),
+
+    # Zero-parameter function
     ('const()', 1337),
+
+    # One-parameter function
     ('neg(a)', -1),
+
+    # Two-parameter functions
     ('add(a, b)', 3),
     ('sub(c, a)', 2),
+
 ])
 def test_parse(string, expected):
     row = {
@@ -68,9 +78,7 @@ def test_parse(string, expected):
         'add': lambda x, y: x + y,
         'sub': lambda x, y: x - y,
     }
-    tokens = Token.tokenize(string)
-    parser = Parser(functions)
-    assert parser.parse(tokens)(row) == expected
+    assert parse(string, functions)(row) == expected
 
 @pytest.mark.parametrize('string, expected', [
     ('', 'end of input'),
@@ -82,7 +90,7 @@ def test_parse(string, expected):
     ('function(,)', 'IDENTIFIER'),
     ('function(x,)', 'IDENTIFIER'),
 ])
-def test_parse_error(string, expected):
+def test_parser_parse_error(string, expected):
     tokens = Token.tokenize(string)
     parser = Parser({})
     with pytest.raises(ParseError, match=expected):

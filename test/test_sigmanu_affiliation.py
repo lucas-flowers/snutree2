@@ -1,7 +1,7 @@
 
 import pytest
 
-from snutree.sigmanu.affiliation import Affiliation
+from snutree.utilities.sigmanu.affiliation import Affiliation
 
 @pytest.mark.parametrize('string, expected', [
 
