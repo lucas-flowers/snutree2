@@ -1,7 +1,7 @@
 
 import pytest
 
-from snutree.core.member.parser import parse, Token, Parser, TokenError, ParseError
+from snutree.core.member.parser import Token, Parser, TokenError, ParseError
 from snutree.utilities.semester import Semester
 
 @pytest.mark.parametrize('string, expected', [
@@ -51,34 +51,24 @@ def test_tokenize_error(string):
 @pytest.mark.parametrize('string, expected', [
 
     # Simple
-    ('a', 1),
-    ('b', 2),
-    ('c', 3),
+    ('a', (None, ['a'])),
+    ('b', (None, ['b'])),
+    ('c', (None, ['c'])),
 
     # Zero-parameter function
-    ('const()', 1337),
+    ('const()', ('const', [])),
 
     # One-parameter function
-    ('neg(a)', -1),
+    ('neg(a)', ('neg', ['a'])),
 
     # Two-parameter functions
-    ('add(a, b)', 3),
-    ('sub(c, a)', 2),
+    ('add(a, b)', ('add', ['a', 'b'])),
+    ('sub(c, a)', ('sub', ['c', 'a'])),
 
 ])
 def test_parse(string, expected):
-    row = {
-        'a': 1,
-        'b': 2,
-        'c': 3,
-    }
-    functions = {
-        'const': lambda: 1337,
-        'neg': lambda x: -x,
-        'add': lambda x, y: x + y,
-        'sub': lambda x, y: x - y,
-    }
-    assert parse(string, functions)(row) == expected
+    function_name, field_names = Parser().parse(string)
+    assert (function_name, list(field_names)) == expected
 
 @pytest.mark.parametrize('string, expected', [
     ('', 'end of input'),
@@ -91,8 +81,7 @@ def test_parse(string, expected):
     ('function(x,)', 'IDENTIFIER'),
 ])
 def test_parser_parse_error(string, expected):
-    tokens = Token.tokenize(string)
-    parser = Parser({})
+    parser = Parser()
     with pytest.raises(ParseError, match=expected):
-        parser.parse(tokens)({})
+        parser.parse(string)
 
