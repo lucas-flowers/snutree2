@@ -1,5 +1,6 @@
 
 import re
+from dataclasses import dataclass
 from enum import Enum
 from functools import singledispatch, total_ordering
 
@@ -15,51 +16,56 @@ class Season(Enum):
     def __le__(self, other):
         return self == self.SPRING
 
-class Semester(int):
+@dataclass(init=False, order=True, frozen=True)
+class Semester:
+
+    _index: int
 
     YEAR = r'\d+'
     SEASON = fr'{Season.FALL}|{Season.SPRING}'
     SEMESTER = fr'\s*(?P<season>{SEASON})\s*(?P<year>{YEAR})\s*'
     PATTERN_SEMESTER = re.compile(SEMESTER, flags=re.IGNORECASE)
 
-    def __new__(cls, *args, **kwargs):
-        return super().__new__(cls, _semester(*args, **kwargs))
+    def __init__(self, *args, **kwargs):
+
+        @singledispatch
+        def index(index: int):
+            return index
+
+        @index.register
+        def _(season: Season, year: int):
+            return 2 * year + {Season.SPRING: 0, Season.FALL: 1}[season]
+
+        @index.register
+        def _(string: str):
+            match = type(self).PATTERN_SEMESTER.match(string)
+            return index( # pylint: disable=too-many-function-args
+                getattr(Season, match.group('season').upper()),
+                int(match.group('year')),
+            )
+
+        # Extra fancy because this class is supposed to be frozen
+        object.__setattr__(self, '_index', index(*args, **kwargs))
 
     @property
     def year(self):
-        return self // 2
+        return self._index // 2
 
     @property
     def season(self):
-        return Season.SPRING if self % 2 == 0 else Season.FALL
-
-    def __repr__(self):
-        return f'{self.season} {self.year}'
+        return Season.SPRING if self._index % 2 == 0 else Season.FALL
 
     def __str__(self):
-        return repr(self)
+        return f'{self.season} {self.year}'
+
+    def __index__(self):
+        return self._index
 
     def __add__(self, other):
-        if isinstance(other, Semester):
-            raise TypeError('Cannot add two semesters')
+        if isinstance(other, int):
+            return Semester(self._index + other)
         else:
-            return type(self)(super(type(self), self).__add__(other))
+            raise TypeError('Can only add to int')
 
     __radd__ = __add__
-
-@singledispatch
-def _semester(value: int):
-    return value
-
-@_semester.register
-def _(season: Season, year: int):
-    return 2 * year + {Season.SPRING: 0, Season.FALL: 1}[season]
-
-@_semester.register
-def _(string: str):
-    match = Semester.PATTERN_SEMESTER.match(string)
-    return _semester( # pylint: disable=too-many-function-args
-        getattr(Season, match.group('season').upper()),
-        int(match.group('year')),
-    )
 
