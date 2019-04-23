@@ -44,6 +44,8 @@ class Cohort:
 
 class FamilyTree:
 
+    # TODO Convert to dataclass
+
     def __init__(self, entities, relationships, cohorts=None, classes=None, data=None):
 
         self._entities = {
