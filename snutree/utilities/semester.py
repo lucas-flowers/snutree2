@@ -55,11 +55,17 @@ class Semester:
     def season(self):
         return Season.SPRING if self._index % 2 == 0 else Season.FALL
 
+    def __repr__(self):
+        return f'Semester(season={self.season!r}, year={self.year!r})'
+
     def __str__(self):
         return f'{self.season} {self.year}'
 
     def __index__(self):
         return self._index
+
+    def __sub__(self, other):
+        return Semester(self._index - other.__index__())
 
     def __add__(self, other):
         if isinstance(other, int):
