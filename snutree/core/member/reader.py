@@ -38,6 +38,11 @@ class ClassFunctions:
     @namespace.register(name=None)
     def default(keys, row):
         (key,) = keys
+        return [key]
+
+    @namespace.register('Enum')
+    def enum(keys, row):
+        (key,) = keys
         return [row[key]]
 
     @namespace.register('Boolean')
