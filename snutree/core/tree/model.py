@@ -39,8 +39,7 @@ class Cohort:
 
     @property
     def id(self):
-        # TODO Create an ID?
-        return str(self.rank)
+        return self.rank.to_identifier()
 
 class FamilyTree:
 

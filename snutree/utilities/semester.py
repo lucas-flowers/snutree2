@@ -56,7 +56,7 @@ class Semester:
         return Season.SPRING if self._index % 2 == 0 else Season.FALL
 
     def __repr__(self):
-        return f'Semester(season={self.season!r}, year={self.year!r})'
+        return f'{type(self).__name__}(season={self.season!r}, year={self.year!r})'
 
     def __str__(self):
         return f'{self.season} {self.year}'
@@ -65,11 +65,11 @@ class Semester:
         return self._index
 
     def __sub__(self, other):
-        return Semester(self._index - other.__index__())
+        return type(self)(self._index - other.__index__())
 
     def __add__(self, other):
         if isinstance(other, int):
-            return Semester(self._index + other)
+            return type(self)(self._index + other)
         else:
             raise TypeError('Can only add to int')
 

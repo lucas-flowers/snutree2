@@ -3,8 +3,6 @@
 Create Member objects from lists of rows.
 '''
 
-from functools import wraps
-
 from ...utilities import get, name
 from ...utilities.semester import Semester
 from .config import validate
@@ -76,19 +74,40 @@ class DataFunctions:
     def preferred_name(keys, row):
         return name.preferred(*[row[key] for key in keys])
 
+def create_rank_function(rank_class, rank_to_identifier):
+    '''
+    Return a function to be used in converting a member row into a rank value
+    representing that member's rank. The function will take a list of keys
+    (which should contain only one element), and the row (a dictionary) from
+    which the string value of the rank should be taken (based on that key). The
+    function will then return an instance of the rank class provided to
+    `create_rank_function`, EXCEPT that the instance will also have a
+    `to_identifier` method that converts the instance to a valid snutree
+    identifier.
+
+    This is necessary because some potential rank types might have a string
+    form that is an invalid identifier, and I'd rather not add the
+    to_identifier to those classes (because it couples those classes to the
+    implementation of snutree).
+    '''
+    class Rank(rank_class):
+        to_identifier = rank_to_identifier
+    def rank_function(keys, row):
+        (key,) = keys
+        return Rank(row[key])
+    return rank_function
+
 class RankFunctions:
 
     namespace = FunctionNamespace()
 
-    @namespace.register('Semester')
-    def semester(keys, row):
-        (key,) = keys
-        return Semester(row[key])
+    semester = namespace.register('Semester')(create_rank_function(
+        Semester, lambda semester: f'{semester.season}{semester.year}'.lower(),
+    ))
 
-    @namespace.register('Integer')
-    def integer(keys, row):
-        (key,) = keys
-        return int(row[key])
+    integer = namespace.register('Integer')(create_rank_function(
+        int, str,
+    ))
 
 class Reader:
 
