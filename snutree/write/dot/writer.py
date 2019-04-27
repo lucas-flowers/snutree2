@@ -207,8 +207,8 @@ class Writer:
         '''
         return Subgraph(
             Attribute(rank='same'),
-            Node(f'{cohort.rank}L'),
-            Node(f'{cohort.rank}R'),
+            Node(f'{cohort.id}L'),
+            Node(f'{cohort.id}R'),
             *map(Node, cohort.ids),
         )
 

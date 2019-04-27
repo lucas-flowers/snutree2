@@ -3,6 +3,9 @@
 Create Member objects from lists of rows.
 '''
 
+from dataclasses import dataclass
+from typing import Callable
+
 from ...utilities import get, name
 from ...utilities.semester import Semester
 from .config import validate
@@ -15,99 +18,74 @@ def read(rows, config=None):
 def read_row(row, config=None):
     return Reader(config or {}).read_member(row)
 
-class FunctionNamespace:
+class Functions:
 
-    def __init__(self):
-        self.mapping = {}
+    class FunctionNamespace(dict):
+        def register(self, name):
+            def wrapped(function):
+                self[name] = function
+                return staticmethod(function)
+            return wrapped
 
-    def register(self, name):
-        def wrapped(function):
-            self.mapping[name] = function
-            return staticmethod(function)
-        return wrapped
+    @dataclass
+    class identified_by:
+        identify: Callable[[object], str]
+        def __call__(self, function):
+            class Rank(function.__annotations__['return']):
+                identify = self.identify
+            return lambda *args, **kwargs: Rank(function(*args, **kwargs))
 
-    def __getitem__(self, value):
-        return self.mapping[value]
+    rank = FunctionNamespace()
 
-class ClassFunctions:
+    @rank.register('Semester')
+    @identified_by(lambda semester: f'{semester.season}{semester.year}'.lower())
+    def semester(row, key) -> Semester:
+        return row[key]
 
-    namespace = FunctionNamespace()
+    @rank.register('Integer')
+    @identified_by(str)
+    def integer(row, key) -> int:
+        return row[key]
 
-    @namespace.register(name=None)
-    def default(keys, row):
-        (key,) = keys
-        return [key]
+    classes = FunctionNamespace()
 
-    @namespace.register('Enum')
-    def enum(keys, row):
-        (key,) = keys
+    @classes.register(name=None)
+    def constant(row, constant):
+        return [constant]
+
+    @classes.register('Enum')
+    def enum(row, key):
         return [row[key]]
 
-    @namespace.register('Boolean')
-    def boolean(keys, row):
-        (key,) = keys
+    @classes.register('Boolean')
+    def boolean(row, key):
         value = row[key]
         if bool(value) and value.lower() in {'yes', 'true', '1'}:
             return [key]
         else:
             return []
 
-    @namespace.register('List')
-    def list(keys, row):
-        (key,) = keys
+    @classes.register('List')
+    def list(row, key):
         value = row[key]
         return [
             element.strip() for element
-            in (value.split(',') if value.strip() else [])
+            in (value.split(',') if value else [])
         ]
 
-class DataFunctions:
+    data = FunctionNamespace()
 
-    namespace = FunctionNamespace()
-
-    @namespace.register(name=None)
-    def default(keys, row):
-        (key,) = keys
+    @data.register(name=None)
+    def lookup(row, key):
         return row[key]
 
-    @namespace.register('PreferredName')
-    def preferred_name(keys, row):
-        return name.preferred(*[row[key] for key in keys])
-
-def create_rank_function(rank_class, rank_to_identifier):
-    '''
-    Return a function to be used in converting a member row into a rank value
-    representing that member's rank. The function will take a list of keys
-    (which should contain only one element), and the row (a dictionary) from
-    which the string value of the rank should be taken (based on that key). The
-    function will then return an instance of the rank class provided to
-    `create_rank_function`, EXCEPT that the instance will also have a
-    `to_identifier` method that converts the instance to a valid snutree
-    identifier.
-
-    This is necessary because some potential rank types might have a string
-    form that is an invalid identifier, and I'd rather not add the
-    to_identifier to those classes (because it couples those classes to the
-    implementation of snutree).
-    '''
-    class Rank(rank_class):
-        to_identifier = rank_to_identifier
-    def rank_function(keys, row):
-        (key,) = keys
-        return Rank(row[key])
-    return rank_function
-
-class RankFunctions:
-
-    namespace = FunctionNamespace()
-
-    semester = namespace.register('Semester')(create_rank_function(
-        Semester, lambda semester: f'{semester.season}{semester.year}'.lower(),
-    ))
-
-    integer = namespace.register('Integer')(create_rank_function(
-        int, str,
-    ))
+    @data.register('PreferredName')
+    def preferred_name(row, first_key, preferred_key, last_key):
+        return name.preferred(
+            first_name=row[first_key],
+            preferred_name=row[preferred_key],
+            last_name=row[last_key],
+        )
 
 class Reader:
 
@@ -143,31 +121,46 @@ class Reader:
         }
 
     def read_members(self, rows):
-        return list(map(self.read_member, rows))
+        return [
+            *map(self.read_member, rows),
+            *map(self.read_custom_member, get(self.config, 'custom')),
+        ]
 
     def read_member(self, row):
         return Member(
             id=self.read_id(row),
             parent_id=self.read_parent_id(row),
             rank=self.read_rank(row),
-            data=self.read_data(row),
             classes=self.read_classes(row),
+            data=self.read_data(row),
+        )
+
+    def read_custom_member(self, row):
+        return Member(
+            id=row.get('id'),
+            parent_id=row.get('parent_id'),
+            rank=(
+                Functions.rank[self.config_rank[0]](row, 'rank')
+                if self.config_rank is not None else None
+            ),
+            data=row.get('data') or {},
+            classes=row.get('classes') or [],
         )
 
     def read_id(self, row):
-        function_name, sources = self.config_id
-        return DataFunctions.namespace[function_name](sources, row)
+        fname, keys = self.config_id
+        return Functions.data[fname](row, *keys)
 
     def read_parent_id(self, row):
-        function_name, sources = self.config_parent_id
-        return DataFunctions.namespace[function_name](sources, row)
+        fname, keys = self.config_parent_id
+        return Functions.data[fname](row, *keys)
 
     def read_rank(self, row):
         if self.config_rank is None:
             rank = None
         else:
-            function_name, sources = self.config_rank
-            rank = RankFunctions.namespace[function_name](sources, row)
+            fname, keys = self.config_rank
+            rank = Functions.rank[fname](row, *keys)
         return rank
 
     def read_classes(self, row):
@@ -175,13 +168,13 @@ class Reader:
         # return ['root', 'tree']
         return list({
             cls: None
-            for function_name, sources in self.config_classes
-            for cls in ClassFunctions.namespace[function_name](sources, row)
+            for fname, keys in self.config_classes
+            for cls in Functions.classes[fname](row, *keys)
         })
 
     def read_data(self, row):
         return {
-            destination: DataFunctions.namespace[function_name](sources, row)
-            for destination, (function_name, sources) in self.config_data.items()
+            destination: Functions.data[fname](row, *keys)
+            for destination, (fname, keys) in self.config_data.items()
         }
 
