@@ -33,7 +33,7 @@ class TreeFactory:
     def entity(self, extended_member):
         return Entity(
             id=extended_member.id,
-            classes=['root', 'tree'] + extended_member.classes, # TODO ???
+            classes=['root', 'tree', *extended_member.classes],
             data=extended_member.data,
         )
 
@@ -48,7 +48,11 @@ class TreeFactory:
             from_id=extended_member.parent_id,
             to_id=extended_member.id,
             # TODO Figure out the classes exactly and whether to include member.classes
-            classes=['root', 'unknown' if extended_member.has_unknown_parent else 'tree'],
+            classes=[
+                'root',
+                'unknown' if extended_member.has_unknown_parent else 'tree',
+                *extended_member.classes, # TODO Include this?
+            ],
             data=extended_member.data, # TODO ?
         )
 
@@ -95,8 +99,8 @@ class TreeFactory:
             Cohort(
                 rank=rank,
                 ids=rank_to_ids[rank],
-                classes=['root', 'rank'], # TODO???
-                data={'rank': rank}, # TODO???
+                classes=['root', 'rank'],
+                data={'rank': rank},
             )
             for rank in all_ranks
         ]

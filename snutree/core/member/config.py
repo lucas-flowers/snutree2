@@ -15,9 +15,9 @@ schema = {
 
     'properties': {
 
-        # 'id': {'type': 'string'},
-        # 'parent_id': {'type': 'string'},
-        # 'rank': {'type': 'string'},
+        'id': {'type': 'string'},
+        'parent_id': {'type': 'string'},
+        'rank': {'type': 'string'},
 
         'classes': {
             'type': 'array',

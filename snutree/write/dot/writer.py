@@ -124,8 +124,8 @@ class Writer:
                 f'{cohort.id}{suffix}',
                 **self.attribute_list(
                     'node',
-                    classes=['root', 'rank'],
-                    data={'rank': cohort.rank},
+                    classes=cohort.classes,
+                    data=cohort.data
                 )
             ) for cohort in cohorts),
             *(Edge(
@@ -133,8 +133,15 @@ class Writer:
                 f'{cohort1.id}{suffix}',
                 **self.attribute_list(
                     'edge',
-                    classes=['root', 'rank'],
-                    data={},
+                    classes=list({
+                        # Use a dict to preserve both order and uniqueness
+                        cls: None for cls in cohort0.classes + cohort1.classes
+                    }),
+                    data={
+                        # TODO Is there a better way than prioritizing cohort1?
+                        **cohort0.data,
+                        **cohort1.data,
+                    },
                 )
             ) for cohort0, cohort1 in zip(cohorts[:-1], cohorts[1:])),
         )
