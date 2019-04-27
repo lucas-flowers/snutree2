@@ -64,6 +64,22 @@ schema = {
             'type': 'integer',
         },
 
+        'graph-names': {
+            'type': 'object',
+            'properties': {
+                'root': {'type': 'string'},
+                'tree': {'type': 'string'},
+                'rank': {
+                    'type': 'object',
+                    'properties': {
+                        'prefix': {'type': 'string'},
+                        'left': {'type': 'string'},
+                        'right': {'type': 'string'},
+                    },
+                },
+            },
+        },
+
         'class': {
             'type': 'object',
             'additionalProperties': False,

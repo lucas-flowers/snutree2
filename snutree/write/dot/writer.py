@@ -112,13 +112,13 @@ class Writer:
             if attribute_statement
         ]
 
-    def rank_labels(self, suffix, cohorts):
+    def rank_labels(self, prefix, suffix, cohorts):
         '''
         Rank labels for the left or right side of the tree.
         '''
         # TODO Remove suffix; just use graph_id or something
         return Subgraph(
-            f'rank{suffix}',
+            f'{prefix}{suffix}',
             *self.attribute_statements('rank'),
             *(Node(
                 f'{cohort.id}{suffix}',
@@ -144,11 +144,19 @@ class Writer:
 
     def root(self, tree):
         return Digraph(
-            'root',
+            self.config['graph-names']['root'],
             *self.attribute_statements('root'),
-            self.rank_labels('Left'[0], tree.cohorts) if tree.cohorts is not None else None,
+            self.rank_labels(
+                prefix=self.config['graph-names']['rank']['prefix'],
+                suffix=self.config['graph-names']['rank']['left'],
+                cohorts=tree.cohorts,
+            ) if tree.cohorts is not None else None,
             self.tree(tree),
-            self.rank_labels('Right'[0], tree.cohorts) if tree.cohorts is not None else None,
+            self.rank_labels(
+                prefix=self.config['graph-names']['rank']['prefix'],
+                suffix=self.config['graph-names']['rank']['right'],
+                cohorts=tree.cohorts,
+            ) if tree.cohorts is not None else None,
             *(map(self.ranks, tree.cohorts) if tree.cohorts is not None else ()),
         )
 
@@ -157,7 +165,7 @@ class Writer:
         The actual entities and relationships in the tree.
         '''
         return Subgraph(
-            'tree',
+            self.config['graph-names']['tree'],
             *self.attribute_statements('tree'),
             *self.nodes(tree),
             *self.custom_nodes,
