@@ -29,6 +29,30 @@ schema = {
             'additionalProperties': {'type': 'string'},
         },
 
+        'custom': {
+            'type': 'array',
+            'items': {
+
+                'type': 'object',
+
+                'id': {'type': 'string'},
+                'parent_id': {'type': 'string'},
+                'rank': {'type': 'string'},
+
+                'classes': {
+                    'type': 'array',
+                    'items': {'type': 'string'},
+                },
+
+                'data': {
+                    'type': 'object',
+                    'additionalProperties': {'type': 'string'},
+                },
+
+            },
+
+        },
+
     },
 
 }
