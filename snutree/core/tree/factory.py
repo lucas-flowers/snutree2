@@ -44,7 +44,7 @@ class TreeFactory:
         )
 
     def relationship(self, extended_member):
-        return Relationship(
+        return None if extended_member.parent_id is None else Relationship(
             from_id=extended_member.parent_id,
             to_id=extended_member.id,
             # TODO Figure out the classes exactly and whether to include member.classes
@@ -117,8 +117,9 @@ class TreeFactory:
                 for entity in self.entities(extended_member)
             ],
             relationships=[
-                self.relationship(extended_member)
-                for extended_member in extended_members
+                relationship
+                for relationship in map(self.relationship, extended_members)
+                if relationship is not None
             ],
             cohorts=self.cohorts(extended_members),
             classes=['root'], # TODO ???
