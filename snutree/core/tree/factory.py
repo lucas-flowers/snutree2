@@ -33,7 +33,7 @@ class TreeFactory:
     def entity(self, extended_member):
         return Entity(
             id=extended_member.id,
-            classes=['root', 'tree', *extended_member.classes],
+            classes=extended_member.classes,
             data=extended_member.data,
         )
 

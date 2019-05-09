@@ -6,17 +6,17 @@ Create Member objects from lists of rows.
 from dataclasses import dataclass
 from typing import Callable
 
-from ...utilities import get, name
+from ...utilities import name, deep_update
 from ...utilities.semester import Semester
-from .config import validate
-from .parser import Parser
+from .config import Config, defaults
 from .model import Member
+from .parser import Parser
 
-def read(rows, config=None):
-    return Reader(config or {}).read_members(rows)
+def read(rows, config):
+    return Reader(Config.from_dict(deep_update(defaults, config))).read_members(rows)
 
-def read_row(row, config=None):
-    return Reader(config or {}).read_member(row)
+def read_row(row, config):
+    return Reader(Config.from_dict(deep_update(defaults, config))).read_member(row)
 
 class Functions:
 
@@ -33,7 +33,9 @@ class Functions:
         def __call__(self, function):
             class Rank(function.__annotations__['return']):
                 identify = self.identify
-            return lambda *args, **kwargs: Rank(function(*args, **kwargs))
+            def rank_function(*args, **kwargs) -> Rank:
+                return Rank(function(*args, **kwargs))
+            return rank_function
 
     rank = FunctionNamespace()
 
@@ -95,86 +97,65 @@ class Reader:
         self.config = config
 
     @property
-    def config_id(self):
-        return self.parser.parse(self.config['id'])
-
-    @property
-    def config_parent_id(self):
-        return self.parser.parse(self.config['parent_id'])
-
-    @property
-    def config_rank(self):
-        return self.parser.parse(self.config['rank'])
-
-    @property
-    def config_classes(self):
-        return [
-            self.parser.parse(string)
-            for string in get(self.config, 'classes')
-        ]
-
-    @property
-    def config_data(self):
-        return {
-            destination: self.parser.parse(string)
-            for destination, string in get(self.config, 'data').items()
-        }
+    def Rank(self):
+        fname, _ = self.config.rank
+        function = Functions.rank[fname]
+        constructor = function.__annotations__['return']
+        return constructor
 
     def read_members(self, rows):
         return [
             *map(self.read_member, rows),
-            *map(self.read_custom_member, get(self.config, 'custom')),
+            *map(self.read_custom_member, self.config.custom),
         ]
 
     def read_member(self, row):
         return Member(
-            id=self.read_id(row),
-            parent_id=self.read_parent_id(row),
-            rank=self.read_rank(row),
+            id=self.read_id(row) if self.config.id else None,
+            parent_id=self.read_parent_id(row) if self.config.parent_id else None,
+            rank=self.read_rank(row) if self.config.rank else None,
             classes=self.read_classes(row),
             data=self.read_data(row),
         )
 
     def read_custom_member(self, row):
         return Member(
-            id=row.get('id'),
-            parent_id=row.get('parent_id'),
+            id=row['id'],
+            parent_id=row['parent_id'],
             rank=(
-                Functions.rank[self.config_rank[0]](row, 'rank')
-                if self.config_rank is not None else None
+                self.Rank(row['rank'])
+                if self.config.rank is not None else None
             ),
-            data=row.get('data') or {},
-            classes=row.get('classes') or [],
+            data=row['data'],
+            classes=row['classes'],
         )
 
     def read_id(self, row):
-        fname, keys = self.config_id
+        fname, keys = self.config.id
         return Functions.data[fname](row, *keys)
 
     def read_parent_id(self, row):
-        fname, keys = self.config_parent_id
+        fname, keys = self.config.parent_id
         return Functions.data[fname](row, *keys)
 
     def read_rank(self, row):
-        if self.config_rank is None:
+        if self.config.rank is None:
             rank = None
         else:
-            fname, keys = self.config_rank
+            fname, keys = self.config.rank
             rank = Functions.rank[fname](row, *keys)
         return rank
 
     def read_classes(self, row):
-        # # TODO ???
-        # return ['root', 'tree']
         return list({
-            cls: None
-            for fname, keys in self.config_classes
+            cls: None # Using dict to maintain both order and uniqueness
+            for fname, keys in self.config.classes
             for cls in Functions.classes[fname](row, *keys)
         })
 
     def read_data(self, row):
         return {
             destination: Functions.data[fname](row, *keys)
-            for destination, (fname, keys) in self.config_data.items()
+            for destination, (fname, keys) in self.config.data.items()
         }
 
