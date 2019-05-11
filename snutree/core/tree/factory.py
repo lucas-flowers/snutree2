@@ -88,12 +88,12 @@ class TreeFactory:
                 max_rank = extended_member.rank
             rank_to_ids[extended_member.rank].append(extended_member.id)
             if extended_member.has_unknown_parent:
-                rank_to_ids[extended_member.rank - 1].append(extended_member.parent_id)
+                rank_to_ids[extended_member.rank - 2].append(extended_member.parent_id)
 
         if min_rank is None and max_rank is None:
             all_ranks = []
         else:
-            all_ranks = (min_rank + i for i in range(max_rank - min_rank + 1))
+            all_ranks = (min_rank + i - 2 for i in range(max_rank - min_rank + 1))
 
         return [
             Cohort(
