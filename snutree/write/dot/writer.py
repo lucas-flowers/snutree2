@@ -114,21 +114,19 @@ class Writer:
         '''
         Return a list of attribute statements based on the classes.
         '''
-        statements = []
-        type_to_class_map = {
-            ComponentType.GRAPH: self.config.classes.graph,
-            ComponentType.NODE: self.config.classes.node,
-            ComponentType.EDGE: self.config.classes.edge,
+        component_type_to_attributes = {
+            component_type: self.graph_level_attributes(component_type, classes)
+            for component_type in ComponentType.__members__.values()
         }
-        for component_type, class_to_attributes in type_to_class_map.items():
-            attributes = self.graph_level_attributes(component_type, classes)
-            if attributes:
-                statements.append(Component(
-                    type=component_type,
-                    identifiers=(),
-                    attributes=attributes,
-                ))
-        return statements
+        return [
+            Component(
+                type=component_type,
+                identifiers=(),
+                attributes=attributes,
+            )
+            for component_type, attributes in component_type_to_attributes.items()
+            if attributes
+        ]
 
     def rank_labels(self, graph_id, suffix, cohorts):
         '''
