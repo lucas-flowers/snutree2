@@ -28,7 +28,7 @@ def Graph(*args, **kwargs):
         return create_graph_factory(GraphType.GRAPH)()
     elif not args and kwargs:
         # Graph(**attributes): Default graph with attributes
-        return model.Component(ComponentType.GRAPH, [], kwargs)
+        return model.Component(ComponentType.GRAPH, (), kwargs)
     elif args and not kwargs:
         # Graph(*statements): Nameless graph
         # Graph(identifier): Empty named graph

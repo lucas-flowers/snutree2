@@ -4,10 +4,16 @@ from itertools import repeat
 import pytest
 
 from snutree.core.tree import Entity, Relationship, Cohort, FamilyTree
-from snutree.write import dot
+from snutree.write.dot.config import Config
+from snutree.write.dot.model import ComponentType
 from snutree.write.dot.create import Graph, Node, Edge
+from snutree.write.dot.writer import Writer, write_str
 
 from conftest import trim
+
+def create_writer(dct):
+    config = Config.from_dict(dct)
+    return Writer(config)
 
 @pytest.mark.parametrize('component_type, classes, data, config, expected', [
 
@@ -101,8 +107,9 @@ from conftest import trim
 
 ])
 def test_component_attributes(component_type, classes, data, config, expected):
-    writer = dot.Writer(config)
-    component = writer.attribute_list(component_type, classes, data)
+    writer = create_writer(config)
+    component_type = ComponentType.__members__[component_type.upper()] # TODO
+    component = writer.component_level_attributes(component_type, classes, data)
     assert component == expected
 
 @pytest.mark.parametrize('graph_id, config, expected', [
@@ -177,7 +184,7 @@ def test_component_attributes(component_type, classes, data, config, expected):
 
 ])
 def test_attribute_statements(graph_id, config, expected):
-    writer = dot.Writer(config)
+    writer = create_writer(config)
     component = writer.attribute_statements(graph_id)
     assert component == expected
 
@@ -204,7 +211,7 @@ def test_family_tree_standard_order():
         ],
     )
 
-    assert dot.write_str(tree) == trim(r'''
+    assert write_str(tree, config={}) == trim(r'''
         digraph "root" {
             subgraph "tree" {
                 "a1";
@@ -248,7 +255,7 @@ def test_family_tree_shuffled_order():
         'seed': 1066,
     }
 
-    assert dot.write_str(tree, config) == trim(r'''
+    assert write_str(tree, config) == trim(r'''
         digraph "root" {
             subgraph "tree" {
                 "f";
@@ -316,7 +323,7 @@ def test_family_tree_no_cohorts():
         },
     }
 
-    assert dot.write_str(tree, config) == trim(r'''
+    assert write_str(tree, config) == trim(r'''
         digraph "root" {
             graph [rankdir="LR"];
             subgraph "tree" {
@@ -335,23 +342,23 @@ def test_family_tree_complete():
         entities=[
             Entity(id, classes, data)
             for id, classes, data in [
-                ('N', {'emperor'}, {'name': 'Nikephoros Phokas'}),
-                ('J', {'emperor', 'usurper'}, {'name': 'John Tzimiskes'}),
-                ('B', {'emperor'}, {'name': 'Basil II'}),
+                ('N', ['emperor'], {'name': 'Nikephoros Phokas'}),
+                ('J', ['emperor', 'usurper'], {'name': 'John Tzimiskes'}),
+                ('B', ['emperor'], {'name': 'Basil II'}),
             ]
         ],
         relationships=[
             Relationship(from_id, to_id, classes, data)
             for from_id, to_id, classes, data in [
-                ('N', 'J', {'usurper', 'succession'}, {}),
-                ('J', 'B', {'succession'}, {}),
+                ('N', 'J', ['usurper', 'succession'], {}),
+                ('J', 'B', ['succession'], {}),
             ]
         ],
         cohorts=[
             Cohort(rank, ids, classes, data)
             for rank, ids, classes, data in [
-                ('960s', ['N', 'J'], {}, {}),
-                ('970s', ['B'], {}, {}),
+                (960, ['N', 'J'], [], {}),
+                (970, ['B'], [], {}),
             ]
         ],
     )
@@ -380,13 +387,13 @@ def test_family_tree_complete():
         },
     }
 
-    assert dot.write_str(tree, config) == trim(r'''
+    assert write_str(tree, config) == trim(r'''
         digraph "root" {
             edge [color="purple"];
-            subgraph "rankL" {
-                "960sL";
-                "970sL";
-                "960sL" -> "970sL";
+            subgraph "ranksL" {
+                "960L";
+                "970L";
+                "960L" -> "970L";
             }
             subgraph "tree" {
                 "B" [label="Basil II",color="purple"];
@@ -395,22 +402,22 @@ def test_family_tree_complete():
                 "J" -> "B";
                 "N" -> "J" [style="dotted",color="yellow"];
             }
-            subgraph "rankR" {
-                "960sR";
-                "970sR";
-                "960sR" -> "970sR";
+            subgraph "ranksR" {
+                "960R";
+                "970R";
+                "960R" -> "970R";
             }
             {
                 rank="same";
-                "960sL";
-                "960sR";
+                "960L";
+                "960R";
                 "N";
                 "J";
             }
             {
                 rank="same";
-                "970sL";
-                "970sR";
+                "970L";
+                "970R";
                 "B";
             }
         }''')

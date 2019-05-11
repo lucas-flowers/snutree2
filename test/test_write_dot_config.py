@@ -2,7 +2,7 @@
 import pytest
 from jsonschema.exceptions import ValidationError
 
-from snutree.write.dot.config import class_map, validate
+from snutree.write.dot.config import Config, class_map
 
 @pytest.mark.parametrize('keys, error', [
 
@@ -42,20 +42,30 @@ def test_class_map(keys, error):
             class_map(mapping)
 
 @pytest.mark.parametrize('config', [
+
+    # Nothing at all
     {},
+
+    # Various empty dicts
     {'class': {}},
     {'class': {'node': {}}},
     {'class': {'node': {'custom_class': {}}}},
     {'class': {'node': {'custom_class': {'color': 'orange'}}}},
+
+    # Graphs can have custom classes, but they won't do anything
+    {'class': {'graph': {'custom_class': {}}}},
+
 ])
 def test_config_validate(config):
-    validate(config)
+    assert Config.from_dict(config)
 
 @pytest.mark.parametrize('config', [
-    {'class': {'graph': {'custom_class': {}}}}, # No custom graphs
-    {'class': {'node': {'custom': {}, 'root': {}}}}, # Root must go first
+
+    # Root must go first
+    {'class': {'node': {'custom': {}, 'root': {}}}},
+
 ])
 def test_config_validate_invalid(config):
     with pytest.raises(ValidationError):
-        validate(config)
+        Config.from_dict(config)
 

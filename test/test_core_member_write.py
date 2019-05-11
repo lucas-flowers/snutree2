@@ -50,10 +50,25 @@ def test_read_parent_id(row, config, expected):
 
 ])
 def test_read_rank(row, config, expected):
-    reader = Reader(config)
+    reader = create_reader(config)
     assert reader.read_rank(row) == expected
 
 @pytest.mark.parametrize('row, config, expected', [
+
+    # Constants
+    (
+        {},
+        {'classes': [
+            'clsA',
+            'clsB',
+            'clsC',
+        ]},
+        [
+            'clsA',
+            'clsB',
+            'clsC',
+        ],
+    ),
 
     # Columns that are enums
     (
@@ -63,9 +78,9 @@ def test_read_rank(row, config, expected):
             'E': 'clsE',
         },
         {'classes': [
-            'A',
-            'B',
-            'E',
+            'Enum(A)',
+            'Enum(B)',
+            'Enum(E)',
         ]},
         [
             'clsA',
@@ -136,7 +151,7 @@ def test_read_rank(row, config, expected):
 
 ])
 def test_read_classes(row, config, expected):
-    reader = Reader(config)
+    reader = create_reader(config)
     assert reader.read_classes(row) == expected
 
 @pytest.mark.parametrize('row, config, expected', [
@@ -192,7 +207,7 @@ def test_read_classes(row, config, expected):
 
 ])
 def test_read_data(row, config, expected):
-    reader = Reader(config)
+    reader = create_reader(config)
     assert reader.read_data(row) == expected
 
 
@@ -240,6 +255,6 @@ def test_read_data(row, config, expected):
 
 ])
 def test_read_member(row, config, expected):
-    reader = Reader(config)
+    reader = create_reader(config)
     assert reader.read_member(row) == expected
 
