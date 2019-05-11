@@ -31,15 +31,10 @@ class Relationship:
 
 @dataclass
 class Cohort:
-
     rank: object
     ids: Sequence[str]
     classes: Sequence[str] = field(default_factory=list)
     data: Mapping = field(default_factory=dict)
-
-    @property
-    def id(self):
-        return self.rank.identify()
 
 class FamilyTree:
 

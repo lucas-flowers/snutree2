@@ -1,9 +1,14 @@
 
 import pytest
 
+from snutree.core.member.config import Config
 from snutree.core.member.model import Member
 from snutree.core.member.reader import Reader
 from snutree.utilities.semester import Semester
+
+def create_reader(dct):
+    config = Config.from_dict(dct, defaults=False, validate=False)
+    return Reader(config)
 
 @pytest.mark.parametrize('row, config, expected', [
     (
@@ -13,7 +18,7 @@ from snutree.utilities.semester import Semester
     ),
 ])
 def test_read_id(row, config, expected):
-    reader = Reader(config)
+    reader = create_reader(config)
     assert reader.read_id(row) == expected
 
 @pytest.mark.parametrize('row, config, expected', [
@@ -24,7 +29,7 @@ def test_read_id(row, config, expected):
     ),
 ])
 def test_read_parent_id(row, config, expected):
-    reader = Reader(config)
+    reader = create_reader(config)
     assert reader.read_parent_id(row) == expected
 
 @pytest.mark.parametrize('row, config, expected', [

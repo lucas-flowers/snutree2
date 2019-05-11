@@ -4,6 +4,7 @@ from typing import Optional, Tuple, List, Mapping
 
 from jsonschema import Draft7Validator
 
+from ...utilities import deep_update
 from .parser import Parser
 
 def validate(config):
@@ -83,13 +84,19 @@ class Config:
     custom: List[dict]
 
     @classmethod
-    def from_dict(cls, dct):
+    def from_dict(cls, dct, defaults=True, validate=True):
         '''
         Assumes nothing (or very, very little) about the configuration, but
         gives the program view into the configuration that it expects without
         too much guessing.
         '''
-        dct = dct or {}
+
+        if defaults:
+            dct = deep_update(globals()['defaults'], dct)
+
+        if validate:
+            globals()['validate'](dct)
+
         parser = Parser()
         return cls(
             id=(

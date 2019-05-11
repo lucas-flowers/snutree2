@@ -3,18 +3,37 @@
 Convert a FamilyTree to DOT code.
 '''
 
+import dataclasses
+from dataclasses import dataclass
 from random import Random
 
-from ...utilities import get
-from .config import validate, GRAPHS, TEMPLATE_ATTRIBUTES
-from .create import Graph, Digraph, Subgraph, Attribute, Node, Edge
+from ...utilities.semester import Semester
+from .config import Config, GRAPHS
+from .create import Digraph, Subgraph, Attribute, Node, Edge
+from .model import Component, ComponentType
 
-def write(tree, stream, config=None):
+# Functions to convert different types of objects to valid identifiers
+IDENTIFIERS = {
+    Semester: lambda semester: f'{semester.season}{semester.year}'.lower(),
+    int: str,
+}
+
+# Fields that are templates, also requiring special handling
+TEMPLATE_ATTRIBUTES = [
+    'label',
+]
+
+def write(tree, stream, config: dict):
     raise NotImplementedError # TODO
 
-def write_str(tree, config=None):
-    return Writer(config or {}).write(tree)
+def write_str(tree, config: dict):
+    config = Config.from_dict(config)
+    return Writer(config).write(tree)
 
+def identify(value):
+    return IDENTIFIERS[type(value)](value)
+
+@dataclass
 class Writer:
     '''
     The configuration treats graphs and classes identical to each other. But
@@ -42,40 +61,25 @@ class Writer:
     (namely, the 'label' field), since they'd be different for each node/edge.
     '''
 
-    def __init__(self, config):
-        validate(config)
-        self.config = config
-
-    @property
-    def custom_nodes(self):
-        return [
-            Node(identifier, **attributes)
-            for identifier, attributes
-            in get(self.config, 'custom', 'node').items()
-        ]
-
-    @property
-    def custom_edges(self):
-        return [
-            Edge(*identifiers.split(','), **attributes)
-            for identifiers, attributes
-            in get(self.config, 'custom', 'edge').items()
-        ]
+    config: Config
 
     # TODO Custom cohorts
 
-    def attribute_list(self, component_type, classes, data):
+    def component_level_attributes(self, component_type, classes, data):
         '''
         Combine the classes and data into node/edge/graph attributes.
         '''
+
+        class_to_attributes = getattr(self.config.classes, component_type.value)
+
         return {
 
             key: value.format(**data) if key in TEMPLATE_ATTRIBUTES else value
 
             # Use the class order in the config file, not the class list
-            for cls in get(self.config, 'class', component_type).keys()
+            for cls in class_to_attributes.keys()
             if cls in classes
-            for key, value in self.config['class'][component_type][cls].items()
+            for key, value in class_to_attributes[cls].items()
 
             # Do not include attributes inherited from graph-based classes
             # (unless they're templated attributes, like labels), since they
@@ -84,55 +88,68 @@ class Writer:
 
         }
 
-    def attribute_statements(self, graph_id):
+    def graph_level_attributes(self, component_type, classes):
         '''
-        Return a list of attribute statements for the given (sub)graph.
+        Combine the classes into a node/edge/graph attribute statement.
         '''
 
-        graph_attributes, node_attributes, edge_attributes = ({
+        class_to_attributes = getattr(self.config.classes, component_type.value)
+
+        return {
 
             key: value
-            for key, value in get(self.config, 'class', component, graph_id).items()
+
+            # Use the class order in the config, not the class list
+            for cls in class_to_attributes.keys()
+            if cls in classes
+            for key, value in class_to_attributes[cls].items()
 
             # Always include graph attributes, and any node or edge attributes
             # that aren't templated
-            if component == 'graph' or key not in TEMPLATE_ATTRIBUTES
+            if component_type == ComponentType.GRAPH or key not in TEMPLATE_ATTRIBUTES
 
-        } for component in ('graph', 'node', 'edge'))
+        }
 
-        attribute_statements = [
-            graph_attributes and Graph(**graph_attributes),
-            node_attributes and Node(**node_attributes),
-            edge_attributes and Edge(**edge_attributes),
-        ]
+    def attribute_statements(self, classes):
+        '''
+        Return a list of attribute statements based on the classes.
+        '''
+        statements = []
+        type_to_class_map = {
+            ComponentType.GRAPH: self.config.classes.graph,
+            ComponentType.NODE: self.config.classes.node,
+            ComponentType.EDGE: self.config.classes.edge,
+        }
+        for component_type, class_to_attributes in type_to_class_map.items():
+            attributes = self.graph_level_attributes(component_type, classes)
+            if attributes:
+                statements.append(Component(
+                    type=component_type,
+                    identifiers=(),
+                    attributes=attributes,
+                ))
+        return statements
 
-        return [
-            attribute_statement
-            for attribute_statement in attribute_statements
-            if attribute_statement
-        ]
-
-    def rank_labels(self, prefix, suffix, cohorts):
+    def rank_labels(self, graph_id, suffix, cohorts):
         '''
         Rank labels for the left or right side of the tree.
         '''
-        # TODO Remove suffix; just use graph_id or something
         return Subgraph(
-            f'{prefix}{suffix}',
-            *self.attribute_statements('rank'),
+            graph_id,
+            *self.attribute_statements(['rank']),
             *(Node(
-                f'{cohort.id}{suffix}',
-                **self.attribute_list(
-                    'node',
+                f'{identify(cohort.rank)}{suffix}',
+                **self.component_level_attributes(
+                    ComponentType.NODE,
                     classes=cohort.classes,
                     data=cohort.data
                 )
             ) for cohort in cohorts),
             *(Edge(
-                f'{cohort0.id}{suffix}',
-                f'{cohort1.id}{suffix}',
-                **self.attribute_list(
-                    'edge',
+                f'{identify(cohort0.rank)}{suffix}',
+                f'{identify(cohort1.rank)}{suffix}',
+                **self.component_level_attributes(
+                    ComponentType.EDGE,
                     classes=list({
                         # Use a dict to preserve both order and uniqueness
                         cls: None for cls in cohort0.classes + cohort1.classes
@@ -151,17 +168,17 @@ class Writer:
 
     def root(self, tree):
         return Digraph(
-            self.config['graph-names']['root'],
-            *self.attribute_statements('root'),
+            self.config.names.root_graph_name,
+            *self.attribute_statements(['root']),
             self.rank_labels(
-                prefix=self.config['graph-names']['rank']['prefix'],
-                suffix=self.config['graph-names']['rank']['left'],
+                graph_id=self.config.names.ranks_left_graph_name,
+                suffix=self.config.names.rank_key_suffix_left,
                 cohorts=tree.cohorts,
             ) if tree.cohorts is not None else None,
             self.tree(tree),
             self.rank_labels(
-                prefix=self.config['graph-names']['rank']['prefix'],
-                suffix=self.config['graph-names']['rank']['right'],
+                graph_id=self.config.names.ranks_right_graph_name,
+                suffix=self.config.names.rank_key_suffix_right,
                 cohorts=tree.cohorts,
             ) if tree.cohorts is not None else None,
             *(map(self.ranks, tree.cohorts) if tree.cohorts is not None else ()),
@@ -172,17 +189,17 @@ class Writer:
         The actual entities and relationships in the tree.
         '''
         return Subgraph(
-            self.config['graph-names']['tree'],
-            *self.attribute_statements('tree'),
+            self.config.names.tree_graph_name,
+            *self.attribute_statements(['tree']),
             *self.nodes(tree),
-            *self.custom_nodes,
+            *self.config.nodes,
             *self.edges(tree),
-            *self.custom_edges,
+            *self.config.edges,
         )
 
     def nodes(self, tree):
-        if self.config.get('seed'):
-            rng = Random(self.config['seed'])
+        if self.config.seed is not None:
+            rng = Random(self.config.seed)
             shuffle = lambda families: rng.sample(families, k=len(families))
         else:
             shuffle = lambda families: families
@@ -198,8 +215,8 @@ class Writer:
     def entity(self, entity):
         return Node(
             entity.id,
-            **self.attribute_list(
-                'node',
+            **self.component_level_attributes(
+                ComponentType.NODE,
                 classes=entity.classes,
                 data=entity.data,
             ),
@@ -209,8 +226,8 @@ class Writer:
         return Edge(
             relationship.from_id,
             relationship.to_id,
-            **self.attribute_list(
-                'edge',
+            **self.component_level_attributes(
+                ComponentType.EDGE,
                 classes=relationship.classes,
                 data=relationship.data,
             ),
@@ -222,8 +239,8 @@ class Writer:
         '''
         return Subgraph(
             Attribute(rank='same'),
-            Node(f'{cohort.id}L'),
-            Node(f'{cohort.id}R'),
+            Node(f'{identify(cohort.rank)}L'),
+            Node(f'{identify(cohort.rank)}R'),
             *map(Node, cohort.ids),
         )
 

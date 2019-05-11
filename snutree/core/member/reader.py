@@ -4,19 +4,20 @@ Create Member objects from lists of rows.
 '''
 
 from dataclasses import dataclass
-from typing import Callable
 
 from ...utilities import name, deep_update
 from ...utilities.semester import Semester
-from .config import Config, defaults
+from .config import Config
 from .model import Member
 from .parser import Parser
 
-def read(rows, config):
-    return Reader(Config.from_dict(deep_update(defaults, config))).read_members(rows)
+def read(rows, config: dict):
+    config = Config.from_dict(config)
+    return Reader(config).read_members(rows)
 
-def read_row(row, config):
-    return Reader(Config.from_dict(deep_update(defaults, config))).read_member(row)
+def read_row(row, config: dict):
+    config = Config.from_dict(config)
+    return Reader(config).read_member(row)
 
 class Functions:
 
@@ -27,27 +28,15 @@ class Functions:
                 return staticmethod(function)
             return wrapped
 
-    @dataclass
-    class identified_by:
-        identify: Callable[[object], str]
-        def __call__(self, function):
-            class Rank(function.__annotations__['return']):
-                identify = self.identify
-            def rank_function(*args, **kwargs) -> Rank:
-                return Rank(function(*args, **kwargs))
-            return rank_function
-
     rank = FunctionNamespace()
 
     @rank.register('Semester')
-    @identified_by(lambda semester: f'{semester.season}{semester.year}'.lower())
     def semester(row, key) -> Semester:
-        return row[key]
+        return Semester(row[key])
 
     @rank.register('Integer')
-    @identified_by(str)
     def integer(row, key) -> int:
-        return row[key]
+        return int(row[key])
 
     classes = FunctionNamespace()
 
@@ -71,8 +60,8 @@ class Functions:
     def list(row, key):
         value = row[key]
         return [
-            element.strip() for element
-            in (value.split(',') if value else [])
+            element.strip()
+            for element in (value.split(',') if value.strip() else [])
         ]
 
     data = FunctionNamespace()
@@ -89,12 +78,12 @@ class Functions:
             last_name=row[last_key],
         )
 
+@dataclass
 class Reader:
 
     parser = Parser()
 
-    def __init__(self, config):
-        self.config = config
+    config: Config
 
     @property
     def Rank(self):

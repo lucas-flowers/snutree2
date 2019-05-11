@@ -3,7 +3,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from itertools import count
 
-from ..member import Member, ExtendedMember
+from ..member import ExtendedMember
 from .model import Entity, Relationship, Cohort, FamilyTree
 
 from ...utilities import get

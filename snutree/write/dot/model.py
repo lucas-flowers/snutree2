@@ -4,7 +4,7 @@ Underlying representations of DOT objects.
 '''
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, field, InitVar
 from enum import Enum
 from typing import List, Dict
 
@@ -13,9 +13,9 @@ class StringEnum(Enum):
         return self.value
 
 class ComponentType(StringEnum):
+    GRAPH = 'graph'
     NODE = 'node'
     EDGE = 'edge'
-    GRAPH = 'graph'
 
 class EdgeOp(StringEnum):
     DIRECTED = ' -> '
@@ -47,11 +47,15 @@ class Attribute:
 @dataclass
 class Component:
 
-    component_type: ComponentType
+    type: ComponentType
     identifiers: List[str]
-    _attributes: Dict[str, object]
+    attributes: InitVar[Dict[str, object]]
+    _attributes: Dict[str, object] = field(init=False)
 
     EDGE_OP = EdgeOp.DIRECTED
+
+    def __post_init__(self, attributes=None):
+        self._attributes = attributes
 
     @property
     def attributes(self):
@@ -70,7 +74,7 @@ class Component:
             identifiers = self.identifiers
         else:
             is_attribute_statement = True
-            identifiers = [self.component_type]
+            identifiers = [self.type]
 
         identifier_string = str(self.EDGE_OP).join(
             f'{identifier}' if isinstance(identifier, ComponentType) else f'"{identifier}"'
