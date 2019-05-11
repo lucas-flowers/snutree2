@@ -152,11 +152,18 @@ def test_attributes(component_type, classes, data, config, expected):
         {'color': 'red', 'fillcolor': 'blue'},
     ),
 
-    # .... *except* for the label
+    # .... *except* for the label...
     (
         ComponentType.NODE, ['tree', 'other_class'],
         {'class': {'node': {'tree': {'label': 'The Label'}, 'other_class': {'fillcolor': 'blue'}}}},
         {'fillcolor': 'blue'},
+    ),
+
+    # .... *unless* the component is a graph
+    (
+        ComponentType.GRAPH, ['tree', 'other_class'],
+        {'class': {'graph': {'tree': {'label': 'The Label'}, 'other_class': {'fillcolor': 'blue'}}}},
+        {'label': 'The Label', 'fillcolor': 'blue'},
     ),
 
 ])
