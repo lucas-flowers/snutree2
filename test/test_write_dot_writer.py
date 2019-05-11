@@ -19,73 +19,73 @@ def create_writer(dct):
 
     # Empty component
     (
-        'node', {}, {},
+        ComponentType.NODE, {}, {},
         {},
         {},
     ),
 
     # Class is not defined
     (
-        'node', {'nonexistent'}, {},
+        ComponentType.NODE, {'nonexistent'}, {},
         {},
         {},
     ),
 
     # Class is defined but not for the right component
     (
-        'node', {'nonexistent'}, {},
+        ComponentType.NODE, {'nonexistent'}, {},
         {'class': {'edge': {'nonexistent': {'color': 'blue'}}}},
         {},
     ),
 
     # Class is defined but not used
     (
-        'node', {}, {},
+        ComponentType.NODE, {}, {},
         {'class': {'node': {'nonexistent': {'color': 'blue'}}}},
         {},
     ),
 
     # Class is defined and used
     (
-        'node', {'class'}, {},
+        ComponentType.NODE, {'class'}, {},
         {'class': {'node': {'class': {'color': 'blue'}}}},
         {'color': 'blue'},
     ),
 
     # Order of attributes in the config dict is preserved
     (
-        'node', {'class'}, {},
+        ComponentType.NODE, {'class'}, {},
         {'class': {'node': {'class': {'size': 10, 'color': 'blue'}}}},
         {'size': 10, 'color': 'blue'},
     ),
     (
-        'node', {'class'}, {},
+        ComponentType.NODE, {'class'}, {},
         {'class': {'node': {'class': {'color': 'blue', 'size': 10}}}},
         {'color': 'blue', 'size': 10},
     ),
 
     # The last class in the config takes priority when there are conflicts
     (
-        'node', {'class_a', 'class_b'}, {},
+        ComponentType.NODE, {'class_a', 'class_b'}, {},
         {'class': {'node': {'class_a': {'color': 'blue'}, 'class_b': {'color': 'red'}}}},
         {'color': 'red'},
     ),
     (
-        'node', {'class_b', 'class_a'}, {},
+        ComponentType.NODE, {'class_b', 'class_a'}, {},
         {'class': {'node': {'class_b': {'color': 'red'}, 'class_a': {'color': 'blue'}}}},
         {'color': 'blue'},
     ),
 
     # Attribute order still reflects config order when there are conflicts
     (
-        'node', {'class_a', 'class_b'}, {},
+        ComponentType.NODE, {'class_a', 'class_b'}, {},
         {'class': {'node': {'class_a': {'A': 'a', 'B': 'b'}, 'class_b': {'B': 2, 'A': 1}}}},
         {'A': 1, 'B': 2},
     ),
 
     # The 'label' field is a template whose values are filled by the data dict
     (
-        'edge', {'class'}, {'name': 'Test'},
+        ComponentType.EDGE, {'class'}, {'name': 'Test'},
         {'class': {'edge': {'class': {'label': 'Name is {name}', 'title': 'Title is {name}'}}}},
         {'label': 'Name is Test', 'title': 'Title is {name}'},
     ),
@@ -93,14 +93,14 @@ def create_writer(dct):
     # Fields for classes corresponding to subgraphs are not included, since
     # they are written as attribute statements for the whole subgraph....
     (
-        'node', {'tree', 'other_class'}, {},
+        ComponentType.NODE, {'tree', 'other_class'}, {},
         {'class': {'node': {'tree': {'color': 'red'}, 'other_class': {'fillcolor': 'blue'}}}},
         {'fillcolor': 'blue'},
     ),
 
     # .... *except* for the label
     (
-        'node', {'tree', 'other_class'}, {},
+        ComponentType.NODE, {'tree', 'other_class'}, {},
         {'class': {'node': {'tree': {'label': 'The Label'}, 'other_class': {'fillcolor': 'blue'}}}},
         {'label': 'The Label', 'fillcolor': 'blue'},
     ),
@@ -108,7 +108,6 @@ def create_writer(dct):
 ])
 def test_component_attributes(component_type, classes, data, config, expected):
     writer = create_writer(config)
-    component_type = ComponentType.__members__[component_type.upper()] # TODO
     component = writer.attributes(component_type, classes, data)
     assert component == expected
 
