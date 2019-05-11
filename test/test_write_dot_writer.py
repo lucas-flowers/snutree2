@@ -1,4 +1,5 @@
 
+from collections import OrderedDict
 from itertools import repeat
 
 import pytest
@@ -101,11 +102,9 @@ def test_attributes_common(function, component_type, classes, config, expected):
     '''
     Tests common to both writer.attributes and writer.default_attributes
     '''
-    # TODO Use pair lists because dicts aren't ordered
     writer = create_writer(config)
     component = function(writer, component_type, classes)
-    assert component == expected
-
+    assert OrderedDict(component) == OrderedDict(expected)
 
 @pytest.mark.parametrize('component_type, classes, data, config, expected', [
 
@@ -135,7 +134,7 @@ def test_attributes_common(function, component_type, classes, config, expected):
 def test_attributes(component_type, classes, data, config, expected):
     writer = create_writer(config)
     component = writer.attributes(component_type, classes, data)
-    assert component == expected
+    assert OrderedDict(component) == OrderedDict(expected)
 
 @pytest.mark.parametrize('component_type, classes, config, expected', [
 
@@ -164,7 +163,7 @@ def test_attributes(component_type, classes, data, config, expected):
 def test_default_attributes(component_type, classes, config, expected):
     writer = create_writer(config)
     component = writer.default_attributes(component_type, classes)
-    assert component == expected
+    assert OrderedDict(component) == OrderedDict(expected)
 
 @pytest.mark.parametrize('graph_id, config, expected', [
 

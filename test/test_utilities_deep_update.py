@@ -1,4 +1,5 @@
 
+from collections import OrderedDict
 from types import MappingProxyType
 
 import pytest
@@ -110,5 +111,5 @@ from snutree.utilities import deep_update
 
 ])
 def test_deep_update(dicts, expected):
-    assert deep_update(*dicts) == expected
+    assert OrderedDict(deep_update(*dicts)) == OrderedDict(expected)
 

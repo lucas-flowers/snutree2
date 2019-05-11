@@ -1,4 +1,6 @@
 
+from collections import OrderedDict
+
 import pytest
 
 from snutree.core.member.config import Config
@@ -208,7 +210,7 @@ def test_read_classes(row, config, expected):
 ])
 def test_read_data(row, config, expected):
     reader = create_reader(config)
-    assert reader.read_data(row) == expected
+    assert OrderedDict(reader.read_data(row)) == OrderedDict(expected)
 
 @pytest.mark.parametrize('row, config, expected', [
 
