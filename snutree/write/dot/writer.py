@@ -131,6 +131,66 @@ class Writer:
             if attributes
         ]
 
+    def entity(self, entity):
+        return Node(
+            entity.id,
+            **self.attributes(
+                ComponentType.NODE,
+                classes=entity.classes,
+                data=entity.data,
+            ),
+        )
+
+    def relationship(self, relationship):
+        return Edge(
+            relationship.from_id,
+            relationship.to_id,
+            **self.attributes(
+                ComponentType.EDGE,
+                classes=relationship.classes,
+                data=relationship.data,
+            ),
+        )
+
+    def nodes(self, tree):
+        if self.config.seed is not None:
+            rng = Random(self.config.seed)
+            shuffle = lambda families: rng.sample(families, k=len(families))
+        else:
+            shuffle = lambda families: families
+        return [
+            self.entity(entity)
+            for family in shuffle(sorted(tree.families, key=min))
+            for entity in sorted(family)
+        ]
+
+    def edges(self, tree):
+        return map(self.relationship, sorted(tree.relationships))
+
+    def ranks(self, cohort):
+        '''
+        Group nodes of the same rank together.
+        '''
+        return Subgraph(
+            Attribute(rank='same'),
+            Node(f'{identify(cohort.rank)}L'),
+            Node(f'{identify(cohort.rank)}R'),
+            *map(Node, cohort.ids),
+        )
+
+    def tree(self, tree):
+        '''
+        The actual entities and relationships in the tree.
+        '''
+        return Subgraph(
+            self.config.names.tree_graph_name,
+            *self.attribute_statements(['tree']),
+            *self.nodes(tree),
+            *self.config.nodes,
+            *self.edges(tree),
+            *self.config.edges,
+        )
+
     def rank_labels(self, graph_id, suffix, cohorts):
         '''
         Rank labels for the left or right side of the tree.
@@ -164,9 +224,6 @@ class Writer:
             ) for cohort0, cohort1 in zip(cohorts[:-1], cohorts[1:])),
         )
 
-    def write(self, tree):
-        return str(self.root(tree))
-
     def root(self, tree):
         return Digraph(
             self.config.names.root_graph_name,
@@ -185,63 +242,6 @@ class Writer:
             *(map(self.ranks, tree.cohorts) if tree.cohorts is not None else ()),
         )
 
-    def tree(self, tree):
-        '''
-        The actual entities and relationships in the tree.
-        '''
-        return Subgraph(
-            self.config.names.tree_graph_name,
-            *self.attribute_statements(['tree']),
-            *self.nodes(tree),
-            *self.config.nodes,
-            *self.edges(tree),
-            *self.config.edges,
-        )
-
-    def nodes(self, tree):
-        if self.config.seed is not None:
-            rng = Random(self.config.seed)
-            shuffle = lambda families: rng.sample(families, k=len(families))
-        else:
-            shuffle = lambda families: families
-        return [
-            self.entity(entity)
-            for family in shuffle(sorted(tree.families, key=min))
-            for entity in sorted(family)
-        ]
-
-    def edges(self, tree):
-        return map(self.relationship, sorted(tree.relationships))
-
-    def entity(self, entity):
-        return Node(
-            entity.id,
-            **self.attributes(
-                ComponentType.NODE,
-                classes=entity.classes,
-                data=entity.data,
-            ),
-        )
-
-    def relationship(self, relationship):
-        return Edge(
-            relationship.from_id,
-            relationship.to_id,
-            **self.attributes(
-                ComponentType.EDGE,
-                classes=relationship.classes,
-                data=relationship.data,
-            ),
-        )
-
-    def ranks(self, cohort):
-        '''
-        Group nodes of the same rank together.
-        '''
-        return Subgraph(
-            Attribute(rank='same'),
-            Node(f'{identify(cohort.rank)}L'),
-            Node(f'{identify(cohort.rank)}R'),
-            *map(Node, cohort.ids),
-        )
+    def write(self, tree):
+        return str(self.root(tree))
 
