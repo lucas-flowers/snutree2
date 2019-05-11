@@ -109,7 +109,7 @@ def create_writer(dct):
 def test_component_attributes(component_type, classes, data, config, expected):
     writer = create_writer(config)
     component_type = ComponentType.__members__[component_type.upper()] # TODO
-    component = writer.component_level_attributes(component_type, classes, data)
+    component = writer.attributes(component_type, classes, data)
     assert component == expected
 
 @pytest.mark.parametrize('graph_id, config, expected', [

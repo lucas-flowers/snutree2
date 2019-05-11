@@ -3,7 +3,6 @@
 Convert a FamilyTree to DOT code.
 '''
 
-import dataclasses
 from dataclasses import dataclass
 from random import Random
 
@@ -65,21 +64,23 @@ class Writer:
 
     # TODO Custom cohorts
 
-    def component_level_attributes(self, component_type, classes, data):
+    def attributes(self, component_type, classes, data):
         '''
-        Combine the classes and data into node/edge/graph attributes.
+        Find the class definitions for the given classes and component type
+        (usually nodes or edges). Use the data and the class definitions to
+        create an attribute dictionary for use with an attribute list.
         '''
 
-        class_to_attributes = getattr(self.config.classes, component_type.value)
+        class_definitions = getattr(self.config.classes, component_type.value)
 
         return {
 
             key: value.format(**data) if key in TEMPLATE_ATTRIBUTES else value
 
             # Use the class order in the config file, not the class list
-            for cls in class_to_attributes.keys()
+            for cls in class_definitions.keys()
             if cls in classes
-            for key, value in class_to_attributes[cls].items()
+            for key, value in class_definitions[cls].items()
 
             # Do not include attributes inherited from graph-based classes
             # (unless they're templated attributes, like labels), since they
@@ -88,21 +89,23 @@ class Writer:
 
         }
 
-    def graph_level_attributes(self, component_type, classes):
+    def default_attributes(self, component_type, classes):
         '''
-        Combine the classes into a node/edge/graph attribute statement.
+        Find the class definitions for the given classes and component type
+        (graph, node, or edge). Use the class definitions to create a default
+        attribute dictionary for use with an attribute statement in some graph.
         '''
 
-        class_to_attributes = getattr(self.config.classes, component_type.value)
+        class_definitions = getattr(self.config.classes, component_type.value)
 
         return {
 
             key: value
 
             # Use the class order in the config, not the class list
-            for cls in class_to_attributes.keys()
+            for cls in class_definitions.keys()
             if cls in classes
-            for key, value in class_to_attributes[cls].items()
+            for key, value in class_definitions[cls].items()
 
             # Always include graph attributes, and any node or edge attributes
             # that aren't templated
@@ -115,7 +118,7 @@ class Writer:
         Return a list of attribute statements based on the classes.
         '''
         component_type_to_attributes = {
-            component_type: self.graph_level_attributes(component_type, classes)
+            component_type: self.default_attributes(component_type, classes)
             for component_type in ComponentType.__members__.values()
         }
         return [
@@ -137,7 +140,7 @@ class Writer:
             *self.attribute_statements(['rank']),
             *(Node(
                 f'{identify(cohort.rank)}{suffix}',
-                **self.component_level_attributes(
+                **self.attributes(
                     ComponentType.NODE,
                     classes=cohort.classes,
                     data=cohort.data
@@ -146,7 +149,7 @@ class Writer:
             *(Edge(
                 f'{identify(cohort0.rank)}{suffix}',
                 f'{identify(cohort1.rank)}{suffix}',
-                **self.component_level_attributes(
+                **self.attributes(
                     ComponentType.EDGE,
                     classes=list({
                         # Use a dict to preserve both order and uniqueness
@@ -213,7 +216,7 @@ class Writer:
     def entity(self, entity):
         return Node(
             entity.id,
-            **self.component_level_attributes(
+            **self.attributes(
                 ComponentType.NODE,
                 classes=entity.classes,
                 data=entity.data,
@@ -224,7 +227,7 @@ class Writer:
         return Edge(
             relationship.from_id,
             relationship.to_id,
-            **self.component_level_attributes(
+            **self.attributes(
                 ComponentType.EDGE,
                 classes=relationship.classes,
                 data=relationship.data,
