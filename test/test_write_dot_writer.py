@@ -184,7 +184,7 @@ def test_component_attributes(component_type, classes, data, config, expected):
 ])
 def test_attribute_statements(graph_id, config, expected):
     writer = create_writer(config)
-    component = writer.attribute_statements(graph_id)
+    component = writer.attribute_statements([graph_id]) # TODO Make this fail
     assert component == expected
 
 def test_family_tree_standard_order():

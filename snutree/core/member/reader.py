@@ -5,7 +5,7 @@ Create Member objects from lists of rows.
 
 from dataclasses import dataclass
 
-from ...utilities import name, deep_update
+from ...utilities import name
 from ...utilities.semester import Semester
 from .config import Config
 from .model import Member
@@ -30,23 +30,19 @@ class Functions:
 
     rank = FunctionNamespace()
 
-    @rank.register('Semester')
-    def semester(row, key) -> Semester:
-        return Semester(row[key])
-
     @rank.register('Integer')
     def integer(row, key) -> int:
         return int(row[key])
+
+    @rank.register('Semester')
+    def semester(row, key) -> Semester:
+        return Semester(row[key])
 
     classes = FunctionNamespace()
 
     @classes.register(name=None)
     def constant(row, constant):
         return [constant]
-
-    @classes.register('Enum')
-    def enum(row, key):
-        return [row[key]]
 
     @classes.register('Boolean')
     def boolean(row, key):
@@ -55,6 +51,10 @@ class Functions:
             return [key]
         else:
             return []
+
+    @classes.register('Enum')
+    def enum(row, key):
+        return [row[key]]
 
     @classes.register('List')
     def list(row, key):
@@ -92,33 +92,6 @@ class Reader:
         constructor = function.__annotations__['return']
         return constructor
 
-    def read_members(self, rows):
-        return [
-            *map(self.read_member, rows),
-            *map(self.read_custom_member, self.config.custom),
-        ]
-
-    def read_member(self, row):
-        return Member(
-            id=self.read_id(row) if self.config.id else None,
-            parent_id=self.read_parent_id(row) if self.config.parent_id else None,
-            rank=self.read_rank(row) if self.config.rank else None,
-            classes=self.read_classes(row),
-            data=self.read_data(row),
-        )
-
-    def read_custom_member(self, row):
-        return Member(
-            id=row['id'],
-            parent_id=row['parent_id'],
-            rank=(
-                self.Rank(row['rank'])
-                if self.config.rank is not None else None
-            ),
-            data=row['data'],
-            classes=row['classes'],
-        )
-
     def read_id(self, row):
         fname, keys = self.config.id
         return Functions.data[fname](row, *keys)
@@ -147,4 +120,28 @@ class Reader:
             destination: Functions.data[fname](row, *keys)
             for destination, (fname, keys) in self.config.data.items()
         }
+
+    def read_member(self, row):
+        return Member(
+            id=self.read_id(row) if self.config.id else None,
+            parent_id=self.read_parent_id(row) if self.config.parent_id else None,
+            rank=self.read_rank(row) if self.config.rank else None,
+            classes=self.read_classes(row),
+            data=self.read_data(row),
+        )
+
+    def read_custom_member(self, row):
+        return Member(
+            id=row['id'],
+            parent_id=row['parent_id'],
+            rank=self.Rank(row['rank']) if self.config.rank is not None else None,
+            data=row['data'],
+            classes=row['classes'],
+        )
+
+    def read_members(self, rows):
+        return [
+            *map(self.read_member, rows),
+            *map(self.read_custom_member, self.config.custom),
+        ]
 

@@ -70,7 +70,30 @@ def test_read_rank(row, config, expected):
         ],
     ),
 
-    # Columns that are enums
+    # Booleans
+    (
+        {
+            'clsA': '1',
+            'clsB': 'TRuE',
+            'clsC': '',
+            'clsD': 'asdfasdf',
+            'clsE': 'yEs',
+        },
+        {'classes': [
+            'Boolean(clsA)',
+            'Boolean(clsB)',
+            'Boolean(clsC)',
+            'Boolean(clsD)',
+            'Boolean(clsE)',
+        ]},
+        [
+            'clsA',
+            'clsB',
+            'clsE',
+        ],
+    ),
+
+    # Enums
     (
         {
             'A': 'clsA',
@@ -89,7 +112,7 @@ def test_read_rank(row, config, expected):
         ],
     ),
 
-    # Columns that are lists
+    # Lists
     (
         {
             'listA': ' clsA, clsB  , clsE ',
@@ -100,29 +123,6 @@ def test_read_rank(row, config, expected):
             'List(listA)',
             'List(listB)',
             'List(listC)',
-        ]},
-        [
-            'clsA',
-            'clsB',
-            'clsE',
-        ],
-    ),
-
-    # Columns that are booleans
-    (
-        {
-            'clsA': '1',
-            'clsB': 'TRuE',
-            'clsC': '',
-            'clsD': 'asdfasdf',
-            'clsE': 'yEs',
-        },
-        {'classes': [
-            'Boolean(clsA)',
-            'Boolean(clsB)',
-            'Boolean(clsC)',
-            'Boolean(clsD)',
-            'Boolean(clsE)',
         ]},
         [
             'clsA',
@@ -209,7 +209,6 @@ def test_read_classes(row, config, expected):
 def test_read_data(row, config, expected):
     reader = create_reader(config)
     assert reader.read_data(row) == expected
-
 
 @pytest.mark.parametrize('row, config, expected', [
 
