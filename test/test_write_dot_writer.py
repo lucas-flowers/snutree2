@@ -172,80 +172,96 @@ def test_default_attributes(component_type, classes, config, expected):
     component = writer.default_attributes(component_type, classes)
     assert OrderedDict(component) == OrderedDict(expected)
 
-@pytest.mark.parametrize('graph_id, config, expected', [
+@pytest.mark.parametrize('classes, config, expected', [
 
     # Empty config
     (
-        '',
+        [],
         {},
         [],
     ),
 
     # No attributes defined at all
     (
-        'root',
+        ['root'],
         {},
         [],
     ),
 
     # Attributes defined but not used
     (
-        'root',
+        ['root'],
         {'class': {'node': {'tree': {'a': 1}}}},
         [],
     ),
 
     # Graph exists in config but is undefined
     (
-        'root',
+        ['root'],
         {'class': {'graph': {'root': {}}}},
         [],
     ),
 
     # Attributes defined and used
     (
-        'root',
+        ['root'],
         {'class': {'graph': {'root': {'a': 1}}}},
         [Graph(a=1)],
     ),
     (
-        'root',
+        ['root'],
         {'class': {'node': {'root': {'a': 1}}}},
         [Node(a=1)],
     ),
     (
-        'root',
+        ['root'],
         {'class': {'edge': {'root': {'a': 1}}}},
         [Edge(a=1)],
     ),
     (
-        'root',
-        {'class': {'graph': {'root': {'a': 1}}, 'node': {'root': {'b': 2}}, 'edge': {'root': {'c': 3}}}},
+        ['root', 'and', 'stem'],
+        {'class': {'graph': {'root': {'a': 1}}, 'node': {'and': {'b': 2}}, 'edge': {'stem': {'c': 3}}}},
         [Graph(a=1), Node(b=2), Edge(c=3)],
     ),
 
     # The 'label' attribute is not included in attribute statements for nodes
     # and edges (since they will be included in attribute lists)
     (
-        'root',
+        ['root'],
         {'class': {'graph': {'root': {'label': 'The Label'}}}},
         [Graph(label='The Label')],
     ),
     (
-        'root',
+        ['root'],
         {'class': {'node': {'root': {'label': 'The Label'}}}},
         [],
     ),
     (
-        'root',
+        ['root'],
         {'class': {'edge': {'root': {'label': 'The Label'}}}},
         [],
     ),
 
+    # Due to a quirk (`in` keyword can take strings on both sides), making
+    # `classes` a string will somehow work. Leaving it for now because the
+    # schema should guard against this, upstream.
+    #
+    # TODO Make this test fail
+    (
+        'tree', # This should be a list
+        {'class': {'node': {'tree': {'A': 'Fluke'}}}},
+        [Node(A='Fluke')],
+    ),
+    (
+        ['tree'], # For comparison
+        {'class': {'node': {'tree': {'A': 'Fluke'}}}},
+        [Node(A='Fluke')],
+    ),
+
 ])
-def test_attribute_statements(graph_id, config, expected):
+def test_attribute_statements(classes, config, expected):
     writer = create_writer(config)
-    component = writer.attribute_statements([graph_id]) # TODO Make this fail
+    component = writer.attribute_statements(classes)
     assert component == expected
 
 def test_family_tree_standard_order():

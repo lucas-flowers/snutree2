@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from random import Random
 
 from ...utilities.semester import Semester
-from .config import Config, GRAPHS
+from .config import Config, GRAPHS as GRAPH_CLASSES
 from .create import Digraph, Subgraph, Attribute, Node, Edge
 from .model import Component, ComponentType
 
@@ -85,7 +85,7 @@ class Writer:
             # Do not include attributes inherited from graph-based classes
             # (unless they're templated attributes, like labels), since they
             # will be part of graph attributes instead
-            if cls not in GRAPHS or key in TEMPLATE_ATTRIBUTES
+            if cls not in GRAPH_CLASSES or key in TEMPLATE_ATTRIBUTES
 
         }
 
