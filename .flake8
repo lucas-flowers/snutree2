@@ -1,0 +1,7 @@
+
+[flake8]
+
+ignore=
+    E203, # https://black.readthedocs.io/en/stable/the_black_code_style.html#slices
+    E501, # Black enforces line length
+    W503, # https://black.readthedocs.io/en/stable/the_black_code_style.html#line-breaks-binary-operators

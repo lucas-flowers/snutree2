@@ -1,0 +1,35 @@
+
+[MASTER]
+
+load-plugins=pylint.extensions.broad_try_clause
+
+[MESSAGES CONTROL]
+
+enable=
+    trailing-comma-tuple,
+
+disable=
+    too-few-public-methods,
+    missing-docstring,
+    no-else-return,
+    no-else-raise,
+    no-else-continue,
+    misplaced-comparison-constant,
+    unsubscriptable-object, # Use mypy
+    no-member, # Use mypy
+    assignment-from-no-return, # Use mypy
+    fixme,
+    c-extension-no-member, # pylint.pycqa.org/en/latest/technical_reference/c_extensions.html
+
+[BASIC]
+
+good-names-rgxs=
+    ^[a-zA-Z]$,  # Too many exceptions
+    ^[a-z]{2}$,  # Too many exceptions
+    ^[A-Z]([a-z]+([A-Z][a-z]+)*)?_co(ntra)?$,  # https://www.python.org/dev/peps/pep-0008/#type-variable-names; https://github.com/PyCQA/pylint/issues/3401
+
+[FORMAT]
+max-line-length=140
+
+[SIMILARITIES]
+min-similarity-lines=15

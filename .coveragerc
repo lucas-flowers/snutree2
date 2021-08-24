@@ -1,0 +1,18 @@
+
+[run]
+
+omit = tests/*
+
+branch = true
+
+[report]
+
+show_missing = true
+
+fail_under = 100
+
+exclude_lines =
+    pragma: no cover
+    \.\.\.
+    if __name__ == .__main__.:
+    if TYPE_CHECKING:
