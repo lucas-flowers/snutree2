@@ -240,4 +240,3 @@ def test_addition(case: AdditionTestCase) -> None:
 
     actual = semester + integer
     assert actual == case.expected
-    assert isinstance(actual, Semester)
