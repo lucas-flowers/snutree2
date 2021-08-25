@@ -1,8 +1,8 @@
 import re
 from dataclasses import dataclass
 from enum import Enum
-from functools import singledispatch, total_ordering
-from typing import Optional, Tuple, Union, overload
+from functools import total_ordering
+from typing import Optional, Union, overload
 
 
 @total_ordering
@@ -15,7 +15,7 @@ class Season(Enum):
         return self.value
 
     def __le__(self, _other: "Season") -> bool:
-        return self == self.SPRING
+        return self == self.SPRING  # type: ignore[comparison-overlap] # Mypy gets confused for some reason
 
 
 @dataclass(init=False, order=True, frozen=True)
