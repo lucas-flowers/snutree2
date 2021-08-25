@@ -45,40 +45,14 @@ def test_season_less_than(case: SeasonLessThanTestCase) -> None:
     assert (case.a < case.b) == case.expected
 
 
-@dataclass
-class PropertiesTestCase:
-    season: Season
-    year: int
-
-
-@pytest.mark.parametrize(
-    "case",
-    [
-        PropertiesTestCase(
-            season=Season.FALL,
-            year=1970,
-        ),
-        PropertiesTestCase(
-            season=Season.SPRING,
-            year=1970,
-        ),
-        PropertiesTestCase(
-            season=Season.FALL,
-            year=1971,
-        ),
-        PropertiesTestCase(
-            season=Season.SPRING,
-            year=1971,
-        ),
-    ],
-)
-def test_properties(case: PropertiesTestCase) -> None:
+@given(season=infer, year=infer)  # type: ignore[misc]
+def test_properties(season: Season, year: int) -> None:  # type: ignore[misc]
     """
     The actual season and year are not stored directly as fields, so we need to
     test that we can recover them correctly.
     """
-    semester = Semester(case.season, case.year)
-    assert (semester.season, semester.year) == (case.season, case.year)
+    semester = Semester(season, year)
+    assert (semester.season, semester.year) == (season, year)
 
 
 @dataclass
