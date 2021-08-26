@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from inspect import cleandoc
 from typing import Optional
 
 from _pytest.config import Config
@@ -17,3 +18,11 @@ def pytest_make_parametrize_id(
         return val.id
     else:
         return None
+
+
+def trim(string: str) -> str:
+    """
+    Remove all leading whitespace, common indentation, and trailing whitespace
+    (except for the final, standard newline).
+    """
+    return cleandoc(string) + "\n"

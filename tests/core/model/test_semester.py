@@ -1,7 +1,7 @@
 import operator
 from contextlib import nullcontext
 from dataclasses import dataclass
-from typing import ContextManager, Tuple, Union
+from typing import ContextManager, Union
 
 import pytest
 from hypothesis import given, infer
@@ -182,7 +182,7 @@ def test_index(index: int) -> None:  # type: ignore[misc]
 
 @dataclass
 class AdditionTestCase(TestCase):
-    terms: Union[Tuple[Semester, int], Tuple[int, Semester]]
+    terms: Union[tuple[Semester, int], tuple[int, Semester]]
     expected: Semester
 
 
