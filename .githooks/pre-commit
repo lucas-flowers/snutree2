@@ -1,0 +1,2 @@
+#!/bin/sh
+./bin/lint.py && pytest --quiet --cov .
