@@ -1,7 +1,9 @@
 
 [run]
 
-omit = tests/*
+omit = 
+    tests/*
+    bin/*
 
 branch = true
 
