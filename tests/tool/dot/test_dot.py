@@ -5,7 +5,7 @@ from unittest.mock import patch
 import pytest
 
 # from conftest import trim
-from snutree.tool.dot.factory import (
+from snutree.tool.dot.declarative import (
     Attribute,
     Digraph,
     Edge,
