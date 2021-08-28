@@ -1,9 +1,8 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Generic, SupportsIndex, TypeVar, Union
+from typing import Generic, Union
 
-# Rank types may either be integral or NoneType
-R = TypeVar("R", SupportsIndex, None)
+from snutree.core.model.common import AnyRank, Component
 
 
 class ParentStatus(Enum):
@@ -12,9 +11,7 @@ class ParentStatus(Enum):
 
 
 @dataclass
-class Member(Generic[R]):
+class Member(Component, Generic[AnyRank]):
     id: str
     parent_id: Union[str, ParentStatus]
-    rank: R
-    classes: list[str] = field(default_factory=list)
-    data: dict[str, str] = field(default_factory=dict)
+    rank: AnyRank
