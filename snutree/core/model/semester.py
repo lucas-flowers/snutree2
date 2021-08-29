@@ -79,4 +79,8 @@ class Semester:
     def __add__(self, other: int) -> "Semester":
         return type(self)(self._index + other)
 
-    __radd__ = __add__
+    def __sub__(self, other: Union["Semester", int]) -> "Semester":
+        if isinstance(other, Semester):
+            return type(self)(self._index - other._index)
+        else:
+            return type(self)(self._index - other)

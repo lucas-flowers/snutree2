@@ -1,8 +1,10 @@
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import Generic, Union
+from typing import Generic, TypeVar, Union
 
-from snutree.core.model.common import AnyRank, Component
+from snutree.core.model.common import Component, Rank
+
+OptionalAnyRank = TypeVar("OptionalAnyRank", bound=Union[Rank, None])
 
 
 class ParentStatus(Enum):
@@ -11,7 +13,7 @@ class ParentStatus(Enum):
 
 
 @dataclass
-class Member(Component, Generic[AnyRank]):
+class Member(Component, Generic[OptionalAnyRank]):
     id: str
     parent_id: Union[str, ParentStatus]
-    rank: AnyRank
+    rank: OptionalAnyRank
