@@ -19,12 +19,9 @@ disable=
     too-few-public-methods,
     missing-docstring,
     fixme,
-    # Mypy does it better without false positives
-    unsubscriptable-object,
-    assignment-from-no-return,
-    no-member,
-    c-extension-no-member, # pylint.pycqa.org/en/latest/technical_reference/c_extensions.html
-    not-an-iterable,
+    # Mypy does it better without as many false positives
+    typecheck,
+    iterable_check,
 
 [BASIC]
 
