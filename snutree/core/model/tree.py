@@ -1,27 +1,18 @@
 from dataclasses import dataclass
-from enum import Enum, auto
-from typing import Generic, Optional, TypeVar, Union
+from typing import Generic, List, Optional, TypeVar, Union
 
-from snutree.core.model.common import Component, Rank
+from snutree.core.model.common import Rank
 
 OptionalAnyRank = TypeVar("OptionalAnyRank", bound=Union[Rank, None])
 
-
-class RankStatus(Enum):
-    UNKNOWN = auto()
+T = TypeVar("T")
 
 
-@dataclass
-class Entity(Generic[OptionalAnyRank]):
-    rank: Union[OptionalAnyRank, RankStatus]
-
-
-class Relationship(Component):
-    pass
+Cohort = object
 
 
 @dataclass
-class FamilyTree(Component, Generic[OptionalAnyRank]):
-    entities: dict[str, Entity[OptionalAnyRank]]
-    relationships: dict[tuple[Optional[str], str], Relationship]
-    ranks: set[OptionalAnyRank]
+class Tree(Generic[T]):
+    @property
+    def cohorts(self) -> Optional[List[Cohort]]:  # TODO A list of cohorts?
+        ...
