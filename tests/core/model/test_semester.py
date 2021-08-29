@@ -241,3 +241,67 @@ def test_addition(case: AdditionTestCase) -> None:
 
     actual = semester + integer
     assert actual == case.expected
+
+
+@dataclass
+class SubtractionTestCase(TestCase):
+    terms: Union[tuple[Semester, Semester], tuple[Semester, int]]
+    expected: Union[Semester, int]
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        SubtractionTestCase(
+            id="semester-semester",
+            terms=(
+                Semester(Season.FALL, 2015),
+                Semester(Season.FALL, 2015),
+            ),
+            expected=0,
+        ),
+        SubtractionTestCase(
+            id="semester-semester",
+            terms=(
+                Semester(Season.FALL, 2015),
+                Semester(Season.SPRING, 2015),
+            ),
+            expected=1,
+        ),
+        SubtractionTestCase(
+            id="semester-semester",
+            terms=(
+                Semester(Season.FALL, 2015),
+                Semester(Season.SPRING, 2010),
+            ),
+            expected=11,
+        ),
+        SubtractionTestCase(
+            id="semester-semester",
+            terms=(
+                Semester(Season.SPRING, 2010),
+                Semester(Season.FALL, 2015),
+            ),
+            expected=-11,
+        ),
+        SubtractionTestCase(
+            id="semester-integer",
+            terms=(
+                Semester(Season.FALL, 2015),
+                1,
+            ),
+            expected=Semester(Season.SPRING, 2015),
+        ),
+        SubtractionTestCase(
+            id="semester-integer",
+            terms=(
+                Semester(Season.FALL, 2015),
+                -3,
+            ),
+            expected=Semester(Season.SPRING, 2017),
+        ),
+    ],
+)
+def test_subtraction(case: SubtractionTestCase) -> None:
+    arg2, arg1 = case.terms
+    assert arg2 - arg1 == case.expected

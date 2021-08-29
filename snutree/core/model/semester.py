@@ -79,8 +79,16 @@ class Semester:
     def __add__(self, other: int) -> "Semester":
         return type(self)(self._index + other)
 
-    def __sub__(self, other: Union["Semester", int]) -> "Semester":
+    @overload
+    def __sub__(self, other: "Semester") -> int:
+        ...
+
+    @overload
+    def __sub__(self, other: int) -> "Semester":
+        ...
+
+    def __sub__(self, other: Union["Semester", int]) -> Union["Semester", int]:
         if isinstance(other, Semester):
-            return type(self)(self._index - other._index)
+            return self._index - other._index
         else:
             return type(self)(self._index - other)
