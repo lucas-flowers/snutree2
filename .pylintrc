@@ -7,19 +7,24 @@ load-plugins=pylint.extensions.broad_try_clause
 
 enable=
     trailing-comma-tuple,
+    useless-suppression,
 
 disable=
-    too-few-public-methods,
-    missing-docstring,
+    # Aesthetic
     no-else-return,
     no-else-raise,
     no-else-continue,
     misplaced-comparison-constant,
-    unsubscriptable-object, # Use mypy
-    no-member, # Use mypy
-    assignment-from-no-return, # Use mypy
+    # Noise
+    too-few-public-methods,
+    missing-docstring,
     fixme,
+    # Mypy does it better without false positives
+    unsubscriptable-object,
+    assignment-from-no-return,
+    no-member,
     c-extension-no-member, # pylint.pycqa.org/en/latest/technical_reference/c_extensions.html
+    not-an-iterable,
 
 [BASIC]
 
