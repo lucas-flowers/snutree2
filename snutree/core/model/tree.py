@@ -13,6 +13,14 @@ Cohort = object
 
 @dataclass
 class Tree(Generic[T]):
+    """
+    A tree.
+    """
+
     @property
     def cohorts(self) -> Optional[List[Cohort]]:  # TODO A list of cohorts?
+        ...
+
+    @property
+    def ranks(self) -> Optional[tuple[Rank, Rank]]:
         ...
