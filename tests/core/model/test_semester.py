@@ -191,7 +191,7 @@ class AdditionTestCase(TestCase):
     "case",
     [
         AdditionTestCase(
-            id="semester-plus-integer",
+            id="semester+integer",
             terms=(
                 Semester(Season.FALL, 2015),
                 1,
@@ -199,7 +199,7 @@ class AdditionTestCase(TestCase):
             expected=Semester(Season.SPRING, 2016),
         ),
         AdditionTestCase(
-            id="expected-plus-integer",
+            id="semester+integer",
             terms=(
                 Semester(Season.FALL, 2015),
                 -1,
@@ -207,7 +207,7 @@ class AdditionTestCase(TestCase):
             expected=Semester(Season.SPRING, 2015),
         ),
         AdditionTestCase(
-            id="expected-plus-integer",
+            id="semester+integer",
             terms=(
                 Semester(Season.FALL, 2015),
                 100,
@@ -215,7 +215,7 @@ class AdditionTestCase(TestCase):
             expected=Semester(Season.FALL, 2065),
         ),
         AdditionTestCase(
-            id="integer-plus-expected",
+            id="integer+semester",
             terms=(
                 1,
                 Semester(Season.FALL, 2015),
@@ -223,7 +223,7 @@ class AdditionTestCase(TestCase):
             expected=Semester(Season.SPRING, 2016),
         ),
         AdditionTestCase(
-            id="integer-plus-expected",
+            id="integer+semester",
             terms=(
                 -1,
                 Semester(Season.FALL, 2015),
