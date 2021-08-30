@@ -1,12 +1,16 @@
-"""
-Underlying representations of DOT objects.
-"""
-
 import re
 from abc import ABC
 from dataclasses import dataclass
 from enum import Enum
-from typing import Iterable, Iterator, Optional, Protocol, Union, overload
+from typing import (
+    Iterable,
+    Iterator,
+    Optional,
+    Protocol,
+    Union,
+    overload,
+    runtime_checkable,
+)
 
 Id = Union[str, int, float]
 
@@ -41,6 +45,7 @@ class Block:
                 yield f"{indent}{block}\n"
 
 
+@runtime_checkable
 class Statement(Protocol):
     @property
     def block(self) -> Block:
@@ -116,7 +121,7 @@ class Attribute:
                 self.key, self.value = key, value
 
     @classmethod
-    def from_dict(cls, mapping: dict[str, Id]) -> list["Attribute"]:
+    def from_kwargs(cls, **mapping: Id) -> list["Attribute"]:
         return [Attribute(key, value) for key, value in mapping.items()]
 
     @property
@@ -138,7 +143,7 @@ class Node(Component):
 
     def __init__(self, identifier: Optional[Id] = None, /, **attrs: Id) -> None:
         ids = [] if identifier is None else [identifier]
-        super().__init__(ids, Attribute.from_dict(attrs))
+        super().__init__(ids, Attribute.from_kwargs(**attrs))
 
 
 class Edge(Component):
@@ -151,17 +156,17 @@ class Edge(Component):
         ...
 
     @overload
-    def __init__(self, id1: str, id2: str, /, *ids: str, **attributes: Id) -> None:
+    def __init__(self, id1: Id, id2: Id, /, *ids: Id, **attributes: Id) -> None:
         ...
 
-    def __init__(self, arg1: Optional[str] = None, arg2: Optional[str] = None, /, *args: str, **attributes: Id) -> None:
+    def __init__(self, arg1: Optional[Id] = None, arg2: Optional[Id] = None, /, *args: Id, **attributes: Id) -> None:
         if arg1 is None and arg2 is None:
             identifiers = args
         elif arg1 is not None and arg2 is not None:
             identifiers = (arg1, arg2, *args)
         else:  # pragma: no cover
             raise RuntimeError("Check function overloading")
-        super().__init__(list(identifiers), Attribute.from_dict(attributes))
+        super().__init__(list(identifiers), Attribute.from_kwargs(**attributes))
 
 
 @dataclass
@@ -170,7 +175,7 @@ class Graph:
     Represent a DOT graph.
     """
 
-    identifier: Optional[str]
+    identifier: Optional[Id]
     statements: list[Statement]
     graph_type: str = "graph"
 
@@ -178,7 +183,7 @@ class Graph:
     TAB_CHAR = " "
 
     @overload
-    def __init__(self, identifier: str, /, *statements: Optional[Statement]) -> None:
+    def __init__(self, identifier: Id, /, *statements: Optional[Statement]) -> None:
         ...
 
     @overload
@@ -186,13 +191,13 @@ class Graph:
         ...
 
     def __init__(
-        self, arg: Union[str, Optional[Statement], NullStatementType] = NULL_STMT, /, *args: Optional[Statement]
+        self, arg: Union[Id, Optional[Statement], NullStatementType] = NULL_STMT, /, *args: Optional[Statement]
     ) -> None:
 
-        identifier: Optional[str]
+        identifier: Optional[Id]
         if arg is NULL_STMT:
             identifier, statements = None, args
-        elif isinstance(arg, str):
+        elif arg is not None and not isinstance(arg, Statement):
             identifier, statements = arg, args
         else:
             identifier, statements = None, (arg, *args)
