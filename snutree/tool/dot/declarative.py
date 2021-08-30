@@ -9,8 +9,8 @@ from enum import Enum
 from typing import Optional, Union, overload
 
 from snutree.tool.dot.model import (
-    _Attribute,
-    _AttrValue,
+    Attr,
+    Id,
     _Component,
     _ComponentType,
     _Graph,
@@ -98,48 +98,48 @@ def Subgraph(arg: Union[str, OptionalStatement] = NULL_STMT, /, *args: _Statemen
     return _Graph(graph_type, identifier, list(statements))
 
 
-def Node(identifier: Optional[str] = None, /, **attributes: _AttrValue) -> _Statement:
+def Node(identifier: Optional[str] = None, /, **attributes: Id) -> _Statement:
     identifiers = [] if identifier is None else [identifier]
-    return _Component(_ComponentType.NODE, identifiers, _Attribute.from_dict(attributes))
+    return _Component(_ComponentType.NODE, identifiers, Attr.from_dict(attributes))
 
 
 @overload
-def Edge(**attributes: _AttrValue) -> _Statement:
+def Edge(**attributes: Id) -> _Statement:
     ...
 
 
 @overload
-def Edge(id1: str, id2: str, /, *ids: str, **attributes: _AttrValue) -> _Statement:
+def Edge(id1: str, id2: str, /, *ids: str, **attributes: Id) -> _Statement:
     ...
 
 
-def Edge(arg1: Optional[str] = None, arg2: Optional[str] = None, /, *args: str, **attributes: _AttrValue) -> _Statement:
+def Edge(arg1: Optional[str] = None, arg2: Optional[str] = None, /, *args: str, **attributes: Id) -> _Statement:
     if arg1 is None and arg2 is None:
         identifiers = args
     elif arg1 is not None and arg2 is not None:
         identifiers = (arg1, arg2, *args)
     else:  # pragma: no cover
         raise RuntimeError("Check function overloading")
-    return _Component(_ComponentType.EDGE, list(identifiers), _Attribute.from_dict(attributes))
+    return _Component(_ComponentType.EDGE, list(identifiers), Attr.from_dict(attributes))
 
 
 @overload
-def Attribute(key: str, value: _AttrValue, /) -> _Statement:
+def Attribute(key: str, value: Id, /) -> _Statement:
     ...
 
 
 @overload
-def Attribute(**kwargs: _AttrValue) -> _Statement:
+def Attribute(**kwargs: Id) -> _Statement:
     ...
 
 
-def Attribute(key: Optional[str] = None, value: Optional[_AttrValue] = None, /, **kwargs: _AttrValue) -> _Statement:
+def Attribute(key: Optional[str] = None, value: Optional[Id] = None, /, **kwargs: Id) -> _Statement:
     if len(kwargs) > 1:
         raise ValueError("Only a single kwarg is permitted")
     elif len(kwargs) == 1:
-        return _Attribute(*kwargs.popitem())
+        return Attr(*kwargs.popitem())
     else:
         if key is None or value is None:
             raise ValueError("Must provide a key and a value")
         else:
-            return _Attribute(key, value)
+            return Attr(key, value)

@@ -8,7 +8,7 @@ from enum import Enum
 from typing import Iterable, Iterator, Optional, Union
 
 _Statement = Union[
-    "_Attribute",
+    "Attr",
     "_Component",
     "_Graph",
     None,
@@ -63,18 +63,18 @@ class _GraphType(_StringEnum):
     STRICT_GRAPH = "strict graph"
 
 
-_AttrValue = Union[str, int, float]
+Id = Union[str, int, float]
 
 
 @dataclass
-class _Attribute:
+class Attr:
 
-    key: str
-    value: _AttrValue
+    id: Id
+    value: Id
 
     @classmethod
-    def from_dict(cls, mapping: dict[str, _AttrValue]) -> list["_Attribute"]:
-        return [_Attribute(key, value) for key, value in mapping.items()]
+    def from_dict(cls, mapping: dict[str, Id]) -> list["Attr"]:
+        return [Attr(key, value) for key, value in mapping.items()]
 
     @property
     def block(self) -> _Block:
@@ -82,9 +82,9 @@ class _Attribute:
 
     def __str__(self) -> str:
         return (
-            f'{self.key}="{self.value}"'
+            f'{self.id}="{self.value}"'
             if isinstance(self.value, str) and not re.match(r"^<.+>$", self.value)
-            else f"{self.key}={self.value}"
+            else f"{self.id}={self.value}"
         )
 
 
@@ -93,7 +93,7 @@ class _Component:
 
     type: _ComponentType
     identifiers: list[str]
-    attributes: list[_Attribute]
+    attributes: list[Attr]
 
     EDGE_OP = _EdgeOp.DIRECTED
 
