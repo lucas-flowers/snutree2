@@ -60,11 +60,6 @@ Digraph = GraphFactory(_GraphType.DIGRAPH)
 
 
 @overload
-def Graph(**attributes: _AttrValue) -> _Statement:
-    ...
-
-
-@overload
 def Graph(*statements: _Statement) -> _Statement:
     ...
 
@@ -74,10 +69,8 @@ def Graph(identifier: str, /, *statements: _Statement) -> _Statement:
     ...
 
 
-def Graph(arg: Union[str, OptionalStatement] = NULL_STMT, /, *args: _Statement, **kwargs: _AttrValue) -> _Statement:
-    if kwargs:
-        return _Component(_ComponentType.GRAPH, [], _Attribute.from_dict(kwargs))
-    elif arg is NULL_STMT:
+def Graph(arg: Union[str, OptionalStatement] = NULL_STMT, /, *args: _Statement) -> _Statement:
+    if arg is NULL_STMT:
         return GraphFactory(_GraphType.GRAPH)(*args)
     else:
         return GraphFactory(_GraphType.GRAPH)(arg, *args)

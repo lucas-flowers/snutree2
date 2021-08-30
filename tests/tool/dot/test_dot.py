@@ -201,11 +201,6 @@ class GraphTestCase(TestCase):
             ),
         ),
         GraphTestCase(
-            id="graph-defaults",
-            graph=Graph(a=1, b="2"),
-            expected='graph [a=1,b="2"]',
-        ),
-        GraphTestCase(
             id="graph-unnamed-nonempty",
             graph=Graph(Attribute(a=1), Node(b=2)),
             expected=trim(
@@ -340,7 +335,6 @@ def test_dot() -> None:
         "tree",
         Attribute(size="5"),
         Attribute(width="gold"),
-        Graph(rankdir="LR"),
         Node(penwidth="5", width="4"),
         Edge(penwidth="4", width="5"),
         Node("Key One", color="piss yellow", label="A Label"),
@@ -364,7 +358,6 @@ def test_dot() -> None:
         digraph "tree" {
             size="5";
             width="gold";
-            graph [rankdir="LR"];
             node [penwidth="5",width="4"];
             edge [penwidth="4",width="5"];
             "Key One" [color="piss yellow",label="A Label"];
