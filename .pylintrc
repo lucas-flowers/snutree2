@@ -3,6 +3,8 @@
 
 load-plugins=pylint.extensions.broad_try_clause
 
+fail-on=useless-suppression
+
 [MESSAGES CONTROL]
 
 enable=
