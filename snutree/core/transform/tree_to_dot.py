@@ -4,18 +4,10 @@ from typing import Optional, TypeVar
 
 from snutree.core.model.common import Rank
 from snutree.core.model.semester import Semester
-from snutree.core.model.tree import Cohort, Tree
+from snutree.core.model.tree import Tree
 from snutree.tool.dot import Attribute, Digraph, Edge, Graph, Node, Subgraph
 
 T = TypeVar("T")
-
-
-@dataclass
-class NameConfig:
-    root_graph: str
-    ranks_graph_left: str
-    ranks_graph_right: str
-    tree_graph: str
 
 
 @dataclass
@@ -26,73 +18,77 @@ class CustomConfig:
 
 @dataclass
 class Config:
-    names: NameConfig
     custom: CustomConfig
 
 
-def create_root(tree: Tree[T], config: Config) -> Graph:
+def create_family_tree(tree: Tree[T], config: Config) -> Graph:
+    ranks_left_id, ranks_right_id = "ranks-left", "ranks-right"
     return Digraph(
-        config.names.root_graph,
+        "family-tree",
         *create_attributes(),
         create_ranks(
-            graph_id=config.names.ranks_graph_left,
+            graph_id=ranks_left_id,
             ranks=tree.ranks,
         ),
-        create_tree(
-            graph_id=config.names.tree_graph,
+        create_members(
+            graph_id="members",
             tree=tree,
             custom_nodes=config.custom.nodes,
             custom_edges=config.custom.edges,
         ),
         create_ranks(
-            graph_id=config.names.ranks_graph_right,
+            graph_id=ranks_right_id,
             ranks=tree.ranks,
         ),
-        *map(create_cohort, tree.cohorts or []),
+        *[
+            create_cohort(
+                ranks_left_id=ranks_left_id,
+                ranks_right_id=ranks_right_id,
+                rank=rank,
+                cohort=cohort,
+            )
+            for rank, cohort in (tree.cohorts or {}).items()
+        ],
     )
 
 
-# pylint: disable=unused-argument
-
-
 def create_attributes() -> list[Attribute]:
-    ...
+    return []
 
 
-def create_ranks(graph_id: str, ranks: Optional[tuple[Rank, Rank]]) -> Optional[Subgraph]:
+def create_ranks(graph_id: str, ranks: Optional[list[Rank]]) -> Optional[Subgraph]:
     return (
         Subgraph(
             graph_id,
             *create_attributes(),
-            *create_rank_nodes(graph_id, *ranks),
-            *create_rank_edges(graph_id, *ranks),
+            *create_rank_nodes(graph_id, ranks),
+            *create_rank_edges(graph_id, ranks),
         )
         if ranks is not None
         else None
     )
 
 
-def create_rank_nodes(prefix: str, start: Rank, stop: Rank) -> list[Node]:
-    rank_type = type(start)
+def create_rank_nodes(prefix: str, ranks: Optional[list[Rank]]) -> list[Node]:
     return [
         Node(
             create_rank_identifier(
                 prefix=prefix,
-                rank=rank_type(i),
+                rank=rank,
             )
         )
-        for i in range(index(start), index(stop) + 1)
+        for rank in ranks or []
     ]
 
 
-def create_rank_edges(prefix: str, start: Rank, stop: Rank) -> list[Edge]:
-    rank_type = type(start)
+def create_rank_edges(prefix: str, ranks: Optional[list[Rank]]) -> list[Edge]:
+    ranks = ranks or []
     return [
         Edge(
-            create_rank_identifier(prefix, rank_type(i)),
-            create_rank_identifier(prefix, rank_type(i + 1)),
+            create_rank_identifier(prefix, rank0),
+            create_rank_identifier(prefix, rank1),
         )
-        for i in range(index(start), index(stop))
+        for rank0, rank1 in zip(ranks[:-1], ranks[1:])
     ]
 
 
@@ -104,24 +100,28 @@ def create_rank_identifier(prefix: str, rank: Rank) -> str:
     return f"{prefix}:{suffix}"
 
 
-def create_tree(graph_id: str, tree: Tree[T], custom_nodes: list[Node], custom_edges: list[Edge]) -> Subgraph:
+def create_members(graph_id: str, tree: Tree[T], custom_nodes: list[Node], custom_edges: list[Edge]) -> Subgraph:
     return Subgraph(
         graph_id,
         *create_attributes(),
-        *create_nodes(tree),
+        *create_nodes(tree.entity_ids),
         *custom_nodes,
-        *create_edges(tree),
+        *create_edges(tree.relationship_ids),
         *custom_edges,
     )
 
 
-def create_nodes(tree: Tree[T]) -> list[Node]:
-    ...
+def create_nodes(entities: list[str]) -> list[Node]:
+    return [Node(entity_id) for entity_id in entities]
 
 
-def create_edges(tree: Tree[T]) -> list[Edge]:
-    ...
+def create_edges(relationships: list[tuple[str, str]]) -> list[Edge]:
+    return [Edge(parent_id, child_id) for parent_id, child_id in relationships]
 
 
-def create_cohort(cohort: Cohort) -> Subgraph:
-    ...
+def create_cohort(ranks_left_id: str, ranks_right_id: str, rank: Rank, cohort: list[str]) -> Subgraph:
+    return Subgraph(
+        Node(create_rank_identifier(ranks_left_id, rank)),
+        Node(create_rank_identifier(ranks_right_id, rank)),
+        *[Node(entity_id) for entity_id in cohort],
+    )

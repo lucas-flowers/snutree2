@@ -3,3 +3,4 @@ tags.lock
 .coverage
 .hypothesis
 __pycache__
+.mypy_cache
