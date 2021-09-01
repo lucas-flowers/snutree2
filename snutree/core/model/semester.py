@@ -29,7 +29,7 @@ class Semester:
     PATTERN_SEMESTER = re.compile(SEMESTER, flags=re.IGNORECASE)
 
     @overload
-    def __init__(self, index: int, /) -> None:
+    def __init__(self, index: int = ..., /) -> None:
         ...
 
     @overload
@@ -40,7 +40,7 @@ class Semester:
     def __init__(self, string: str, /) -> None:
         ...
 
-    def __init__(self, arg1: Union[int, Season, str], year: Optional[int] = None) -> None:
+    def __init__(self, arg1: Union[int, Season, str] = 0, year: Optional[int] = None) -> None:
 
         if isinstance(arg1, int):
             assert year is None

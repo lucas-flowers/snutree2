@@ -1,13 +1,11 @@
 from dataclasses import dataclass
 from operator import index
-from typing import Optional, TypeVar
+from typing import Optional
 
 from snutree.core.model.common import Rank
 from snutree.core.model.semester import Semester
-from snutree.core.model.tree import Tree
+from snutree.core.model.tree import AnyRank, Tree
 from snutree.tool.dot import Attribute, Digraph, Edge, Graph, Node, Subgraph
-
-T = TypeVar("T")
 
 
 @dataclass
@@ -21,7 +19,7 @@ class Config:
     custom: CustomConfig
 
 
-def create_family_tree(tree: Tree[T], config: Config) -> Graph:
+def create_family_tree(tree: Tree[AnyRank], config: Config) -> Graph:
     ranks_left_id, ranks_right_id = "ranks-left", "ranks-right"
     return Digraph(
         "family-tree",
@@ -40,15 +38,18 @@ def create_family_tree(tree: Tree[T], config: Config) -> Graph:
             graph_id=ranks_right_id,
             ranks=tree.ranks,
         ),
-        *[
-            create_cohort(
-                ranks_left_id=ranks_left_id,
-                ranks_right_id=ranks_right_id,
-                rank=rank,
-                cohort=cohort,
-            )
-            for rank, cohort in (tree.cohorts or {}).items()
-        ],
+        Subgraph(
+            "ranks",
+            *[
+                create_cohort(
+                    ranks_left_id=ranks_left_id,
+                    ranks_right_id=ranks_right_id,
+                    rank=rank,
+                    cohort=cohort,
+                )
+                for rank, cohort in (tree.cohorts or {}).items()
+            ],
+        ),
     )
 
 
@@ -56,7 +57,7 @@ def create_attributes() -> list[Attribute]:
     return []
 
 
-def create_ranks(graph_id: str, ranks: Optional[list[Rank]]) -> Optional[Subgraph]:
+def create_ranks(graph_id: str, ranks: Optional[list[AnyRank]]) -> Optional[Subgraph]:
     return (
         Subgraph(
             graph_id,
@@ -69,7 +70,7 @@ def create_ranks(graph_id: str, ranks: Optional[list[Rank]]) -> Optional[Subgrap
     )
 
 
-def create_rank_nodes(prefix: str, ranks: Optional[list[Rank]]) -> list[Node]:
+def create_rank_nodes(prefix: str, ranks: Optional[list[AnyRank]]) -> list[Node]:
     return [
         Node(
             create_rank_identifier(
@@ -81,7 +82,7 @@ def create_rank_nodes(prefix: str, ranks: Optional[list[Rank]]) -> list[Node]:
     ]
 
 
-def create_rank_edges(prefix: str, ranks: Optional[list[Rank]]) -> list[Edge]:
+def create_rank_edges(prefix: str, ranks: Optional[list[AnyRank]]) -> list[Edge]:
     ranks = ranks or []
     return [
         Edge(
@@ -92,7 +93,7 @@ def create_rank_edges(prefix: str, ranks: Optional[list[Rank]]) -> list[Edge]:
     ]
 
 
-def create_rank_identifier(prefix: str, rank: Rank) -> str:
+def create_rank_identifier(prefix: str, rank: AnyRank) -> str:
     if isinstance(rank, Semester):
         suffix = str(rank).replace(" ", "").lower()
     else:
@@ -100,7 +101,7 @@ def create_rank_identifier(prefix: str, rank: Rank) -> str:
     return f"{prefix}:{suffix}"
 
 
-def create_members(graph_id: str, tree: Tree[T], custom_nodes: list[Node], custom_edges: list[Edge]) -> Subgraph:
+def create_members(graph_id: str, tree: Tree[AnyRank], custom_nodes: list[Node], custom_edges: list[Edge]) -> Subgraph:
     return Subgraph(
         graph_id,
         *create_attributes(),
@@ -119,9 +120,9 @@ def create_edges(relationships: list[tuple[str, str]]) -> list[Edge]:
     return [Edge(parent_id, child_id) for parent_id, child_id in relationships]
 
 
-def create_cohort(ranks_left_id: str, ranks_right_id: str, rank: Rank, cohort: list[str]) -> Subgraph:
+def create_cohort(ranks_left_id: str, ranks_right_id: str, rank: Rank, cohort: set[str]) -> Subgraph:
     return Subgraph(
         Node(create_rank_identifier(ranks_left_id, rank)),
         Node(create_rank_identifier(ranks_right_id, rank)),
-        *[Node(entity_id) for entity_id in cohort],
+        *[Node(entity_id) for entity_id in sorted(cohort)],
     )

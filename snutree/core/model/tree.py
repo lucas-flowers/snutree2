@@ -1,15 +1,14 @@
 import random
 from dataclasses import dataclass
 from functools import cached_property
-from typing import Generic, Optional, TypeVar, Union
+from operator import index
+from typing import Generic, Type, TypeVar
 
 from networkx import DiGraph, weakly_connected_components
 
 from snutree.core.model.common import Rank
 
-OptionalAnyRank = TypeVar("OptionalAnyRank", bound=Union[Rank, None])
-
-T = TypeVar("T")
+AnyRank = TypeVar("AnyRank", bound=Rank)
 
 
 class Cohort:
@@ -23,60 +22,64 @@ class Component:
 
 
 @dataclass
-class CustomEntity(Component):
+class Entity(Component, Generic[AnyRank]):
     rank: Rank
 
 
 @dataclass
-class CustomRelationship(Component):
+class Relationship(Component):
     pass
 
 
 @dataclass
-class Member(Component):
-    rank: Rank
-    parent_id: str
-
-
-Entity = Union[Member, CustomEntity]
+class Member(Entity[AnyRank]):
+    pass
 
 
 class Family:
     pass
 
 
-# Probably gonna need tobe Generic[T, R], one for member, one for rank
-class Tree(Generic[T]):
+@dataclass
+class TreeConfig:
+
+    rank_min_offset: int
+    rank_max_offset: int
+
+    def __post_init__(self) -> None:
+        if self.rank_min_offset > 0:
+            raise NotImplementedError("positive minimum rank offsets (i.e., entity filtering by rank) not implemented")
+        if self.rank_max_offset < 0:
+            raise NotImplementedError("negative maximum rank offsets (i.e., entity filtering by rank) not implemented")
+
+
+class Tree(Generic[AnyRank]):  # pylint: disable=too-many-instance-attributes
     """
     A tree.
     """
 
-    # _entities: dict[str, Entity]
-    # _relationships: dict[tuple[str, str], Relationship]
-    # cohorts: Optional[dict[Rank, list[str]]]
-
     def __init__(
         self,
-        members: dict[str, Member],
-        custom_entities: dict[str, CustomEntity],
-        custom_relationships: dict[tuple[str, str], CustomRelationship],
+        rank_type: Type[AnyRank],
+        entities: dict[str, Entity[AnyRank]],
+        relationships: dict[tuple[str, str], Relationship],
+        config: TreeConfig,
     ) -> None:
 
-        self.members = members
-        self.custom_entities = custom_entities
-        self.custom_relationships = custom_relationships
+        self.rank_type = rank_type
+        self.config = config
 
-        self._digraph = DiGraph[str]()
+        self.entities = entities
+        self.relationships = relationships
 
-        self._digraph.add_nodes_from(self.members.keys())
-        self._digraph.add_edges_from((member.parent_id, child_id) for child_id, member in self.members.items())
-
-        self._digraph.add_nodes_from(custom_entities.keys())
-        self._digraph.add_edges_from(custom_relationships.keys())
+        self._digraph: DiGraph[str] = DiGraph()
+        self._digraph.add_nodes_from(self.entities.keys())
+        self._digraph.add_edges_from(self.relationships.keys())
 
         self._member_digraph = self._digraph.subgraph(
-            entity_id for entity_id in self._digraph.nodes if entity_id in self.members
+            entity_id for entity_id in self._digraph.nodes if isinstance(entities[entity_id], Member)
         )
+
         self._families: dict[str, Family] = {}
         self._family_roots: dict[Family, str] = {}
         for family_member_ids in weakly_connected_components(self._member_digraph):
@@ -107,18 +110,40 @@ class Tree(Generic[T]):
         return sorted(self._digraph.edges())
 
     @cached_property
-    def cohorts(self) -> Optional[dict[Rank, list[str]]]:
+    def cohorts(self) -> dict[Rank, set[str]]:
         """
         Return a mapping of ranks to their corresponding entity IDs.
-
-        Return None if the tree is rankless.
         """
-        ...
+
+        unsorted_cohorts: dict[Rank, set[str]] = {}
+        for entity_id, entity in self.entities.items():
+            if entity.rank not in unsorted_cohorts:
+                unsorted_cohorts[entity.rank] = set()
+            unsorted_cohorts[entity.rank].add(entity_id)
+
+        return {rank: unsorted_cohorts.get(rank) or set() for rank in self.ranks}
 
     @cached_property
-    def ranks(self) -> Optional[list[Rank]]:
+    def ranks(self) -> list[AnyRank]:
         """
         Return a list of all the ranks of the tree, in order.
-
-        Return None if the tree is rankless.
         """
+
+        if len(self.entities) == 0:
+            return []
+
+        initial_rank = next(iter(self.entities.values())).rank
+        min_rank, max_rank = initial_rank, initial_rank
+        for entity in self.entities.values():
+            if index(entity.rank) < index(min_rank):
+                min_rank = entity.rank
+            if index(entity.rank) > index(max_rank):
+                max_rank = entity.rank
+
+        return [
+            self.rank_type(i)
+            for i in range(
+                index(min_rank) + self.config.rank_min_offset,
+                index(max_rank) + self.config.rank_max_offset + 1,
+            )
+        ]
