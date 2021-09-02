@@ -9,6 +9,8 @@ from networkx import DiGraph, weakly_connected_components
 from snutree.core.model.common import Rank
 
 AnyRank = TypeVar("AnyRank", bound=Rank)
+E = TypeVar("E")
+R = TypeVar("R")
 
 
 class Cohort:
@@ -16,17 +18,18 @@ class Cohort:
 
 
 @dataclass
-class Entity(Generic[AnyRank]):
+class Entity(Generic[E, AnyRank]):
     rank: AnyRank
+    payload: E
 
 
 @dataclass
-class Relationship:
-    pass
+class Relationship(Generic[R]):
+    payload: R
 
 
 @dataclass
-class Member(Entity[AnyRank]):
+class Member(Entity[E, AnyRank]):
     pass
 
 
@@ -47,7 +50,7 @@ class TreeConfig:
             raise NotImplementedError("negative maximum rank offsets (i.e., entity filtering by rank) not implemented")
 
 
-class Tree(Generic[AnyRank]):  # pylint: disable=too-many-instance-attributes
+class Tree(Generic[E, R, AnyRank]):  # pylint: disable=too-many-instance-attributes
     """
     A tree.
     """
@@ -55,20 +58,20 @@ class Tree(Generic[AnyRank]):  # pylint: disable=too-many-instance-attributes
     def __init__(
         self,
         rank_type: Type[AnyRank],
-        entities: dict[str, Entity[AnyRank]],
-        relationships: dict[tuple[str, str], Relationship],
+        entities: dict[str, Entity[E, AnyRank]],
+        relationships: dict[tuple[str, str], Relationship[R]],
         config: TreeConfig,
     ) -> None:
 
         self.rank_type = rank_type
         self.config = config
 
-        self.entities = entities
-        self.relationships = relationships
+        self._entities = entities
+        self._relationships = relationships
 
         self._digraph: DiGraph[str] = DiGraph()
-        self._digraph.add_nodes_from(self.entities.keys())
-        self._digraph.add_edges_from(self.relationships.keys())
+        self._digraph.add_nodes_from(self._entities.keys())
+        self._digraph.add_edges_from(self._relationships.keys())
 
         self._member_digraph = self._digraph.subgraph(
             entity_id for entity_id in self._digraph.nodes if isinstance(entities[entity_id], Member)
@@ -87,21 +90,25 @@ class Tree(Generic[AnyRank]):  # pylint: disable=too-many-instance-attributes
                 self._families[family_member_id] = family
 
     @cached_property
-    def entity_ids(self) -> list[str]:
+    def entities(self) -> dict[str, Entity[E, AnyRank]]:
         """
+        Return a dict of entity_ids for this tree, sorted consistently.
         Return a list of entity_ids for this tree, sorted consistently.
         """
         components = sorted(weakly_connected_components(self._digraph), key=min)
         random.Random("12345").shuffle(components)  # TODO seed
-        return [key for component in components for key in sorted(component)]
+        return {key: self._entities[key] for component in components for key in sorted(component)}
 
     @cached_property
-    def relationship_ids(self) -> list[tuple[str, str]]:
+    def relationships(self) -> dict[tuple[str, str], Relationship[R]]:
         """
         Return a sorted list of relationship_ids (tuples of parent entity ID
         and child entity ID) for this tree.
         """
-        return sorted(self._digraph.edges())
+        return {
+            (parent_id, child_id): self._relationships[(parent_id, child_id)]
+            for parent_id, child_id in sorted(self._digraph.edges())
+        }
 
     @cached_property
     def cohorts(self) -> dict[Rank, set[str]]:

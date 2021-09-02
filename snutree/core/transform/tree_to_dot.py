@@ -1,11 +1,28 @@
 from dataclasses import dataclass
 from operator import index
-from typing import Optional
+from typing import Optional, Protocol, TypeVar
 
 from snutree.core.model.common import Rank
 from snutree.core.model.semester import Semester
-from snutree.core.model.tree import AnyRank, Tree
-from snutree.tool.dot import Attribute, Digraph, Edge, Graph, Node, Subgraph
+from snutree.core.model.tree import AnyRank, Entity, Relationship, Tree
+from snutree.tool.dot import (
+    Attribute,
+    Digraph,
+    Edge,
+    Graph,
+    Id,
+    Node,
+    Subgraph,
+)
+
+E = TypeVar("E", bound="DotComponent")
+R = TypeVar("R", bound="DotComponent")
+
+
+class DotComponent(Protocol):
+    @property
+    def dot_attributes(self) -> dict[str, Id]:
+        ...
 
 
 @dataclass
@@ -19,7 +36,7 @@ class Config:
     custom: CustomConfig
 
 
-def create_family_tree(tree: Tree[AnyRank], config: Config) -> Graph:
+def create_family_tree(tree: Tree[E, R, AnyRank], config: Config) -> Graph:
     ranks_left_id, ranks_right_id = "ranks-left", "ranks-right"
     return Digraph(
         "family-tree",
@@ -101,23 +118,37 @@ def create_rank_identifier(prefix: str, rank: AnyRank) -> str:
     return f"{prefix}:{suffix}"
 
 
-def create_members(graph_id: str, tree: Tree[AnyRank], custom_nodes: list[Node], custom_edges: list[Edge]) -> Subgraph:
+def create_members(
+    graph_id: str, tree: Tree[E, R, AnyRank], custom_nodes: list[Node], custom_edges: list[Edge]
+) -> Subgraph:
     return Subgraph(
         graph_id,
         *create_attributes(),
-        *create_nodes(tree.entity_ids),
+        *create_nodes(tree.entities),
         *custom_nodes,
-        *create_edges(tree.relationship_ids),
+        *create_edges(tree.relationships),
         *custom_edges,
     )
 
 
-def create_nodes(entities: list[str]) -> list[Node]:
-    return [Node(entity_id) for entity_id in entities]
+def create_nodes(entities: dict[str, Entity[E, AnyRank]]) -> list[Node]:
+    return [
+        Node(
+            entity_id,
+            **entity.payload.dot_attributes,
+        )
+        for entity_id, entity in entities.items()
+    ]
 
 
-def create_edges(relationships: list[tuple[str, str]]) -> list[Edge]:
-    return [Edge(parent_id, child_id) for parent_id, child_id in relationships]
+def create_edges(relationships: dict[tuple[str, str], Relationship[R]]) -> list[Edge]:
+    return [
+        Edge(
+            *relationship_id,
+            **relationship.payload.dot_attributes,
+        )
+        for relationship_id, relationship in relationships.items()
+    ]
 
 
 def create_cohort(ranks_left_id: str, ranks_right_id: str, rank: Rank, cohort: set[str]) -> Subgraph:
