@@ -17,7 +17,7 @@ class Cohort:
 
 @dataclass
 class Entity(Generic[AnyRank]):
-    rank: Rank
+    rank: AnyRank
 
 
 @dataclass
