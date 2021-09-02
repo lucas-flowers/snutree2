@@ -78,21 +78,25 @@ def test_write_family_tree() -> None:
             }
             subgraph "ranks" {
                 subgraph {
+                    rank="same";
                     "ranks-left:0";
                     "ranks-right:0";
                 }
                 subgraph {
+                    rank="same";
                     "ranks-left:1";
                     "ranks-right:1";
                     "50";
                     "a";
                 }
                 subgraph {
+                    rank="same";
                     "ranks-left:2";
                     "ranks-right:2";
                     "100";
                 }
                 subgraph {
+                    rank="same";
                     "ranks-left:3";
                     "ranks-right:3";
                 }

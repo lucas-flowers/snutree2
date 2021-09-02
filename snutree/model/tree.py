@@ -54,8 +54,8 @@ class Family:
 @dataclass
 class TreeConfig:
 
-    rank_min_offset: int
-    rank_max_offset: int
+    rank_min_offset: int = 0
+    rank_max_offset: int = 0
 
     def __post_init__(self) -> None:
         if self.rank_min_offset > 0:
@@ -74,11 +74,11 @@ class Tree(Generic[E, R, AnyRank]):  # pylint: disable=too-many-instance-attribu
         rank_type: Type[AnyRank],
         entities: dict[str, Entity[E, AnyRank]],
         relationships: dict[tuple[str, str], Relationship[R]],
-        config: TreeConfig,
+        config: Optional[TreeConfig] = None,
     ) -> None:
 
         self.rank_type = rank_type
-        self.config = config
+        self.config = config or TreeConfig()
 
         self._entities = entities
         self._relationships = relationships
