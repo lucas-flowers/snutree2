@@ -93,7 +93,6 @@ class Tree(Generic[E, R, AnyRank]):  # pylint: disable=too-many-instance-attribu
     def entities(self) -> dict[str, Entity[E, AnyRank]]:
         """
         Return a dict of entity_ids for this tree, sorted consistently.
-        Return a list of entity_ids for this tree, sorted consistently.
         """
         components = sorted(weakly_connected_components(self._digraph), key=min)
         random.Random("12345").shuffle(components)  # TODO seed
