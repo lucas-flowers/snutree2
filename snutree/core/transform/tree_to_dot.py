@@ -43,9 +43,22 @@ class NamesConfig:
 
 
 @dataclass
+class GraphAttributesConfig:
+    root: list[Attribute] = field(default_factory=list)
+    members: list[Attribute] = field(default_factory=list)
+    ranks: list[Attribute] = field(default_factory=list)
+
+
+@dataclass
+class GraphsConfig:
+    names: NamesConfig = field(default_factory=NamesConfig)
+    attributes: GraphAttributesConfig = field(default_factory=GraphAttributesConfig)
+
+
+@dataclass
 class DotWriterConfig:
     custom: CustomComponentConfig = field(default_factory=CustomComponentConfig)
-    names: NamesConfig = field(default_factory=NamesConfig)
+    graph: GraphsConfig = field(default_factory=GraphsConfig)
 
 
 @dataclass
@@ -58,14 +71,14 @@ class DotWriter:
     def write_family_tree(self, tree: Tree[E, R, AnyRank]) -> Graph:
         ranks_left_id, ranks_right_id = "ranks-left", "ranks-right"
         return Digraph(
-            self.config.names.root,
-            *self.write_attributes(),
+            self.config.graph.names.root,
+            *self.config.graph.attributes.root,
             self.write_ranks(
                 graph_id=ranks_left_id,
                 ranks=tree.ranks,
             ),
             self.write_members(
-                graph_id=self.config.names.members,
+                graph_id=self.config.graph.names.members,
                 tree=tree,
             ),
             self.write_ranks(
@@ -73,7 +86,7 @@ class DotWriter:
                 ranks=tree.ranks,
             ),
             Subgraph(
-                self.config.names.ranks,
+                self.config.graph.names.ranks,
                 *[
                     self.write_cohort(
                         rank=rank,
@@ -84,14 +97,11 @@ class DotWriter:
             ),
         )
 
-    def write_attributes(self) -> list[Attribute]:
-        return []
-
     def write_ranks(self, graph_id: str, ranks: Optional[list[AnyRank]]) -> Optional[Subgraph]:
         return (
             Subgraph(
                 graph_id,
-                *self.write_attributes(),
+                *self.config.graph.attributes.ranks,
                 *self.write_rank_nodes(graph_id, ranks),
                 *self.write_rank_edges(graph_id, ranks),
             )
@@ -130,7 +140,7 @@ class DotWriter:
     def write_members(self, graph_id: str, tree: Tree[E, R, AnyRank]) -> Subgraph:
         return Subgraph(
             graph_id,
-            *self.write_attributes(),
+            *self.config.graph.attributes.members,
             *self.write_nodes(tree.entities),
             *self.config.custom.nodes,
             *self.write_edges(tree.relationships),
@@ -157,7 +167,7 @@ class DotWriter:
 
     def write_cohort(self, rank: Rank, cohort: set[str]) -> Subgraph:
         return Subgraph(
-            Node(self.write_rank_identifier(self.config.names.ranks_left, rank)),
-            Node(self.write_rank_identifier(self.config.names.ranks_right, rank)),
+            Node(self.write_rank_identifier(self.config.graph.names.ranks_left, rank)),
+            Node(self.write_rank_identifier(self.config.graph.names.ranks_right, rank)),
             *[Node(entity_id) for entity_id in sorted(cohort)],
         )
