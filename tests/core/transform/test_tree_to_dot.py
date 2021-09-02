@@ -19,13 +19,13 @@ def test_create_family_tree() -> None:
     tree = Tree[int](
         rank_type=int,
         entities={
-            "100": Member([], {}, rank=2),
-            "50": Member([], {}, rank=1),
-            "a": Entity([], {}, rank=1),
+            "100": Member(rank=2),
+            "50": Member(rank=1),
+            "a": Entity(rank=1),
         },
         relationships={
-            ("a", "50"): Relationship([], {}),
-            ("50", "100"): Relationship([], {}),
+            ("a", "50"): Relationship(),
+            ("50", "100"): Relationship(),
         },
         config=TreeConfig(
             rank_min_offset=0,

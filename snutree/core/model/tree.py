@@ -16,18 +16,12 @@ class Cohort:
 
 
 @dataclass
-class Component:
-    classes: list[str]
-    data: dict[str, str]
-
-
-@dataclass
-class Entity(Component, Generic[AnyRank]):
+class Entity(Generic[AnyRank]):
     rank: Rank
 
 
 @dataclass
-class Relationship(Component):
+class Relationship:
     pass
 
 
