@@ -20,6 +20,8 @@ R = TypeVar("R", bound="DotComponent")
 
 
 class DotComponent(Protocol):
+    # TODO: Decided whether to keep this a protocol, or make it a callable
+    # injected into the DotWriter configuration
     @property
     def dot_attributes(self) -> dict[str, Id]:
         ...
