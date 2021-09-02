@@ -1,18 +1,12 @@
 from dataclasses import dataclass, field
 
-from snutree.core.model.tree import (
-    Entity,
-    Member,
-    Relationship,
-    Tree,
-    TreeConfig,
-)
-from snutree.core.transform.tree_to_dot import (
+from snutree.model.tree import Entity, Member, Relationship, Tree, TreeConfig
+from snutree.tool.dot import Edge, Id, Node
+from snutree.writer.dot import (
     CustomComponentConfig,
     DotWriter,
     DotWriterConfig,
 )
-from snutree.tool.dot import Edge, Id, Node
 from tests.conftest import trim
 
 

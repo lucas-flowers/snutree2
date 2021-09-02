@@ -6,7 +6,7 @@ from typing import ContextManager, Union
 import pytest
 from hypothesis import given, infer
 
-from snutree.core.model.semester import Season, Semester
+from snutree.model.semester import Season, Semester
 from tests.conftest import TestCase
 
 

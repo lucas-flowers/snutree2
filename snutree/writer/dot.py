@@ -2,8 +2,8 @@ from dataclasses import dataclass, field
 from operator import index
 from typing import Optional, Protocol, TypeVar
 
-from snutree.core.model.semester import Semester
-from snutree.core.model.tree import AnyRank, Entity, Rank, Relationship, Tree
+from snutree.model.semester import Semester
+from snutree.model.tree import AnyRank, Entity, Rank, Relationship, Tree
 from snutree.tool.dot import (
     Attribute,
     Digraph,
