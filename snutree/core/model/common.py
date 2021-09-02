@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 from typing import Optional, Protocol, runtime_checkable
 
 
@@ -9,9 +8,3 @@ class Rank(Protocol):
 
     def __index__(self) -> int:  # pylint: disable=invalid-index-returned # Come on pylint, it's a protocol
         ...
-
-
-@dataclass
-class Component:
-    classes: list[str]
-    data: dict[str, str]
