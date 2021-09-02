@@ -35,8 +35,8 @@ def test_write_family_tree() -> None:
             ("50", "100"): Relationship(payload=BasicDotPayload()),
         },
         config=TreeConfig(
-            rank_min_offset=0,
-            rank_max_offset=0,
+            rank_min_offset=-1,
+            rank_max_offset=1,
         ),
     )
 
@@ -55,9 +55,13 @@ def test_write_family_tree() -> None:
         """
         digraph "family-tree" {
             subgraph "ranks-left" {
+                "ranks-left:0";
                 "ranks-left:1";
                 "ranks-left:2";
+                "ranks-left:3";
+                "ranks-left:0" -> "ranks-left:1";
                 "ranks-left:1" -> "ranks-left:2";
+                "ranks-left:2" -> "ranks-left:3";
             }
             subgraph "members" {
                 "100" [label="test"];
@@ -70,11 +74,19 @@ def test_write_family_tree() -> None:
                 "i" -> "ii";
             }
             subgraph "ranks-right" {
+                "ranks-right:0";
                 "ranks-right:1";
                 "ranks-right:2";
+                "ranks-right:3";
+                "ranks-right:0" -> "ranks-right:1";
                 "ranks-right:1" -> "ranks-right:2";
+                "ranks-right:2" -> "ranks-right:3";
             }
             subgraph "ranks" {
+                subgraph {
+                    "ranks-left:0";
+                    "ranks-right:0";
+                }
                 subgraph {
                     "ranks-left:1";
                     "ranks-right:1";
@@ -85,6 +97,10 @@ def test_write_family_tree() -> None:
                     "ranks-left:2";
                     "ranks-right:2";
                     "100";
+                }
+                subgraph {
+                    "ranks-left:3";
+                    "ranks-right:3";
                 }
             }
         }
