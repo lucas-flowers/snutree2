@@ -8,9 +8,9 @@ from snutree.core.model.tree import (
     TreeConfig,
 )
 from snutree.core.transform.tree_to_dot import (
-    Config,
-    CustomConfig,
-    create_family_tree,
+    CustomComponentConfig,
+    DotWriter,
+    DotWriterConfig,
 )
 from snutree.tool.dot import Edge, Id, Node
 from tests.conftest import trim
@@ -21,7 +21,7 @@ class BasicDotPayload:
     dot_attributes: dict[str, Id] = field(default_factory=lambda: {"label": "test"})
 
 
-def test_create_family_tree() -> None:
+def test_write_family_tree() -> None:
 
     tree = Tree(
         rank_type=int,
@@ -40,15 +40,16 @@ def test_create_family_tree() -> None:
         ),
     )
 
-    dot = create_family_tree(
-        tree=tree,
-        config=Config(
-            custom=CustomConfig(
+    writer = DotWriter(
+        DotWriterConfig(
+            custom=CustomComponentConfig(
                 nodes=[Node("i"), Node("ii")],
                 edges=[Edge("i", "ii")],
             ),
         ),
     )
+
+    dot = writer.write_family_tree(tree)
 
     expected = trim(
         """
