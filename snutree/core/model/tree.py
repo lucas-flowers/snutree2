@@ -2,15 +2,29 @@ import random
 from dataclasses import dataclass
 from functools import cached_property
 from operator import index
-from typing import Generic, Type, TypeVar
+from typing import (
+    Generic,
+    Optional,
+    Protocol,
+    Type,
+    TypeVar,
+    runtime_checkable,
+)
 
 from networkx import DiGraph, weakly_connected_components
 
-from snutree.core.model.common import Rank
-
-AnyRank = TypeVar("AnyRank", bound=Rank)
+AnyRank = TypeVar("AnyRank", bound="Rank")
 E = TypeVar("E")
 R = TypeVar("R")
+
+
+@runtime_checkable
+class Rank(Protocol):
+    def __init__(self, i: Optional[int] = None, /) -> None:  # pylint: disable=super-init-not-called
+        ...
+
+    def __index__(self) -> int:  # pylint: disable=invalid-index-returned # Come on pylint, it's a protocol
+        ...
 
 
 class Cohort:
