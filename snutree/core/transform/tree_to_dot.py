@@ -69,12 +69,11 @@ class DotWriter:
     config: DotWriterConfig = field(default_factory=DotWriterConfig)
 
     def write_family_tree(self, tree: Tree[E, R, AnyRank]) -> Graph:
-        ranks_left_id, ranks_right_id = "ranks-left", "ranks-right"
         return Digraph(
             self.config.graph.names.root,
             *self.config.graph.attributes.root,
             self.write_ranks(
-                graph_id=ranks_left_id,
+                graph_id=self.config.graph.names.ranks_left,
                 ranks=tree.ranks,
             ),
             self.write_members(
@@ -82,7 +81,7 @@ class DotWriter:
                 tree=tree,
             ),
             self.write_ranks(
-                graph_id=ranks_right_id,
+                graph_id=self.config.graph.names.ranks_right,
                 ranks=tree.ranks,
             ),
             Subgraph(
