@@ -51,17 +51,17 @@ class AttributesConfig:
 @dataclass
 class GraphsConfig:
     names: NamesConfig = field(default_factory=NamesConfig)
-    attributes: AttributesConfig = field(default_factory=AttributesConfig)
+    defaults: AttributesConfig = field(default_factory=AttributesConfig)
 
 
 @dataclass
 class NodesConfig:
-    attributes: AttributesConfig = field(default_factory=AttributesConfig)
+    defaults: AttributesConfig = field(default_factory=AttributesConfig)
 
 
 @dataclass
 class EdgesConfig:
-    attributes: AttributesConfig = field(default_factory=AttributesConfig)
+    defaults: AttributesConfig = field(default_factory=AttributesConfig)
 
 
 @dataclass
@@ -82,9 +82,9 @@ class DotWriter:
     def write_family_tree(self, tree: Tree[E, R, AnyRank]) -> Graph:
         return Digraph(
             self.config.graph.names.root,
-            *self.write_graph_defaults(self.config.graph.attributes.root),
-            self.write_node_defaults(self.config.node.attributes.root),
-            self.write_edge_defaults(self.config.edge.attributes.root),
+            *self.write_graph_defaults(self.config.graph.defaults.root),
+            self.write_node_defaults(self.config.node.defaults.root),
+            self.write_edge_defaults(self.config.edge.defaults.root),
             self.write_ranks(
                 graph_id=self.config.graph.names.ranks_left,
                 ranks=tree.ranks,
@@ -122,9 +122,9 @@ class DotWriter:
         return (
             Subgraph(
                 graph_id,
-                *self.write_graph_defaults(self.config.graph.attributes.ranks),
-                self.write_node_defaults(self.config.node.attributes.ranks),
-                self.write_edge_defaults(self.config.edge.attributes.ranks),
+                *self.write_graph_defaults(self.config.graph.defaults.ranks),
+                self.write_node_defaults(self.config.node.defaults.ranks),
+                self.write_edge_defaults(self.config.edge.defaults.ranks),
                 *self.write_rank_nodes(graph_id, ranks),
                 *self.write_rank_edges(graph_id, ranks),
             )
@@ -163,9 +163,9 @@ class DotWriter:
     def write_members(self, graph_id: str, tree: Tree[E, R, AnyRank]) -> Subgraph:
         return Subgraph(
             graph_id,
-            *self.write_graph_defaults(self.config.graph.attributes.members),
-            self.write_node_defaults(self.config.node.attributes.members),
-            self.write_edge_defaults(self.config.edge.attributes.members),
+            *self.write_graph_defaults(self.config.graph.defaults.members),
+            self.write_node_defaults(self.config.node.defaults.members),
+            self.write_edge_defaults(self.config.edge.defaults.members),
             *self.write_nodes(tree.entities),
             *self.config.custom.nodes,
             *self.write_edges(tree.relationships),
