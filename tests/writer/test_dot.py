@@ -1,7 +1,7 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from snutree.model.tree import Member, RankedEntity, Tree, TreeConfig
-from snutree.tool.dot import Edge, Id, Node
+from snutree.tool.dot import Edge, Node
 from snutree.writer.dot import (
     DotWriter,
     DotWriterConfig,
@@ -14,7 +14,7 @@ from tests.conftest import trim
 
 @dataclass
 class BasicDotComponent:
-    dot_attributes: dict[str, Id] = field(default_factory=lambda: {"label": "test"})
+    pass
 
 
 @dataclass
