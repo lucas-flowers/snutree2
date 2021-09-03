@@ -38,6 +38,7 @@ class DefaultAttributesConfig:
 class DynamicNodeAttributesConfig(Generic[AnyRank, E]):
     member: Callable[[E], dict[str, Id]] = lambda _: {}
     rank: Callable[[AnyRank], dict[str, Id]] = lambda _: {}
+    family: Callable[[str], dict[str, Id]] = lambda _: {}
 
 
 @dataclass
@@ -161,17 +162,18 @@ class DotWriter(Generic[E, R, AnyRank]):
             *self.write_graph_defaults(self.config.graph.defaults.member),
             self.write_node_defaults(self.config.node.defaults.member),
             self.write_edge_defaults(self.config.edge.defaults.member),
-            *self.write_nodes(tree.entities),
+            *self.write_nodes(tree.entities, tree.families),
             *self.config.node.custom,
             *self.write_edges(tree.relationships),
             *self.config.edge.custom,
         )
 
-    def write_nodes(self, entities: dict[str, E]) -> list[Node]:
+    def write_nodes(self, entities: dict[str, E], families: dict[str, str]) -> list[Node]:
         return [
             Node(
                 entity_id,
                 **self.config.node.attributes.member(entity),
+                **(self.config.node.attributes.family(families[entity_id]) if entity_id in families else {}),
             )
             for entity_id, entity in entities.items()
         ]

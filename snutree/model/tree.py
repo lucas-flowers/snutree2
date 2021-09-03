@@ -55,7 +55,7 @@ class TreeConfig:
             raise NotImplementedError("negative maximum rank offsets (i.e., entity filtering by rank) not implemented")
 
 
-class Tree(Generic[E, R, AnyRank]):  # pylint: disable=too-many-instance-attributes
+class Tree(Generic[E, R, AnyRank]):
     """
     A tree.
     """
@@ -83,17 +83,21 @@ class Tree(Generic[E, R, AnyRank]):  # pylint: disable=too-many-instance-attribu
             entity_id for entity_id in self._digraph.nodes if isinstance(self._entities[entity_id], Member)
         )
 
-        self._families: dict[str, Family] = {}
-        self._family_roots: dict[Family, str] = {}
+    @cached_property
+    def families(self) -> dict[str, str]:
+        """
+        Return a dict of entity_id to the entity_id of the root of the entity's family.
+        """
+        families: dict[str, str] = {}
         for family_member_ids in weakly_connected_components(self._member_digraph):
-            family = Family()
-            (self._family_roots[family],) = set(
+            (root_member_id,) = set(
                 family_member_id
-                for family_member_id, degree in self._digraph.subgraph(family_member_ids).in_degree()
+                for family_member_id, degree in self._member_digraph.subgraph(family_member_ids).in_degree()
                 if degree == 0
             )
             for family_member_id in family_member_ids:
-                self._families[family_member_id] = family
+                families[family_member_id] = root_member_id
+        return families
 
     @cached_property
     def entities(self) -> dict[str, E]:

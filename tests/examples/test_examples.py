@@ -106,6 +106,30 @@ def test_examples(case: ExampleTestCase) -> None:
                 attributes=DynamicNodeAttributesConfig(
                     member=lambda member: {"label": member.label},
                     rank=lambda rank: {"label": str(rank)},
+                    family=lambda family_id: {
+                        "color": {
+                            "663": "deeppink",
+                            "760": "brown1",
+                            "722": "red4",
+                            "726": "lightsteelblue",
+                            "673": "midnightblue",
+                            "716": "purple",
+                            "702": "indianred4",
+                            "735": "limegreen",
+                            "757": "darkgreen",
+                            "740": "royalblue4",
+                            "986": "yellow",
+                            "1043": "slategrey",
+                            "1044": "orangered4",
+                            "1045": "crimson",  # Dea family
+                            "1046": "chartreuse4",
+                            "1047": "cyan2",
+                            "1048": "sienna2",
+                            "1049": "salmon2",
+                            "1050": "cadetblue",
+                            "1051": "dodgerblue",  # Ochi family
+                        }.get(family_id, "black"),
+                    },
                 ),
             ),
             edge=EdgesConfig(
