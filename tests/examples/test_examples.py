@@ -1,6 +1,7 @@
 from csv import DictReader
 from dataclasses import dataclass
 from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Optional
 
 import pytest
@@ -104,6 +105,7 @@ def test_examples(case: ExampleTestCase) -> None:
                 ),
                 attributes=DynamicNodeAttributesConfig(
                     member=lambda member: {"label": member.label},
+                    rank=lambda rank: {"label": str(rank)},
                 ),
             ),
             edge=EdgesConfig(
@@ -120,4 +122,10 @@ def test_examples(case: ExampleTestCase) -> None:
     )
 
     actual = str(writer.write_family_tree(tree))
-    assert actual == output_path.read_text()
+    try:
+        assert actual == output_path.read_text()
+    except AssertionError:
+        with NamedTemporaryFile(delete=False) as tmpfile:
+            path = Path(tmpfile.name)
+            path.write_text(actual)
+        pytest.fail(f"Wrote actual result to {path}")

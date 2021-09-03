@@ -134,7 +134,7 @@ class DotWriter(Generic[E, R, AnyRank]):
                     prefix=prefix,
                     rank=rank,
                 ),
-                *self.config.node.attributes.rank(rank),
+                **self.config.node.attributes.rank(rank),
             )
             for rank in ranks or []
         ]
