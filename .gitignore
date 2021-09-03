@@ -4,3 +4,4 @@ tags.lock
 .hypothesis
 __pycache__
 .mypy_cache
+*.pdf
