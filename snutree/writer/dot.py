@@ -31,14 +31,14 @@ class NamesConfig:
 @dataclass
 class DefaultAttributesConfig:
     root: dict[str, Id] = field(default_factory=dict)
-    members: dict[str, Id] = field(default_factory=dict)
-    ranks: dict[str, Id] = field(default_factory=dict)
+    member: dict[str, Id] = field(default_factory=dict)
+    rank: dict[str, Id] = field(default_factory=dict)
 
 
 @dataclass
 class DynamicNodeAttributesConfig(Generic[AnyRank, E]):
-    members: Callable[[E], dict[str, Id]] = lambda _: {}
-    ranks: Callable[[AnyRank], dict[str, Id]] = lambda _: {}
+    member: Callable[[E], dict[str, Id]] = lambda _: {}
+    rank: Callable[[AnyRank], dict[str, Id]] = lambda _: {}
 
 
 @dataclass
@@ -117,9 +117,9 @@ class DotWriter(Generic[E, R, AnyRank]):
         return (
             Subgraph(
                 graph_id,
-                *self.write_graph_defaults(self.config.graph.defaults.ranks),
-                self.write_node_defaults(self.config.node.defaults.ranks),
-                self.write_edge_defaults(self.config.edge.defaults.ranks),
+                *self.write_graph_defaults(self.config.graph.defaults.rank),
+                self.write_node_defaults(self.config.node.defaults.rank),
+                self.write_edge_defaults(self.config.edge.defaults.rank),
                 *self.write_rank_nodes(graph_id, ranks),
                 *self.write_rank_edges(graph_id, ranks),
             )
@@ -134,7 +134,7 @@ class DotWriter(Generic[E, R, AnyRank]):
                     prefix=prefix,
                     rank=rank,
                 ),
-                *self.config.node.attributes.ranks(rank),
+                *self.config.node.attributes.rank(rank),
             )
             for rank in ranks or []
         ]
@@ -159,9 +159,9 @@ class DotWriter(Generic[E, R, AnyRank]):
     def write_members(self, graph_id: str, tree: Tree[E, R, AnyRank]) -> Subgraph:
         return Subgraph(
             graph_id,
-            *self.write_graph_defaults(self.config.graph.defaults.members),
-            self.write_node_defaults(self.config.node.defaults.members),
-            self.write_edge_defaults(self.config.edge.defaults.members),
+            *self.write_graph_defaults(self.config.graph.defaults.member),
+            self.write_node_defaults(self.config.node.defaults.member),
+            self.write_edge_defaults(self.config.edge.defaults.member),
             *self.write_nodes(tree.entities),
             *self.config.node.custom,
             *self.write_edges(tree.relationships),
@@ -172,7 +172,7 @@ class DotWriter(Generic[E, R, AnyRank]):
         return [
             Node(
                 entity_id,
-                **self.config.node.attributes.members(entity),
+                **self.config.node.attributes.member(entity),
             )
             for entity_id, entity in entities.items()
         ]

@@ -48,7 +48,7 @@ def test_write_family_tree() -> None:
             ),
             node=NodesConfig(
                 attributes=DynamicNodeAttributesConfig(
-                    members=lambda _: {"label": "test"},
+                    member=lambda _: {"label": "test"},
                 ),
                 custom=[Node("i"), Node("ii")],
             ),

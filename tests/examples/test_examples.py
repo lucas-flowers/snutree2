@@ -93,17 +93,17 @@ def test_examples(case: ExampleTestCase) -> None:
                         width=1.63,
                         fontname="dejavu sans",
                     ),
-                    members=dict(
+                    member=dict(
                         fillcolor=".11 .71 1.",
                     ),
-                    ranks=dict(
+                    rank=dict(
                         color="none",
                         fontsize=20,
                         fontname="dejavu serif",
                     ),
                 ),
                 attributes=DynamicNodeAttributesConfig(
-                    members=lambda member: {"label": member.label},
+                    member=lambda member: {"label": member.label},
                 ),
             ),
             edge=EdgesConfig(
@@ -111,7 +111,7 @@ def test_examples(case: ExampleTestCase) -> None:
                     root=dict(
                         arrowhead="none",
                     ),
-                    ranks=dict(
+                    rank=dict(
                         style="invis",
                     ),
                 ),
