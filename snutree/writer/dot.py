@@ -16,7 +16,6 @@ from snutree.tool.dot import (
 
 E = TypeVar("E")
 R = TypeVar("R")
-T = TypeVar("T")
 
 
 @dataclass
