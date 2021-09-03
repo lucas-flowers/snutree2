@@ -19,12 +19,6 @@ R = TypeVar("R")
 
 
 @dataclass
-class CustomComponentConfig:
-    nodes: list[Node] = field(default_factory=list)
-    edges: list[Edge] = field(default_factory=list)
-
-
-@dataclass
 class NamesConfig:
     root = "family-tree"
     members = "members"
@@ -55,17 +49,18 @@ class GraphsConfig:
 class NodesConfig(Generic[E]):
     defaults: DefaultAttributesConfig = field(default_factory=DefaultAttributesConfig)
     attributes: DynamicAttributesConfig[E] = field(default_factory=DynamicAttributesConfig)
+    custom: list[Node] = field(default_factory=list)
 
 
 @dataclass
 class EdgesConfig(Generic[R]):
     defaults: DefaultAttributesConfig = field(default_factory=DefaultAttributesConfig)
     attributes: DynamicAttributesConfig[R] = field(default_factory=DynamicAttributesConfig)
+    custom: list[Edge] = field(default_factory=list)
 
 
 @dataclass
 class DotWriterConfig(Generic[E, R]):
-    custom: CustomComponentConfig = field(default_factory=CustomComponentConfig)
     graph: GraphsConfig = field(default_factory=GraphsConfig)
     node: NodesConfig[E] = field(default_factory=NodesConfig)
     edge: EdgesConfig[R] = field(default_factory=EdgesConfig)
@@ -166,9 +161,9 @@ class DotWriter(Generic[E, R]):
             self.write_node_defaults(self.config.node.defaults.members),
             self.write_edge_defaults(self.config.edge.defaults.members),
             *self.write_nodes(tree.entities),
-            *self.config.custom.nodes,
+            *self.config.node.custom,
             *self.write_edges(tree.relationships),
-            *self.config.custom.edges,
+            *self.config.edge.custom,
         )
 
     def write_nodes(self, entities: dict[str, E]) -> list[Node]:

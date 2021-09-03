@@ -3,10 +3,10 @@ from dataclasses import dataclass, field
 from snutree.model.tree import Member, RankedEntity, Tree, TreeConfig
 from snutree.tool.dot import Edge, Id, Node
 from snutree.writer.dot import (
-    CustomComponentConfig,
     DotWriter,
     DotWriterConfig,
     DynamicAttributesConfig,
+    EdgesConfig,
     NodesConfig,
 )
 from tests.conftest import trim
@@ -43,14 +43,14 @@ def test_write_family_tree() -> None:
 
     writer = DotWriter(
         DotWriterConfig[BasicDotComponent, BasicDotComponent](
-            custom=CustomComponentConfig(
-                nodes=[Node("i"), Node("ii")],
-                edges=[Edge("i", "ii")],
+            edge=EdgesConfig(
+                custom=[Edge("i", "ii")],
             ),
             node=NodesConfig(
                 attributes=DynamicAttributesConfig(
                     members=lambda _: {"label": "test"},
                 ),
+                custom=[Node("i"), Node("ii")],
             ),
         ),
     )
