@@ -42,7 +42,7 @@ class NamesConfig:
 
 
 @dataclass
-class AttributesConfig:
+class DefaultAttributesConfig:
     root: dict[str, Id] = field(default_factory=dict)
     members: dict[str, Id] = field(default_factory=dict)
     ranks: dict[str, Id] = field(default_factory=dict)
@@ -51,17 +51,17 @@ class AttributesConfig:
 @dataclass
 class GraphsConfig:
     names: NamesConfig = field(default_factory=NamesConfig)
-    defaults: AttributesConfig = field(default_factory=AttributesConfig)
+    defaults: DefaultAttributesConfig = field(default_factory=DefaultAttributesConfig)
 
 
 @dataclass
 class NodesConfig:
-    defaults: AttributesConfig = field(default_factory=AttributesConfig)
+    defaults: DefaultAttributesConfig = field(default_factory=DefaultAttributesConfig)
 
 
 @dataclass
 class EdgesConfig:
-    defaults: AttributesConfig = field(default_factory=AttributesConfig)
+    defaults: DefaultAttributesConfig = field(default_factory=DefaultAttributesConfig)
 
 
 @dataclass

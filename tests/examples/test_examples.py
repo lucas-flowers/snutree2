@@ -9,7 +9,7 @@ from snutree.model.semester import Semester
 from snutree.model.tree import Member, RankedEntity, Tree
 from snutree.tool.dot import Id
 from snutree.writer.dot import (
-    AttributesConfig,
+    DefaultAttributesConfig,
     DotWriter,
     DotWriterConfig,
     EdgesConfig,
@@ -82,7 +82,7 @@ def test_examples(case: ExampleTestCase) -> None:
     writer = DotWriter(
         DotWriterConfig(
             graph=GraphsConfig(
-                defaults=AttributesConfig(
+                defaults=DefaultAttributesConfig(
                     root=dict(
                         size=80,
                         ratio="compress",
@@ -97,7 +97,7 @@ def test_examples(case: ExampleTestCase) -> None:
                 ),
             ),
             node=NodesConfig(
-                defaults=AttributesConfig(
+                defaults=DefaultAttributesConfig(
                     root=dict(
                         style="filled",
                         shape="box",
@@ -116,7 +116,7 @@ def test_examples(case: ExampleTestCase) -> None:
                 ),
             ),
             edge=EdgesConfig(
-                defaults=AttributesConfig(
+                defaults=DefaultAttributesConfig(
                     root=dict(
                         arrowhead="none",
                     ),
