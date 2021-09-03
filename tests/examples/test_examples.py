@@ -54,7 +54,7 @@ def test_examples(case: ExampleTestCase) -> None:
             DotMember(
                 big_badge=row["big_badge"] or None,
                 badge=row["badge"],
-                label=fr'{row["last_name"]}\n{row["badge"]}',
+                label=fr'{row["first_name"]} {row["last_name"]}\nΔΑ {row["badge"]}',
             ),
         )
         for row in rows
