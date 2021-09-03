@@ -116,7 +116,7 @@ class Tree(Generic[E, R, AnyRank]):  # pylint: disable=too-many-instance-attribu
         }
 
     @cached_property
-    def cohorts(self) -> dict[Rank, set[str]]:
+    def cohorts(self) -> dict[AnyRank, set[str]]:
         """
         Return a mapping of ranks to their corresponding entity IDs.
         """

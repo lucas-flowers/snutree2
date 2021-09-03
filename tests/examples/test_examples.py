@@ -11,7 +11,7 @@ from snutree.writer.dot import (
     DefaultAttributesConfig,
     DotWriter,
     DotWriterConfig,
-    DynamicAttributesConfig,
+    DynamicNodeAttributesConfig,
     EdgesConfig,
     GraphsConfig,
     NodesConfig,
@@ -67,7 +67,7 @@ def test_examples(case: ExampleTestCase) -> None:
         },
     )
 
-    writer = DotWriter[DotMember, None](
+    writer = DotWriter[DotMember, None, Semester](
         DotWriterConfig(
             graph=GraphsConfig(
                 defaults=DefaultAttributesConfig(
@@ -102,7 +102,7 @@ def test_examples(case: ExampleTestCase) -> None:
                         fontname="dejavu serif",
                     ),
                 ),
-                attributes=DynamicAttributesConfig(
+                attributes=DynamicNodeAttributesConfig(
                     members=lambda member: {"label": member.label},
                 ),
             ),

@@ -5,7 +5,7 @@ from snutree.tool.dot import Edge, Node
 from snutree.writer.dot import (
     DotWriter,
     DotWriterConfig,
-    DynamicAttributesConfig,
+    DynamicNodeAttributesConfig,
     EdgesConfig,
     NodesConfig,
 )
@@ -42,12 +42,12 @@ def test_write_family_tree() -> None:
     )
 
     writer = DotWriter(
-        DotWriterConfig[BasicDotComponent, None](
+        DotWriterConfig[BasicDotComponent, None, int](
             edge=EdgesConfig(
                 custom=[Edge("i", "ii")],
             ),
             node=NodesConfig(
-                attributes=DynamicAttributesConfig(
+                attributes=DynamicNodeAttributesConfig(
                     members=lambda _: {"label": "test"},
                 ),
                 custom=[Node("i"), Node("ii")],
