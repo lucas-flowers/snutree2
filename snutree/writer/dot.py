@@ -3,7 +3,7 @@ from operator import index
 from typing import Optional, Protocol, TypeVar
 
 from snutree.model.semester import Semester
-from snutree.model.tree import AnyRank, Entity, Rank, Relationship, Tree
+from snutree.model.tree import AnyRank, Rank, Tree
 from snutree.tool.dot import (
     Attribute,
     Digraph,
@@ -172,20 +172,20 @@ class DotWriter:
             *self.config.custom.edges,
         )
 
-    def write_nodes(self, entities: dict[str, Entity[E, AnyRank]]) -> list[Node]:
+    def write_nodes(self, entities: dict[str, E]) -> list[Node]:
         return [
             Node(
                 entity_id,
-                **entity.payload.dot_attributes,
+                **entity.dot_attributes,
             )
             for entity_id, entity in entities.items()
         ]
 
-    def write_edges(self, relationships: dict[tuple[str, str], Relationship[R]]) -> list[Edge]:
+    def write_edges(self, relationships: dict[tuple[str, str], R]) -> list[Edge]:
         return [
             Edge(
                 *relationship_id,
-                **relationship.payload.dot_attributes,
+                **relationship.dot_attributes,
             )
             for relationship_id, relationship in relationships.items()
         ]

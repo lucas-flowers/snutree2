@@ -6,7 +6,7 @@ from typing import Optional
 import pytest
 
 from snutree.model.semester import Semester
-from snutree.model.tree import Member, Relationship, Tree
+from snutree.model.tree import Member, RankedEntity, Tree
 from snutree.tool.dot import Id
 from snutree.writer.dot import (
     AttributesConfig,
@@ -42,7 +42,7 @@ def test_examples(case: ExampleTestCase) -> None:
         rows = list(DictReader(f))
 
     @dataclass
-    class DotMemberPayload:
+    class DotMember(Member):
         big_badge: Optional[str]
         badge: str
         label: str
@@ -52,15 +52,15 @@ def test_examples(case: ExampleTestCase) -> None:
             return {"label": self.label}
 
     @dataclass
-    class DotRelationshipPayload:
+    class DotRelationship:
         @property
         def dot_attributes(self) -> dict[str, Id]:
             return {}
 
-    members = [
-        Member(
-            rank=Semester(row["semester"]),
-            payload=DotMemberPayload(
+    ranked_entities = [
+        (
+            Semester(row["semester"]),
+            DotMember(
                 big_badge=row["big_badge"] or None,
                 badge=row["badge"],
                 label=fr'{row["last_name"]}\n{row["badge"]}',
@@ -69,13 +69,13 @@ def test_examples(case: ExampleTestCase) -> None:
         for row in rows
     ]
 
-    tree = Tree(
+    tree = Tree[DotMember, DotRelationship, Semester](
         rank_type=Semester,
-        entities={str(member.payload.badge): member for member in members},
+        ranked_entities={entity.badge: RankedEntity(rank, entity) for rank, entity in ranked_entities},
         relationships={
-            (member.payload.big_badge, member.payload.badge): Relationship(DotRelationshipPayload())
-            for member in members
-            if member.payload.big_badge is not None
+            (entity.big_badge, entity.badge): DotRelationship()
+            for rank, entity in ranked_entities
+            if entity.big_badge is not None
         },
     )
 

@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from snutree.model.tree import Entity, Member, Relationship, Tree, TreeConfig
+from snutree.model.tree import Member, RankedEntity, Tree, TreeConfig
 from snutree.tool.dot import Edge, Id, Node
 from snutree.writer.dot import (
     CustomComponentConfig,
@@ -11,22 +11,27 @@ from tests.conftest import trim
 
 
 @dataclass
-class BasicDotPayload:
+class BasicDotComponent:
     dot_attributes: dict[str, Id] = field(default_factory=lambda: {"label": "test"})
+
+
+@dataclass
+class BasicDotMember(BasicDotComponent, Member):
+    pass
 
 
 def test_write_family_tree() -> None:
 
-    tree = Tree(
+    tree = Tree[BasicDotComponent, BasicDotComponent, int](
         rank_type=int,
-        entities={
-            "100": Member(payload=BasicDotPayload(), rank=2),
-            "50": Member(payload=BasicDotPayload(), rank=1),
-            "a": Entity(payload=BasicDotPayload(), rank=1),
+        ranked_entities={
+            "100": RankedEntity(2, BasicDotMember()),
+            "50": RankedEntity(1, BasicDotMember()),
+            "a": RankedEntity(1, BasicDotComponent()),
         },
         relationships={
-            ("a", "50"): Relationship(payload=BasicDotPayload()),
-            ("50", "100"): Relationship(payload=BasicDotPayload()),
+            ("a", "50"): BasicDotComponent(),
+            ("50", "100"): BasicDotComponent(),
         },
         config=TreeConfig(
             rank_min_offset=-1,
