@@ -6,6 +6,8 @@ from snutree.writer.dot import (
     CustomComponentConfig,
     DotWriter,
     DotWriterConfig,
+    DynamicAttributesConfig,
+    NodesConfig,
 )
 from tests.conftest import trim
 
@@ -40,10 +42,15 @@ def test_write_family_tree() -> None:
     )
 
     writer = DotWriter(
-        DotWriterConfig(
+        DotWriterConfig[BasicDotComponent, BasicDotComponent](
             custom=CustomComponentConfig(
                 nodes=[Node("i"), Node("ii")],
                 edges=[Edge("i", "ii")],
+            ),
+            node=NodesConfig(
+                attributes=DynamicAttributesConfig(
+                    members=lambda _: {"label": "test"},
+                ),
             ),
         ),
     )
@@ -68,8 +75,8 @@ def test_write_family_tree() -> None:
                 "a" [label="test"];
                 "i";
                 "ii";
-                "50" -> "100" [label="test"];
-                "a" -> "50" [label="test"];
+                "50" -> "100";
+                "a" -> "50";
                 "i" -> "ii";
             }
             subgraph "ranks-right" {

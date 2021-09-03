@@ -7,11 +7,11 @@ import pytest
 
 from snutree.model.semester import Semester
 from snutree.model.tree import Member, RankedEntity, Tree
-from snutree.tool.dot import Id
 from snutree.writer.dot import (
     DefaultAttributesConfig,
     DotWriter,
     DotWriterConfig,
+    DynamicAttributesConfig,
     EdgesConfig,
     GraphsConfig,
     NodesConfig,
@@ -47,15 +47,9 @@ def test_examples(case: ExampleTestCase) -> None:
         badge: str
         label: str
 
-        @property
-        def dot_attributes(self) -> dict[str, Id]:
-            return {"label": self.label}
-
     @dataclass
     class DotRelationship:
-        @property
-        def dot_attributes(self) -> dict[str, Id]:
-            return {}
+        pass
 
     ranked_entities = [
         (
@@ -79,7 +73,7 @@ def test_examples(case: ExampleTestCase) -> None:
         },
     )
 
-    writer = DotWriter(
+    writer = DotWriter[DotMember, DotRelationship](
         DotWriterConfig(
             graph=GraphsConfig(
                 defaults=DefaultAttributesConfig(
@@ -114,6 +108,9 @@ def test_examples(case: ExampleTestCase) -> None:
                         fontname="dejavu serif",
                     ),
                 ),
+                attributes=DynamicAttributesConfig(
+                    members=lambda member: {"label": member.label},
+                ),
             ),
             edge=EdgesConfig(
                 defaults=DefaultAttributesConfig(
@@ -129,4 +126,4 @@ def test_examples(case: ExampleTestCase) -> None:
     )
 
     actual = str(writer.write_family_tree(tree))
-    assert actual == output_path.read_text(), actual
+    assert actual == output_path.read_text()

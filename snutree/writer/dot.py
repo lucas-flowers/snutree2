@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from operator import index
-from typing import Optional, Protocol, TypeVar
+from typing import Callable, Generic, Optional, TypeVar
 
 from snutree.model.semester import Semester
 from snutree.model.tree import AnyRank, Rank, Tree
@@ -14,16 +14,8 @@ from snutree.tool.dot import (
     Subgraph,
 )
 
-E = TypeVar("E", bound="DotComponent")
-R = TypeVar("R", bound="DotComponent")
-
-
-class DotComponent(Protocol):
-    # TODO: Decided whether to keep this a protocol, or make it a callable
-    # injected into the DotWriter configuration
-    @property
-    def dot_attributes(self) -> dict[str, Id]:
-        ...
+E = TypeVar("E")
+R = TypeVar("R")
 
 
 @dataclass
@@ -49,35 +41,42 @@ class DefaultAttributesConfig:
 
 
 @dataclass
+class DynamicAttributesConfig(Generic[E]):
+    members: Callable[[E], dict[str, Id]] = lambda _: {}
+
+
+@dataclass
 class GraphsConfig:
     names: NamesConfig = field(default_factory=NamesConfig)
     defaults: DefaultAttributesConfig = field(default_factory=DefaultAttributesConfig)
 
 
 @dataclass
-class NodesConfig:
+class NodesConfig(Generic[E]):
     defaults: DefaultAttributesConfig = field(default_factory=DefaultAttributesConfig)
+    attributes: DynamicAttributesConfig[E] = field(default_factory=DynamicAttributesConfig)
 
 
 @dataclass
-class EdgesConfig:
+class EdgesConfig(Generic[R]):
     defaults: DefaultAttributesConfig = field(default_factory=DefaultAttributesConfig)
+    attributes: DynamicAttributesConfig[R] = field(default_factory=DynamicAttributesConfig)
 
 
 @dataclass
-class DotWriterConfig:
+class DotWriterConfig(Generic[E, R]):
     custom: CustomComponentConfig = field(default_factory=CustomComponentConfig)
     graph: GraphsConfig = field(default_factory=GraphsConfig)
-    node: NodesConfig = field(default_factory=NodesConfig)
-    edge: EdgesConfig = field(default_factory=EdgesConfig)
+    node: NodesConfig[E] = field(default_factory=NodesConfig)
+    edge: EdgesConfig[R] = field(default_factory=EdgesConfig)
 
 
 @dataclass
-class DotWriter:
+class DotWriter(Generic[E, R]):
 
     # pylint: disable=no-self-use
 
-    config: DotWriterConfig = field(default_factory=DotWriterConfig)
+    config: DotWriterConfig[E, R] = field(default_factory=DotWriterConfig)
 
     def write_family_tree(self, tree: Tree[E, R, AnyRank]) -> Graph:
         return Digraph(
@@ -176,7 +175,7 @@ class DotWriter:
         return [
             Node(
                 entity_id,
-                **entity.dot_attributes,
+                **self.config.node.attributes.members(entity),
             )
             for entity_id, entity in entities.items()
         ]
@@ -185,7 +184,6 @@ class DotWriter:
         return [
             Edge(
                 *relationship_id,
-                **relationship.dot_attributes,
             )
             for relationship_id, relationship in relationships.items()
         ]
