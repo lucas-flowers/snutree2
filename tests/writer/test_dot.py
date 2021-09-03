@@ -24,7 +24,7 @@ class BasicDotMember(BasicDotComponent, Member):
 
 def test_write_family_tree() -> None:
 
-    tree = Tree[BasicDotComponent, BasicDotComponent, int](
+    tree = Tree[BasicDotComponent, None, int](
         rank_type=int,
         ranked_entities={
             "100": RankedEntity(2, BasicDotMember()),
@@ -32,8 +32,8 @@ def test_write_family_tree() -> None:
             "a": RankedEntity(1, BasicDotComponent()),
         },
         relationships={
-            ("a", "50"): BasicDotComponent(),
-            ("50", "100"): BasicDotComponent(),
+            ("a", "50"): None,
+            ("50", "100"): None,
         },
         config=TreeConfig(
             rank_min_offset=-1,
@@ -42,7 +42,7 @@ def test_write_family_tree() -> None:
     )
 
     writer = DotWriter(
-        DotWriterConfig[BasicDotComponent, BasicDotComponent](
+        DotWriterConfig[BasicDotComponent, None](
             edge=EdgesConfig(
                 custom=[Edge("i", "ii")],
             ),

@@ -47,10 +47,6 @@ def test_examples(case: ExampleTestCase) -> None:
         badge: str
         label: str
 
-    @dataclass
-    class DotRelationship:
-        pass
-
     ranked_entities = [
         (
             Semester(row["semester"]),
@@ -63,17 +59,15 @@ def test_examples(case: ExampleTestCase) -> None:
         for row in rows
     ]
 
-    tree = Tree[DotMember, DotRelationship, Semester](
+    tree = Tree[DotMember, None, Semester](
         rank_type=Semester,
         ranked_entities={entity.badge: RankedEntity(rank, entity) for rank, entity in ranked_entities},
         relationships={
-            (entity.big_badge, entity.badge): DotRelationship()
-            for rank, entity in ranked_entities
-            if entity.big_badge is not None
+            (entity.big_badge, entity.badge): None for rank, entity in ranked_entities if entity.big_badge is not None
         },
     )
 
-    writer = DotWriter[DotMember, DotRelationship](
+    writer = DotWriter[DotMember, None](
         DotWriterConfig(
             graph=GraphsConfig(
                 defaults=DefaultAttributesConfig(
