@@ -4,7 +4,7 @@ from typing import ContextManager, Optional
 
 import pytest
 
-from snutree.model.sigmanu.affiliation import Affiliation
+from snutree.model.member.sigmanu.affiliation import Affiliation
 from tests.conftest import TestCase
 
 
