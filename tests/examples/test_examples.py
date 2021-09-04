@@ -1,3 +1,4 @@
+from collections import deque
 from csv import DictReader
 from dataclasses import dataclass
 from pathlib import Path
@@ -8,6 +9,8 @@ import pytest
 
 from snutree.model.semester import Semester
 from snutree.model.tree import Member, RankedEntity, Tree
+from snutree.tool import x11
+from snutree.tool.cycler import Cycler
 from snutree.writer.dot import (
     DefaultAttributesConfig,
     DotWriter,
@@ -68,6 +71,47 @@ def test_examples(case: ExampleTestCase) -> None:
         },
     )
 
+    @dataclass
+    class ColorCycler:
+
+        family_colors: dict[str, str]
+        cycler: Cycler[str]
+
+        def __post_init__(self) -> None:
+            for color in self.family_colors.values():
+                self.cycler.consume(color)
+
+        def get(self, family_id: str) -> str:
+            if family_id not in self.family_colors:
+                self.family_colors[family_id] = next(self.cycler)
+            return self.family_colors[family_id]
+
+    cycler = ColorCycler(
+        {
+            "663": "deeppink",
+            "760": "brown1",
+            "722": "red4",
+            "726": "lightsteelblue",
+            "673": "midnightblue",
+            "716": "purple",
+            "702": "indianred4",
+            "735": "limegreen",
+            "757": "darkgreen",
+            "740": "royalblue4",
+            "986": "yellow",
+            "1043": "slategrey",
+            "1044": "orangered4",
+            "1045": "crimson",  # Dea family
+            "1046": "chartreuse4",
+            "1047": "cyan2",
+            "1048": "sienna2",
+            "1049": "salmon2",
+            "1050": "cadetblue",
+            "1051": "dodgerblue",  # Ochi family
+        },
+        Cycler(deque(x11.COLORS)),
+    )
+
     writer = DotWriter[DotMember, None, Semester](
         DotWriterConfig(
             graph=GraphsConfig(
@@ -107,28 +151,7 @@ def test_examples(case: ExampleTestCase) -> None:
                     member=lambda member: {"label": member.label},
                     rank=lambda rank: {"label": str(rank)},
                     family=lambda family_id: {
-                        "color": {
-                            "663": "deeppink",
-                            "760": "brown1",
-                            "722": "red4",
-                            "726": "lightsteelblue",
-                            "673": "midnightblue",
-                            "716": "purple",
-                            "702": "indianred4",
-                            "735": "limegreen",
-                            "757": "darkgreen",
-                            "740": "royalblue4",
-                            "986": "yellow",
-                            "1043": "slategrey",
-                            "1044": "orangered4",
-                            "1045": "crimson",  # Dea family
-                            "1046": "chartreuse4",
-                            "1047": "cyan2",
-                            "1048": "sienna2",
-                            "1049": "salmon2",
-                            "1050": "cadetblue",
-                            "1051": "dodgerblue",  # Ochi family
-                        }.get(family_id, "black"),
+                        "color": cycler.get(family_id),
                     },
                 ),
             ),
