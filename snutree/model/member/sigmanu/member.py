@@ -1,10 +1,13 @@
+from abc import ABC
 from enum import Enum
-from typing import List, Literal, Optional
+from typing import ClassVar, List, Literal, Optional, Union
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 from snutree.model.member.sigmanu.affiliation import Affiliation
+from snutree.model.member.sigmanu.name import get_full_preferred_name
 from snutree.model.semester import Semester
+from snutree.model.tree import Member
 
 
 class Status(str, Enum):
@@ -16,50 +19,129 @@ class Status(str, Enum):
     EXPELLED = "Expelled"
 
 
-class Expelled(BaseModel):
+class BaseSigmaNuMember(ABC, BaseModel, Member):
+    @validator("*", pre=True)
+    def empty_strings(cls, value: object) -> object:  # pylint: disable=no-self-argument,no-self-use
+        if value == "":
+            return None
+        else:
+            return value
+
+
+class Expelled(BaseSigmaNuMember):
 
     status: Literal[Status.EXPELLED]
 
-    badge: int
-    big_badge: Optional[int]
+    badge: str
+    big_badge: Optional[str]
 
     semester: Semester
 
+    @property
+    def key(self) -> str:
+        return str(self.badge)
 
-class Knight(BaseModel):
+    @property
+    def name(self) -> str:
+        return "Member Expelled"
+
+    @property
+    def affiliation(self) -> str:
+        return str(self.badge)
+
+
+class Knight(BaseSigmaNuMember):
 
     status: Literal[Status.ACTIVE, Status.LEFT_SCHOOL, Status.ALUMNI]
 
-    badge: int
-    big_badge: Optional[int]
+    badge: str
+    big_badge: Optional[str]
 
     first_name: str
     preferred_name: Optional[str]
     last_name: str
 
     semester: Semester
-    affiliations: List[Affiliation]
+    affiliations: Optional[List[Affiliation]]
+
+    @property
+    def key(self) -> str:
+        return str(self.badge)
+
+    @property
+    def name(self) -> str:
+        return get_full_preferred_name(
+            first_name=self.first_name,
+            preferred_name=self.preferred_name,
+            last_name=self.last_name,
+        )
+
+    @property
+    def affiliation(self) -> str:
+        return f"ΔΑ\N{NO-BREAK SPACE}{self.badge}"
 
 
-class Brother(BaseModel):
+class Brother(BaseSigmaNuMember):
+
+    latest_brother_id: ClassVar[int] = 0
 
     status: Literal[Status.BROTHER]
 
-    big_badge: Optional[int]
+    big_badge: Optional[str]
 
     last_name: str
 
     semester: Semester
 
+    @property
+    def key(self) -> str:
+        type(self).latest_brother_id += 1
+        return f"brother{self.latest_brother_id}"
 
-class Candidate(BaseModel):
+    @property
+    def name(self) -> str:
+        return self.last_name
+
+    @property
+    def affiliation(self) -> str:
+        return f"ΔΑ\N{NO-BREAK SPACE}{self.status}"
+
+
+class Candidate(BaseSigmaNuMember):
+
+    latest_candidate_id: ClassVar[int] = 0
 
     status: Literal[Status.CANDIDATE]
 
-    big_badge: Optional[int]
+    big_badge: Optional[str]
 
     first_name: str
     preferred_name: Optional[str]
     last_name: str
 
     semester: Semester
+
+    @property
+    def key(self) -> str:
+        type(self).latest_candidate_id += 1
+        return f"candidate{self.latest_candidate_id}"
+
+    @property
+    def name(self) -> str:
+        return get_full_preferred_name(
+            first_name=self.first_name,
+            preferred_name=self.preferred_name,
+            last_name=self.last_name,
+        )
+
+    @property
+    def affiliation(self) -> str:
+        return f"ΔΑ\N{NO-BREAK SPACE}{self.status}"
+
+
+SigmaNuMember = Union[
+    Expelled,
+    Knight,
+    Brother,
+    Candidate,
+]

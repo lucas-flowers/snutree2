@@ -2,7 +2,7 @@ import re
 from dataclasses import dataclass
 from enum import Enum
 from functools import total_ordering
-from typing import Optional, Union, overload
+from typing import Callable, Iterator, Optional, Union, overload
 
 
 @total_ordering
@@ -58,6 +58,17 @@ class Semester:
             return
 
         object.__setattr__(self, "_index", index)
+
+    @classmethod
+    def __get_validators__(cls) -> Iterator[Callable[[object], "Semester"]]:
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, value: object) -> "Semester":
+        if not isinstance(value, str):
+            raise TypeError("string required")
+        else:
+            return cls(value)
 
     @property
     def year(self) -> int:

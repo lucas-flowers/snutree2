@@ -3,12 +3,13 @@ from csv import DictReader
 from dataclasses import dataclass
 from pathlib import Path
 from tempfile import NamedTemporaryFile
-from typing import Optional
 
 import pytest
+from pydantic.tools import parse_obj_as
 
+from snutree.model.member.sigmanu.member import SigmaNuMember
 from snutree.model.semester import Semester
-from snutree.model.tree import Member, RankedEntity, Tree
+from snutree.model.tree import RankedEntity, Tree
 from snutree.tool import x11
 from snutree.tool.cycler import Cycler
 from snutree.writer.dot import (
@@ -45,29 +46,24 @@ def test_examples(case: ExampleTestCase) -> None:
     with input_path.open() as f:
         rows = list(DictReader(f))
 
-    @dataclass
-    class DotMember(Member):
-        big_badge: Optional[str]
-        badge: str
-        label: str
+    members = parse_obj_as(list[SigmaNuMember], rows)
 
-    ranked_entities = [
-        (
-            Semester(row["semester"]),
-            DotMember(
-                big_badge=row["big_badge"] or None,
-                badge=row["badge"],
-                label=fr'{row["first_name"]} {row["last_name"]}\nΔΑ {row["badge"]}',
-            ),
-        )
-        for row in rows
-    ]
-
-    tree = Tree[DotMember, None, Semester](
+    tree = Tree[SigmaNuMember, None, Semester](
         rank_type=Semester,
-        ranked_entities={entity.badge: RankedEntity(rank, entity) for rank, entity in ranked_entities},
+        ranked_entities={
+            member.key: RankedEntity(
+                rank=member.semester,
+                entity=member,
+            )
+            for member in members
+        },
         relationships={
-            (entity.big_badge, entity.badge): None for rank, entity in ranked_entities if entity.big_badge is not None
+            (
+                member.big_badge,
+                member.key,
+            ): None
+            for member in members
+            if member.big_badge is not None
         },
     )
 
@@ -112,7 +108,7 @@ def test_examples(case: ExampleTestCase) -> None:
         Cycler(deque(x11.COLORS)),
     )
 
-    writer = DotWriter[DotMember, None, Semester](
+    writer = DotWriter[SigmaNuMember, None, Semester](
         DotWriterConfig(
             graph=GraphsConfig(
                 defaults=DefaultAttributesConfig(
@@ -148,8 +144,12 @@ def test_examples(case: ExampleTestCase) -> None:
                     ),
                 ),
                 attributes=DynamicNodeAttributesConfig(
-                    member=lambda member: {"label": member.label},
-                    rank=lambda rank: {"label": str(rank)},
+                    member=lambda member: {
+                        "label": r"\n".join([member.name, member.affiliation]),
+                    },
+                    rank=lambda rank: {
+                        "label": str(rank),
+                    },
                     family=lambda family_id: {
                         "color": cycler.get(family_id),
                     },
