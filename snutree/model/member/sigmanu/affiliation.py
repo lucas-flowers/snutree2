@@ -1,105 +1,127 @@
 import re
 from dataclasses import dataclass
-from typing import Optional, overload
+from enum import Enum
+from typing import Optional, Sequence, Tuple, TypeVar, Union, overload
+
+T = TypeVar("T")
+
+
+@dataclass
+class Token:
+    name: str
+    glyphs: Sequence[str]
+
+
+class ChapterIdToken(Enum):
+    """
+    Valid letters in a chapter designation.
+
+    Some characters in the short names may be Latin homoglyphs.
+    """
+
+    ALPHA = Token("Alpha", "ΑαA")
+    BETA = Token("Beta", "ΒβB")
+    GAMMA = Token("Gamma", "Γγ")
+    DELTA = Token("Delta", "Δδ")
+    EPSILON = Token("Epsilon", "ΕεE")
+    ZETA = Token("Zeta", "ΖζZ")
+    ETA = Token("Eta", "ΗηH")
+    THETA = Token("Theta", "Θθ")
+    IOTA = Token("Iota", "ΙιI")
+    KAPPA = Token("Kappa", "ΚκK")
+    LAMBDA = Token("Lambda", "Λλ")
+    MU = Token("Mu", "ΜμM")
+    NU = Token("Nu", "ΝνN")
+    XI = Token("Xi", "Ξξ")
+    OMICRON = Token("Omicron", "ΟοO")
+    PI = Token("Pi", "Ππ")
+    RHO = Token("Rho", "ΡρP")
+    SIGMA = Token("Sigma", "Σσς")
+    TAU = Token("Tau", "ΤτT")
+    UPSILON = Token("Upsilon", "ΥυY")
+    PHI = Token("Phi", "Φφ")
+    CHI = Token("Chi", "ΧχX")
+    PSI = Token("Psi", "Ψψ")
+    OMEGA = Token("Omega", "Ωω")
+
+    # Because of Eta Mu (A) and (B) Chapters
+    A = Token("(A)", ("(A)", "(a)"))
+    B = Token("(B)", ("(B)", "(b)"))
+
+
+class ChapterId(Tuple[ChapterIdToken, ...]):  # https://github.com/python/mypy/issues/9522
+    def __new__(cls: T, values: Tuple[ChapterIdToken, ...]) -> T:
+        return super().__new__(cls, values)  # type: ignore[misc,no-any-return]
+
+    def __str__(self) -> str:
+        return "".join(token.value.glyphs[0] for token in self)
 
 
 @dataclass(order=True, init=False)
 class Affiliation:
 
-    designation: str
-    badge: int
+    chapter_id: ChapterId
+    member_id: int
 
     @overload
-    def __init__(self, designation: str, badge: int, /) -> None:
+    def __init__(self, chapter_id: ChapterId, member_id: int, /) -> None:
         ...
 
     @overload
     def __init__(self, string: str, /) -> None:
         ...
 
-    def __init__(self, arg1: str, arg2: Optional[int] = None, /) -> None:
+    def __init__(self, arg1: Union[ChapterId, str], arg2: Optional[int] = None, /) -> None:
 
-        if arg2 is not None:
-            self.designation = arg1
-            self.badge = arg2
+        if isinstance(arg1, tuple) and isinstance(arg2, int):
+            self.chapter_id = arg1
+            self.member_id = arg2
             return
 
+        assert isinstance(arg1, str) and arg2 is None
+
+        string = arg1
+
+        if not (match := self.PATTERN_AFFILIATION.match(string)):
+            raise ValueError(f"not a chapter affiliation: {string}")
+
+        chapter_name = match.group("chapter_name")
+        chapter_code = match.group("chapter_code")
+
+        # https://github.com/python/typeshed/issues/263 # For findall
+        if chapter_name:
+            assert not chapter_code
+            token_names: list[str] = self.PATTERN_TOKEN_NAME.findall(chapter_name)
+            tokens = tuple(self.UPPER_NAME_TO_TOKEN[token_name.upper()] for token_name in token_names)
         else:
+            assert chapter_code
+            glyphs: list[str] = self.PATTERN_TOKEN_GLYPH.findall(chapter_code)
+            tokens = tuple(self.GLYPH_TO_TOKEN[glyph] for glyph in glyphs)
 
-            string = arg1
+        self.chapter_id = ChapterId(tokens)
+        self.member_id = int(match.group("member_id"))
 
-            if not (match := self.PATTERN_AFFILIATION.match(string)):
-                raise ValueError(f"not a designation: {string}")
+    GLYPH_TO_TOKEN = {glyph: token for token in ChapterIdToken for glyph in token.value.glyphs}
 
-            chapter_name = match.group("chapter_name")
-            chapter_code = match.group("chapter_code")
+    UPPER_NAME_TO_TOKEN = {token.value.name.upper(): token for token in ChapterIdToken}
 
-            # https://github.com/python/typeshed/issues/263 # For findall
-            if chapter_name:
-                assert not chapter_code
-                words: list[str] = self.PATTERN_WORD.findall(chapter_name)
-            else:
-                assert chapter_code
-                characters: list[str] = self.PATTERN_CHARACTER.findall(chapter_code)
-                words = [self.CHARACTER_TO_WORD[character] for character in characters]
+    TOKEN_NAME = r"(?i:{})".format("|".join(re.escape(token.value.name) for token in ChapterIdToken))
 
-            chapter_code = "".join(self.WORD_TO_CHARACTERS[word.title()][0] for word in words)
+    TOKEN_GLYPH = "|".join(re.escape(glyph) for token in ChapterIdToken for glyph in token.value.glyphs)
 
-            self.designation = chapter_code
-            self.badge = int(match.group("badge"))
+    CHAPTER_NAME = fr"({TOKEN_NAME})(\s+({TOKEN_NAME}))*"
 
-    # Map of titlecase designation names to a sequence of possible,
-    # capitalized, abbreviations. The first abbreviation is the primary one.
-    # Note that some possible abbreviations are Latin lookalikes.
-    WORD_TO_CHARACTERS = {
-        "Alpha": "ΑαA",
-        "Beta": "ΒβB",
-        "Gamma": "Γγ",
-        "Delta": "Δδ",
-        "Epsilon": "ΕεE",
-        "Zeta": "ΖζZ",
-        "Eta": "ΗηH",
-        "Theta": "Θθ",
-        "Iota": "ΙιI",
-        "Kappa": "ΚκK",
-        "Lambda": "Λλ",
-        "Mu": "ΜμM",
-        "Nu": "ΝνN",
-        "Xi": "Ξξ",
-        "Omicron": "ΟοO",
-        "Pi": "Ππ",
-        "Rho": "ΡρP",
-        "Sigma": "Σσς",
-        "Tau": "ΤτT",
-        "Upsilon": "ΥυY",
-        "Phi": "Φφ",
-        "Chi": "ΧχX",
-        "Psi": "Ψψ",
-        "Omega": "Ωω",
-        # Because of Eta Mu (A) and (B) Chapters
-        "(A)": ["(A)", "(a)"],
-        "(B)": ["(B)", "(b)"],
-    }
+    CHAPTER_CODE = fr"({TOKEN_GLYPH})+"
 
-    CHARACTER_TO_WORD = {character: word for word, characters in WORD_TO_CHARACTERS.items() for character in characters}
+    CHAPTER_IDENTIFIER = fr"(?P<chapter_name>{CHAPTER_NAME})|(?P<chapter_code>{CHAPTER_CODE})"
 
-    WORD = r"(?i:{})".format("|".join(re.escape(word) for word in WORD_TO_CHARACTERS.keys()))
+    MEMBER_ID = "0*(?P<member_id>[0-9]+)"  # Not exactly, but there's only two exceptions in all Sigma Nu
 
-    CHARACTER = "|".join(re.escape(character) for characters in WORD_TO_CHARACTERS.values() for character in characters)
-
-    CHAPTER_NAME = fr"({WORD})(\s+({WORD}))*"
-
-    CHAPTER_CODE = fr"({CHARACTER})+"
-
-    DESIGNATION = fr"(?P<chapter_name>{CHAPTER_NAME})|(?P<chapter_code>{CHAPTER_CODE})"
-
-    BADGE = "0*(?P<badge>[0-9]+)"  # Not exactly, but there's only two exceptions in all Sigma Nu
-
-    AFFILIATION = fr"\s*({DESIGNATION})\s+({BADGE})\s*"
+    AFFILIATION = fr"\s*({CHAPTER_IDENTIFIER})\s+({MEMBER_ID})\s*"
 
     PATTERN_AFFILIATION = re.compile(AFFILIATION)
-    PATTERN_WORD = re.compile(WORD)
-    PATTERN_CHARACTER = re.compile(CHARACTER)
+    PATTERN_TOKEN_NAME = re.compile(TOKEN_NAME)
+    PATTERN_TOKEN_GLYPH = re.compile(TOKEN_GLYPH)
 
     def __str__(self) -> str:
-        return f"{self.designation}\N{NO-BREAK SPACE}{self.badge}"
+        return f"{self.chapter_id}\N{NO-BREAK SPACE}{self.member_id}"

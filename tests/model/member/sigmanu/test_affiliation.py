@@ -4,8 +4,22 @@ from typing import ContextManager, Optional
 
 import pytest
 
-from snutree.model.member.sigmanu.affiliation import Affiliation
+from snutree.model.member.sigmanu.affiliation import (
+    Affiliation,
+    ChapterId,
+    ChapterIdToken,
+)
 from tests.conftest import TestCase
+
+
+def test_unique_chapter_id_token_name() -> None:
+    names = [token.value.name for token in ChapterIdToken]
+    assert len(names) == len(set(names))
+
+
+def test_unique_chapter_id_token_glyphs() -> None:
+    glyphs = [glyph for token in ChapterIdToken for glyph in token.value.glyphs]
+    assert len(glyphs) == len(set(glyphs))
 
 
 @dataclass
@@ -194,7 +208,7 @@ def test_affiliation_from_string(case: AffiliationTestCase) -> None:
 
     context: ContextManager[object]
     if case.expected is None:
-        context = pytest.raises(ValueError, match="not a designation")
+        context = pytest.raises(ValueError, match="not a chapter affiliation")
     else:
         context = nullcontext()
 
@@ -203,4 +217,4 @@ def test_affiliation_from_string(case: AffiliationTestCase) -> None:
 
 
 def test_affiliation_direct() -> None:
-    assert str(Affiliation("Delta Alpha", 1000)) == "Delta Alpha 1000"
+    assert str(Affiliation(ChapterId((ChapterIdToken.DELTA, ChapterIdToken.ALPHA)), 1000)) == "ΔΑ 1000"
