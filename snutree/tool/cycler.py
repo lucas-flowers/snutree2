@@ -14,10 +14,10 @@ class Cycler(Iterator[T]):
 
     elements: deque[T]
 
-    def consume(self, element: T) -> None:
+    def consume(self, element: T) -> T:
         """
         Find the first instance of the given element in the deque, then move it
-        to the end of the deque.
+        to the end of the deque. Return the element.
 
         If the element is not in the queue, do nothing.
 
@@ -28,6 +28,7 @@ class Cycler(Iterator[T]):
             raise ValueError(f"not found: {element}") from e
         else:
             self.elements.append(element)
+        return element
 
     def __next__(self) -> T:
         """

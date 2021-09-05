@@ -1,4 +1,4 @@
-from collections import deque
+from collections import defaultdict, deque
 from csv import DictReader
 from dataclasses import dataclass
 from pathlib import Path
@@ -66,45 +66,35 @@ def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
         },
     )
 
-    @dataclass
-    class ColorCycler:
+    cycler = Cycler(deque(x11.COLORS))
 
-        family_colors: dict[str, str]
-        cycler: Cycler[str]
-
-        def __post_init__(self) -> None:
-            for color in self.family_colors.values():
-                self.cycler.consume(color)
-
-        def get(self, family_id: str) -> str:
-            if family_id not in self.family_colors:
-                self.family_colors[family_id] = next(self.cycler)
-            return self.family_colors[family_id]
-
-    cycler = ColorCycler(
+    family_colors = defaultdict(
+        cycler.__next__,
         {
-            "663": "deeppink",
-            "760": "brown1",
-            "722": "red4",
-            "726": "lightsteelblue",
-            "673": "midnightblue",
-            "716": "purple",
-            "702": "indianred4",
-            "735": "limegreen",
-            "757": "darkgreen",
-            "740": "royalblue4",
-            "986": "yellow",
-            "1043": "slategrey",
-            "1044": "orangered4",
-            "1045": "crimson",  # Dea family
-            "1046": "chartreuse4",
-            "1047": "cyan2",
-            "1048": "sienna2",
-            "1049": "salmon2",
-            "1050": "cadetblue",
-            "1051": "dodgerblue",  # Ochi family
+            key: cycler.consume(value)
+            for key, value in {
+                "663": "deeppink",
+                "760": "brown1",
+                "722": "red4",
+                "726": "lightsteelblue",
+                "673": "midnightblue",
+                "716": "purple",
+                "702": "indianred4",
+                "735": "limegreen",
+                "757": "darkgreen",
+                "740": "royalblue4",
+                "986": "yellow",
+                "1043": "slategrey",
+                "1044": "orangered4",
+                "1045": "crimson",  # Dea family
+                "1046": "chartreuse4",
+                "1047": "cyan2",
+                "1048": "sienna2",
+                "1049": "salmon2",
+                "1050": "cadetblue",
+                "1051": "dodgerblue",  # Ochi family
+            }.items()
         },
-        Cycler(deque(x11.COLORS)),
     )
 
     writer = DotWriter[SigmaNuMember, None, Semester](
@@ -150,7 +140,7 @@ def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
                         "label": str(rank),
                     },
                     family=lambda family_id: {
-                        "color": cycler.get(family_id),
+                        "color": family_colors[family_id],
                     },
                 ),
             ),
