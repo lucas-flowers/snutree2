@@ -2,9 +2,9 @@ from collections import deque
 from csv import DictReader
 from dataclasses import dataclass
 from pathlib import Path
-from tempfile import NamedTemporaryFile
 
 import pytest
+from _pytest.config import Config
 from pydantic.tools import parse_obj_as
 
 from snutree.model.member.sigmanu.member import SigmaNuMember
@@ -37,11 +37,10 @@ class ExampleTestCase(TestCase):
         ExampleTestCase("sigmanu_basic"),
     ],
 )
-def test_examples(case: ExampleTestCase) -> None:
+def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
 
     root = Path(__file__).parent
     input_path = (root / "input" / case.name).with_suffix(".csv")
-    output_path = (root / "output" / case.name).with_suffix(".dot")
 
     with input_path.open() as f:
         rows = list(DictReader(f))
@@ -169,10 +168,14 @@ def test_examples(case: ExampleTestCase) -> None:
     )
 
     actual = str(writer.write_family_tree(tree))
-    try:
-        assert actual == output_path.read_text()
-    except AssertionError:
-        with NamedTemporaryFile(delete=False) as tmpfile:
-            path = Path(tmpfile.name)
-            path.write_text(actual)
-        pytest.fail(f"Wrote actual result to {path}")
+    expected_path = (root / "output" / case.name).with_suffix(".dot")
+
+    # Do not directly assert equality, to avoid generating pytest comparison
+    # output, which is really slow for the large files used in these test cases
+    if not expected_path.exists() or actual != expected_path.read_text():
+        overwrite: bool = pytestconfig.getoption("--overwrite")
+        if overwrite:
+            expected_path.write_text(actual)
+            pytest.fail("output changed; overwrote sample file")
+        else:
+            pytest.fail("output changed")
