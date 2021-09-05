@@ -43,7 +43,7 @@ def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
     input_path = (root / "input" / case.name).with_suffix(".csv")
 
     with input_path.open() as f:
-        rows = list(DictReader(f))
+        rows = [{"chapter": "Delta Alpha", **row} for row in DictReader(f)]
 
     members = parse_obj_as(list[SigmaNuMember], rows)
 

@@ -20,6 +20,7 @@ class Expelled(BaseMember):
 
     status: Literal[Status.EXPELLED]
 
+    chapter: str
     badge: str
     big_badge: Optional[str]
 
@@ -42,6 +43,7 @@ class Knight(BaseMember):
 
     status: Literal[Status.ACTIVE, Status.LEFT_SCHOOL, Status.ALUMNI]
 
+    chapter: str
     badge: str
     big_badge: Optional[str]
 
@@ -75,6 +77,7 @@ class Brother(BaseMember):
 
     status: Literal[Status.BROTHER]
 
+    chapter: str
     big_badge: Optional[str]
 
     last_name: str
@@ -101,6 +104,7 @@ class Candidate(BaseMember):
 
     status: Literal[Status.CANDIDATE]
 
+    chapter: str
     big_badge: Optional[str]
 
     first_name: str
