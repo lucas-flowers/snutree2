@@ -20,9 +20,14 @@ class Cycler(Iterator[T]):
         to the end of the deque.
 
         If the element is not in the queue, do nothing.
+
         """
-        self.elements.append(element)
-        self.elements.remove(element)
+        try:
+            self.elements.remove(element)
+        except ValueError as e:
+            raise ValueError(f"not found: {element}") from e
+        else:
+            self.elements.append(element)
 
     def __next__(self) -> T:
         """
