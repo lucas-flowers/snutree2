@@ -1,13 +1,10 @@
-from abc import ABC
 from enum import Enum
 from typing import ClassVar, List, Literal, Optional, Union
 
-from pydantic import BaseModel, validator
-
+from snutree.model.member.common import BaseMember
 from snutree.model.member.sigmanu.affiliation import Affiliation
 from snutree.model.member.sigmanu.name import get_full_preferred_name
 from snutree.model.semester import Semester
-from snutree.model.tree import Member
 
 
 class Status(str, Enum):
@@ -19,16 +16,7 @@ class Status(str, Enum):
     EXPELLED = "Expelled"
 
 
-class BaseSigmaNuMember(ABC, BaseModel, Member):
-    @validator("*", pre=True)
-    def empty_strings(cls, value: object) -> object:  # pylint: disable=no-self-argument,no-self-use
-        if value == "":
-            return None
-        else:
-            return value
-
-
-class Expelled(BaseSigmaNuMember):
+class Expelled(BaseMember):
 
     status: Literal[Status.EXPELLED]
 
@@ -50,7 +38,7 @@ class Expelled(BaseSigmaNuMember):
         return str(self.badge)
 
 
-class Knight(BaseSigmaNuMember):
+class Knight(BaseMember):
 
     status: Literal[Status.ACTIVE, Status.LEFT_SCHOOL, Status.ALUMNI]
 
@@ -81,7 +69,7 @@ class Knight(BaseSigmaNuMember):
         return f"ΔΑ\N{NO-BREAK SPACE}{self.badge}"
 
 
-class Brother(BaseSigmaNuMember):
+class Brother(BaseMember):
 
     latest_brother_id: ClassVar[int] = 0
 
@@ -107,7 +95,7 @@ class Brother(BaseSigmaNuMember):
         return f"ΔΑ\N{NO-BREAK SPACE}{self.status}"
 
 
-class Candidate(BaseSigmaNuMember):
+class Candidate(BaseMember):
 
     latest_candidate_id: ClassVar[int] = 0
 
