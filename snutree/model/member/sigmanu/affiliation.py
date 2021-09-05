@@ -6,24 +6,22 @@ from typing import Optional, overload
 @dataclass(order=True, init=False)
 class Affiliation:
 
-    priority: int
     designation: str
     badge: int
 
     @overload
-    def __init__(self, designation: str, badge: int, /, priority: int) -> None:
+    def __init__(self, designation: str, badge: int, /) -> None:
         ...
 
     @overload
-    def __init__(self, string: str, /, *, priority: int = ...) -> None:
+    def __init__(self, string: str, /) -> None:
         ...
 
-    def __init__(self, arg1: str, arg2: Optional[int] = None, /, priority: int = 1) -> None:
+    def __init__(self, arg1: str, arg2: Optional[int] = None, /) -> None:
 
         if arg2 is not None:
             self.designation = arg1
             self.badge = arg2
-            self.priority = priority
             return
 
         else:
@@ -47,7 +45,6 @@ class Affiliation:
 
             chapter_code = "".join(self.WORD_TO_CHARACTERS[word.title()][0] for word in words)
 
-            self.priority = priority
             self.designation = chapter_code
             self.badge = int(match.group("badge"))
 

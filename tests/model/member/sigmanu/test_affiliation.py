@@ -203,4 +203,4 @@ def test_affiliation_from_string(case: AffiliationTestCase) -> None:
 
 
 def test_affiliation_direct() -> None:
-    assert str(Affiliation("Delta Alpha", 1000, priority=1)) == "Delta Alpha 1000"
+    assert str(Affiliation("Delta Alpha", 1000)) == "Delta Alpha 1000"
