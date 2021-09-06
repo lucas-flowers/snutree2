@@ -9,6 +9,7 @@ from snutree.model.member.sigmanu.pipeline import (
 )
 from snutree.model.semester import Semester
 from snutree.reader.csv import CsvReader
+from snutree.reader.json import JsonReader
 from snutree.tool import x11
 from snutree.tool.cycler import Cycler
 from snutree.writer.dot import (
@@ -53,7 +54,10 @@ family_colors = defaultdict(
 )
 
 __snutree__ = SnutreeApi[SigmaNuMember, None, Semester](
-    reader=CsvReader(),
+    readers=[
+        CsvReader(),
+        JsonReader(),
+    ],
     parser=SigmaNuParser(
         chapter_id=ChapterId("Delta Alpha"),
         require_semester=False,

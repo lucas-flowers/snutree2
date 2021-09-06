@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from itertools import chain
 
 import pytest
 from _pytest.config import Config
@@ -23,7 +24,7 @@ class ExampleTestCase(TestCase):
 def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
 
     root_path = pytestconfig.rootpath / "examples" / case.name
-    input_paths = root_path.rglob("*.csv")
+    input_paths = chain(root_path.rglob("*.csv"), root_path.rglob("*.json"))
     (output_path,) = root_path.rglob("*.dot")
 
     module_name = ".".join(["examples", case.name, "config"])

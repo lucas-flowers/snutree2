@@ -1,7 +1,7 @@
 import importlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Generic, Iterable, Protocol, TypeVar
+from typing import ClassVar, Generic, Iterable, Protocol, TypeVar
 
 from snutree.model.tree import AnyRank, FamilyTree
 
@@ -11,6 +11,9 @@ R = TypeVar("R")
 
 
 class Reader(Protocol):
+
+    extensions: ClassVar[list[str]]
+
     def read(self, path: Path) -> Iterable[dict[str, str]]:
         ...
 
@@ -38,7 +41,7 @@ class SnutreeApiProtocol(Protocol):
 @dataclass
 class SnutreeApi(Generic[E, R, AnyRank]):
 
-    reader: Reader
+    readers: list[Reader]
     parser: Parser[E]
     assembler: Assembler[E, R, AnyRank]
     writer: Writer[E, R, AnyRank]
@@ -52,7 +55,10 @@ class SnutreeApi(Generic[E, R, AnyRank]):
 
     def run(self, input_paths: Iterable[Path]) -> str:
 
-        rows = (row for input_path in input_paths for row in self.reader.read(input_path))
+        readers = {extension: reader for reader in self.readers for extension in reader.extensions}
+
+        rows = (row for input_path in input_paths for row in readers[input_path.suffix].read(input_path))
+
         members = self.parser.parse(rows)
         tree = self.assembler.assemble(members)
 
