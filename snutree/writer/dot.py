@@ -62,6 +62,7 @@ class EdgesConfig(Generic[R]):
 
 @dataclass
 class DotWriterConfig(Generic[E, R, AnyRank]):
+    draw_ranks: bool = True
     graph: GraphsConfig = field(default_factory=GraphsConfig)
     node: NodesConfig[AnyRank, E] = field(default_factory=NodesConfig)
     edge: EdgesConfig[R] = field(default_factory=EdgesConfig)
@@ -76,33 +77,25 @@ class DotWriter(Generic[E, R, AnyRank]):
         return str(self.write_family_tree(tree))
 
     def write_family_tree(self, tree: FamilyTree[E, R, AnyRank]) -> Graph:
+
+        ranks: Optional[list[AnyRank]]
+        cohorts: Optional[dict[AnyRank, set[str]]]
+        if self.config.draw_ranks:
+            ranks = tree.ranks
+            cohorts = tree.cohorts
+        else:
+            ranks = None
+            cohorts = None
+
         return Digraph(
             self.config.graph.names.root,
             *self.write_graph_defaults(self.config.graph.defaults.root),
             self.write_node_defaults(self.config.node.defaults.root),
             self.write_edge_defaults(self.config.edge.defaults.root),
-            self.write_ranks(
-                graph_id=self.config.graph.names.ranks_left,
-                ranks=tree.ranks,
-            ),
-            self.write_members(
-                graph_id=self.config.graph.names.members,
-                tree=tree,
-            ),
-            self.write_ranks(
-                graph_id=self.config.graph.names.ranks_right,
-                ranks=tree.ranks,
-            ),
-            Subgraph(
-                self.config.graph.names.ranks,
-                *[
-                    self.write_cohort(
-                        rank=rank,
-                        cohort=cohort,
-                    )
-                    for rank, cohort in (tree.cohorts or {}).items()
-                ],
-            ),
+            self.write_ranks(self.config.graph.names.ranks_left, ranks),
+            self.write_members(self.config.graph.names.members, tree),
+            self.write_ranks(self.config.graph.names.ranks_right, ranks),
+            self.write_cohorts(cohorts),
         )
 
     def write_graph_defaults(self, attributes: dict[str, Id]) -> list[Attribute]:
@@ -193,4 +186,20 @@ class DotWriter(Generic[E, R, AnyRank]):
             Node(self.write_rank_identifier(self.config.graph.names.ranks_left, rank)),
             Node(self.write_rank_identifier(self.config.graph.names.ranks_right, rank)),
             *[Node(entity_id) for entity_id in sorted(cohort)],
+        )
+
+    def write_cohorts(self, cohorts: Optional[dict[AnyRank, set[str]]]) -> Optional[Subgraph]:
+        return (
+            Subgraph(
+                self.config.graph.names.ranks,
+                *[
+                    self.write_cohort(
+                        rank=rank,
+                        cohort=cohort,
+                    )
+                    for rank, cohort in cohorts.items()
+                ],
+            )
+            if cohorts is not None
+            else None
         )

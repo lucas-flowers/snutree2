@@ -10,6 +10,9 @@ from tests.conftest import TestCase
 
 @dataclass
 class ExampleTestCase(TestCase):
+
+    output_name: str
+
     @property
     def name(self) -> str:
         return self.id
@@ -18,14 +21,21 @@ class ExampleTestCase(TestCase):
 @pytest.mark.parametrize(
     "case",
     [
-        ExampleTestCase("sigmanu_basic"),
+        ExampleTestCase(
+            id="sigmanu_basic",
+            output_name="sigmanu_basic.dot",
+        ),
+        ExampleTestCase(
+            id="keyed",
+            output_name="keyed.dot",
+        ),
     ],
 )
 def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
 
     root_path = pytestconfig.rootpath / "examples" / case.name
     input_paths = chain(root_path.rglob("*.csv"), root_path.rglob("*.json"))
-    (output_path,) = root_path.rglob("*.dot")
+    output_path = root_path / case.output_name
 
     module_name = ".".join(["examples", case.name, "config"])
     api: SnutreeApiProtocol = SnutreeApi.from_module_name(module_name)
