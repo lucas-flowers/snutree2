@@ -1,6 +1,8 @@
 from enum import Enum
 from typing import ClassVar, List, Literal, Optional, Union
 
+from pydantic import Field
+
 from snutree.model.member.common import BaseMember
 from snutree.model.member.sigmanu.affiliation import Affiliation, ChapterId
 from snutree.model.member.sigmanu.name import get_full_preferred_name
@@ -28,7 +30,7 @@ class Expelled(BaseMember):
 
     @property
     def key(self) -> str:
-        return str(self.badge)
+        return self.badge
 
     @property
     def name(self) -> str:
@@ -56,7 +58,7 @@ class Knight(BaseMember):
 
     @property
     def key(self) -> str:
-        return str(self.badge)
+        return self.badge
 
     @property
     def name(self) -> str:
@@ -84,10 +86,12 @@ class Brother(BaseMember):
 
     semester: Semester
 
-    @property
-    def key(self) -> str:
-        type(self).latest_brother_id += 1
-        return f"brother{self.latest_brother_id}"
+    key: str = Field(default_factory=lambda: Brother.next_key())  # pylint: disable=unnecessary-lambda # Because scope
+
+    @classmethod
+    def next_key(cls) -> str:
+        cls.latest_brother_id += 1
+        return f"brother{cls.latest_brother_id}"
 
     @property
     def name(self) -> str:
@@ -113,10 +117,12 @@ class Candidate(BaseMember):
 
     semester: Semester
 
-    @property
-    def key(self) -> str:
-        type(self).latest_candidate_id += 1
-        return f"candidate{self.latest_candidate_id}"
+    key: str = Field(default_factory=lambda: Candidate.next_key())  # pylint: disable=unnecessary-lambda # Because scope
+
+    @classmethod
+    def next_key(cls) -> str:
+        cls.latest_candidate_id += 1
+        return f"candidate{cls.latest_candidate_id}"
 
     @property
     def name(self) -> str:
