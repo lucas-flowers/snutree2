@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from snutree.model.tree import Member, RankedEntity, Tree, TreeConfig
+from snutree.model.tree import FamilyTree, Member, RankedEntity, TreeConfig
 from snutree.tool.dot import Edge, Node
 from snutree.writer.dot import (
     DotWriter,
@@ -24,7 +24,7 @@ class BasicDotMember(BasicDotComponent, Member):
 
 def test_write_family_tree() -> None:
 
-    tree = Tree[BasicDotComponent, None, int](
+    tree = FamilyTree[BasicDotComponent, None, int](
         rank_type=int,
         ranked_entities={
             "100": RankedEntity(2, BasicDotMember()),

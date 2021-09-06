@@ -3,7 +3,7 @@ from operator import index
 from typing import Callable, Generic, Optional, TypeVar
 
 from snutree.model.semester import Semester
-from snutree.model.tree import AnyRank, Tree
+from snutree.model.tree import AnyRank, FamilyTree
 from snutree.tool.dot import (
     Attribute,
     Digraph,
@@ -72,7 +72,7 @@ class DotWriter(Generic[E, R, AnyRank]):
 
     config: DotWriterConfig[E, R, AnyRank] = field(default_factory=DotWriterConfig)
 
-    def write_family_tree(self, tree: Tree[E, R, AnyRank]) -> Graph:
+    def write_family_tree(self, tree: FamilyTree[E, R, AnyRank]) -> Graph:
         return Digraph(
             self.config.graph.names.root,
             *self.write_graph_defaults(self.config.graph.defaults.root),
@@ -154,7 +154,7 @@ class DotWriter(Generic[E, R, AnyRank]):
             suffix = str(index(rank))
         return f"{prefix}:{suffix}"
 
-    def write_members(self, graph_id: str, tree: Tree[E, R, AnyRank]) -> Subgraph:
+    def write_members(self, graph_id: str, tree: FamilyTree[E, R, AnyRank]) -> Subgraph:
         return Subgraph(
             graph_id,
             *self.write_graph_defaults(self.config.graph.defaults.member),

@@ -56,7 +56,7 @@ class TreeConfig:
             raise NotImplementedError("negative maximum rank offsets (i.e., entity filtering by rank) not implemented")
 
 
-class Tree(Generic[E, R, AnyRank]):
+class FamilyTree(Generic[E, R, AnyRank]):
     """
     A tree.
     """
