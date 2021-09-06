@@ -22,6 +22,7 @@ disable=
     # Noise
     too-few-public-methods,
     missing-docstring,
+    no-self-use,
     fixme,
     # Mypy does it better without as many false positives
     typecheck,

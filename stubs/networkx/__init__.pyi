@@ -1,6 +1,6 @@
 from typing import Generic, Iterable, Iterator, TypeVar
 
-# pylint: disable=no-self-use,unused-argument,multiple-statements
+# pylint: disable=unused-argument,multiple-statements
 
 T = TypeVar("T")
 

@@ -70,8 +70,6 @@ class DotWriterConfig(Generic[E, R, AnyRank]):
 @dataclass
 class DotWriter(Generic[E, R, AnyRank]):
 
-    # pylint: disable=no-self-use
-
     config: DotWriterConfig[E, R, AnyRank] = field(default_factory=DotWriterConfig)
 
     def write_family_tree(self, tree: Tree[E, R, AnyRank]) -> Graph:
