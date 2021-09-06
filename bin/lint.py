@@ -121,7 +121,7 @@ class Isort(Linter):
         else:
             quiet = "--quiet" if not verbose else ""
             show_files = "--show-files" if verbose else ""
-            return f"{cls.name} {quiet} {show_files} ."
+            return f"{cls.name} --check-only {quiet} {show_files} ."
 
 
 class YamlLint(Linter):
