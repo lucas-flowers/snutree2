@@ -2,7 +2,7 @@ from enum import Enum
 from typing import ClassVar, List, Literal, Optional, Union
 
 from snutree.model.member.common import BaseMember
-from snutree.model.member.sigmanu.affiliation import Affiliation
+from snutree.model.member.sigmanu.affiliation import Affiliation, ChapterId
 from snutree.model.member.sigmanu.name import get_full_preferred_name
 from snutree.model.semester import Semester
 
@@ -20,7 +20,7 @@ class Expelled(BaseMember):
 
     status: Literal[Status.EXPELLED]
 
-    chapter: str
+    chapter: ChapterId
     badge: str
     big_badge: Optional[str]
 
@@ -43,7 +43,7 @@ class Knight(BaseMember):
 
     status: Literal[Status.ACTIVE, Status.LEFT_SCHOOL, Status.ALUMNI]
 
-    chapter: str
+    chapter: ChapterId
     badge: str
     big_badge: Optional[str]
 
@@ -77,7 +77,7 @@ class Brother(BaseMember):
 
     status: Literal[Status.BROTHER]
 
-    chapter: str
+    chapter: ChapterId
     big_badge: Optional[str]
 
     last_name: str
@@ -104,7 +104,7 @@ class Candidate(BaseMember):
 
     status: Literal[Status.CANDIDATE]
 
-    chapter: str
+    chapter: ChapterId
     big_badge: Optional[str]
 
     first_name: str

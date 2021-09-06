@@ -1,7 +1,15 @@
 import re
 from dataclasses import dataclass
 from enum import Enum
-from typing import Optional, Sequence, Tuple, Union, overload
+from typing import (
+    Callable,
+    Iterator,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    overload,
+)
 
 
 @dataclass
@@ -100,6 +108,17 @@ class ChapterId(Tuple[ChapterIdToken, ...]):  # https://github.com/python/mypy/i
             tokens = tuple(cls.GLYPH_TO_TOKEN[glyph] for glyph in glyphs)
 
         return cls(tokens)
+
+    @classmethod
+    def __get_validators__(cls) -> Iterator[Callable[[object], "ChapterId"]]:
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, value: object) -> "ChapterId":
+        if not isinstance(value, str):
+            raise TypeError("string required")
+        else:
+            return cls(value)
 
     def __str__(self) -> str:
         return "".join(token.value.glyphs[0] for token in self)
