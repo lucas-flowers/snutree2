@@ -208,7 +208,7 @@ def test_affiliation_from_string(case: AffiliationTestCase) -> None:
 
     context: ContextManager[object]
     if case.expected is None:
-        context = pytest.raises(ValueError, match="not a chapter affiliation")
+        context = pytest.raises(ValueError, match="not a chapter (affiliation|identifier)")
     else:
         context = nullcontext()
 
