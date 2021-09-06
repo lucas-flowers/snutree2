@@ -45,6 +45,7 @@ class Family:
 @dataclass
 class TreeConfig:
 
+    seed: str = "12345"
     rank_min_offset: int = 0
     rank_max_offset: int = 0
 
@@ -105,7 +106,7 @@ class Tree(Generic[E, R, AnyRank]):
         Return a dict of entity_ids for this tree, sorted consistently.
         """
         components = sorted(weakly_connected_components(self._digraph), key=min)
-        random.Random("12345").shuffle(components)  # TODO seed
+        random.Random(self.config.seed).shuffle(components)
         return {key: self._entities[key] for component in components for key in sorted(component)}
 
     @cached_property
