@@ -51,7 +51,7 @@ family_colors = defaultdict(
     },
 )
 
-api = SnutreeApi[SigmaNuMember, None, Semester](
+__snutree__ = SnutreeApi[SigmaNuMember, None, Semester](
     parser=SigmaNuParser(
         chapter_id=ChapterId("Delta Alpha"),
     ),

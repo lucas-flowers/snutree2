@@ -1,3 +1,4 @@
+import importlib
 from csv import DictReader
 from dataclasses import dataclass
 from pathlib import Path
@@ -25,12 +26,24 @@ class Writer(Protocol[E, R, AnyRank]):
         ...
 
 
+class SnutreeApiProtocol(Protocol):
+    def run(self, input_path: Path) -> str:
+        ...
+
+
 @dataclass
 class SnutreeApi(Generic[E, R, AnyRank]):
 
     parser: Parser[E]
     assembler: Assembler[E, R, AnyRank]
     writer: Writer[E, R, AnyRank]
+
+    @classmethod
+    def from_module_name(cls, module_name: str) -> "SnutreeApi[E, R, AnyRank]":
+        module = importlib.import_module(module_name)
+        api: object = getattr(module, "__snutree__")
+        assert isinstance(api, SnutreeApi)
+        return api
 
     def run(self, input_path: Path) -> str:
 

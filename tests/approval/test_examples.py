@@ -1,10 +1,9 @@
 from dataclasses import dataclass
-from pathlib import Path
 
 import pytest
 from _pytest.config import Config
 
-from snutree.config import api
+from snutree.api import SnutreeApi, SnutreeApiProtocol
 from tests.conftest import TestCase
 
 
@@ -23,11 +22,12 @@ class ExampleTestCase(TestCase):
 )
 def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
 
-    root = Path(__file__).parent / "examples" / case.name
+    root_path = pytestconfig.rootpath / "examples" / case.name
+    input_path = root_path / "input.csv"
+    output_path = root_path / "output.dot"
 
-    input_path = root / "input.csv"
-    output_path = root / "output.dot"
-
+    module_name = ".".join(["examples", case.name, "config"])
+    api: SnutreeApiProtocol = SnutreeApi.from_module_name(module_name)
     actual = api.run(input_path)
 
     # Do not directly assert equality, to avoid generating pytest comparison
