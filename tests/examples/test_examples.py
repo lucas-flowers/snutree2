@@ -5,11 +5,14 @@ from pathlib import Path
 
 import pytest
 from _pytest.config import Config
-from pydantic.tools import parse_obj_as
 
+from snutree.model.member.sigmanu.affiliation import ChapterId
 from snutree.model.member.sigmanu.member import SigmaNuMember
+from snutree.model.member.sigmanu.pipeline import (
+    SigmaNuAssembler,
+    SigmaNuParser,
+)
 from snutree.model.semester import Semester
-from snutree.model.tree import RankedEntity, Tree
 from snutree.tool import x11
 from snutree.tool.cycler import Cycler
 from snutree.writer.dot import (
@@ -43,28 +46,9 @@ def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
     input_path = (root / "input" / case.name).with_suffix(".csv")
 
     with input_path.open() as f:
-        rows = [{"chapter": "Delta Alpha", **row} for row in DictReader(f)]
-
-    members = parse_obj_as(list[SigmaNuMember], rows)
-
-    tree = Tree[SigmaNuMember, None, Semester](
-        rank_type=Semester,
-        ranked_entities={
-            member.key: RankedEntity(
-                rank=member.semester,
-                entity=member,
-            )
-            for member in members
-        },
-        relationships={
-            (
-                member.big_badge,
-                member.key,
-            ): None
-            for member in members
-            if member.big_badge is not None
-        },
-    )
+        rows = DictReader(f)
+        members = SigmaNuParser(ChapterId("Delta Alpha")).parse(rows)
+        tree = SigmaNuAssembler().assemble(members)
 
     cycler = Cycler(deque(x11.COLORS))
 

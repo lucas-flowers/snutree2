@@ -115,13 +115,18 @@ class ChapterId(Tuple[ChapterIdToken, ...]):  # https://github.com/python/mypy/i
 
     @classmethod
     def validate(cls, value: object) -> "ChapterId":
-        if not isinstance(value, str):
-            raise TypeError("string required")
-        else:
+        if isinstance(value, ChapterId):
+            return value
+        elif isinstance(value, str):
             return cls(value)
+        else:
+            raise TypeError("string or ChapterId required")
 
     def __str__(self) -> str:
         return "".join(token.value.glyphs[0] for token in self)
+
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({str(self)!r})"
 
 
 @dataclass(order=True, init=False)
