@@ -5,6 +5,7 @@ from snutree.model.member.keyed import (
     KeyedMemberParser,
 )
 from snutree.model.semester import Semester
+from snutree.model.tree import FamilyTreeConfig
 from snutree.reader.json import JsonReader
 from snutree.writer.dot import (
     DefaultAttributesConfig,
@@ -22,6 +23,9 @@ __snutree__ = SnutreeApi[KeyedMember, None, Semester](
     ],
     parser=KeyedMemberParser(),
     assembler=KeyedMemberAssembler(),
+    tree_config=FamilyTreeConfig(
+        seed="23",
+    ),
     writer=DotWriter(
         config=DotWriterConfig(
             draw_ranks=False,

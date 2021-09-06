@@ -8,6 +8,7 @@ from snutree.model.member.sigmanu.pipeline import (
     SigmaNuParser,
 )
 from snutree.model.semester import Semester
+from snutree.model.tree import FamilyTreeConfig
 from snutree.reader.csv import CsvReader
 from snutree.reader.json import JsonReader
 from snutree.tool import x11
@@ -63,6 +64,7 @@ __snutree__ = SnutreeApi[SigmaNuMember, None, Semester](
         require_semester=False,
     ),
     assembler=SigmaNuAssembler(),
+    tree_config=FamilyTreeConfig(),
     writer=DotWriter(
         DotWriterConfig(
             graph=GraphsConfig(

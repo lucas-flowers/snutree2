@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import ClassVar, Generic, Iterable, Protocol, TypeVar
 
-from snutree.model.tree import AnyRank, FamilyTree
+from snutree.model.tree import AnyRank, FamilyTree, FamilyTreeConfig
 
 E_co = TypeVar("E_co", covariant=True)
 E = TypeVar("E")
@@ -24,7 +24,7 @@ class Parser(Protocol[E_co]):
 
 
 class Assembler(Protocol[E, R, AnyRank]):
-    def assemble(self, members: Iterable[E]) -> FamilyTree[E, R, AnyRank]:
+    def assemble(self, tree_config: FamilyTreeConfig, members: Iterable[E]) -> FamilyTree[E, R, AnyRank]:
         ...
 
 
@@ -44,6 +44,7 @@ class SnutreeApi(Generic[E, R, AnyRank]):
     readers: list[Reader]
     parser: Parser[E]
     assembler: Assembler[E, R, AnyRank]
+    tree_config: FamilyTreeConfig
     writer: Writer[E, R, AnyRank]
 
     @classmethod
@@ -60,6 +61,6 @@ class SnutreeApi(Generic[E, R, AnyRank]):
         rows = (row for input_path in input_paths for row in readers[input_path.suffix].read(input_path))
 
         members = self.parser.parse(rows)
-        tree = self.assembler.assemble(members)
+        tree = self.assembler.assemble(self.tree_config, members)
 
         return self.writer.write(tree)

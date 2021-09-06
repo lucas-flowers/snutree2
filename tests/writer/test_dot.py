@@ -1,6 +1,11 @@
 from dataclasses import dataclass
 
-from snutree.model.tree import FamilyTree, Member, RankedEntity, TreeConfig
+from snutree.model.tree import (
+    FamilyTree,
+    FamilyTreeConfig,
+    Member,
+    RankedEntity,
+)
 from snutree.tool.dot import Edge, Node
 from snutree.writer.dot import (
     DotWriter,
@@ -35,7 +40,7 @@ def test_write_family_tree() -> None:
             ("a", "50"): None,
             ("50", "100"): None,
         },
-        config=TreeConfig(
+        config=FamilyTreeConfig(
             rank_min_offset=-1,
             rank_max_offset=1,
         ),

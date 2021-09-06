@@ -5,7 +5,7 @@ from pydantic.tools import parse_obj_as
 
 from snutree.model.member.common import BaseMember
 from snutree.model.semester import Semester
-from snutree.model.tree import FamilyTree, RankedEntity
+from snutree.model.tree import FamilyTree, FamilyTreeConfig, RankedEntity
 
 
 class KeyedMember(BaseMember):
@@ -24,11 +24,13 @@ class KeyedMemberParser:
 
 @dataclass
 class KeyedMemberAssembler:
-    def assemble(self, members: Iterable[KeyedMember]) -> FamilyTree[KeyedMember, None, Semester]:
+    def assemble(
+        self, tree_config: FamilyTreeConfig, members: Iterable[KeyedMember]
+    ) -> FamilyTree[KeyedMember, None, Semester]:
         ranked_entities: dict[str, RankedEntity[Semester, KeyedMember]] = {}
         relationships: dict[tuple[str, str], None] = {}
         for member in members:
             ranked_entities[member.key] = RankedEntity(member.semester, member)
             if member.big_key is not None:
                 relationships[(member.big_key, member.key)] = None
-        return FamilyTree(Semester, ranked_entities, relationships)
+        return FamilyTree(Semester, ranked_entities, relationships, tree_config)

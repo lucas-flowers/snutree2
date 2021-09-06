@@ -38,12 +38,8 @@ class Member:
     pass
 
 
-class Family:
-    pass
-
-
 @dataclass
-class TreeConfig:
+class FamilyTreeConfig:
 
     seed: str = "12345"
     rank_min_offset: int = 0
@@ -66,11 +62,11 @@ class FamilyTree(Generic[E, R, AnyRank]):
         rank_type: Type[AnyRank],
         ranked_entities: dict[str, RankedEntity[AnyRank, E]],
         relationships: dict[tuple[str, str], R],
-        config: Optional[TreeConfig] = None,
+        config: Optional[FamilyTreeConfig] = None,
     ) -> None:
 
         self.rank_type = rank_type
-        self.config = config or TreeConfig()
+        self.config = config or FamilyTreeConfig()
 
         self._entities: dict[str, E] = {key: ranked_entity.entity for key, ranked_entity in ranked_entities.items()}
         self._ranks: dict[str, AnyRank] = {key: ranked_entity.rank for key, ranked_entity in ranked_entities.items()}
