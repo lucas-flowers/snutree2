@@ -1,5 +1,4 @@
 import importlib
-from csv import DictReader
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Generic, Iterable, Protocol, TypeVar
@@ -9,6 +8,11 @@ from snutree.model.tree import AnyRank, FamilyTree
 E_co = TypeVar("E_co", covariant=True)
 E = TypeVar("E")
 R = TypeVar("R")
+
+
+class Reader(Protocol):
+    def read(self, path: Path) -> Iterable[dict[str, str]]:
+        ...
 
 
 class Parser(Protocol[E_co]):
@@ -27,13 +31,14 @@ class Writer(Protocol[E, R, AnyRank]):
 
 
 class SnutreeApiProtocol(Protocol):
-    def run(self, input_path: Path) -> str:
+    def run(self, input_paths: Iterable[Path]) -> str:
         ...
 
 
 @dataclass
 class SnutreeApi(Generic[E, R, AnyRank]):
 
+    reader: Reader
     parser: Parser[E]
     assembler: Assembler[E, R, AnyRank]
     writer: Writer[E, R, AnyRank]
@@ -45,11 +50,10 @@ class SnutreeApi(Generic[E, R, AnyRank]):
         assert isinstance(api, SnutreeApi)
         return api
 
-    def run(self, input_path: Path) -> str:
+    def run(self, input_paths: Iterable[Path]) -> str:
 
-        with input_path.open() as f:
-            rows = DictReader(f)
-            members = self.parser.parse(rows)
-            tree = self.assembler.assemble(members)
+        rows = (row for input_path in input_paths for row in self.reader.read(input_path))
+        members = self.parser.parse(rows)
+        tree = self.assembler.assemble(members)
 
         return self.writer.write(tree)

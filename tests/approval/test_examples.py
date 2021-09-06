@@ -23,12 +23,12 @@ class ExampleTestCase(TestCase):
 def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
 
     root_path = pytestconfig.rootpath / "examples" / case.name
-    input_path = root_path / "input.csv"
-    output_path = root_path / "output.dot"
+    input_paths = root_path.rglob("*.csv")
+    (output_path,) = root_path.rglob("*.dot")
 
     module_name = ".".join(["examples", case.name, "config"])
     api: SnutreeApiProtocol = SnutreeApi.from_module_name(module_name)
-    actual = api.run(input_path)
+    actual = api.run(input_paths)
 
     # Do not directly assert equality, to avoid generating pytest comparison
     # output, which is really slow for the large files used in these test cases
