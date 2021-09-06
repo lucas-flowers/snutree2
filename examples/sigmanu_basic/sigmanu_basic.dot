@@ -143,6 +143,9 @@ digraph "family-tree" {
         "ranks-left:spring2014" [label="Spring 2014"];
         "ranks-left:fall2014" [label="Fall 2014"];
         "ranks-left:spring2015" [label="Spring 2015"];
+        "ranks-left:fall2015" [label="Fall 2015"];
+        "ranks-left:spring2016" [label="Spring 2016"];
+        "ranks-left:fall2016" [label="Fall 2016"];
         "ranks-left:fall1950" -> "ranks-left:spring1951";
         "ranks-left:spring1951" -> "ranks-left:fall1951";
         "ranks-left:fall1951" -> "ranks-left:spring1952";
@@ -272,6 +275,9 @@ digraph "family-tree" {
         "ranks-left:fall2013" -> "ranks-left:spring2014";
         "ranks-left:spring2014" -> "ranks-left:fall2014";
         "ranks-left:fall2014" -> "ranks-left:spring2015";
+        "ranks-left:spring2015" -> "ranks-left:fall2015";
+        "ranks-left:fall2015" -> "ranks-left:spring2016";
+        "ranks-left:spring2016" -> "ranks-left:fall2016";
     }
     subgraph "members" {
         node [fillcolor=".11 .71 1."];
@@ -414,6 +420,12 @@ digraph "family-tree" {
         "1395" [label="Nathan Steinmetz\nΔΑ 1395",color="dodgerblue"];
         "1405" [label="Sam Lee\nΔΑ 1405",color="dodgerblue"];
         "1407" [label="Uday Manchanda\nΔΑ 1407",color="dodgerblue"];
+        "1417" [label="Matthew Kaiser\nΔΑ 1417",color="dodgerblue"];
+        "1418" [label="Junhe Hu\nΔΑ 1418",color="dodgerblue"];
+        "1421" [label="Mark Kaminski\nΔΑ 1421",color="dodgerblue"];
+        "1429" [label="Tristan Greiner\nΔΑ 1429",color="dodgerblue"];
+        "1431" [label="Adrian Hattan\nΔΑ 1431",color="dodgerblue"];
+        "1439" [label="Ziyi Huang\nΔΑ 1439",color="dodgerblue"];
         "467" [label="Jerome Eldridge\nΔΑ 467",color="darkslategray"];
         "497" [label="Don Theis\nΔΑ 497",color="darkslategray"];
         "1001" [label="Kenneth Bates\nΔΑ 1001",color="plum1"];
@@ -993,6 +1005,30 @@ digraph "family-tree" {
         "1406" [label="George Enwia\nΔΑ 1406",color="crimson"];
         "1408" [label="Will MacDonald\nΔΑ 1408",color="crimson"];
         "1409" [label="Jeremy Chai\nΔΑ 1409",color="crimson"];
+        "1410" [label="Dallas Eckman\nΔΑ 1410",color="crimson"];
+        "1411" [label="Kameron Damaska\nΔΑ 1411",color="crimson"];
+        "1412" [label="Tom Kan\nΔΑ 1412",color="crimson"];
+        "1413" [label="Jack Lewis\nΔΑ 1413",color="crimson"];
+        "1414" [label="Hiri Ontiveros\nΔΑ 1414",color="crimson"];
+        "1415" [label="Prince Ghosh\nΔΑ 1415",color="crimson"];
+        "1416" [label="Derek Tang\nΔΑ 1416",color="crimson"];
+        "1419" [label="Kieran Aulak\nΔΑ 1419",color="crimson"];
+        "1420" [label="Nathaniel Starkman\nΔΑ 1420",color="crimson"];
+        "1422" [label="Alex Gordon\nΔΑ 1422",color="crimson"];
+        "1423" [label="Andrew Jimenez\nΔΑ 1423",color="crimson"];
+        "1424" [label="David Lituchy\nΔΑ 1424",color="crimson"];
+        "1425" [label="Dene Hoffman\nΔΑ 1425",color="crimson"];
+        "1426" [label="Drew Borneman\nΔΑ 1426",color="crimson"];
+        "1427" [label="Julian Marquardt\nΔΑ 1427",color="crimson"];
+        "1428" [label="Wesley Worden\nΔΑ 1428",color="crimson"];
+        "1430" [label="Anthony Cimo\nΔΑ 1430",color="crimson"];
+        "1432" [label="Grant Hom\nΔΑ 1432",color="crimson"];
+        "1433" [label="Austin Toot\nΔΑ 1433",color="crimson"];
+        "1434" [label="Ananth Suresh\nΔΑ 1434",color="crimson"];
+        "1435" [label="Eli Newcomb\nΔΑ 1435",color="crimson"];
+        "1436" [label="Adam Law\nΔΑ 1436",color="crimson"];
+        "1437" [label="Bixing Qiao\nΔΑ 1437",color="crimson"];
+        "1438" [label="Ben Szafarz\nΔΑ 1438",color="crimson"];
         "653" [label="Stephen Smith\nΔΑ 653",color="mediumseagreen"];
         "688" [label="Bill Feth\nΔΑ 688",color="mediumseagreen"];
         "708" [label="Larry Jansen\nΔΑ 708",color="mediumseagreen"];
@@ -1419,6 +1455,7 @@ digraph "family-tree" {
         "1350" -> "1383";
         "1352" -> "1362";
         "1352" -> "1385";
+        "1352" -> "1412";
         "1353" -> "1365";
         "1353" -> "1397";
         "1354" -> "1394";
@@ -1426,21 +1463,50 @@ digraph "family-tree" {
         "1355" -> "1401";
         "1356" -> "1367";
         "1356" -> "1409";
+        "1356" -> "1427";
         "1357" -> "1381";
         "1363" -> "1388";
+        "1363" -> "1415";
         "1364" -> "1390";
         "1364" -> "1408";
+        "1364" -> "1410";
+        "1364" -> "1424";
+        "1364" -> "1435";
         "1365" -> "1378";
+        "1365" -> "1434";
         "1368" -> "1391";
+        "1368" -> "1420";
+        "1369" -> "1418";
         "1370" -> "1398";
         "1371" -> "1389";
         "1372" -> "1393";
         "1377" -> "1405";
+        "1377" -> "1417";
         "1378" -> "1399";
+        "1378" -> "1430";
         "1381" -> "1402";
+        "1382" -> "1419";
         "1384" -> "1407";
+        "1384" -> "1429";
         "1385" -> "1403";
         "1386" -> "1404";
+        "1386" -> "1416";
+        "1387" -> "1414";
+        "1387" -> "1438";
+        "1388" -> "1413";
+        "1388" -> "1428";
+        "1389" -> "1431";
+        "1390" -> "1422";
+        "1391" -> "1436";
+        "1392" -> "1439";
+        "1395" -> "1421";
+        "1396" -> "1423";
+        "1406" -> "1411";
+        "1408" -> "1426";
+        "1410" -> "1437";
+        "1414" -> "1432";
+        "1416" -> "1425";
+        "1420" -> "1433";
         "436" -> "493";
         "437" -> "482";
         "438" -> "498";
@@ -1911,6 +1977,9 @@ digraph "family-tree" {
         "ranks-right:spring2014" [label="Spring 2014"];
         "ranks-right:fall2014" [label="Fall 2014"];
         "ranks-right:spring2015" [label="Spring 2015"];
+        "ranks-right:fall2015" [label="Fall 2015"];
+        "ranks-right:spring2016" [label="Spring 2016"];
+        "ranks-right:fall2016" [label="Fall 2016"];
         "ranks-right:fall1950" -> "ranks-right:spring1951";
         "ranks-right:spring1951" -> "ranks-right:fall1951";
         "ranks-right:fall1951" -> "ranks-right:spring1952";
@@ -2040,6 +2109,9 @@ digraph "family-tree" {
         "ranks-right:fall2013" -> "ranks-right:spring2014";
         "ranks-right:spring2014" -> "ranks-right:fall2014";
         "ranks-right:fall2014" -> "ranks-right:spring2015";
+        "ranks-right:spring2015" -> "ranks-right:fall2015";
+        "ranks-right:fall2015" -> "ranks-right:spring2016";
+        "ranks-right:spring2016" -> "ranks-right:fall2016";
     }
     subgraph "ranks" {
         subgraph {
@@ -3474,6 +3546,51 @@ digraph "family-tree" {
             "1407";
             "1408";
             "1409";
+        }
+        subgraph {
+            rank="same";
+            "ranks-left:fall2015";
+            "ranks-right:fall2015";
+            "1410";
+            "1411";
+            "1412";
+            "1413";
+            "1414";
+            "1415";
+            "1416";
+            "1417";
+            "1418";
+            "1419";
+            "1420";
+        }
+        subgraph {
+            rank="same";
+            "ranks-left:spring2016";
+            "ranks-right:spring2016";
+            "1421";
+            "1422";
+            "1423";
+            "1424";
+            "1425";
+            "1426";
+            "1427";
+            "1428";
+            "1429";
+            "1430";
+        }
+        subgraph {
+            rank="same";
+            "ranks-left:fall2016";
+            "ranks-right:fall2016";
+            "1431";
+            "1432";
+            "1433";
+            "1434";
+            "1435";
+            "1436";
+            "1437";
+            "1438";
+            "1439";
         }
     }
 }

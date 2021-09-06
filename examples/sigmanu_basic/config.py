@@ -56,6 +56,7 @@ __snutree__ = SnutreeApi[SigmaNuMember, None, Semester](
     reader=CsvReader(),
     parser=SigmaNuParser(
         chapter_id=ChapterId("Delta Alpha"),
+        require_semester=False,
     ),
     assembler=SigmaNuAssembler(),
     writer=DotWriter(

@@ -13,11 +13,15 @@ from snutree.model.tree import FamilyTree, RankedEntity
 class SigmaNuParser:
 
     chapter_id: ChapterId
+    require_semester: bool
 
     def parse(self, rows: Iterable[dict[str, str]]) -> Iterable[SigmaNuMember]:
         for row in rows:
             obj: dict[str, object] = {"chapter": self.chapter_id, **row}
-            yield parse_obj_as(SigmaNuMember, obj)  # type: ignore[arg-type]
+            if self.require_semester or obj.get("semester"):
+                yield parse_obj_as(SigmaNuMember, obj)  # type: ignore[arg-type]
+            else:
+                continue
 
 
 @dataclass
