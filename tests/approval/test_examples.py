@@ -24,9 +24,9 @@ class ExampleTestCase(TestCase):
 def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
 
     root = Path(__file__).parent
-    input_path = (root / "input" / case.name).with_suffix(".csv")
+    input_path = (root / "examples/input" / case.name).with_suffix(".csv")
     actual = api.run(input_path)
-    expected_path = (root / "output" / case.name).with_suffix(".dot")
+    expected_path = (root / "examples/output" / case.name).with_suffix(".dot")
 
     # Do not directly assert equality, to avoid generating pytest comparison
     # output, which is really slow for the large files used in these test cases
