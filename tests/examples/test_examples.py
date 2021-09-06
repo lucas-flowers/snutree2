@@ -1,11 +1,11 @@
 from collections import defaultdict, deque
-from csv import DictReader
 from dataclasses import dataclass
 from pathlib import Path
 
 import pytest
 from _pytest.config import Config
 
+from snutree.api import SnutreeApi
 from snutree.model.member.sigmanu.affiliation import ChapterId
 from snutree.model.member.sigmanu.member import SigmaNuMember
 from snutree.model.member.sigmanu.pipeline import (
@@ -42,14 +42,6 @@ class ExampleTestCase(TestCase):
 )
 def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
 
-    root = Path(__file__).parent
-    input_path = (root / "input" / case.name).with_suffix(".csv")
-
-    with input_path.open() as f:
-        rows = DictReader(f)
-        members = SigmaNuParser(ChapterId("Delta Alpha")).parse(rows)
-        tree = SigmaNuAssembler().assemble(members)
-
     cycler = Cycler(deque(x11.COLORS))
 
     family_colors = defaultdict(
@@ -81,67 +73,75 @@ def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
         },
     )
 
-    writer = DotWriter[SigmaNuMember, None, Semester](
-        DotWriterConfig(
-            graph=GraphsConfig(
-                defaults=DefaultAttributesConfig(
-                    root=dict(
-                        size=80,
-                        ratio="compress",
-                        pad=".5, .5",
-                        ranksep=0.15,
-                        nodesep=0.5,
-                        label="Family Tree: Delta Alpha Chapter of Sigma Nu Fraternity",
-                        labelloc="t",
-                        fontsize=110,
-                        concentrate=False,
+    api = SnutreeApi[SigmaNuMember, None, Semester](
+        parser=SigmaNuParser(
+            chapter_id=ChapterId("Delta Alpha"),
+        ),
+        assembler=SigmaNuAssembler(),
+        writer=DotWriter(
+            DotWriterConfig(
+                graph=GraphsConfig(
+                    defaults=DefaultAttributesConfig(
+                        root=dict(
+                            size=80,
+                            ratio="compress",
+                            pad=".5, .5",
+                            ranksep=0.15,
+                            nodesep=0.5,
+                            label="Family Tree: Delta Alpha Chapter of Sigma Nu Fraternity",
+                            labelloc="t",
+                            fontsize=110,
+                            concentrate=False,
+                        ),
                     ),
                 ),
-            ),
-            node=NodesConfig(
-                defaults=DefaultAttributesConfig(
-                    root=dict(
-                        style="filled",
-                        shape="box",
-                        penwidth=2,
-                        width=1.63,
-                        fontname="dejavu sans",
+                node=NodesConfig(
+                    defaults=DefaultAttributesConfig(
+                        root=dict(
+                            style="filled",
+                            shape="box",
+                            penwidth=2,
+                            width=1.63,
+                            fontname="dejavu sans",
+                        ),
+                        member=dict(
+                            fillcolor=".11 .71 1.",
+                        ),
+                        rank=dict(
+                            color="none",
+                            fontsize=20,
+                            fontname="dejavu serif",
+                        ),
                     ),
-                    member=dict(
-                        fillcolor=".11 .71 1.",
-                    ),
-                    rank=dict(
-                        color="none",
-                        fontsize=20,
-                        fontname="dejavu serif",
+                    attributes=DynamicNodeAttributesConfig(
+                        member=lambda member: {
+                            "label": r"\n".join([member.name, member.affiliation]),
+                        },
+                        rank=lambda rank: {
+                            "label": str(rank),
+                        },
+                        family=lambda family_id: {
+                            "color": family_colors[family_id],
+                        },
                     ),
                 ),
-                attributes=DynamicNodeAttributesConfig(
-                    member=lambda member: {
-                        "label": r"\n".join([member.name, member.affiliation]),
-                    },
-                    rank=lambda rank: {
-                        "label": str(rank),
-                    },
-                    family=lambda family_id: {
-                        "color": family_colors[family_id],
-                    },
-                ),
-            ),
-            edge=EdgesConfig(
-                defaults=DefaultAttributesConfig(
-                    root=dict(
-                        arrowhead="none",
-                    ),
-                    rank=dict(
-                        style="invis",
+                edge=EdgesConfig(
+                    defaults=DefaultAttributesConfig(
+                        root=dict(
+                            arrowhead="none",
+                        ),
+                        rank=dict(
+                            style="invis",
+                        ),
                     ),
                 ),
             ),
         ),
     )
 
-    actual = str(writer.write_family_tree(tree))
+    root = Path(__file__).parent
+    input_path = (root / "input" / case.name).with_suffix(".csv")
+    actual = api.run(input_path)
     expected_path = (root / "output" / case.name).with_suffix(".dot")
 
     # Do not directly assert equality, to avoid generating pytest comparison

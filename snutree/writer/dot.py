@@ -72,6 +72,9 @@ class DotWriter(Generic[E, R, AnyRank]):
 
     config: DotWriterConfig[E, R, AnyRank] = field(default_factory=DotWriterConfig)
 
+    def write(self, tree: FamilyTree[E, R, AnyRank]) -> str:
+        return str(self.write_family_tree(tree))
+
     def write_family_tree(self, tree: FamilyTree[E, R, AnyRank]) -> Graph:
         return Digraph(
             self.config.graph.names.root,
