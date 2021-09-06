@@ -79,7 +79,7 @@ class Semester:
         return Season.SPRING if self._index % 2 == 0 else Season.FALL
 
     def __repr__(self) -> str:
-        return f"{type(self).__name__}(season={self.season!r}, year={self.year!r})"
+        return f"{type(self).__name__}({str(self)!r})"
 
     def __str__(self) -> str:
         return f"{self.season} {self.year}"

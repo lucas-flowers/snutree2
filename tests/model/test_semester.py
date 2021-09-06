@@ -168,7 +168,7 @@ class ReprTestCase:
     [
         ReprTestCase(
             semester=Semester("Fall 1990"),
-            expected="Semester(season=<Season.FALL: 'Fall'>, year=1990)",
+            expected="Semester('Fall 1990')",
         ),
     ],
 )
