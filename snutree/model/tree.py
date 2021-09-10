@@ -49,10 +49,15 @@ class Entity(Generic[AnyRank, M]):
 class FamilyTreeConfig:
 
     seed: str = "12345"
+    include_unknowns: bool = True
+
+    unknown_offset: int = 1
     rank_min_offset: int = 0
     rank_max_offset: int = 0
 
     def __post_init__(self) -> None:
+        if self.unknown_offset <= 0:
+            raise ValueError("unknown member rank offsets must be strictly positive")
         if self.rank_min_offset > 0:
             raise NotImplementedError("positive minimum rank offsets (i.e., entity filtering by rank) not implemented")
         if self.rank_max_offset < 0:
@@ -78,12 +83,30 @@ class FamilyTree(Generic[AnyRank, M]):
         self.rank_type = rank_type
         self.config = config or FamilyTreeConfig()
 
+        self.unknowns: set[str] = set()
         self._entities: dict[str, Entity[AnyRank, M]] = {}
         self._relationships = relationships
         for entity in entities:
+
             self._entities[entity.key] = entity
+
+            parent_key: Optional[str]
             if isinstance(entity.parent_key, str):
-                self._relationships.add((entity.parent_key, entity.key))
+                parent_key = entity.parent_key
+            elif entity.parent_key == ParentKeyStatus.UNKNOWN and self.config.include_unknowns:
+                parent_key = f"{entity.key}:parent"
+                self.unknowns.add(parent_key)
+                self._entities[parent_key] = Entity(
+                    parent_key=ParentKeyStatus.NONE,
+                    key=parent_key,
+                    member=None,
+                    rank=self.rank_type(index(entity.rank) - self.config.unknown_offset),
+                )
+            else:
+                parent_key = None
+
+            if parent_key:
+                self._relationships.add((parent_key, entity.key))
 
         self._digraph: DiGraph[str] = DiGraph()
         self._digraph.add_nodes_from(self._entities.keys())

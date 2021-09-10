@@ -91,6 +91,11 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
                     entity=dict(
                         fillcolor=".11 .71 1.",
                     ),
+                    unknown=dict(
+                        height=0,
+                        width=0,
+                        style="invis",
+                    ),
                     rank=dict(
                         color="none",
                         fontsize=20,
@@ -113,6 +118,9 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
                 defaults=DefaultAttributesConfig(
                     root=dict(
                         arrowhead="none",
+                    ),
+                    unknown=dict(
+                        style="dotted",
                     ),
                     rank=dict(
                         style="invis",

@@ -13,6 +13,7 @@ digraph "family-tree" {
     subgraph "ranks-left" {
         node [color="none",fontsize=20,fontname="dejavu serif"];
         edge [style="invis"];
+        "ranks-left:spring1950" [label="Spring 1950"];
         "ranks-left:fall1950" [label="Fall 1950"];
         "ranks-left:spring1951" [label="Spring 1951"];
         "ranks-left:fall1951" [label="Fall 1951"];
@@ -146,6 +147,7 @@ digraph "family-tree" {
         "ranks-left:fall2015" [label="Fall 2015"];
         "ranks-left:spring2016" [label="Spring 2016"];
         "ranks-left:fall2016" [label="Fall 2016"];
+        "ranks-left:spring1950" -> "ranks-left:fall1950";
         "ranks-left:fall1950" -> "ranks-left:spring1951";
         "ranks-left:spring1951" -> "ranks-left:fall1951";
         "ranks-left:fall1951" -> "ranks-left:spring1952";
@@ -282,35 +284,44 @@ digraph "family-tree" {
     subgraph "entities" {
         node [fillcolor=".11 .71 1."];
         "1044" [label="Vin Tangpricha\nΔΑ 1044",color="orangered4"];
+        "1044:parent" [height=0,width=0,style="invis"];
         "1058" [label="Ruben Garcia\nΔΑ 1058",color="orangered4"];
         "453" [label="Reed Gunselman\nΔΑ 453",color="tan3"];
+        "453:parent" [height=0,width=0,style="invis"];
         "491" [label="Larry Mattson\nΔΑ 491",color="tan3"];
         "740" [label="Dennis Pesek\nΔΑ 740",color="royalblue4"];
+        "740:parent" [height=0,width=0,style="invis"];
         "781" [label="Robert Steinke\nΔΑ 781",color="royalblue4"];
         "802" [label="Lel Somogyi\nΔΑ 802",color="royalblue4"];
         "831" [label="Kurt Bigler\nΔΑ 831",color="royalblue4"];
         "860" [label="Thomas Eldridge\nΔΑ 860",color="royalblue4"];
         "466" [label="Dwight Decker\nΔΑ 466",color="brown4"];
+        "466:parent" [height=0,width=0,style="invis"];
         "501" [label="Peter Duff\nΔΑ 501",color="brown4"];
         "517" [label="John Lenihan\nΔΑ 517",color="brown4"];
         "538" [label="Larry Scotchie\nΔΑ 538",color="brown4"];
         "551" [label="John Coon\nΔΑ 551",color="brown4"];
         "562" [label="Don Harris\nΔΑ 562",color="brown4"];
         "480" [label="David Ohl\nΔΑ 480",color="plum3"];
+        "480:parent" [height=0,width=0,style="invis"];
         "490" [label="Joseph Lupo\nΔΑ 490",color="plum3"];
         "527" [label="James Kennedy\nΔΑ 527",color="plum3"];
         "brother11" [label="Keller\nΔΑ Brother",color="plum3"];
         "438" [label="Dale Johnson\nΔΑ 438",color="chartreuse1"];
+        "438:parent" [height=0,width=0,style="invis"];
         "498" [label="Ronald Thomas\nΔΑ 498",color="chartreuse1"];
         "brother1" [label="Altoff\nΔΑ Brother",color="chartreuse1"];
         "437" [label="John Hall\nΔΑ 437",color="deeppink3"];
+        "437:parent" [height=0,width=0,style="invis"];
         "482" [label="Thomas Beebe\nΔΑ 482",color="deeppink3"];
         "464" [label="Thomas Bowden\nΔΑ 464",color="paleturquoise4"];
+        "464:parent" [height=0,width=0,style="invis"];
         "496" [label="Jim Taylor\nΔΑ 496",color="paleturquoise4"];
         "515" [label="Edward Labuda\nΔΑ 515",color="paleturquoise4"];
         "523" [label="William Taylor\nΔΑ 523",color="paleturquoise4"];
         "1001" [label="Kenneth Bates\nΔΑ 1001",color="navy"];
         "666" [label="David Brezic\nΔΑ 666",color="navy"];
+        "666:parent" [height=0,width=0,style="invis"];
         "706" [label="Richard Merrill\nΔΑ 706",color="navy"];
         "718" [label="Ed Evers\nΔΑ 718",color="navy"];
         "726" [label="John Bertko\nΔΑ 726",color="navy"];
@@ -348,6 +359,7 @@ digraph "family-tree" {
         "991" [label="Douglas King\nΔΑ 991",color="navy"];
         "brother28" [label="S. Witkowski\nΔΑ Brother",color="navy"];
         "473" [label="Jim Nay\nΔΑ 473",color="darkseagreen3"];
+        "473:parent" [height=0,width=0,style="invis"];
         "484" [label="Tom Dean\nΔΑ 484",color="darkseagreen3"];
         "1004" [label="Tatsuro Hayashi\nΔΑ 1004",color="yellow"];
         "1020" [label="Gregory Lynch\nΔΑ 1020",color="yellow"];
@@ -356,12 +368,16 @@ digraph "family-tree" {
         "1035" [label="Jeff Kellam\nΔΑ 1035",color="yellow"];
         "1042" [label="Mike Hosack\nΔΑ 1042",color="yellow"];
         "986" [label="Michael Varverakis\nΔΑ 986",color="yellow"];
+        "986:parent" [height=0,width=0,style="invis"];
         "993" [label="Hugh Phelps\nΔΑ 993",color="yellow"];
         "709" [label="Drew Barry\nΔΑ 709",color="darkslategray"];
+        "709:parent" [height=0,width=0,style="invis"];
         "725" [label="Rick Pump\nΔΑ 725",color="darkslategray"];
         "459" [label="David Warrick\nΔΑ 459",color="plum1"];
+        "459:parent" [height=0,width=0,style="invis"];
         "brother29" [label="Wolfe\nΔΑ Brother",color="plum1"];
         "1051" [label="Dean Ochi\nΔΑ 1051",color="dodgerblue"];
+        "1051:parent" [height=0,width=0,style="invis"];
         "1062" [label="Chris Watson\nΔΑ 1062",color="dodgerblue"];
         "1075" [label="Aaron Wisnewski\nΔΑ 1075",color="dodgerblue"];
         "1094" [label="Josh Widick\nΔΑ 1094",color="dodgerblue"];
@@ -453,18 +469,23 @@ digraph "family-tree" {
         "1431" [label="Adrian Hattan\nΔΑ 1431",color="dodgerblue"];
         "1439" [label="Ziyi Huang\nΔΑ 1439",color="dodgerblue"];
         "508" [label="Richard Reinhart\nΔΑ 508",color="deepskyblue3"];
+        "508:parent" [height=0,width=0,style="invis"];
         "513" [label="Jim Buchtel\nΔΑ 513",color="deepskyblue3"];
         "472" [label="James McCord\nΔΑ 472",color="dodgerblue1"];
+        "472:parent" [height=0,width=0,style="invis"];
         "483" [label="Dale Chambers\nΔΑ 483",color="dodgerblue1"];
         "521" [label="Glenn Pfleiderer\nΔΑ 521",color="dodgerblue1"];
         "657" [label="Bob Cotabish\nΔΑ 657",color="slategray2"];
+        "657:parent" [height=0,width=0,style="invis"];
         "682" [label="Frank Berdan\nΔΑ 682",color="slategray2"];
         "717" [label="Robert Gann\nΔΑ 717",color="slategray2"];
         "736" [label="Scott Jaffe\nΔΑ 736",color="slategray2"];
         "642" [label="Leonhard Goeller\nΔΑ 642",color="violetred3"];
+        "642:parent" [height=0,width=0,style="invis"];
         "687" [label="Clark Heckert\nΔΑ 687",color="violetred3"];
         "713" [label="Frederick Gearhart\nΔΑ 713",color="violetred3"];
         "462" [label="John Nielsen\nΔΑ 462",color="azure4"];
+        "462:parent" [height=0,width=0,style="invis"];
         "brother17" [label="Lyons\nΔΑ Brother",color="azure4"];
         "1000" [label="Chip Caley\nΔΑ 1000",color="brown1"];
         "1002" [label="Doug Friant\nΔΑ 1002",color="brown1"];
@@ -498,6 +519,7 @@ digraph "family-tree" {
         "1057" [label="Jose Mancilla\nΔΑ 1057",color="brown1"];
         "1070" [label="Dan Sanders\nΔΑ 1070",color="brown1"];
         "760" [label="Rich Kelly\nΔΑ 760",color="brown1"];
+        "760:parent" [height=0,width=0,style="invis"];
         "776" [label="Wilbert Mariner\nΔΑ 776",color="brown1"];
         "791" [label="Daniel Fisher\nΔΑ 791",color="brown1"];
         "799" [label="Michael Bondor\nΔΑ 799",color="brown1"];
@@ -539,12 +561,15 @@ digraph "family-tree" {
         "brother22" [label="Poremba\nΔΑ Brother",color="brown1"];
         "brother6" [label="Dandalides\nΔΑ Brother",color="brown1"];
         "460" [label="Andrew Bogeatzes\nΔΑ 460",color="indigo"];
+        "460:parent" [height=0,width=0,style="invis"];
         "500" [label="Gary Uhl\nΔΑ 500",color="indigo"];
         "514" [label="Ronald Kapela\nΔΑ 514",color="indigo"];
         "467" [label="Jerome Eldridge\nΔΑ 467",color="thistle3"];
+        "467:parent" [height=0,width=0,style="invis"];
         "497" [label="Don Theis\nΔΑ 497",color="thistle3"];
         "brother12" [label="Kicher\nΔΑ Brother",color="thistle3"];
         "643" [label="Ralph Papa\nΔΑ 643",color="darkorange1"];
+        "643:parent" [height=0,width=0,style="invis"];
         "673" [label="John Shields\nΔΑ 673",color="darkorange1"];
         "721" [label="James Waldorf\nΔΑ 721",color="darkorange1"];
         "758" [label="Gary Steinbach\nΔΑ 758",color="darkorange1"];
@@ -571,9 +596,11 @@ digraph "family-tree" {
         "brother5" [label="Chan\nΔΑ Brother",color="darkorange1"];
         "brother8" [label="Hirsch\nΔΑ Brother",color="darkorange1"];
         "454" [label="John Janos\nΔΑ 454",color="deepskyblue1"];
+        "454:parent" [height=0,width=0,style="invis"];
         "494" [label="Robert Shumaker\nΔΑ 494",color="deepskyblue1"];
         "539" [label="Robert Ibos\nΔΑ 539",color="deepskyblue1"];
         "1049" [label="Scott Lanterman\nΔΑ 1049",color="salmon2"];
+        "1049:parent" [height=0,width=0,style="invis"];
         "1072" [label="Clay Flannigan\nΔΑ 1072",color="salmon2"];
         "1085" [label="Dan UpDyke\nΔΑ 1085",color="salmon2"];
         "1091" [label="Jason Oster\nΔΑ 1091",color="salmon2"];
@@ -587,6 +614,7 @@ digraph "family-tree" {
         "1137" [label="Adil Shroff\nΔΑ 1137",color="salmon2"];
         "1138" [label="Jon McCoy\nΔΑ 1138",color="salmon2"];
         "1050" [label="Christopher Cheyer\nΔΑ 1050",color="cadetblue"];
+        "1050:parent" [height=0,width=0,style="invis"];
         "1056" [label="John Lisse\nΔΑ 1056",color="cadetblue"];
         "1061" [label="Dave Ferrance\nΔΑ 1061",color="cadetblue"];
         "1069" [label="Geoff Schmit\nΔΑ 1069",color="cadetblue"];
@@ -603,58 +631,78 @@ digraph "family-tree" {
         "1178" [label="Bryan Dillon\nΔΑ 1178",color="cadetblue"];
         "1223" [label="Zachary Newman\nΔΑ 1223",color="cadetblue"];
         "509" [label="Don Jackson\nΔΑ 509",color="lavenderblush3"];
+        "509:parent" [height=0,width=0,style="invis"];
         "524" [label="Robin Wiegel\nΔΑ 524",color="lavenderblush3"];
         "1048" [label="Tim Wiemels\nΔΑ 1048",color="sienna2"];
+        "1048:parent" [height=0,width=0,style="invis"];
         "477" [label="Alden Winters\nΔΑ 477",color="slategray"];
+        "477:parent" [height=0,width=0,style="invis"];
         "488" [label="Jim Lazor\nΔΑ 488",color="slategray"];
         "519" [label="Bruce Monteith\nΔΑ 519",color="slategray"];
         "528" [label="Don Soldatis\nΔΑ 528",color="slategray"];
         "brother10" [label="Huber\nΔΑ Brother",color="purple2"];
+        "brother10:parent" [height=0,width=0,style="invis"];
         "443" [label="William Monteith\nΔΑ 443",color="peachpuff"];
+        "443:parent" [height=0,width=0,style="invis"];
         "brother4" [label="Carlson\nΔΑ Brother",color="peachpuff"];
         "648" [label="Thomas Kaye\nΔΑ 648",color="palegreen4"];
+        "648:parent" [height=0,width=0,style="invis"];
         "664" [label="Tom Szymanski\nΔΑ 664",color="palegreen4"];
         "714" [label="Dave Adams\nΔΑ 714",color="palegreen4"];
         "469" [label="Donald Johnson\nΔΑ 469",color="pink3"];
+        "469:parent" [height=0,width=0,style="invis"];
         "492" [label="John Richards\nΔΑ 492",color="pink3"];
         "585" [label="Karl Newkirk\nΔΑ 585",color="burlywood3"];
+        "585:parent" [height=0,width=0,style="invis"];
         "640" [label="Jeffrey Williams\nΔΑ 640",color="burlywood3"];
         "452" [label="Dick Goodall\nΔΑ 452",color="wheat4"];
+        "452:parent" [height=0,width=0,style="invis"];
         "495" [label="Bob Simokat\nΔΑ 495",color="wheat4"];
         "522" [label="Phillip Stone\nΔΑ 522",color="wheat4"];
         "450" [label="Brice Carnahan\nΔΑ 450",color="mediumspringgreen"];
+        "450:parent" [height=0,width=0,style="invis"];
         "485" [label="Jim Firmin\nΔΑ 485",color="mediumspringgreen"];
         "440" [label="Edward Moorehead\nΔΑ 440",color="palegreen3"];
+        "440:parent" [height=0,width=0,style="invis"];
         "486" [label="Edward Geddes\nΔΑ 486",color="palegreen3"];
         "520" [label="Bob Peacock\nΔΑ 520",color="palegreen3"];
         "558" [label="Bill Pritts\nΔΑ 558",color="palegreen3"];
         "566" [label="Alan Mochnick\nΔΑ 566",color="palegreen3"];
         "511" [label="Herbert Chapin\nΔΑ 511",color="blueviolet"];
+        "511:parent" [height=0,width=0,style="invis"];
         "546" [label="Frank Guenzel\nΔΑ 546",color="blueviolet"];
         "557" [label="Kenneth Fischer\nΔΑ 557",color="blueviolet"];
         "573" [label="Gerald Appleton\nΔΑ 573",color="blueviolet"];
         "brother2" [label="Barber\nΔΑ Brother",color="blueviolet"];
         "brother7" [label="Haladik\nΔΑ Brother",color="blueviolet"];
         "439" [label="Dick Lyndes\nΔΑ 439",color="ivory4"];
+        "439:parent" [height=0,width=0,style="invis"];
         "503" [label="Philip Heisner\nΔΑ 503",color="ivory4"];
         "634" [label="Dwight Racioppo\nΔΑ 634",color="cadetblue4"];
+        "634:parent" [height=0,width=0,style="invis"];
         "661" [label="John Massie\nΔΑ 661",color="cadetblue4"];
         "716" [label="Clayton Bromley\nΔΑ 716",color="purple"];
+        "716:parent" [height=0,width=0,style="invis"];
         "767" [label="Christopher Clautice\nΔΑ 767",color="purple"];
         "549" [label="Julius Marcus\nΔΑ 549",color="maroon2"];
+        "549:parent" [height=0,width=0,style="invis"];
         "569" [label="Bill Samuels\nΔΑ 569",color="maroon2"];
         "620" [label="Frederick Trenor\nΔΑ 620",color="maroon2"];
         "635" [label="Greg Smith\nΔΑ 635",color="maroon2"];
         "1043" [label="Ben Taggart\nΔΑ 1043",color="slategrey"];
+        "1043:parent" [height=0,width=0,style="invis"];
         "470" [label="Paul Katonak\nΔΑ 470",color="orangered"];
+        "470:parent" [height=0,width=0,style="invis"];
         "489" [label="Bill Limberty\nΔΑ 489",color="orangered"];
         "525" [label="Alan Freisinger\nΔΑ 525",color="orangered"];
         "1047" [label="Dave Bastawros\nΔΑ 1047",color="cyan2"];
+        "1047:parent" [height=0,width=0,style="invis"];
         "1053" [label="Alex Olugbile\nΔΑ 1053",color="cyan2"];
         "1064" [label="Rob McCracken\nΔΑ 1064",color="cyan2"];
         "1076" [label="Sir Kumar\nΔΑ 1076",color="cyan2"];
         "1080" [label="Marinel Rosu\nΔΑ 1080",color="cyan2"];
         "1046" [label="Matt Unger\nΔΑ 1046",color="chartreuse4"];
+        "1046:parent" [height=0,width=0,style="invis"];
         "1055" [label="Ian Verschuren\nΔΑ 1055",color="chartreuse4"];
         "1065" [label="Marty Linenweber\nΔΑ 1065",color="chartreuse4"];
         "1066" [label="Shawn Cornelius\nΔΑ 1066",color="chartreuse4"];
@@ -694,21 +742,27 @@ digraph "family-tree" {
         "1245" [label="Russell Smith\nΔΑ 1245",color="chartreuse4"];
         "1264" [label="Philip Kiser\nΔΑ 1264",color="chartreuse4"];
         "476" [label="Terrence Tyrrell\nΔΑ 476",color="goldenrod3"];
+        "476:parent" [height=0,width=0,style="invis"];
         "512" [label="Aloysius Mikolanis\nΔΑ 512",color="goldenrod3"];
         "brother16" [label="Luscowke\nΔΑ Brother",color="goldenrod3"];
         "510" [label="Erwin Meyer\nΔΑ 510",color="olivedrab1"];
+        "510:parent" [height=0,width=0,style="invis"];
         "brother23" [label="Sabo\nΔΑ Brother",color="olivedrab1"];
         "436" [label="John Guyeska\nΔΑ 436",color="gold3"];
+        "436:parent" [height=0,width=0,style="invis"];
         "493" [label="Doug Sheppard\nΔΑ 493",color="gold3"];
         "504" [label="Dale Hall\nΔΑ 504",color="goldenrod2"];
+        "504:parent" [height=0,width=0,style="invis"];
         "516" [label="Robert Leddon\nΔΑ 516",color="goldenrod2"];
         "471" [label="George Ludwick\nΔΑ 471",color="mediumorchid4"];
+        "471:parent" [height=0,width=0,style="invis"];
         "502" [label="Pete Hanley\nΔΑ 502",color="mediumorchid4"];
         "559" [label="Donald Van Hyning\nΔΑ 559",color="mediumorchid4"];
         "599" [label="George Bondor\nΔΑ 599",color="mediumorchid4"];
         "brother20" [label="Neal\nΔΑ Brother",color="mediumorchid4"];
         "1009" [label="Dave Robison\nΔΑ 1009",color="darkgreen"];
         "757" [label="Kenneth Marbaugh\nΔΑ 757",color="darkgreen"];
+        "757:parent" [height=0,width=0,style="invis"];
         "789" [label="Douglas Latta\nΔΑ 789",color="darkgreen"];
         "797" [label="Edward Haddad\nΔΑ 797",color="darkgreen"];
         "844" [label="Robert Hazy\nΔΑ 844",color="darkgreen"];
@@ -739,6 +793,7 @@ digraph "family-tree" {
         "1104" [label="Steve Jenkins\nΔΑ 1104",color="deeppink"];
         "1124" [label="Skeeter Latsch\nΔΑ 1124",color="deeppink"];
         "663" [label="Edward Gesdorf\nΔΑ 663",color="deeppink"];
+        "663:parent" [height=0,width=0,style="invis"];
         "701" [label="Jeffrey Lund\nΔΑ 701",color="deeppink"];
         "727" [label="Ray McFarland\nΔΑ 727",color="deeppink"];
         "754" [label="Peter Skottegard\nΔΑ 754",color="deeppink"];
@@ -801,6 +856,7 @@ digraph "family-tree" {
         "brother27" [label="Wingate\nΔΑ Brother",color="deeppink"];
         "brother9" [label="Hoffman\nΔΑ Brother",color="deeppink"];
         "702" [label="Laurence Koppelberger\nΔΑ 702",color="indianred4"];
+        "702:parent" [height=0,width=0,style="invis"];
         "728" [label="Neal Nomiyama\nΔΑ 728",color="indianred4"];
         "751" [label="Eric Snyder\nΔΑ 751",color="indianred4"];
         "771" [label="Cheuk Kwan\nΔΑ 771",color="indianred4"];
@@ -813,12 +869,15 @@ digraph "family-tree" {
         "841" [label="Paul Slobodian\nΔΑ 841",color="indianred4"];
         "brother26" [label="Wilbur\nΔΑ Brother",color="indianred4"];
         "629" [label="Stuart Clifton\nΔΑ 629",color="mediumseagreen"];
+        "629:parent" [height=0,width=0,style="invis"];
         "704" [label="Bill Verdini\nΔΑ 704",color="mediumseagreen"];
         "724" [label="James Skjervem\nΔΑ 724",color="mediumseagreen"];
         "742" [label="Jim Reiman\nΔΑ 742",color="mediumseagreen"];
         "455" [label="J.R. Louis\nΔΑ 455",color="mistyrose2"];
+        "455:parent" [height=0,width=0,style="invis"];
         "481" [label="William Beall\nΔΑ 481",color="mistyrose2"];
         "735" [label="Paul Lizak\nΔΑ 735",color="limegreen"];
+        "735:parent" [height=0,width=0,style="invis"];
         "769" [label="John Pettit\nΔΑ 769",color="limegreen"];
         "773" [label="Bruce DiPietro\nΔΑ 773",color="limegreen"];
         "784" [label="Tom Eckstein\nΔΑ 784",color="limegreen"];
@@ -836,11 +895,14 @@ digraph "family-tree" {
         "brother24" [label="Terberg\nΔΑ Brother",color="limegreen"];
         "brother30" [label="Womer\nΔΑ Brother",color="limegreen"];
         "474" [label="David Pirnack\nΔΑ 474",color="magenta2"];
+        "474:parent" [height=0,width=0,style="invis"];
         "499" [label="Don Trimmer\nΔΑ 499",color="magenta2"];
         "526" [label="Francis Hebert\nΔΑ 526",color="magenta2"];
         "506" [label="Dale Morton\nΔΑ 506",color="khaki"];
+        "506:parent" [height=0,width=0,style="invis"];
         "518" [label="Thomas Millhoff\nΔΑ 518",color="khaki"];
         "1045" [label="Joe Dea\nΔΑ 1045",color="crimson"];
+        "1045:parent" [height=0,width=0,style="invis"];
         "1059" [label="Matt Bangerter\nΔΑ 1059",color="crimson"];
         "1060" [label="Chris Kiehl\nΔΑ 1060",color="crimson"];
         "1063" [label="Nick Macron\nΔΑ 1063",color="crimson"];
@@ -1060,18 +1122,23 @@ digraph "family-tree" {
         "1437" [label="Bixing Qiao\nΔΑ 1437",color="crimson"];
         "1438" [label="Ben Szafarz\nΔΑ 1438",color="crimson"];
         "653" [label="Stephen Smith\nΔΑ 653",color="firebrick4"];
+        "653:parent" [height=0,width=0,style="invis"];
         "688" [label="Bill Feth\nΔΑ 688",color="firebrick4"];
         "708" [label="Larry Jansen\nΔΑ 708",color="firebrick4"];
         "461" [label="John Laughlin\nΔΑ 461",color="palegreen"];
+        "461:parent" [height=0,width=0,style="invis"];
         "487" [label="Daniel Hensel\nΔΑ 487",color="palegreen"];
         "451" [label="Don Dick\nΔΑ 451",color="deepskyblue"];
+        "451:parent" [height=0,width=0,style="invis"];
         "brother25" [label="Vriant\nΔΑ Brother",color="deepskyblue"];
         "647" [label="Allen Gutheim\nΔΑ 647",color="cadetblue2"];
+        "647:parent" [height=0,width=0,style="invis"];
         "672" [label="Bob Bauder\nΔΑ 672",color="cadetblue2"];
         "711" [label="Terry Voress\nΔΑ 711",color="cadetblue2"];
         "715" [label="Michael Hyrnick\nΔΑ 715",color="cadetblue2"];
         "734" [label="John Lundberg\nΔΑ 734",color="cadetblue2"];
         "667" [label="Frank Steffey\nΔΑ 667",color="gold1"];
+        "667:parent" [height=0,width=0,style="invis"];
         "722" [label="Bruce Groberg\nΔΑ 722",color="gold1"];
         "729" [label="David Fink\nΔΑ 729",color="gold1"];
         "746" [label="Evan Lim\nΔΑ 746",color="gold1"];
@@ -1155,18 +1222,27 @@ digraph "family-tree" {
         "1039" -> "1052";
         "1039" -> "1074";
         "1039" -> "1086";
+        "1043:parent" -> "1043" [style="dotted"];
         "1044" -> "1058";
+        "1044:parent" -> "1044" [style="dotted"];
         "1045" -> "1059";
         "1045" -> "1060";
         "1045" -> "1077";
         "1045" -> "1082";
+        "1045:parent" -> "1045" [style="dotted"];
         "1046" -> "1055";
         "1046" -> "1066";
+        "1046:parent" -> "1046" [style="dotted"];
         "1047" -> "1053";
+        "1047:parent" -> "1047" [style="dotted"];
+        "1048:parent" -> "1048" [style="dotted"];
         "1049" -> "1072";
+        "1049:parent" -> "1049" [style="dotted"];
         "1050" -> "1056";
         "1050" -> "1061";
+        "1050:parent" -> "1050" [style="dotted"];
         "1051" -> "1062";
+        "1051:parent" -> "1051" [style="dotted"];
         "1053" -> "1064";
         "1055" -> "1065";
         "1055" -> "1067";
@@ -1538,39 +1614,67 @@ digraph "family-tree" {
         "1416" -> "1425";
         "1420" -> "1433";
         "436" -> "493";
+        "436:parent" -> "436" [style="dotted"];
         "437" -> "482";
+        "437:parent" -> "437" [style="dotted"];
         "438" -> "498";
+        "438:parent" -> "438" [style="dotted"];
         "439" -> "503";
+        "439:parent" -> "439" [style="dotted"];
         "440" -> "486";
+        "440:parent" -> "440" [style="dotted"];
         "443" -> "brother4";
+        "443:parent" -> "443" [style="dotted"];
         "450" -> "485";
+        "450:parent" -> "450" [style="dotted"];
         "451" -> "brother25";
+        "451:parent" -> "451" [style="dotted"];
         "452" -> "495";
+        "452:parent" -> "452" [style="dotted"];
         "453" -> "491";
+        "453:parent" -> "453" [style="dotted"];
         "454" -> "494";
+        "454:parent" -> "454" [style="dotted"];
         "455" -> "481";
+        "455:parent" -> "455" [style="dotted"];
         "459" -> "brother29";
+        "459:parent" -> "459" [style="dotted"];
         "460" -> "500";
+        "460:parent" -> "460" [style="dotted"];
         "461" -> "487";
+        "461:parent" -> "461" [style="dotted"];
         "462" -> "brother17";
+        "462:parent" -> "462" [style="dotted"];
         "464" -> "496";
         "464" -> "515";
+        "464:parent" -> "464" [style="dotted"];
         "466" -> "501";
         "466" -> "517";
+        "466:parent" -> "466" [style="dotted"];
         "467" -> "497";
+        "467:parent" -> "467" [style="dotted"];
         "469" -> "492";
+        "469:parent" -> "469" [style="dotted"];
         "470" -> "489";
+        "470:parent" -> "470" [style="dotted"];
         "471" -> "502";
+        "471:parent" -> "471" [style="dotted"];
         "472" -> "483";
+        "472:parent" -> "472" [style="dotted"];
         "473" -> "484";
+        "473:parent" -> "473" [style="dotted"];
         "474" -> "499";
         "474" -> "526";
+        "474:parent" -> "474" [style="dotted"];
         "476" -> "512";
         "476" -> "brother16";
+        "476:parent" -> "476" [style="dotted"];
         "477" -> "488";
         "477" -> "528";
+        "477:parent" -> "477" [style="dotted"];
         "480" -> "490";
         "480" -> "brother11";
+        "480:parent" -> "480" [style="dotted"];
         "483" -> "521";
         "486" -> "520";
         "488" -> "519";
@@ -1585,11 +1689,17 @@ digraph "family-tree" {
         "502" -> "559";
         "502" -> "brother20";
         "504" -> "516";
+        "504:parent" -> "504" [style="dotted"];
         "506" -> "518";
+        "506:parent" -> "506" [style="dotted"];
         "508" -> "513";
+        "508:parent" -> "508" [style="dotted"];
         "509" -> "524";
+        "509:parent" -> "509" [style="dotted"];
         "510" -> "brother23";
+        "510:parent" -> "510" [style="dotted"];
         "511" -> "546";
+        "511:parent" -> "511" [style="dotted"];
         "517" -> "538";
         "520" -> "558";
         "538" -> "551";
@@ -1599,23 +1709,36 @@ digraph "family-tree" {
         "546" -> "brother2";
         "546" -> "brother7";
         "549" -> "569";
+        "549:parent" -> "549" [style="dotted"];
         "558" -> "566";
         "559" -> "599";
         "569" -> "620";
         "569" -> "635";
         "585" -> "640";
+        "585:parent" -> "585" [style="dotted"];
         "629" -> "704";
+        "629:parent" -> "629" [style="dotted"];
         "634" -> "661";
+        "634:parent" -> "634" [style="dotted"];
         "642" -> "687";
+        "642:parent" -> "642" [style="dotted"];
         "643" -> "673";
+        "643:parent" -> "643" [style="dotted"];
         "647" -> "672";
+        "647:parent" -> "647" [style="dotted"];
         "648" -> "664";
+        "648:parent" -> "648" [style="dotted"];
         "653" -> "688";
+        "653:parent" -> "653" [style="dotted"];
         "657" -> "682";
+        "657:parent" -> "657" [style="dotted"];
         "663" -> "701";
+        "663:parent" -> "663" [style="dotted"];
         "664" -> "714";
         "666" -> "706";
+        "666:parent" -> "666" [style="dotted"];
         "667" -> "722";
+        "667:parent" -> "667" [style="dotted"];
         "672" -> "711";
         "672" -> "715";
         "672" -> "734";
@@ -1625,11 +1748,14 @@ digraph "family-tree" {
         "688" -> "708";
         "701" -> "727";
         "702" -> "728";
+        "702:parent" -> "702" [style="dotted"];
         "704" -> "724";
         "704" -> "742";
         "706" -> "718";
         "709" -> "725";
+        "709:parent" -> "709" [style="dotted"];
         "716" -> "767";
+        "716:parent" -> "716" [style="dotted"];
         "717" -> "736";
         "718" -> "726";
         "721" -> "758";
@@ -1646,16 +1772,20 @@ digraph "family-tree" {
         "735" -> "773";
         "735" -> "brother24";
         "735" -> "brother30";
+        "735:parent" -> "735" [style="dotted"];
         "740" -> "781";
+        "740:parent" -> "740" [style="dotted"];
         "749" -> "777";
         "751" -> "771";
         "751" -> "790";
         "754" -> "780";
         "757" -> "789";
+        "757:parent" -> "757" [style="dotted"];
         "758" -> "775";
         "759" -> "772";
         "760" -> "776";
         "760" -> "brother6";
+        "760:parent" -> "760" [style="dotted"];
         "763" -> "768";
         "768" -> "803";
         "771" -> "806";
@@ -1891,6 +2021,7 @@ digraph "family-tree" {
         "982" -> "994";
         "982" -> "998";
         "986" -> "993";
+        "986:parent" -> "986" [style="dotted"];
         "987" -> "1013";
         "987" -> "1017";
         "990" -> "1008";
@@ -1902,10 +2033,12 @@ digraph "family-tree" {
         "996" -> "1002";
         "996" -> "1021";
         "998" -> "1014";
+        "brother10:parent" -> "brother10" [style="dotted"];
     }
     subgraph "ranks-right" {
         node [color="none",fontsize=20,fontname="dejavu serif"];
         edge [style="invis"];
+        "ranks-right:spring1950" [label="Spring 1950"];
         "ranks-right:fall1950" [label="Fall 1950"];
         "ranks-right:spring1951" [label="Spring 1951"];
         "ranks-right:fall1951" [label="Fall 1951"];
@@ -2039,6 +2172,7 @@ digraph "family-tree" {
         "ranks-right:fall2015" [label="Fall 2015"];
         "ranks-right:spring2016" [label="Spring 2016"];
         "ranks-right:fall2016" [label="Fall 2016"];
+        "ranks-right:spring1950" -> "ranks-right:fall1950";
         "ranks-right:fall1950" -> "ranks-right:spring1951";
         "ranks-right:spring1951" -> "ranks-right:fall1951";
         "ranks-right:fall1951" -> "ranks-right:spring1952";
@@ -2175,6 +2309,16 @@ digraph "family-tree" {
     subgraph "ranks" {
         subgraph {
             rank="same";
+            "ranks-left:spring1950";
+            "ranks-right:spring1950";
+            "436:parent";
+            "437:parent";
+            "438:parent";
+            "439:parent";
+            "440:parent";
+        }
+        subgraph {
+            rank="same";
             "ranks-left:fall1950";
             "ranks-right:fall1950";
             "436";
@@ -2182,12 +2326,20 @@ digraph "family-tree" {
             "438";
             "439";
             "440";
+            "443:parent";
         }
         subgraph {
             rank="same";
             "ranks-left:spring1951";
             "ranks-right:spring1951";
             "443";
+            "450:parent";
+            "451:parent";
+            "452:parent";
+            "453:parent";
+            "454:parent";
+            "455:parent";
+            "459:parent";
         }
         subgraph {
             rank="same";
@@ -2200,6 +2352,9 @@ digraph "family-tree" {
             "454";
             "455";
             "459";
+            "460:parent";
+            "461:parent";
+            "462:parent";
         }
         subgraph {
             rank="same";
@@ -2208,6 +2363,17 @@ digraph "family-tree" {
             "460";
             "461";
             "462";
+            "464:parent";
+            "466:parent";
+            "467:parent";
+            "469:parent";
+            "470:parent";
+            "471:parent";
+            "472:parent";
+            "473:parent";
+            "474:parent";
+            "476:parent";
+            "477:parent";
         }
         subgraph {
             rank="same";
@@ -2224,6 +2390,7 @@ digraph "family-tree" {
             "474";
             "476";
             "477";
+            "480:parent";
         }
         subgraph {
             rank="same";
@@ -2268,6 +2435,9 @@ digraph "family-tree" {
             "501";
             "502";
             "503";
+            "504:parent";
+            "506:parent";
+            "508:parent";
         }
         subgraph {
             rank="same";
@@ -2276,6 +2446,8 @@ digraph "family-tree" {
             "504";
             "506";
             "508";
+            "509:parent";
+            "510:parent";
         }
         subgraph {
             rank="same";
@@ -2283,6 +2455,7 @@ digraph "family-tree" {
             "ranks-right:spring1955";
             "509";
             "510";
+            "511:parent";
         }
         subgraph {
             rank="same";
@@ -2322,6 +2495,7 @@ digraph "family-tree" {
             "ranks-left:fall1956";
             "ranks-right:fall1956";
             "538";
+            "549:parent";
         }
         subgraph {
             rank="same";
@@ -2358,6 +2532,7 @@ digraph "family-tree" {
             "ranks-left:spring1959";
             "ranks-right:spring1959";
             "569";
+            "585:parent";
         }
         subgraph {
             rank="same";
@@ -2393,6 +2568,8 @@ digraph "family-tree" {
             rank="same";
             "ranks-left:spring1962";
             "ranks-right:spring1962";
+            "629:parent";
+            "634:parent";
         }
         subgraph {
             rank="same";
@@ -2402,6 +2579,8 @@ digraph "family-tree" {
             "634";
             "635";
             "640";
+            "642:parent";
+            "643:parent";
         }
         subgraph {
             rank="same";
@@ -2409,6 +2588,9 @@ digraph "family-tree" {
             "ranks-right:spring1963";
             "642";
             "643";
+            "647:parent";
+            "648:parent";
+            "653:parent";
         }
         subgraph {
             rank="same";
@@ -2417,6 +2599,7 @@ digraph "family-tree" {
             "647";
             "648";
             "653";
+            "657:parent";
         }
         subgraph {
             rank="same";
@@ -2429,6 +2612,9 @@ digraph "family-tree" {
             rank="same";
             "ranks-left:fall1964";
             "ranks-right:fall1964";
+            "663:parent";
+            "666:parent";
+            "667:parent";
         }
         subgraph {
             rank="same";
@@ -2448,6 +2634,8 @@ digraph "family-tree" {
             rank="same";
             "ranks-left:fall1965";
             "ranks-right:fall1965";
+            "702:parent";
+            "709:parent";
         }
         subgraph {
             rank="same";
@@ -2468,6 +2656,7 @@ digraph "family-tree" {
             "713";
             "714";
             "715";
+            "716:parent";
         }
         subgraph {
             rank="same";
@@ -2485,6 +2674,8 @@ digraph "family-tree" {
             "ranks-right:fall1967";
             "724";
             "725";
+            "735:parent";
+            "740:parent";
         }
         subgraph {
             rank="same";
@@ -2505,6 +2696,8 @@ digraph "family-tree" {
             "ranks-left:fall1968";
             "ranks-right:fall1968";
             "746";
+            "757:parent";
+            "760:parent";
         }
         subgraph {
             rank="same";
@@ -2558,6 +2751,7 @@ digraph "family-tree" {
             rank="same";
             "ranks-left:fall1971";
             "ranks-right:fall1971";
+            "brother10:parent";
         }
         subgraph {
             rank="same";
@@ -2879,6 +3073,7 @@ digraph "family-tree" {
             "976";
             "977";
             "978";
+            "986:parent";
         }
         subgraph {
             rank="same";
@@ -3008,6 +3203,15 @@ digraph "family-tree" {
             rank="same";
             "ranks-left:spring1989";
             "ranks-right:spring1989";
+            "1043:parent";
+            "1044:parent";
+            "1045:parent";
+            "1046:parent";
+            "1047:parent";
+            "1048:parent";
+            "1049:parent";
+            "1050:parent";
+            "1051:parent";
         }
         subgraph {
             rank="same";

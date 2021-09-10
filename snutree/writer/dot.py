@@ -30,6 +30,7 @@ class NamesConfig:
 class DefaultAttributesConfig:
     root: dict[str, Id] = field(default_factory=dict)
     entity: dict[str, Id] = field(default_factory=dict)
+    unknown: dict[str, Id] = field(default_factory=dict)
     rank: dict[str, Id] = field(default_factory=dict)
 
 
@@ -158,7 +159,7 @@ class DotWriter(Generic[AnyRank, M]):
             self.write_edge_defaults(self.config.edge.defaults.entity),
             *self.write_nodes(tree),
             *self.config.node.custom,
-            *self.write_edges(tree.relationships),
+            *self.write_edges(tree),
             *self.config.edge.custom,
         )
 
@@ -167,18 +168,21 @@ class DotWriter(Generic[AnyRank, M]):
             Node(
                 entity.key,
                 **self.config.node.attributes.entity(entity),
+                **(self.config.node.defaults.unknown if key in tree.unknowns else {}),
                 **(self.config.node.attributes.member(entity.member) if entity.member is not None else {}),
                 **(self.config.node.attributes.family(tree.families[key]) if key in tree.families else {}),
             )
             for key, entity in tree.entities.items()
         ]
 
-    def write_edges(self, relationships: list[tuple[str, str]]) -> list[Edge]:
+    def write_edges(self, tree: FamilyTree[AnyRank, M]) -> list[Edge]:
         return [
             Edge(
-                *relationship,
+                parent_key,
+                child_key,
+                **(self.config.edge.defaults.unknown if parent_key in tree.unknowns else {}),
             )
-            for relationship in relationships
+            for (parent_key, child_key) in tree.relationships
         ]
 
     def write_cohort(self, rank: AnyRank, cohort: set[str]) -> Subgraph:
