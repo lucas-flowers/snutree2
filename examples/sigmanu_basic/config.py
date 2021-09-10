@@ -12,6 +12,8 @@ from snutree.tool import x11
 from snutree.tool.cycler import Cycler
 from snutree.writer.dot import (
     DefaultAttributesConfig,
+    DefaultEdgeAttributesConfig,
+    DefaultNodeAttributesConfig,
     DotWriter,
     DotWriterConfig,
     DynamicNodeAttributesConfig,
@@ -80,7 +82,7 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
                 ),
             ),
             node=NodesConfig(
-                defaults=DefaultAttributesConfig(
+                defaults=DefaultNodeAttributesConfig(
                     root=dict(
                         style="filled",
                         shape="box",
@@ -115,7 +117,7 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
                 ),
             ),
             edge=EdgesConfig(
-                defaults=DefaultAttributesConfig(
+                defaults=DefaultEdgeAttributesConfig(
                     root=dict(
                         arrowhead="none",
                     ),

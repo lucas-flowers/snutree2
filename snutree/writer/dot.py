@@ -30,8 +30,17 @@ class NamesConfig:
 class DefaultAttributesConfig:
     root: dict[str, Id] = field(default_factory=dict)
     entity: dict[str, Id] = field(default_factory=dict)
-    unknown: dict[str, Id] = field(default_factory=dict)
     rank: dict[str, Id] = field(default_factory=dict)
+
+
+@dataclass
+class DefaultNodeAttributesConfig(DefaultAttributesConfig):
+    unknown: dict[str, Id] = field(default_factory=dict)
+
+
+@dataclass
+class DefaultEdgeAttributesConfig(DefaultAttributesConfig):
+    unknown: dict[str, Id] = field(default_factory=dict)
 
 
 @dataclass
@@ -50,14 +59,14 @@ class GraphsConfig:
 
 @dataclass
 class NodesConfig(Generic[AnyRank, M]):
-    defaults: DefaultAttributesConfig = field(default_factory=DefaultAttributesConfig)
+    defaults: DefaultNodeAttributesConfig = field(default_factory=DefaultNodeAttributesConfig)
     attributes: DynamicNodeAttributesConfig[AnyRank, M] = field(default_factory=DynamicNodeAttributesConfig)
     custom: list[Node] = field(default_factory=list)
 
 
 @dataclass
 class EdgesConfig:
-    defaults: DefaultAttributesConfig = field(default_factory=DefaultAttributesConfig)
+    defaults: DefaultEdgeAttributesConfig = field(default_factory=DefaultEdgeAttributesConfig)
     custom: list[Edge] = field(default_factory=list)
 
 

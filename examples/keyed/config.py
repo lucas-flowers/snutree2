@@ -5,6 +5,8 @@ from snutree.model.tree import FamilyTreeConfig
 from snutree.reader.json import JsonReader
 from snutree.writer.dot import (
     DefaultAttributesConfig,
+    DefaultEdgeAttributesConfig,
+    DefaultNodeAttributesConfig,
     DotWriter,
     DotWriterConfig,
     DynamicNodeAttributesConfig,
@@ -35,7 +37,7 @@ __snutree__ = SnutreeApi[Semester, KeyedMember](
                 ),
             ),
             node=NodesConfig(
-                defaults=DefaultAttributesConfig(
+                defaults=DefaultNodeAttributesConfig(
                     root=dict(
                         shape="box",
                     ),
@@ -45,7 +47,7 @@ __snutree__ = SnutreeApi[Semester, KeyedMember](
                 ),
             ),
             edge=EdgesConfig(
-                defaults=DefaultAttributesConfig(
+                defaults=DefaultEdgeAttributesConfig(
                     root=dict(
                         arrowhead="none",
                     ),
