@@ -1,5 +1,6 @@
 import random
 from dataclasses import dataclass
+from enum import Enum, auto
 from functools import cached_property
 from operator import index
 from typing import (
@@ -9,6 +10,7 @@ from typing import (
     Protocol,
     Type,
     TypeVar,
+    Union,
     runtime_checkable,
 )
 
@@ -19,6 +21,11 @@ AnyRank_co = TypeVar("AnyRank_co", bound="Rank", covariant=True)
 
 
 M = TypeVar("M")
+
+
+class ParentKeyStatus(Enum):
+    UNKNOWN = auto()
+    NONE = auto()
 
 
 @runtime_checkable
@@ -32,7 +39,7 @@ class Rank(Protocol):
 
 @dataclass
 class Entity(Generic[AnyRank, M]):
-    parent_key: Optional[str]
+    parent_key: Union[str, ParentKeyStatus]
     key: str
     rank: AnyRank
     member: Optional[M]
@@ -75,7 +82,7 @@ class FamilyTree(Generic[AnyRank, M]):
         self._relationships = relationships
         for entity in entities:
             self._entities[entity.key] = entity
-            if entity.parent_key is not None:
+            if isinstance(entity.parent_key, str):
                 self._relationships.add((entity.parent_key, entity.key))
 
         self._digraph: DiGraph[str] = DiGraph()

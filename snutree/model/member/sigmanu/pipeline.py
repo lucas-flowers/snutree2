@@ -1,5 +1,5 @@
-from dataclasses import dataclass
-from typing import Iterable, Optional
+from dataclasses import dataclass, field
+from typing import Iterable, Optional, Union
 
 from pydantic.tools import parse_obj_as
 
@@ -10,7 +10,7 @@ from snutree.model.member.sigmanu.member import (
     SigmaNuMember,
 )
 from snutree.model.semester import Semester
-from snutree.model.tree import Entity
+from snutree.model.tree import Entity, ParentKeyStatus
 
 
 @dataclass
@@ -20,6 +20,7 @@ class SigmaNuParser:
     require_semester: bool
     last_candidate_key: int = 0
     last_brother_key: int = 0
+    root_member_badges: set[str] = field(default_factory=set)
 
     def parse(self, rows: Iterable[dict[str, str]]) -> Iterable[Entity[Semester, SigmaNuMember]]:
 
@@ -40,4 +41,12 @@ class SigmaNuParser:
                 else:
                     key = member.badge
 
-                yield Entity(member.big_badge, key, member.semester, member)
+                parent_key: Union[str, ParentKeyStatus]
+                if member.big_badge is not None:
+                    parent_key = member.big_badge
+                elif key in self.root_member_badges:
+                    parent_key = ParentKeyStatus.NONE
+                else:
+                    parent_key = ParentKeyStatus.UNKNOWN
+
+                yield Entity(parent_key, key, member.semester, member)

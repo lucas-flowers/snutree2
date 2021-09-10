@@ -1,6 +1,11 @@
 from dataclasses import dataclass
 
-from snutree.model.tree import Entity, FamilyTree, FamilyTreeConfig
+from snutree.model.tree import (
+    Entity,
+    FamilyTree,
+    FamilyTreeConfig,
+    ParentKeyStatus,
+)
 from snutree.tool.dot import Edge, Node
 from snutree.writer.dot import (
     DotWriter,
@@ -23,8 +28,8 @@ def test_write_family_tree() -> None:
         rank_type=int,
         entities=[
             Entity("50", "100", 2, BasicDotMember()),
-            Entity(None, "50", 1, BasicDotMember()),
-            Entity(None, "a", 1, None),
+            Entity(ParentKeyStatus.NONE, "50", 1, BasicDotMember()),
+            Entity(ParentKeyStatus.NONE, "a", 1, None),
         ],
         relationships={
             ("a", "50"),
