@@ -1,5 +1,6 @@
 import importlib
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from itertools import chain
 from pathlib import Path
 from typing import ClassVar, Generic, Iterable, Protocol, Type, TypeVar
 
@@ -40,6 +41,9 @@ class SnutreeApi(Generic[AnyRank, M]):
     tree_config: FamilyTreeConfig
     writer: Writer[AnyRank, M]
 
+    custom_entities: list[Entity[AnyRank, M]] = field(default_factory=list)
+    custom_relationships: set[tuple[str, str]] = field(default_factory=set)
+
     @classmethod
     def from_module_name(cls, module_name: str) -> "SnutreeApi[AnyRank, M]":
         module = importlib.import_module(module_name)
@@ -55,6 +59,11 @@ class SnutreeApi(Generic[AnyRank, M]):
 
         entities = self.parser.parse(rows)
 
-        tree = FamilyTree(self.rank_type, entities, set(), self.tree_config)
+        tree = FamilyTree(
+            rank_type=self.rank_type,
+            entities=chain(entities, self.custom_entities),
+            relationships=self.custom_relationships,
+            config=self.tree_config,
+        )
 
         return self.writer.write(tree)

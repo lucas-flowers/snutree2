@@ -5,7 +5,7 @@ from snutree.model.member.sigmanu.affiliation import ChapterId
 from snutree.model.member.sigmanu.member import SigmaNuMember
 from snutree.model.member.sigmanu.pipeline import SigmaNuParser
 from snutree.model.semester import Semester
-from snutree.model.tree import FamilyTreeConfig
+from snutree.model.tree import Entity, FamilyTreeConfig, ParentKeyStatus
 from snutree.reader.csv import CsvReader
 from snutree.reader.json import JsonReader
 from snutree.tool import x11
@@ -16,6 +16,7 @@ from snutree.writer.dot import (
     DefaultNodeAttributesConfig,
     DotWriter,
     DotWriterConfig,
+    DynamicEdgeAttributesConfig,
     DynamicNodeAttributesConfig,
     EdgesConfig,
     GraphsConfig,
@@ -63,6 +64,42 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
         default_chapter_id=ChapterId("Delta Alpha"),
         require_semester=False,
     ),
+    custom_entities=[
+        Entity(
+            parent_key=ParentKeyStatus.NONE,
+            key="reorganization",
+            rank=Semester("Spring 1989"),
+            member=None,
+        ),
+        Entity(
+            parent_key=ParentKeyStatus.NONE,
+            key="kappa-delta",
+            rank=Semester("Fall 1982"),
+            member=None,
+        ),
+    ],
+    custom_relationships={
+        # Connect ΔA 986 to his home chapter
+        ("kappa-delta", "986"),
+        # Connect refounders from the old chapter to Reorganization
+        ("reorganization", "1031"),
+        ("reorganization", "1034"),
+        ("reorganization", "1035"),
+        ("reorganization", "1036"),
+        ("reorganization", "1038"),
+        ("reorganization", "1039"),
+        ("reorganization", "1041"),
+        # Make Reorganization the "big" of the new refounders
+        ("reorganization", "1043"),
+        ("reorganization", "1044"),
+        ("reorganization", "1045"),
+        ("reorganization", "1046"),
+        ("reorganization", "1047"),
+        ("reorganization", "1048"),
+        ("reorganization", "1049"),
+        ("reorganization", "1050"),
+        ("reorganization", "1051"),
+    },
     tree_config=FamilyTreeConfig(),
     writer=DotWriter(
         DotWriterConfig(
@@ -114,6 +151,20 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
                     family=lambda family_id: {
                         "color": family_colors[family_id],
                     },
+                    by_key={
+                        "reorganization": dict(
+                            height=0.6,
+                            label="Reorganization",
+                            shape="oval",
+                        ),
+                        # The home chapter of ΔA 986, who transferred to CWRU from Duquesne
+                        "kappa-delta": dict(
+                            rank="Fall 1982",
+                            label="Kappa Delta Chapter\nDuquesne University",
+                            color="none",
+                            fillcolor="none",
+                        ),
+                    },
                 ),
             ),
             edge=EdgesConfig(
@@ -127,6 +178,17 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
                     rank=dict(
                         style="invis",
                     ),
+                ),
+                attributes=DynamicEdgeAttributesConfig(
+                    by_key={
+                        ("Reorganization", "1031"): dict(style="dashed"),
+                        ("Reorganization", "1034"): dict(style="dashed"),
+                        ("Reorganization", "1035"): dict(style="dashed"),
+                        ("Reorganization", "1036"): dict(style="dashed"),
+                        ("Reorganization", "1038"): dict(style="dashed"),
+                        ("Reorganization", "1039"): dict(style="dashed"),
+                        ("Reorganization", "1041"): dict(style="dashed"),
+                    }
                 ),
             ),
         ),

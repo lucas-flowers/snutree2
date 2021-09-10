@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from operator import index
-from typing import Callable, Generic, Optional, TypeVar
+from typing import Callable, Dict, Generic, Optional, TypeVar
 
 from snutree.model.semester import Semester
 from snutree.model.tree import AnyRank, Entity, FamilyTree
@@ -49,6 +49,12 @@ class DynamicNodeAttributesConfig(Generic[AnyRank, M]):
     entity: Callable[[Entity[AnyRank, M]], dict[str, Id]] = lambda _: {}
     member: Callable[[M], dict[str, Id]] = lambda _: {}
     family: Callable[[str], dict[str, Id]] = lambda _: {}
+    by_key: Dict[str, dict[str, Id]] = field(default_factory=dict)
+
+
+@dataclass
+class DynamicEdgeAttributesConfig:
+    by_key: Dict[tuple[str, str], dict[str, Id]] = field(default_factory=dict)
 
 
 @dataclass
@@ -67,6 +73,7 @@ class NodesConfig(Generic[AnyRank, M]):
 @dataclass
 class EdgesConfig:
     defaults: DefaultEdgeAttributesConfig = field(default_factory=DefaultEdgeAttributesConfig)
+    attributes: DynamicEdgeAttributesConfig = field(default_factory=DynamicEdgeAttributesConfig)
     custom: list[Edge] = field(default_factory=list)
 
 
@@ -180,6 +187,7 @@ class DotWriter(Generic[AnyRank, M]):
                 **(self.config.node.defaults.unknown if key in tree.unknowns else {}),
                 **(self.config.node.attributes.member(entity.member) if entity.member is not None else {}),
                 **(self.config.node.attributes.family(tree.families[key]) if key in tree.families else {}),
+                **self.config.node.attributes.by_key.get(key, {}),
             )
             for key, entity in tree.entities.items()
         ]
@@ -190,6 +198,7 @@ class DotWriter(Generic[AnyRank, M]):
                 parent_key,
                 child_key,
                 **(self.config.edge.defaults.unknown if parent_key in tree.unknowns else {}),
+                **self.config.edge.attributes.by_key.get((parent_key, child_key), {}),
             )
             for (parent_key, child_key) in tree.relationships
         ]
