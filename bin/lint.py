@@ -214,7 +214,8 @@ def run_linters(verbose: bool, fast: bool) -> int:
         if result is None:
             lines = ["🟡 Skipped"]
         elif verbose or result.returncode:
-            lines = [f"🔴 {line}" for line in chain(result.stdout.splitlines(), result.stderr.splitlines())]
+            raw_lines = list(chain(result.stdout.splitlines(), result.stderr.splitlines())) or ["Failed"]
+            lines = [f"🔴 {line}" for line in raw_lines]
             if result.returncode:
                 returncode = 1
         else:
