@@ -58,7 +58,7 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
         JsonReader(),
     ],
     parser=SigmaNuParser(
-        chapter_id=ChapterId("Delta Alpha"),
+        default_chapter_id=ChapterId("Delta Alpha"),
         require_semester=False,
     ),
     tree_config=FamilyTreeConfig(),

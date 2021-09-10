@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Iterable, Optional
 
 from pydantic.tools import parse_obj_as
 
@@ -16,15 +16,17 @@ from snutree.model.tree import Entity
 @dataclass
 class SigmaNuParser:
 
-    chapter_id: ChapterId
+    default_chapter_id: Optional[ChapterId]
     require_semester: bool
     last_candidate_key: int = 0
     last_brother_key: int = 0
 
     def parse(self, rows: Iterable[dict[str, str]]) -> Iterable[Entity[Semester, SigmaNuMember]]:
 
+        default_chapter_column = {"chapter": self.default_chapter_id} if self.default_chapter_id is not None else {}
+
         for row in rows:
-            obj: dict[str, object] = {"chapter": self.chapter_id, **row}
+            obj: dict[str, object] = {**default_chapter_column, **row}
             if self.require_semester or obj.get("semester"):
 
                 member: SigmaNuMember = parse_obj_as(SigmaNuMember, obj)  # type: ignore[arg-type]
