@@ -18,11 +18,10 @@ class SigmaNuParser:
 
     chapter_id: ChapterId
     require_semester: bool
+    last_candidate_key: int = 0
+    last_brother_key: int = 0
 
     def parse(self, rows: Iterable[dict[str, str]]) -> Iterable[Entity[Semester, SigmaNuMember]]:
-
-        last_candidate_key = 0
-        last_brother_key = 0
 
         for row in rows:
             obj: dict[str, object] = {"chapter": self.chapter_id, **row}
@@ -31,11 +30,11 @@ class SigmaNuParser:
                 member: SigmaNuMember = parse_obj_as(SigmaNuMember, obj)  # type: ignore[arg-type]
 
                 if isinstance(member, Candidate):
-                    last_candidate_key += 1
-                    key = f"candidate{last_candidate_key}"
+                    self.last_candidate_key += 1
+                    key = f"candidate{self.last_candidate_key}"
                 elif isinstance(member, Brother):
-                    last_brother_key += 1
-                    key = f"brother{last_brother_key}"
+                    self.last_brother_key += 1
+                    key = f"brother{self.last_brother_key}"
                 else:
                     key = member.badge
 
