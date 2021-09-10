@@ -1,11 +1,6 @@
 from dataclasses import dataclass
 
-from snutree.model.tree import (
-    FamilyTree,
-    FamilyTreeConfig,
-    Member,
-    RankedEntity,
-)
+from snutree.model.tree import Entity, FamilyTree, FamilyTreeConfig
 from snutree.tool.dot import Edge, Node
 from snutree.writer.dot import (
     DotWriter,
@@ -18,27 +13,21 @@ from tests.conftest import trim
 
 
 @dataclass
-class BasicDotComponent:
-    pass
-
-
-@dataclass
-class BasicDotMember(BasicDotComponent, Member):
+class BasicDotMember:
     pass
 
 
 def test_write_family_tree() -> None:
 
-    tree = FamilyTree[BasicDotComponent, None, int](
+    tree = FamilyTree[int, BasicDotMember](
         rank_type=int,
-        ranked_entities={
-            "100": RankedEntity(2, BasicDotMember()),
-            "50": RankedEntity(1, BasicDotMember()),
-            "a": RankedEntity(1, BasicDotComponent()),
-        },
+        entities=[
+            Entity("50", "100", 2, BasicDotMember()),
+            Entity(None, "50", 1, BasicDotMember()),
+            Entity(None, "a", 1, None),
+        ],
         relationships={
-            ("a", "50"): None,
-            ("50", "100"): None,
+            ("a", "50"),
         },
         config=FamilyTreeConfig(
             rank_min_offset=-1,
@@ -47,7 +36,7 @@ def test_write_family_tree() -> None:
     )
 
     writer = DotWriter(
-        DotWriterConfig[BasicDotComponent, None, int](
+        DotWriterConfig[int, BasicDotMember](
             edge=EdgesConfig(
                 custom=[Edge("i", "ii")],
             ),
@@ -74,10 +63,10 @@ def test_write_family_tree() -> None:
                 "ranks-left:1" -> "ranks-left:2";
                 "ranks-left:2" -> "ranks-left:3";
             }
-            subgraph "members" {
+            subgraph "entities" {
                 "100" [label="test"];
                 "50" [label="test"];
-                "a" [label="test"];
+                "a";
                 "i";
                 "ii";
                 "50" -> "100";

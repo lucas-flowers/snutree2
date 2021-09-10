@@ -3,10 +3,7 @@ from collections import defaultdict, deque
 from snutree.api import SnutreeApi
 from snutree.model.member.sigmanu.affiliation import ChapterId
 from snutree.model.member.sigmanu.member import SigmaNuMember
-from snutree.model.member.sigmanu.pipeline import (
-    SigmaNuAssembler,
-    SigmaNuParser,
-)
+from snutree.model.member.sigmanu.pipeline import SigmaNuParser
 from snutree.model.semester import Semester
 from snutree.model.tree import FamilyTreeConfig
 from snutree.reader.csv import CsvReader
@@ -54,7 +51,8 @@ family_colors = defaultdict(
     },
 )
 
-__snutree__ = SnutreeApi[SigmaNuMember, None, Semester](
+__snutree__ = SnutreeApi[Semester, SigmaNuMember](
+    rank_type=Semester,
     readers=[
         CsvReader(),
         JsonReader(),
@@ -63,7 +61,6 @@ __snutree__ = SnutreeApi[SigmaNuMember, None, Semester](
         chapter_id=ChapterId("Delta Alpha"),
         require_semester=False,
     ),
-    assembler=SigmaNuAssembler(),
     tree_config=FamilyTreeConfig(),
     writer=DotWriter(
         DotWriterConfig(
@@ -91,7 +88,7 @@ __snutree__ = SnutreeApi[SigmaNuMember, None, Semester](
                         width=1.63,
                         fontname="dejavu sans",
                     ),
-                    member=dict(
+                    entity=dict(
                         fillcolor=".11 .71 1.",
                     ),
                     rank=dict(

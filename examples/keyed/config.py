@@ -1,9 +1,5 @@
 from snutree.api import SnutreeApi
-from snutree.model.member.keyed import (
-    KeyedMember,
-    KeyedMemberAssembler,
-    KeyedMemberParser,
-)
+from snutree.model.member.keyed import KeyedMember, KeyedMemberParser
 from snutree.model.semester import Semester
 from snutree.model.tree import FamilyTreeConfig
 from snutree.reader.json import JsonReader
@@ -17,12 +13,12 @@ from snutree.writer.dot import (
     NodesConfig,
 )
 
-__snutree__ = SnutreeApi[KeyedMember, None, Semester](
+__snutree__ = SnutreeApi[Semester, KeyedMember](
+    rank_type=Semester,
     readers=[
         JsonReader(),
     ],
     parser=KeyedMemberParser(),
-    assembler=KeyedMemberAssembler(),
     tree_config=FamilyTreeConfig(
         seed="23",
     ),

@@ -4,6 +4,7 @@ from functools import cached_property
 from operator import index
 from typing import (
     Generic,
+    Iterable,
     Optional,
     Protocol,
     Type,
@@ -14,8 +15,10 @@ from typing import (
 from networkx import DiGraph, weakly_connected_components
 
 AnyRank = TypeVar("AnyRank", bound="Rank")
-E = TypeVar("E")
-R = TypeVar("R")
+AnyRank_co = TypeVar("AnyRank_co", bound="Rank", covariant=True)
+
+
+M = TypeVar("M")
 
 
 @runtime_checkable
@@ -28,14 +31,11 @@ class Rank(Protocol):
 
 
 @dataclass
-class RankedEntity(Generic[AnyRank, E]):
+class Entity(Generic[AnyRank, M]):
+    parent_key: Optional[str]
+    key: str
     rank: AnyRank
-    entity: E
-
-
-@dataclass
-class Member:
-    pass
+    member: Optional[M]
 
 
 @dataclass
@@ -52,7 +52,7 @@ class FamilyTreeConfig:
             raise NotImplementedError("negative maximum rank offsets (i.e., entity filtering by rank) not implemented")
 
 
-class FamilyTree(Generic[E, R, AnyRank]):
+class FamilyTree(Generic[AnyRank, M]):
     """
     A tree.
     """
@@ -60,24 +60,30 @@ class FamilyTree(Generic[E, R, AnyRank]):
     def __init__(
         self,
         rank_type: Type[AnyRank],
-        ranked_entities: dict[str, RankedEntity[AnyRank, E]],
-        relationships: dict[tuple[str, str], R],
+        entities: Iterable[Entity[AnyRank, M]],
+        relationships: set[tuple[str, str]],
         config: Optional[FamilyTreeConfig] = None,
     ) -> None:
+
+        # TODO Verify identifiers
+        # TODO Pass members directly?
 
         self.rank_type = rank_type
         self.config = config or FamilyTreeConfig()
 
-        self._entities: dict[str, E] = {key: ranked_entity.entity for key, ranked_entity in ranked_entities.items()}
-        self._ranks: dict[str, AnyRank] = {key: ranked_entity.rank for key, ranked_entity in ranked_entities.items()}
+        self._entities: dict[str, Entity[AnyRank, M]] = {}
         self._relationships = relationships
+        for entity in entities:
+            self._entities[entity.key] = entity
+            if entity.parent_key is not None:
+                self._relationships.add((entity.parent_key, entity.key))
 
         self._digraph: DiGraph[str] = DiGraph()
-        self._digraph.add_nodes_from(ranked_entities.keys())
-        self._digraph.add_edges_from(self._relationships.keys())
+        self._digraph.add_nodes_from(self._entities.keys())
+        self._digraph.add_edges_from(self._relationships)
 
         self._member_digraph = self._digraph.subgraph(
-            entity_id for entity_id in self._digraph.nodes if isinstance(self._entities[entity_id], Member)
+            entity.key for entity in self._entities.values() if entity.member is not None
         )
 
     @cached_property
@@ -97,7 +103,7 @@ class FamilyTree(Generic[E, R, AnyRank]):
         return families
 
     @cached_property
-    def entities(self) -> dict[str, E]:
+    def entities(self) -> dict[str, Entity[AnyRank, M]]:
         """
         Return a dict of entity_ids for this tree, sorted consistently.
         """
@@ -106,15 +112,12 @@ class FamilyTree(Generic[E, R, AnyRank]):
         return {key: self._entities[key] for component in components for key in sorted(component)}
 
     @cached_property
-    def relationships(self) -> dict[tuple[str, str], R]:
+    def relationships(self) -> list[tuple[str, str]]:
         """
         Return a sorted list of relationship_ids (tuples of parent entity ID
         and child entity ID) for this tree.
         """
-        return {
-            (parent_id, child_id): self._relationships[(parent_id, child_id)]
-            for parent_id, child_id in sorted(self._digraph.edges())
-        }
+        return list(sorted(self._digraph.edges()))
 
     @cached_property
     def cohorts(self) -> dict[AnyRank, set[str]]:
@@ -123,10 +126,10 @@ class FamilyTree(Generic[E, R, AnyRank]):
         """
 
         unsorted_cohorts: dict[Rank, set[str]] = {}
-        for entity_id, rank in self._ranks.items():
-            if rank not in unsorted_cohorts:
-                unsorted_cohorts[rank] = set()
-            unsorted_cohorts[rank].add(entity_id)
+        for entity_id, entity in self.entities.items():
+            if entity.rank not in unsorted_cohorts:
+                unsorted_cohorts[entity.rank] = set()
+            unsorted_cohorts[entity.rank].add(entity_id)
 
         return {rank: unsorted_cohorts.get(rank) or set() for rank in self.ranks}
 
@@ -136,12 +139,13 @@ class FamilyTree(Generic[E, R, AnyRank]):
         Return a list of all the ranks of the tree, in order.
         """
 
-        if len(self.entities) == 0:
+        if len(self._entities) == 0:
             return []
 
-        initial_rank = next(iter(self._ranks.values()))
+        initial_rank = next(iter(self._entities.values())).rank
         min_rank, max_rank = initial_rank, initial_rank
-        for rank in self._ranks.values():
+        for entity in self._entities.values():
+            rank = entity.rank
             if index(rank) < index(min_rank):
                 min_rank = rank
             if index(rank) > index(max_rank):

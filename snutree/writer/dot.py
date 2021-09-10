@@ -3,7 +3,7 @@ from operator import index
 from typing import Callable, Generic, Optional, TypeVar
 
 from snutree.model.semester import Semester
-from snutree.model.tree import AnyRank, FamilyTree
+from snutree.model.tree import AnyRank, Entity, FamilyTree
 from snutree.tool.dot import (
     Attribute,
     Digraph,
@@ -14,14 +14,13 @@ from snutree.tool.dot import (
     Subgraph,
 )
 
-E = TypeVar("E")
-R = TypeVar("R")
+M = TypeVar("M")
 
 
 @dataclass
 class NamesConfig:
     root = "family-tree"
-    members = "members"
+    entities = "entities"
     ranks = "ranks"
     ranks_left = "ranks-left"
     ranks_right = "ranks-right"
@@ -30,14 +29,15 @@ class NamesConfig:
 @dataclass
 class DefaultAttributesConfig:
     root: dict[str, Id] = field(default_factory=dict)
-    member: dict[str, Id] = field(default_factory=dict)
+    entity: dict[str, Id] = field(default_factory=dict)
     rank: dict[str, Id] = field(default_factory=dict)
 
 
 @dataclass
-class DynamicNodeAttributesConfig(Generic[AnyRank, E]):
-    member: Callable[[E], dict[str, Id]] = lambda _: {}
+class DynamicNodeAttributesConfig(Generic[AnyRank, M]):
     rank: Callable[[AnyRank], dict[str, Id]] = lambda _: {}
+    entity: Callable[[Entity[AnyRank, M]], dict[str, Id]] = lambda _: {}
+    member: Callable[[M], dict[str, Id]] = lambda _: {}
     family: Callable[[str], dict[str, Id]] = lambda _: {}
 
 
@@ -48,35 +48,35 @@ class GraphsConfig:
 
 
 @dataclass
-class NodesConfig(Generic[AnyRank, E]):
+class NodesConfig(Generic[AnyRank, M]):
     defaults: DefaultAttributesConfig = field(default_factory=DefaultAttributesConfig)
-    attributes: DynamicNodeAttributesConfig[AnyRank, E] = field(default_factory=DynamicNodeAttributesConfig)
+    attributes: DynamicNodeAttributesConfig[AnyRank, M] = field(default_factory=DynamicNodeAttributesConfig)
     custom: list[Node] = field(default_factory=list)
 
 
 @dataclass
-class EdgesConfig(Generic[R]):
+class EdgesConfig:
     defaults: DefaultAttributesConfig = field(default_factory=DefaultAttributesConfig)
     custom: list[Edge] = field(default_factory=list)
 
 
 @dataclass
-class DotWriterConfig(Generic[E, R, AnyRank]):
+class DotWriterConfig(Generic[AnyRank, M]):
     draw_ranks: bool = True
     graph: GraphsConfig = field(default_factory=GraphsConfig)
-    node: NodesConfig[AnyRank, E] = field(default_factory=NodesConfig)
-    edge: EdgesConfig[R] = field(default_factory=EdgesConfig)
+    node: NodesConfig[AnyRank, M] = field(default_factory=NodesConfig)
+    edge: EdgesConfig = field(default_factory=EdgesConfig)
 
 
 @dataclass
-class DotWriter(Generic[E, R, AnyRank]):
+class DotWriter(Generic[AnyRank, M]):
 
-    config: DotWriterConfig[E, R, AnyRank] = field(default_factory=DotWriterConfig)
+    config: DotWriterConfig[AnyRank, M] = field(default_factory=DotWriterConfig)
 
-    def write(self, tree: FamilyTree[E, R, AnyRank]) -> str:
+    def write(self, tree: FamilyTree[AnyRank, M]) -> str:
         return str(self.write_family_tree(tree))
 
-    def write_family_tree(self, tree: FamilyTree[E, R, AnyRank]) -> Graph:
+    def write_family_tree(self, tree: FamilyTree[AnyRank, M]) -> Graph:
 
         ranks: Optional[list[AnyRank]]
         cohorts: Optional[dict[AnyRank, set[str]]]
@@ -93,7 +93,7 @@ class DotWriter(Generic[E, R, AnyRank]):
             self.write_node_defaults(self.config.node.defaults.root),
             self.write_edge_defaults(self.config.edge.defaults.root),
             self.write_ranks(self.config.graph.names.ranks_left, ranks),
-            self.write_members(self.config.graph.names.members, tree),
+            self.write_entities(self.config.graph.names.entities, tree),
             self.write_ranks(self.config.graph.names.ranks_right, ranks),
             self.write_cohorts(cohorts),
         )
@@ -150,34 +150,35 @@ class DotWriter(Generic[E, R, AnyRank]):
             suffix = str(index(rank))
         return f"{prefix}:{suffix}"
 
-    def write_members(self, graph_id: str, tree: FamilyTree[E, R, AnyRank]) -> Subgraph:
+    def write_entities(self, graph_id: str, tree: FamilyTree[AnyRank, M]) -> Subgraph:
         return Subgraph(
             graph_id,
-            *self.write_graph_defaults(self.config.graph.defaults.member),
-            self.write_node_defaults(self.config.node.defaults.member),
-            self.write_edge_defaults(self.config.edge.defaults.member),
-            *self.write_nodes(tree.entities, tree.families),
+            *self.write_graph_defaults(self.config.graph.defaults.entity),
+            self.write_node_defaults(self.config.node.defaults.entity),
+            self.write_edge_defaults(self.config.edge.defaults.entity),
+            *self.write_nodes(tree),
             *self.config.node.custom,
             *self.write_edges(tree.relationships),
             *self.config.edge.custom,
         )
 
-    def write_nodes(self, entities: dict[str, E], families: dict[str, str]) -> list[Node]:
+    def write_nodes(self, tree: FamilyTree[AnyRank, M]) -> list[Node]:
         return [
             Node(
-                entity_id,
-                **self.config.node.attributes.member(entity),
-                **(self.config.node.attributes.family(families[entity_id]) if entity_id in families else {}),
+                entity.key,
+                **self.config.node.attributes.entity(entity),
+                **(self.config.node.attributes.member(entity.member) if entity.member is not None else {}),
+                **(self.config.node.attributes.family(tree.families[key]) if key in tree.families else {}),
             )
-            for entity_id, entity in entities.items()
+            for key, entity in tree.entities.items()
         ]
 
-    def write_edges(self, relationships: dict[tuple[str, str], R]) -> list[Edge]:
+    def write_edges(self, relationships: list[tuple[str, str]]) -> list[Edge]:
         return [
             Edge(
-                *relationship_id,
+                *relationship,
             )
-            for relationship_id, relationship in relationships.items()
+            for relationship in relationships
         ]
 
     def write_cohort(self, rank: AnyRank, cohort: set[str]) -> Subgraph:

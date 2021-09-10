@@ -4,7 +4,7 @@ digraph "family-tree" {
     ratio="compress";
     node [shape="box"];
     edge [arrowhead="none"];
-    subgraph "members" {
+    subgraph "entities" {
         "14" [label="Deborah Reeves"];
         "230" [label="Rachel Williams"];
         "43" [label="Robert Fisher"];

@@ -279,7 +279,7 @@ digraph "family-tree" {
         "ranks-left:fall2015" -> "ranks-left:spring2016";
         "ranks-left:spring2016" -> "ranks-left:fall2016";
     }
-    subgraph "members" {
+    subgraph "entities" {
         node [fillcolor=".11 .71 1."];
         "1044" [label="Vin Tangpricha\nΔΑ 1044",color="orangered4"];
         "1058" [label="Ruben Garcia\nΔΑ 1058",color="orangered4"];

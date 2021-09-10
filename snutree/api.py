@@ -1,13 +1,11 @@
 import importlib
 from dataclasses import dataclass
 from pathlib import Path
-from typing import ClassVar, Generic, Iterable, Protocol, TypeVar
+from typing import ClassVar, Generic, Iterable, Protocol, Type, TypeVar
 
-from snutree.model.tree import AnyRank, FamilyTree, FamilyTreeConfig
+from snutree.model.tree import AnyRank, Entity, FamilyTree, FamilyTreeConfig
 
-E_co = TypeVar("E_co", covariant=True)
-E = TypeVar("E")
-R = TypeVar("R")
+M = TypeVar("M")
 
 
 class Reader(Protocol):
@@ -18,18 +16,13 @@ class Reader(Protocol):
         ...
 
 
-class Parser(Protocol[E_co]):
-    def parse(self, rows: Iterable[dict[str, str]]) -> Iterable[E_co]:
+class Parser(Protocol[AnyRank, M]):
+    def parse(self, rows: Iterable[dict[str, str]]) -> Iterable[Entity[AnyRank, M]]:
         ...
 
 
-class Assembler(Protocol[E, R, AnyRank]):
-    def assemble(self, tree_config: FamilyTreeConfig, members: Iterable[E]) -> FamilyTree[E, R, AnyRank]:
-        ...
-
-
-class Writer(Protocol[E, R, AnyRank]):
-    def write(self, tree: FamilyTree[E, R, AnyRank]) -> str:
+class Writer(Protocol[AnyRank, M]):
+    def write(self, tree: FamilyTree[AnyRank, M]) -> str:
         ...
 
 
@@ -39,16 +32,16 @@ class SnutreeApiProtocol(Protocol):
 
 
 @dataclass
-class SnutreeApi(Generic[E, R, AnyRank]):
+class SnutreeApi(Generic[AnyRank, M]):
 
+    rank_type: Type[AnyRank]
     readers: list[Reader]
-    parser: Parser[E]
-    assembler: Assembler[E, R, AnyRank]
+    parser: Parser[AnyRank, M]
     tree_config: FamilyTreeConfig
-    writer: Writer[E, R, AnyRank]
+    writer: Writer[AnyRank, M]
 
     @classmethod
-    def from_module_name(cls, module_name: str) -> "SnutreeApi[E, R, AnyRank]":
+    def from_module_name(cls, module_name: str) -> "SnutreeApi[AnyRank, M]":
         module = importlib.import_module(module_name)
         api: object = getattr(module, "__snutree__")
         assert isinstance(api, SnutreeApi)
@@ -60,7 +53,8 @@ class SnutreeApi(Generic[E, R, AnyRank]):
 
         rows = (row for input_path in input_paths for row in readers[input_path.suffix].read(input_path))
 
-        members = self.parser.parse(rows)
-        tree = self.assembler.assemble(self.tree_config, members)
+        entities = self.parser.parse(rows)
+
+        tree = FamilyTree(self.rank_type, entities, set(), self.tree_config)
 
         return self.writer.write(tree)
