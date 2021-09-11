@@ -48,7 +48,7 @@ class Entity(Generic[AnyRank, M]):
 @dataclass
 class FamilyTreeConfig:
 
-    seed: str = "12345"
+    seed: int = 0
     include_unknowns: bool = True
 
     unknown_offset: int = 1
@@ -83,17 +83,24 @@ class FamilyTree(Generic[AnyRank, M]):
         self.rank_type = rank_type
         self.config = config or FamilyTreeConfig()
 
-        self.unknowns: set[str] = set()
+        self._digraph: DiGraph[str] = DiGraph()
+
         self._entities: dict[str, Entity[AnyRank, M]] = {}
-        self._relationships = relationships
         for entity in entities:
-
             self._entities[entity.key] = entity
-
-            parent_key: Optional[str]
             if isinstance(entity.parent_key, str):
-                parent_key = entity.parent_key
-            elif entity.parent_key == ParentKeyStatus.UNKNOWN and self.config.include_unknowns:
+                self._digraph.add_edge(entity.parent_key, entity.key)
+
+        self._digraph.add_edges_from(relationships)
+        self._digraph.add_nodes_from(self._entities.keys())
+
+        self.unknowns: set[str] = set()
+        for entity in list(self._entities.values()):
+            if (
+                self.config.include_unknowns
+                and entity.parent_key == ParentKeyStatus.UNKNOWN
+                and self._digraph.in_degree(entity.key) == 0
+            ):
                 parent_key = f"{entity.key}:parent"
                 self.unknowns.add(parent_key)
                 self._entities[parent_key] = Entity(
@@ -102,15 +109,7 @@ class FamilyTree(Generic[AnyRank, M]):
                     member=None,
                     rank=self.rank_type(index(entity.rank) - self.config.unknown_offset),
                 )
-            else:
-                parent_key = None
-
-            if parent_key:
-                self._relationships.add((parent_key, entity.key))
-
-        self._digraph: DiGraph[str] = DiGraph()
-        self._digraph.add_nodes_from(self._entities.keys())
-        self._digraph.add_edges_from(self._relationships)
+                self._digraph.add_edge(parent_key, entity.key)
 
         self._member_digraph = self._digraph.subgraph(
             entity.key for entity in self._entities.values() if entity.member is not None

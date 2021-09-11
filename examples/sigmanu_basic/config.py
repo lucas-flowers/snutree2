@@ -100,7 +100,10 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
         ("reorganization", "1050"),
         ("reorganization", "1051"),
     },
-    tree_config=FamilyTreeConfig(),
+    tree_config=FamilyTreeConfig(
+        seed=6584,
+        rank_max_offset=1,
+    ),
     writer=DotWriter(
         DotWriterConfig(
             graph=GraphsConfig(

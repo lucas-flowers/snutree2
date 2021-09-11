@@ -22,7 +22,7 @@ __snutree__ = SnutreeApi[Semester, KeyedMember](
     ],
     parser=KeyedMemberParser(),
     tree_config=FamilyTreeConfig(
-        seed="23",
+        seed=23,
     ),
     writer=DotWriter(
         config=DotWriterConfig(
