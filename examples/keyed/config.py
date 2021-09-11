@@ -41,6 +41,9 @@ __snutree__ = SnutreeApi[Semester, KeyedMember](
                     root=dict(
                         shape="box",
                     ),
+                    unknown=dict(
+                        style="invis",
+                    ),
                 ),
                 attributes=DynamicNodeAttributesConfig(
                     member=lambda member: {"label": member.name},
