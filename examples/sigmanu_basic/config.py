@@ -73,6 +73,13 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
         ),
         Entity(
             parent_key=ParentKeyStatus.NONE,
+            key="spacer",
+            rank=Semester("Spring 1989"),
+            member=None,
+        ),
+        # The home chapter of ΔA 986, who transferred to CWRU from Duquesne
+        Entity(
+            parent_key=ParentKeyStatus.NONE,
             key="kappa-delta",
             rank=Semester("Fall 1982"),
             member=None,
@@ -160,7 +167,11 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
                             label="Reorganization",
                             shape="oval",
                         ),
-                        # The home chapter of ΔA 986, who transferred to CWRU from Duquesne
+                        "spacer": dict(
+                            height=1.5,
+                            style="invis",
+                            width=0,
+                        ),
                         "kappa-delta": dict(
                             rank="Fall 1982",
                             label="Kappa Delta Chapter\nDuquesne University",
@@ -184,13 +195,13 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
                 ),
                 attributes=DynamicEdgeAttributesConfig(
                     by_key={
-                        ("Reorganization", "1031"): dict(style="dashed"),
-                        ("Reorganization", "1034"): dict(style="dashed"),
-                        ("Reorganization", "1035"): dict(style="dashed"),
-                        ("Reorganization", "1036"): dict(style="dashed"),
-                        ("Reorganization", "1038"): dict(style="dashed"),
-                        ("Reorganization", "1039"): dict(style="dashed"),
-                        ("Reorganization", "1041"): dict(style="dashed"),
+                        ("reorganization", "1031"): dict(style="dashed"),
+                        ("reorganization", "1034"): dict(style="dashed"),
+                        ("reorganization", "1035"): dict(style="dashed"),
+                        ("reorganization", "1036"): dict(style="dashed"),
+                        ("reorganization", "1038"): dict(style="dashed"),
+                        ("reorganization", "1039"): dict(style="dashed"),
+                        ("reorganization", "1041"): dict(style="dashed"),
                     }
                 ),
             ),
