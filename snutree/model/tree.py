@@ -15,7 +15,6 @@ from typing import (
 )
 
 from networkx import DiGraph, weakly_connected_components
-from networkx.algorithms.operators.all import compose_all
 
 AnyRank = TypeVar("AnyRank", bound="Rank")
 AnyRank_co = TypeVar("AnyRank_co", bound="Rank", covariant=True)
@@ -91,44 +90,40 @@ class FamilyTree(Generic[AnyRank, M]):
         self.rank_type = rank_type
         self.config = config or FamilyTreeConfig()
 
-        # Will store all entities, whether they are used or not
-        self._entities: dict[str, Entity[AnyRank, M]] = {entity.key: entity for entity in entities}
-        for entity in entities:
-            if entity.parent_key == ParentKeyStatus.UNKNOWN:
-                parent_key = f"{entity.key} Parent"
-                self._entities[parent_key] = UnknownEntity(
+        self.lookup = {
+            **{entity.key: entity for entity in entities},
+            **{
+                (parent_key := f"{entity.key} Parent"): UnknownEntity(
                     parent_key=ParentKeyStatus.NONE,
                     key=parent_key,
                     member=None,
                     rank=self.rank_type(index(entity.rank) - self.config.unknown_offset),
                 )
+                for entity in entities
+                if entity.parent_key == ParentKeyStatus.UNKNOWN
+            },
+        }
 
         # All entities that either have relationships, or are known to have no
         # parents. These entities are always drawn on the tree unless rank
         # filtering is in place.
-        main_graph: DiGraph[str] = DiGraph()
-        main_graph.add_edges_from(relationships)
+        graph: DiGraph[str] = DiGraph()
+        graph.add_edges_from(relationships)
         for entity in entities:
             if entity.parent_key == ParentKeyStatus.NONE:
-                main_graph.add_node(entity.key)
+                graph.add_node(entity.key)
             elif entity.parent_key == ParentKeyStatus.UNKNOWN:
                 pass
             else:
                 assert isinstance(entity.parent_key, str)
-                main_graph.add_edge(entity.parent_key, entity.key)
+                graph.add_edge(entity.parent_key, entity.key)
 
-        # All entities that have unknown parents and no children
-        singleton_graph: DiGraph[str] = DiGraph()
-        singleton_graph.add_nodes_from(entity.key for entity in entities if entity.key not in main_graph)
+        if self.config.include_singletons:
+            graph.add_nodes_from(entity.key for entity in entities if entity.key not in graph)
 
-        subgraphs = [
-            main_graph,
-            singleton_graph if self.config.include_singletons else None,
-        ]
-        graph = compose_all(subgraph for subgraph in subgraphs if subgraph is not None)
         unknowns: set[str] = set()
         for key, in_degree in list(graph.in_degree()):
-            if self._entities[key].parent_key == ParentKeyStatus.UNKNOWN and in_degree == 0:
+            if self.lookup[key].parent_key == ParentKeyStatus.UNKNOWN and in_degree == 0:
                 parent_key = f"{key} Parent"
                 unknowns.add(parent_key)
                 graph.add_edge(parent_key, key)
@@ -160,7 +155,7 @@ class FamilyTree(Generic[AnyRank, M]):
         """
         components = sorted(weakly_connected_components(self._digraph), key=min)
         random.Random(self.config.seed).shuffle(components)
-        return {key: self._entities[key] for component in components for key in sorted(component)}
+        return {key: self.lookup[key] for component in components for key in sorted(component)}
 
     @cached_property
     def relationships(self) -> list[tuple[str, str]]:
@@ -190,12 +185,12 @@ class FamilyTree(Generic[AnyRank, M]):
         Return a list of all the ranks of the tree, in order.
         """
 
-        if len(self._entities) == 0:
+        if len(self.lookup) == 0:
             return []
 
-        initial_rank = next(iter(self._entities.values())).rank
+        initial_rank = next(iter(self.lookup.values())).rank
         min_rank, max_rank = initial_rank, initial_rank
-        for entity in self._entities.values():
+        for entity in self.lookup.values():
             rank = entity.rank
             if index(rank) < index(min_rank):
                 min_rank = rank
