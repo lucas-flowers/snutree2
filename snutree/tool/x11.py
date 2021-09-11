@@ -25,7 +25,6 @@ COLORS = [
     "slategray",
     "purple2",
     "peachpuff",
-    "lightsteelblue",
     "palegreen4",
     "pink3",
     "burlywood3",
@@ -370,4 +369,5 @@ COLORS = [
     "orange",
     "mediumturquoise",
     "palegreen2",
+    "lightsteelblue",
 ]

@@ -58,17 +58,17 @@ def test_write_family_tree() -> None:
 
     expected = trim(
         """
-        digraph "family-tree" {
-            subgraph "ranks-left" {
-                "ranks-left:0";
-                "ranks-left:1";
-                "ranks-left:2";
-                "ranks-left:3";
-                "ranks-left:0" -> "ranks-left:1";
-                "ranks-left:1" -> "ranks-left:2";
-                "ranks-left:2" -> "ranks-left:3";
+        digraph "family_tree" {
+            subgraph "datesL" {
+                "0L";
+                "1L";
+                "2L";
+                "3L";
+                "0L" -> "1L";
+                "1L" -> "2L";
+                "2L" -> "3L";
             }
-            subgraph "entities" {
+            subgraph "members" {
                 "100" [label="test"];
                 "50" [label="test"];
                 "a";
@@ -78,38 +78,38 @@ def test_write_family_tree() -> None:
                 "a" -> "50";
                 "i" -> "ii";
             }
-            subgraph "ranks-right" {
-                "ranks-right:0";
-                "ranks-right:1";
-                "ranks-right:2";
-                "ranks-right:3";
-                "ranks-right:0" -> "ranks-right:1";
-                "ranks-right:1" -> "ranks-right:2";
-                "ranks-right:2" -> "ranks-right:3";
+            subgraph "datesR" {
+                "0R";
+                "1R";
+                "2R";
+                "3R";
+                "0R" -> "1R";
+                "1R" -> "2R";
+                "2R" -> "3R";
             }
             subgraph "ranks" {
                 subgraph {
                     rank="same";
-                    "ranks-left:0";
-                    "ranks-right:0";
+                    "0L";
+                    "0R";
                 }
                 subgraph {
                     rank="same";
-                    "ranks-left:1";
-                    "ranks-right:1";
+                    "1L";
+                    "1R";
                     "50";
                     "a";
                 }
                 subgraph {
                     rank="same";
-                    "ranks-left:2";
-                    "ranks-right:2";
+                    "2L";
+                    "2R";
                     "100";
                 }
                 subgraph {
                     rank="same";
-                    "ranks-left:3";
-                    "ranks-right:3";
+                    "3L";
+                    "3R";
                 }
             }
         }

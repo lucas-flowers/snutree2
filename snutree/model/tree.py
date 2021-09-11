@@ -101,7 +101,7 @@ class FamilyTree(Generic[AnyRank, M]):
                 and entity.parent_key == ParentKeyStatus.UNKNOWN
                 and self._digraph.in_degree(entity.key) == 0
             ):
-                parent_key = f"{entity.key}:parent"
+                parent_key = f"{entity.key} Parent"
                 self.unknowns.add(parent_key)
                 self._entities[parent_key] = Entity(
                     parent_key=ParentKeyStatus.NONE,

@@ -67,45 +67,45 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
     custom_entities=[
         Entity(
             parent_key=ParentKeyStatus.NONE,
-            key="reorganization",
+            key="Reorganization",
             rank=Semester("Spring 1989"),
             member=None,
         ),
         Entity(
             parent_key=ParentKeyStatus.NONE,
-            key="spacer",
+            key="Spacer",
             rank=Semester("Spring 1989"),
             member=None,
         ),
         # The home chapter of ΔA 986, who transferred to CWRU from Duquesne
         Entity(
             parent_key=ParentKeyStatus.NONE,
-            key="kappa-delta",
+            key="Kappa Delta",
             rank=Semester("Fall 1982"),
             member=None,
         ),
     ],
     custom_relationships={
         # Connect ΔA 986 to his home chapter
-        ("kappa-delta", "986"),
+        ("Kappa Delta", "986"),
         # Connect refounders from the old chapter to Reorganization
-        ("reorganization", "1031"),
-        ("reorganization", "1034"),
-        ("reorganization", "1035"),
-        ("reorganization", "1036"),
-        ("reorganization", "1038"),
-        ("reorganization", "1039"),
-        ("reorganization", "1041"),
+        ("Reorganization", "1031"),
+        ("Reorganization", "1034"),
+        ("Reorganization", "1035"),
+        ("Reorganization", "1036"),
+        ("Reorganization", "1038"),
+        ("Reorganization", "1039"),
+        ("Reorganization", "1041"),
         # Make Reorganization the "big" of the new refounders
-        ("reorganization", "1043"),
-        ("reorganization", "1044"),
-        ("reorganization", "1045"),
-        ("reorganization", "1046"),
-        ("reorganization", "1047"),
-        ("reorganization", "1048"),
-        ("reorganization", "1049"),
-        ("reorganization", "1050"),
-        ("reorganization", "1051"),
+        ("Reorganization", "1043"),
+        ("Reorganization", "1044"),
+        ("Reorganization", "1045"),
+        ("Reorganization", "1046"),
+        ("Reorganization", "1047"),
+        ("Reorganization", "1048"),
+        ("Reorganization", "1049"),
+        ("Reorganization", "1050"),
+        ("Reorganization", "1051"),
     },
     tree_config=FamilyTreeConfig(
         seed=6584,
@@ -116,15 +116,15 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
             graph=GraphsConfig(
                 defaults=DefaultAttributesConfig(
                     root=dict(
-                        size=80,
+                        size="80",
                         ratio="compress",
                         pad=".5, .5",
-                        ranksep=0.15,
-                        nodesep=0.5,
+                        ranksep="0.15",
+                        nodesep="0.5",
                         label="Family Tree: Delta Alpha Chapter of Sigma Nu Fraternity",
                         labelloc="t",
-                        fontsize=110,
-                        concentrate=False,
+                        fontsize="110",
+                        concentrate="False",
                     ),
                 ),
             ),
@@ -133,21 +133,21 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
                     root=dict(
                         style="filled",
                         shape="box",
-                        penwidth=2,
-                        width=1.63,
+                        penwidth="2",
+                        width="1.63",
                         fontname="dejavu sans",
                     ),
                     entity=dict(
                         fillcolor=".11 .71 1.",
                     ),
                     unknown=dict(
-                        height=0,
-                        width=0,
+                        height="0",
+                        width="0",
                         style="invis",
                     ),
                     rank=dict(
                         color="none",
-                        fontsize=20,
+                        fontsize="20",
                         fontname="dejavu serif",
                     ),
                 ),
@@ -162,19 +162,18 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
                         "color": family_colors[family_id],
                     },
                     by_key={
-                        "reorganization": dict(
-                            height=0.6,
+                        "Reorganization": dict(
+                            height="0.6",
                             label="Reorganization",
                             shape="oval",
                         ),
-                        "spacer": dict(
-                            height=1.5,
+                        "Spacer": dict(
+                            height="1.5",
                             style="invis",
-                            width=0,
+                            width="0",
                         ),
-                        "kappa-delta": dict(
-                            rank="Fall 1982",
-                            label="Kappa Delta Chapter\nDuquesne University",
+                        "Kappa Delta": dict(
+                            label=r"Kappa Delta Chapter\nDuquesne University",
                             color="none",
                             fillcolor="none",
                         ),
@@ -195,13 +194,13 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
                 ),
                 attributes=DynamicEdgeAttributesConfig(
                     by_key={
-                        ("reorganization", "1031"): dict(style="dashed"),
-                        ("reorganization", "1034"): dict(style="dashed"),
-                        ("reorganization", "1035"): dict(style="dashed"),
-                        ("reorganization", "1036"): dict(style="dashed"),
-                        ("reorganization", "1038"): dict(style="dashed"),
-                        ("reorganization", "1039"): dict(style="dashed"),
-                        ("reorganization", "1041"): dict(style="dashed"),
+                        ("Reorganization", "1031"): dict(style="dashed"),
+                        ("Reorganization", "1034"): dict(style="dashed"),
+                        ("Reorganization", "1035"): dict(style="dashed"),
+                        ("Reorganization", "1036"): dict(style="dashed"),
+                        ("Reorganization", "1038"): dict(style="dashed"),
+                        ("Reorganization", "1039"): dict(style="dashed"),
+                        ("Reorganization", "1041"): dict(style="dashed"),
                     }
                 ),
             ),

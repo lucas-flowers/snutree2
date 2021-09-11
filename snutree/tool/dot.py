@@ -87,7 +87,7 @@ class Component(ABC):
 
         identifier = str(self.EDGE_OP).join(ids)
 
-        attrs = ",".join(map(str, self.attrs))
+        attrs = ",".join(map(str, sorted(self.attrs)))
 
         if attrs or is_attribute_statement:
             return f"{identifier} [{attrs}]"
@@ -95,7 +95,7 @@ class Component(ABC):
             return identifier
 
 
-@dataclass
+@dataclass(order=True)
 class Attribute:
 
     key: Id
@@ -122,7 +122,7 @@ class Attribute:
 
     @classmethod
     def from_kwargs(cls, **mapping: Id) -> list["Attribute"]:
-        return [Attribute(key, value) for key, value in mapping.items()]
+        return sorted(Attribute(key, value) for key, value in mapping.items())
 
     @property
     def block(self) -> Block:

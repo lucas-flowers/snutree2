@@ -18,8 +18,8 @@ class SigmaNuParser:
 
     default_chapter_id: Optional[ChapterId]
     require_semester: bool
-    last_candidate_key: int = 0
-    last_brother_key: int = 0
+    last_candidate_key: int = -1
+    last_brother_key: int = -1
     root_member_badges: set[str] = field(default_factory=set)
 
     def parse(self, rows: Iterable[dict[str, str]]) -> Iterable[Entity[Semester, SigmaNuMember]]:
@@ -34,10 +34,10 @@ class SigmaNuParser:
 
                 if isinstance(member, Candidate):
                     self.last_candidate_key += 1
-                    key = f"candidate{self.last_candidate_key}"
+                    key = f"Candidate {self.last_candidate_key}"
                 elif isinstance(member, Brother):
                     self.last_brother_key += 1
-                    key = f"brother{self.last_brother_key}"
+                    key = f"Brother {self.last_brother_key}"
                 else:
                     key = member.badge
 

@@ -19,11 +19,11 @@ M = TypeVar("M")
 
 @dataclass
 class NamesConfig:
-    root = "family-tree"
-    entities = "entities"
+    root = "family_tree"
+    entities = "members"
     ranks = "ranks"
-    ranks_left = "ranks-left"
-    ranks_right = "ranks-right"
+    ranks_left = "datesL"
+    ranks_right = "datesR"
 
 
 @dataclass
@@ -109,14 +109,14 @@ class DotWriter(Generic[AnyRank, M]):
             *self.write_graph_defaults(self.config.graph.defaults.root),
             self.write_node_defaults(self.config.node.defaults.root),
             self.write_edge_defaults(self.config.edge.defaults.root),
-            self.write_ranks(self.config.graph.names.ranks_left, ranks),
+            self.write_ranks(self.config.graph.names.ranks_left, ranks, "L"),
             self.write_entities(self.config.graph.names.entities, tree),
-            self.write_ranks(self.config.graph.names.ranks_right, ranks),
+            self.write_ranks(self.config.graph.names.ranks_right, ranks, "R"),
             self.write_cohorts(cohorts),
         )
 
     def write_graph_defaults(self, attributes: dict[str, Id]) -> list[Attribute]:
-        return [Attribute(key, value) for key, value in attributes.items()]
+        return sorted(Attribute(key, value) for key, value in attributes.items())
 
     def write_node_defaults(self, attributes: dict[str, Id]) -> Optional[Node]:
         return None if not attributes else Node(**attributes)
@@ -124,48 +124,49 @@ class DotWriter(Generic[AnyRank, M]):
     def write_edge_defaults(self, attributes: dict[str, Id]) -> Optional[Edge]:
         return None if not attributes else Edge(**attributes)
 
-    def write_ranks(self, graph_id: str, ranks: Optional[list[AnyRank]]) -> Optional[Subgraph]:
+    def write_ranks(self, graph_id: str, ranks: Optional[list[AnyRank]], suffix: str) -> Optional[Subgraph]:
         return (
             Subgraph(
                 graph_id,
                 *self.write_graph_defaults(self.config.graph.defaults.rank),
                 self.write_node_defaults(self.config.node.defaults.rank),
                 self.write_edge_defaults(self.config.edge.defaults.rank),
-                *self.write_rank_nodes(graph_id, ranks),
-                *self.write_rank_edges(graph_id, ranks),
+                *self.write_rank_nodes(graph_id, ranks, suffix),
+                *self.write_rank_edges(graph_id, ranks, suffix),
             )
             if ranks is not None
             else None
         )
 
-    def write_rank_nodes(self, prefix: str, ranks: Optional[list[AnyRank]]) -> list[Node]:
+    def write_rank_nodes(self, prefix: str, ranks: Optional[list[AnyRank]], suffix: str) -> list[Node]:
         return [
             Node(
                 self.write_rank_identifier(
-                    prefix=prefix,
+                    _prefix=prefix,
                     rank=rank,
+                    suffix=suffix,
                 ),
                 **self.config.node.attributes.rank(rank),
             )
             for rank in ranks or []
         ]
 
-    def write_rank_edges(self, prefix: str, ranks: Optional[list[AnyRank]]) -> list[Edge]:
+    def write_rank_edges(self, prefix: str, ranks: Optional[list[AnyRank]], suffix: str) -> list[Edge]:
         ranks = ranks or []
         return [
             Edge(
-                self.write_rank_identifier(prefix, rank0),
-                self.write_rank_identifier(prefix, rank1),
+                self.write_rank_identifier(prefix, rank0, suffix),
+                self.write_rank_identifier(prefix, rank1, suffix),
             )
             for rank0, rank1 in zip(ranks[:-1], ranks[1:])
         ]
 
-    def write_rank_identifier(self, prefix: str, rank: AnyRank) -> str:
+    def write_rank_identifier(self, _prefix: str, rank: AnyRank, suffix: str) -> str:
         if isinstance(rank, Semester):
-            suffix = str(rank).replace(" ", "").lower()
+            infix = str(rank)
         else:
-            suffix = str(index(rank))
-        return f"{prefix}:{suffix}"
+            infix = str(index(rank))
+        return f"{infix}{suffix}"
 
     def write_entities(self, graph_id: str, tree: FamilyTree[AnyRank, M]) -> Subgraph:
         return Subgraph(
@@ -185,8 +186,8 @@ class DotWriter(Generic[AnyRank, M]):
                 entity.key,
                 **self.config.node.attributes.entity(entity),
                 **(self.config.node.defaults.unknown if key in tree.unknowns else {}),
-                **(self.config.node.attributes.member(entity.member) if entity.member is not None else {}),
                 **(self.config.node.attributes.family(tree.families[key]) if key in tree.families else {}),
+                **(self.config.node.attributes.member(entity.member) if entity.member is not None else {}),
                 **self.config.node.attributes.by_key.get(key, {}),
             )
             for key, entity in tree.entities.items()
@@ -206,8 +207,8 @@ class DotWriter(Generic[AnyRank, M]):
     def write_cohort(self, rank: AnyRank, cohort: set[str]) -> Subgraph:
         return Subgraph(
             Attribute(rank="same"),
-            Node(self.write_rank_identifier(self.config.graph.names.ranks_left, rank)),
-            Node(self.write_rank_identifier(self.config.graph.names.ranks_right, rank)),
+            Node(self.write_rank_identifier(self.config.graph.names.ranks_left, rank, "L")),
+            Node(self.write_rank_identifier(self.config.graph.names.ranks_right, rank, "R")),
             *[Node(entity_id) for entity_id in sorted(cohort)],
         )
 
