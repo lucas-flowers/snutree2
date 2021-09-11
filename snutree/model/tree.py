@@ -55,6 +55,7 @@ class FamilyTreeConfig:
 
     seed: int = 0
     include_unknowns: bool = True
+    include_singletons: bool = False
 
     unknown_offset: int = 1
     rank_min_offset: int = 0
@@ -92,20 +93,9 @@ class FamilyTree(Generic[AnyRank, M]):
 
         # Will store all entities, whether they are used or not
         self._entities: dict[str, Entity[AnyRank, M]] = {entity.key: entity for entity in entities}
-
-        # Relationships explicitly provided
-        known_relationships: DiGraph[str] = DiGraph()
-        known_relationships.add_edges_from(relationships)
         for entity in entities:
-            if isinstance(entity.parent_key, str):
-                known_relationships.add_edge(entity.parent_key, entity.key)
-
-        # Relationships from members to their unknown parents
-        unknown_relationships: DiGraph[str] = DiGraph()
-        for entity in entities:
-            if entity.parent_key == ParentKeyStatus.UNKNOWN and known_relationships.in_degree(entity.key) == 0:
+            if entity.parent_key == ParentKeyStatus.UNKNOWN:
                 parent_key = f"{entity.key} Parent"
-                unknown_relationships.add_edge(parent_key, entity.key)
                 self._entities[parent_key] = UnknownEntity(
                     parent_key=ParentKeyStatus.NONE,
                     key=parent_key,
@@ -113,18 +103,39 @@ class FamilyTree(Generic[AnyRank, M]):
                     rank=self.rank_type(index(entity.rank) - self.config.unknown_offset),
                 )
 
-        known_entities: DiGraph[str] = DiGraph()
-        known_entities.add_nodes_from(entity.key for entity in entities)
+        # All entities that either have relationships, or are known to have no
+        # parents. These entities are always drawn on the tree unless rank
+        # filtering is in place.
+        main_graph: DiGraph[str] = DiGraph()
+        main_graph.add_edges_from(relationships)
+        for entity in entities:
+            if entity.parent_key == ParentKeyStatus.NONE:
+                main_graph.add_node(entity.key)
+            elif entity.parent_key == ParentKeyStatus.UNKNOWN:
+                pass
+            else:
+                assert isinstance(entity.parent_key, str)
+                main_graph.add_edge(entity.parent_key, entity.key)
+
+        # All entities that have unknown parents and no children
+        singleton_graph: DiGraph[str] = DiGraph()
+        singleton_graph.add_nodes_from(entity.key for entity in entities if entity.key not in main_graph)
 
         subgraphs = [
-            known_relationships,
-            unknown_relationships if self.config.include_unknowns else None,
-            known_entities,
+            main_graph,
+            singleton_graph if self.config.include_singletons else None,
         ]
-        self._digraph = compose_all(subgraph for subgraph in subgraphs if subgraph is not None)
+        graph = compose_all(subgraph for subgraph in subgraphs if subgraph is not None)
+        unknowns: set[str] = set()
+        for key, in_degree in list(graph.in_degree()):
+            if self._entities[key].parent_key == ParentKeyStatus.UNKNOWN and in_degree == 0:
+                parent_key = f"{key} Parent"
+                unknowns.add(parent_key)
+                graph.add_edge(parent_key, key)
 
+        self._digraph = graph
         self._member_digraph = self._digraph.subgraph(entity.key for entity in entities if entity.member is not None)
-        self.unknowns = unknown_relationships
+        self.unknowns = unknowns
 
     @cached_property
     def families(self) -> dict[str, str]:
