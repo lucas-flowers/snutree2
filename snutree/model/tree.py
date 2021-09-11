@@ -15,6 +15,7 @@ from typing import (
 )
 
 from networkx import DiGraph, weakly_connected_components
+from networkx.algorithms.operators.all import compose_all
 
 AnyRank = TypeVar("AnyRank", bound="Rank")
 AnyRank_co = TypeVar("AnyRank_co", bound="Rank", covariant=True)
@@ -43,6 +44,10 @@ class Entity(Generic[AnyRank, M]):
     key: str
     rank: AnyRank
     member: Optional[M]
+
+
+class UnknownEntity(Entity[AnyRank, M]):
+    pass
 
 
 @dataclass
@@ -80,40 +85,46 @@ class FamilyTree(Generic[AnyRank, M]):
         # TODO Verify identifiers
         # TODO Pass members directly?
 
+        entities = list(entities)
+
         self.rank_type = rank_type
         self.config = config or FamilyTreeConfig()
 
-        self._digraph: DiGraph[str] = DiGraph()
+        # Will store all entities, whether they are used or not
+        self._entities: dict[str, Entity[AnyRank, M]] = {entity.key: entity for entity in entities}
 
-        self._entities: dict[str, Entity[AnyRank, M]] = {}
+        # Relationships explicitly provided
+        known_relationships: DiGraph[str] = DiGraph()
+        known_relationships.add_edges_from(relationships)
         for entity in entities:
-            self._entities[entity.key] = entity
             if isinstance(entity.parent_key, str):
-                self._digraph.add_edge(entity.parent_key, entity.key)
+                known_relationships.add_edge(entity.parent_key, entity.key)
 
-        self._digraph.add_edges_from(relationships)
-        self._digraph.add_nodes_from(self._entities.keys())
-
-        self.unknowns: set[str] = set()
-        for entity in list(self._entities.values()):
-            if (
-                self.config.include_unknowns
-                and entity.parent_key == ParentKeyStatus.UNKNOWN
-                and self._digraph.in_degree(entity.key) == 0
-            ):
+        # Relationships from members to their unknown parents
+        unknown_relationships: DiGraph[str] = DiGraph()
+        for entity in entities:
+            if entity.parent_key == ParentKeyStatus.UNKNOWN and known_relationships.in_degree(entity.key) == 0:
                 parent_key = f"{entity.key} Parent"
-                self.unknowns.add(parent_key)
-                self._entities[parent_key] = Entity(
+                unknown_relationships.add_edge(parent_key, entity.key)
+                self._entities[parent_key] = UnknownEntity(
                     parent_key=ParentKeyStatus.NONE,
                     key=parent_key,
                     member=None,
                     rank=self.rank_type(index(entity.rank) - self.config.unknown_offset),
                 )
-                self._digraph.add_edge(parent_key, entity.key)
 
-        self._member_digraph = self._digraph.subgraph(
-            entity.key for entity in self._entities.values() if entity.member is not None
-        )
+        known_entities: DiGraph[str] = DiGraph()
+        known_entities.add_nodes_from(entity.key for entity in entities)
+
+        subgraphs = [
+            known_relationships,
+            unknown_relationships if self.config.include_unknowns else None,
+            known_entities,
+        ]
+        self._digraph = compose_all(subgraph for subgraph in subgraphs if subgraph is not None)
+
+        self._member_digraph = self._digraph.subgraph(entity.key for entity in entities if entity.member is not None)
+        self.unknowns = unknown_relationships
 
     @cached_property
     def families(self) -> dict[str, str]:

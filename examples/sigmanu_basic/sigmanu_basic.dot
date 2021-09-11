@@ -1030,7 +1030,6 @@ digraph "family_tree" {
         "841" [color="indianred4",label="Paul Slobodian\nΔΑ 841"];
         "Brother 25" [color="indianred4",label="Wilbur\nΔΑ Brother"];
         "Brother 9" [color="maroon2",label="Huber\nΔΑ Brother"];
-        "Brother 9 Parent" [height="0",style="invis",width="0"];
         "735" [color="limegreen",label="Paul Lizak\nΔΑ 735"];
         "735 Parent" [height="0",style="invis",width="0"];
         "769" [color="limegreen",label="John Pettit\nΔΑ 769"];
@@ -2018,7 +2017,6 @@ digraph "family_tree" {
         "996" -> "1002";
         "996" -> "1021";
         "998" -> "1014";
-        "Brother 9 Parent" -> "Brother 9" [style="dotted"];
         "Kappa Delta" -> "986";
         "Reorganization" -> "1031" [style="dashed"];
         "Reorganization" -> "1034" [style="dashed"];
@@ -2755,7 +2753,6 @@ digraph "family_tree" {
             rank="same";
             "Fall 1971L";
             "Fall 1971R";
-            "Brother 9 Parent";
         }
         subgraph {
             rank="same";

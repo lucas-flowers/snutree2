@@ -3,7 +3,7 @@ from operator import index
 from typing import Callable, Dict, Generic, Optional, TypeVar
 
 from snutree.model.semester import Semester
-from snutree.model.tree import AnyRank, Entity, FamilyTree
+from snutree.model.tree import AnyRank, Entity, FamilyTree, UnknownEntity
 from snutree.tool.dot import (
     Attribute,
     Digraph,
@@ -185,7 +185,7 @@ class DotWriter(Generic[AnyRank, M]):
             Node(
                 entity.key,
                 **self.config.node.attributes.entity(entity),
-                **(self.config.node.defaults.unknown if key in tree.unknowns else {}),
+                **(self.config.node.defaults.unknown if isinstance(entity, UnknownEntity) else {}),
                 **(self.config.node.attributes.family(tree.families[key]) if key in tree.families else {}),
                 **(self.config.node.attributes.member(entity.member) if entity.member is not None else {}),
                 **self.config.node.attributes.by_key.get(key, {}),
@@ -198,7 +198,7 @@ class DotWriter(Generic[AnyRank, M]):
             Edge(
                 parent_key,
                 child_key,
-                **(self.config.edge.defaults.unknown if parent_key in tree.unknowns else {}),
+                **(self.config.edge.defaults.unknown if isinstance(tree.entities[parent_key], UnknownEntity) else {}),
                 **self.config.edge.attributes.by_key.get((parent_key, child_key), {}),
             )
             for (parent_key, child_key) in tree.relationships
