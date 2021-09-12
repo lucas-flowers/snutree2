@@ -6,6 +6,7 @@ from typing import ClassVar, Generic, Iterable, Protocol, Type, TypeVar
 
 from snutree.model.tree import (
     AnyRank,
+    CustomEntity,
     Entity,
     EntityId,
     FamilyTree,
@@ -47,7 +48,7 @@ class SnutreeApi(Generic[AnyRank, M]):
     tree_config: FamilyTreeConfig
     writer: Writer[AnyRank, M]
 
-    custom_entities: list[Entity[AnyRank, M]] = field(default_factory=list)
+    custom_entities: list[CustomEntity[AnyRank, M]] = field(default_factory=list)
     custom_relationships: set[tuple[str, str]] = field(default_factory=set)
 
     @classmethod

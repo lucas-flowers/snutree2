@@ -5,12 +5,7 @@ from snutree.model.member.sigmanu.affiliation import ChapterId
 from snutree.model.member.sigmanu.member import SigmaNuMember
 from snutree.model.member.sigmanu.pipeline import SigmaNuParser
 from snutree.model.semester import Semester
-from snutree.model.tree import (
-    Entity,
-    EntityId,
-    FamilyTreeConfig,
-    ParentKeyStatus,
-)
+from snutree.model.tree import CustomEntity, FamilyTreeConfig, ParentKeyStatus
 from snutree.reader.csv import CsvReader
 from snutree.reader.json import JsonReader
 from snutree.tool import x11
@@ -70,24 +65,21 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
         require_semester=False,
     ),
     custom_entities=[
-        Entity(
+        CustomEntity(
             parent_key=ParentKeyStatus.NONE,
-            key=EntityId("Reorganization"),
+            key="Reorganization",
             rank=Semester("Spring 1989"),
-            member=None,
         ),
-        Entity(
+        CustomEntity(
             parent_key=ParentKeyStatus.NONE,
-            key=EntityId("Spacer"),
+            key="Spacer",
             rank=Semester("Spring 1989"),
-            member=None,
         ),
         # The home chapter of ΔA 986, who transferred to CWRU from Duquesne
-        Entity(
+        CustomEntity(
             parent_key=ParentKeyStatus.NONE,
-            key=EntityId("Kappa Delta"),
+            key="Kappa Delta",
             rank=Semester("Fall 1982"),
-            member=None,
         ),
     ],
     custom_relationships={

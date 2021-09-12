@@ -53,8 +53,24 @@ class Entity(Generic[AnyRank, M]):
     member: Optional[M]
 
 
+class CustomEntity(Entity[AnyRank, M]):
+    def __init__(self, parent_key: Union[str, ParentKeyStatus], key: str, rank: AnyRank) -> None:
+        super().__init__(
+            parent_key=EntityId(parent_key) if isinstance(parent_key, str) else parent_key,
+            key=EntityId(key),
+            rank=rank,
+            member=None,
+        )
+
+
 class UnknownEntity(Entity[AnyRank, M]):
-    pass
+    def __init__(self, rank_type: Type[AnyRank], child: Entity[AnyRank, M], offset: int) -> None:
+        super().__init__(
+            parent_key=ParentKeyStatus.NONE,
+            key=EntityId(f"{child.key} Parent"),
+            member=None,
+            rank=rank_type(index(child.rank) - offset),
+        )
 
 
 @dataclass
@@ -106,12 +122,13 @@ class FamilyTree(Generic[AnyRank, M]):
         return {
             **{entity.key: entity for entity in self._entities},
             **{
-                (parent_key := EntityId(f"{entity.key} Parent")): UnknownEntity(
-                    parent_key=ParentKeyStatus.NONE,
-                    key=parent_key,
-                    member=None,
-                    rank=self.rank_type(index(entity.rank) - self.config.unknown_offset),
-                )
+                (
+                    unknown_entity := UnknownEntity(
+                        rank_type=self.rank_type,
+                        child=entity,
+                        offset=self.config.unknown_offset,
+                    )
+                ).key: unknown_entity
                 for entity in self._entities
                 if entity.parent_key == ParentKeyStatus.UNKNOWN
             },
