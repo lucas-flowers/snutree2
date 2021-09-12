@@ -10,7 +10,7 @@ from snutree.model.member.sigmanu.member import (
     SigmaNuMember,
 )
 from snutree.model.semester import Semester
-from snutree.model.tree import Entity, ParentKeyStatus
+from snutree.model.tree import Entity, EntityId, ParentKeyStatus
 
 
 @dataclass
@@ -34,16 +34,16 @@ class SigmaNuParser:
 
                 if isinstance(member, Candidate):
                     self.last_candidate_key += 1
-                    key = f"Candidate {self.last_candidate_key}"
+                    key = EntityId(f"Candidate {self.last_candidate_key}")
                 elif isinstance(member, Brother):
                     self.last_brother_key += 1
-                    key = f"Brother {self.last_brother_key}"
+                    key = EntityId(f"Brother {self.last_brother_key}")
                 else:
-                    key = member.badge
+                    key = EntityId(member.badge)
 
-                parent_key: Union[str, ParentKeyStatus]
+                parent_key: Union[EntityId, ParentKeyStatus]
                 if member.big_badge is not None:
-                    parent_key = member.big_badge
+                    parent_key = EntityId(member.big_badge)
                 elif key in self.root_member_badges:
                     parent_key = ParentKeyStatus.NONE
                 else:

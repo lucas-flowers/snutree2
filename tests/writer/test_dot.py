@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from snutree.model.tree import (
     Entity,
+    EntityId,
     FamilyTree,
     FamilyTreeConfig,
     ParentKeyStatus,
@@ -27,12 +28,12 @@ def test_write_family_tree() -> None:
     tree = FamilyTree[int, BasicDotMember](
         rank_type=int,
         entities=[
-            Entity("50", "100", 2, BasicDotMember()),
-            Entity(ParentKeyStatus.NONE, "50", 1, BasicDotMember()),
-            Entity(ParentKeyStatus.NONE, "a", 1, None),
+            Entity(EntityId("50"), EntityId("100"), 2, BasicDotMember()),
+            Entity(ParentKeyStatus.NONE, EntityId("50"), 1, BasicDotMember()),
+            Entity(ParentKeyStatus.NONE, EntityId("a"), 1, None),
         ],
         relationships={
-            ("a", "50"),
+            (EntityId("a"), EntityId("50")),
         },
         config=FamilyTreeConfig(
             rank_min_offset=-1,

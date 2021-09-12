@@ -40,10 +40,15 @@ class Rank(Protocol):
         ...
 
 
+class EntityId(str):
+    def __new__(cls, value: str) -> "EntityId":
+        return super().__new__(cls, value)
+
+
 @dataclass
 class Entity(Generic[AnyRank, M]):
-    parent_key: Union[str, ParentKeyStatus]
-    key: str
+    parent_key: Union[EntityId, ParentKeyStatus]
+    key: EntityId
     rank: AnyRank
     member: Optional[M]
 
@@ -81,7 +86,7 @@ class FamilyTree(Generic[AnyRank, M]):
         self,
         rank_type: Type[AnyRank],
         entities: Iterable[Entity[AnyRank, M]],
-        relationships: set[tuple[str, str]],
+        relationships: set[tuple[EntityId, EntityId]],
         config: Optional[FamilyTreeConfig] = None,
     ) -> None:
 
@@ -91,17 +96,17 @@ class FamilyTree(Generic[AnyRank, M]):
         self.rank_type = rank_type
         self.config = config or FamilyTreeConfig()
         self._entities: Sequence[Entity[AnyRank, M]] = list(entities)
-        self._relationships: Set[tuple[str, str]] = relationships
+        self._relationships: Set[tuple[EntityId, EntityId]] = relationships
 
     @cached_property
-    def lookup(self) -> Mapping[str, Entity[AnyRank, M]]:
+    def lookup(self) -> Mapping[EntityId, Entity[AnyRank, M]]:
         """
         Return a non-ordered mapping of entity key to entity.
         """
         return {
             **{entity.key: entity for entity in self._entities},
             **{
-                (parent_key := f"{entity.key} Parent"): UnknownEntity(
+                (parent_key := EntityId(f"{entity.key} Parent")): UnknownEntity(
                     parent_key=ParentKeyStatus.NONE,
                     key=parent_key,
                     member=None,
@@ -113,12 +118,12 @@ class FamilyTree(Generic[AnyRank, M]):
         }
 
     @cached_property
-    def graph(self) -> "DiGraph[str]":
+    def graph(self) -> "DiGraph[EntityId]":
         """
         Return the networkx graph underlying this tree.
         """
 
-        graph: DiGraph[str] = DiGraph()
+        graph: DiGraph[EntityId] = DiGraph()
 
         # Add all entities with relationships, or that are known to have no
         # parents. These are always drawn on the tree unless rank filtering is
@@ -130,7 +135,7 @@ class FamilyTree(Generic[AnyRank, M]):
             elif entity.parent_key == ParentKeyStatus.UNKNOWN:
                 pass
             else:
-                assert isinstance(entity.parent_key, str)
+                assert isinstance(entity.parent_key, EntityId)
                 graph.add_edge(entity.parent_key, entity.key)
 
         # Add all other entities (i.e., those without any relationships), if
@@ -141,20 +146,20 @@ class FamilyTree(Generic[AnyRank, M]):
         # Add unknown parents entities if desired.
         for key, in_degree in list(graph.in_degree()):
             if self.lookup[key].parent_key == ParentKeyStatus.UNKNOWN and in_degree == 0:
-                parent_key = f"{key} Parent"
+                parent_key = EntityId(f"{key} Parent")
                 graph.add_edge(parent_key, key)
 
         return graph
 
     @cached_property
-    def families(self) -> Mapping[str, str]:
+    def families(self) -> Mapping[EntityId, EntityId]:
         """
         Return a dict of entity_id to the entity_id of the root of the entity's family.
         """
 
         member_graph = self.graph.subgraph(entity.key for entity in self._entities if entity.member is not None)
 
-        families: dict[str, str] = {}
+        families: dict[EntityId, EntityId] = {}
         for family_member_ids in weakly_connected_components(member_graph):
             (root_member_id,) = set(
                 family_member_id
@@ -167,7 +172,7 @@ class FamilyTree(Generic[AnyRank, M]):
         return families
 
     @cached_property
-    def entities(self) -> Mapping[str, Entity[AnyRank, M]]:
+    def entities(self) -> Mapping[EntityId, Entity[AnyRank, M]]:
         """
         Return a dict of entity_ids for this tree, sorted consistently.
         """
@@ -176,7 +181,7 @@ class FamilyTree(Generic[AnyRank, M]):
         return {key: self.lookup[key] for component in components for key in sorted(component)}
 
     @cached_property
-    def relationships(self) -> Sequence[tuple[str, str]]:
+    def relationships(self) -> Sequence[tuple[EntityId, EntityId]]:
         """
         Return a sorted list of relationship_ids (tuples of parent entity ID
         and child entity ID) for this tree.
@@ -184,12 +189,12 @@ class FamilyTree(Generic[AnyRank, M]):
         return list(sorted(self.graph.edges()))
 
     @cached_property
-    def cohorts(self) -> Mapping[AnyRank, set[str]]:
+    def cohorts(self) -> Mapping[AnyRank, set[EntityId]]:
         """
         Return a mapping of ranks to their corresponding entity IDs.
         """
 
-        unsorted_cohorts: dict[Rank, set[str]] = {}
+        unsorted_cohorts: dict[Rank, set[EntityId]] = {}
         for entity_id, entity in self.entities.items():
             if entity.rank not in unsorted_cohorts:
                 unsorted_cohorts[entity.rank] = set()

@@ -4,7 +4,13 @@ from itertools import chain
 from pathlib import Path
 from typing import ClassVar, Generic, Iterable, Protocol, Type, TypeVar
 
-from snutree.model.tree import AnyRank, Entity, FamilyTree, FamilyTreeConfig
+from snutree.model.tree import (
+    AnyRank,
+    Entity,
+    EntityId,
+    FamilyTree,
+    FamilyTreeConfig,
+)
 
 M = TypeVar("M")
 
@@ -62,7 +68,7 @@ class SnutreeApi(Generic[AnyRank, M]):
         tree = FamilyTree(
             rank_type=self.rank_type,
             entities=chain(entities, self.custom_entities),
-            relationships=self.custom_relationships,
+            relationships={(EntityId(a), EntityId(b)) for a, b in self.custom_relationships},
             config=self.tree_config,
         )
 
