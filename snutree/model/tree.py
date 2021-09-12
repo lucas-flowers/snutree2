@@ -20,6 +20,7 @@ from typing import (
 
 from networkx import DiGraph, weakly_connected_components
 from networkx.algorithms.dag import descendants
+from networkx.classes.function import freeze
 
 AnyRank = TypeVar("AnyRank", bound="Rank")
 
@@ -186,7 +187,7 @@ class FamilyTree(Generic[AnyRank, M]):
                     parent_key = UnknownEntity.key_from(key)
                     graph.add_edge(parent_key, key)
 
-        return graph
+        return freeze(graph)
 
     @cached_property
     def families(self) -> Mapping[EntityId, FamilyId]:
