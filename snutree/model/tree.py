@@ -6,6 +6,7 @@ from operator import index
 from typing import (
     Generic,
     Iterable,
+    Mapping,
     Optional,
     Protocol,
     Type,
@@ -115,7 +116,10 @@ class FamilyTree(Generic[AnyRank, M]):
         self._digraph = graph
 
     @cached_property
-    def lookup(self) -> dict[str, Entity[AnyRank, M]]:
+    def lookup(self) -> Mapping[str, Entity[AnyRank, M]]:
+        """
+        Return a non-ordered mapping of entity key to entity.
+        """
         return {
             **{entity.key: entity for entity in self._entities},
             **{
