@@ -85,31 +85,17 @@ class FamilyTree(Generic[AnyRank, M]):
         # TODO Verify identifiers
         # TODO Pass members directly?
 
-        entities = list(entities)
-
         self.rank_type = rank_type
         self.config = config or FamilyTreeConfig()
 
-        self.lookup = {
-            **{entity.key: entity for entity in entities},
-            **{
-                (parent_key := f"{entity.key} Parent"): UnknownEntity(
-                    parent_key=ParentKeyStatus.NONE,
-                    key=parent_key,
-                    member=None,
-                    rank=self.rank_type(index(entity.rank) - self.config.unknown_offset),
-                )
-                for entity in entities
-                if entity.parent_key == ParentKeyStatus.UNKNOWN
-            },
-        }
+        self._entities = list(entities)
 
         # All entities that either have relationships, or are known to have no
         # parents. These entities are always drawn on the tree unless rank
         # filtering is in place.
         graph: DiGraph[str] = DiGraph()
         graph.add_edges_from(relationships)
-        for entity in entities:
+        for entity in self._entities:
             if entity.parent_key == ParentKeyStatus.NONE:
                 graph.add_node(entity.key)
             elif entity.parent_key == ParentKeyStatus.UNKNOWN:
@@ -119,7 +105,7 @@ class FamilyTree(Generic[AnyRank, M]):
                 graph.add_edge(entity.parent_key, entity.key)
 
         if self.config.include_singletons:
-            graph.add_nodes_from(entity.key for entity in entities if entity.key not in graph)
+            graph.add_nodes_from(entity.key for entity in self._entities if entity.key not in graph)
 
         unknowns: set[str] = set()
         for key, in_degree in list(graph.in_degree()):
@@ -129,8 +115,26 @@ class FamilyTree(Generic[AnyRank, M]):
                 graph.add_edge(parent_key, key)
 
         self._digraph = graph
-        self._member_digraph = self._digraph.subgraph(entity.key for entity in entities if entity.member is not None)
+        self._member_digraph = self._digraph.subgraph(
+            entity.key for entity in self._entities if entity.member is not None
+        )
         self.unknowns = unknowns
+
+    @cached_property
+    def lookup(self) -> dict[str, Entity[AnyRank, M]]:
+        return {
+            **{entity.key: entity for entity in self._entities},
+            **{
+                (parent_key := f"{entity.key} Parent"): UnknownEntity(
+                    parent_key=ParentKeyStatus.NONE,
+                    key=parent_key,
+                    member=None,
+                    rank=self.rank_type(index(entity.rank) - self.config.unknown_offset),
+                )
+                for entity in self._entities
+                if entity.parent_key == ParentKeyStatus.UNKNOWN
+            },
+        }
 
     @cached_property
     def families(self) -> dict[str, str]:
