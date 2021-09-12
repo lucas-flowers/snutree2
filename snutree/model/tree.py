@@ -45,6 +45,10 @@ class EntityId(str):
         return super().__new__(cls, value)
 
 
+class FamilyId(EntityId):
+    pass
+
+
 @dataclass
 class Entity(Generic[AnyRank, M]):
     parent_key: Union[EntityId, ParentKeyStatus]
@@ -177,14 +181,14 @@ class FamilyTree(Generic[AnyRank, M]):
         return graph
 
     @cached_property
-    def families(self) -> Mapping[EntityId, EntityId]:
+    def families(self) -> Mapping[EntityId, FamilyId]:
         """
         Return a dict of entity_id to the entity_id of the root of the entity's family.
         """
 
         member_graph = self.graph.subgraph(entity.key for entity in self._entities if entity.member is not None)
 
-        families: dict[EntityId, EntityId] = {}
+        families: dict[EntityId, FamilyId] = {}
         for family_member_ids in weakly_connected_components(member_graph):
             (root_member_id,) = set(
                 family_member_id
@@ -192,7 +196,7 @@ class FamilyTree(Generic[AnyRank, M]):
                 if degree == 0
             )
             for family_member_id in family_member_ids:
-                families[family_member_id] = root_member_id
+                families[family_member_id] = FamilyId(root_member_id)
 
         return families
 
