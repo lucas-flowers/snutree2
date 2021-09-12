@@ -1,14 +1,7 @@
+from collections.abc import Set
 from dataclasses import dataclass, field
 from operator import index
-from typing import (
-    Callable,
-    Dict,
-    Generic,
-    Mapping,
-    Optional,
-    Sequence,
-    TypeVar,
-)
+from typing import Callable, Generic, Mapping, Optional, Sequence, TypeVar
 
 from snutree.model.semester import Semester
 from snutree.model.tree import (
@@ -63,12 +56,12 @@ class DynamicNodeAttributesConfig(Generic[AnyRank, M]):
     entity: Callable[[Entity[AnyRank, M]], dict[str, Id]] = lambda _: {}
     member: Callable[[M], dict[str, Id]] = lambda _: {}
     family: Callable[[str], dict[str, Id]] = lambda _: {}
-    by_key: Dict[str, dict[str, Id]] = field(default_factory=dict)
+    by_key: dict[str, dict[str, Id]] = field(default_factory=dict)
 
 
 @dataclass
 class DynamicEdgeAttributesConfig:
-    by_key: Dict[tuple[str, str], dict[str, Id]] = field(default_factory=dict)
+    by_key: dict[tuple[str, str], dict[str, Id]] = field(default_factory=dict)
 
 
 @dataclass
@@ -110,7 +103,7 @@ class DotWriter(Generic[AnyRank, M]):
     def write_family_tree(self, tree: FamilyTree[AnyRank, M]) -> Graph:
 
         ranks: Optional[Sequence[AnyRank]]
-        cohorts: Optional[Mapping[AnyRank, set[EntityId]]]
+        cohorts: Optional[Mapping[AnyRank, Set[EntityId]]]
         if self.config.draw_ranks:
             ranks = tree.ranks
             cohorts = tree.cohorts
@@ -218,7 +211,7 @@ class DotWriter(Generic[AnyRank, M]):
             for (parent_key, child_key) in tree.relationships
         ]
 
-    def write_cohort(self, rank: AnyRank, cohort: set[EntityId]) -> Subgraph:
+    def write_cohort(self, rank: AnyRank, cohort: Set[EntityId]) -> Subgraph:
         return Subgraph(
             Attribute(rank="same"),
             Node(self.write_rank_identifier(self.config.graph.names.ranks_left, rank, "L")),
@@ -226,7 +219,7 @@ class DotWriter(Generic[AnyRank, M]):
             *[Node(entity_id) for entity_id in sorted(cohort)],
         )
 
-    def write_cohorts(self, cohorts: Optional[Mapping[AnyRank, set[EntityId]]]) -> Optional[Subgraph]:
+    def write_cohorts(self, cohorts: Optional[Mapping[AnyRank, Set[EntityId]]]) -> Optional[Subgraph]:
         return (
             Subgraph(
                 self.config.graph.names.ranks,

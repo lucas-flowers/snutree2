@@ -108,10 +108,12 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
         seed=6584,
         include_unknowns=True,
         include_singletons=False,
+        include_families=None,
         rank_max_offset=1,
     ),
     writer=DotWriter(
         DotWriterConfig(
+            draw_ranks=True,
             graph=GraphsConfig(
                 defaults=DefaultAttributesConfig(
                     root=dict(

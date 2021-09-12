@@ -3,6 +3,7 @@ from collections.abc import Set
 from dataclasses import dataclass
 from enum import Enum, auto
 from functools import cached_property
+from itertools import chain
 from operator import index
 from typing import (
     Generic,
@@ -18,6 +19,7 @@ from typing import (
 )
 
 from networkx import DiGraph, weakly_connected_components
+from networkx.algorithms.dag import descendants
 
 AnyRank = TypeVar("AnyRank", bound="Rank")
 
@@ -89,6 +91,7 @@ class FamilyTreeConfig:
     seed: int = 0
     include_unknowns: bool = True
     include_singletons: bool = False
+    include_families: Optional[set[str]] = None
 
     unknown_offset: int = 1
     rank_min_offset: int = 0
@@ -170,6 +173,12 @@ class FamilyTree(Generic[AnyRank, M]):
         if self.config.include_singletons:
             graph.add_nodes_from(entity.key for entity in self._entities if entity.key not in graph)
 
+        # If desired, keep only the families requested
+        if self.config.include_families is not None:
+            entity_ids = set(map(EntityId, self.config.include_families))
+            entity_ids |= set(chain(*(descendants(graph, entity_id) for entity_id in entity_ids)))
+            graph = DiGraph(graph.subgraph(entity_ids))
+
         # Add unknown parents entities if desired.
         if self.config.include_unknowns:
             for key, in_degree in list(graph.in_degree()):
@@ -236,12 +245,12 @@ class FamilyTree(Generic[AnyRank, M]):
         Return a list of all the ranks of the tree, in order.
         """
 
-        if len(self.lookup) == 0:
+        if len(self.entities) == 0:
             return []
 
-        initial_rank = next(iter(self.lookup.values())).rank
+        initial_rank = next(iter(self.entities.values())).rank
         min_rank, max_rank = initial_rank, initial_rank
-        for entity in self.lookup.values():
+        for entity in self.entities.values():
             rank = entity.rank
             if index(rank) < index(min_rank):
                 min_rank = rank
