@@ -1,7 +1,6 @@
 import random
 from collections.abc import Set
 from dataclasses import dataclass
-from enum import Enum, auto
 from functools import cached_property
 from itertools import chain
 from operator import index
@@ -10,80 +9,28 @@ from typing import (
     Iterable,
     Mapping,
     Optional,
-    Protocol,
     Sequence,
     Type,
     TypeVar,
-    Union,
-    runtime_checkable,
 )
 
 from networkx import DiGraph, weakly_connected_components
 from networkx.algorithms.dag import descendants
 from networkx.classes.function import freeze
 
-AnyRank = TypeVar("AnyRank", bound="Rank")
-
+from snutree.model.entity import (
+    Entity,
+    EntityId,
+    ParentKeyStatus,
+    UnknownEntity,
+)
+from snutree.model.rank import AnyRank
 
 M = TypeVar("M")
 
 
-class ParentKeyStatus(Enum):
-    UNKNOWN = auto()
-    NONE = auto()
-
-
-@runtime_checkable
-class Rank(Protocol):
-    def __init__(self, i: Optional[int] = None, /) -> None:  # pylint: disable=super-init-not-called
-        ...
-
-    def __index__(self) -> int:  # pylint: disable=invalid-index-returned # Come on pylint, it's a protocol
-        ...
-
-
-class EntityId(str):
-    def __new__(cls, value: str) -> "EntityId":
-        return super().__new__(cls, value)
-
-
 class FamilyId(EntityId):
     pass
-
-
-@dataclass
-class Entity(Generic[AnyRank, M]):
-    parent_key: Union[EntityId, ParentKeyStatus]
-    key: EntityId
-    rank: AnyRank
-    member: Optional[M]
-
-
-class CustomEntity(Entity[AnyRank, M]):
-    def __init__(self, parent_key: Union[str, ParentKeyStatus], key: str, rank: AnyRank) -> None:
-        super().__init__(
-            parent_key=EntityId(parent_key) if isinstance(parent_key, str) else parent_key,
-            key=EntityId(key),
-            rank=rank,
-            member=None,
-        )
-
-
-class UnknownEntity(Entity[AnyRank, M]):
-    def __init__(self, rank_type: Type[AnyRank], child: Entity[AnyRank, M], offset: int) -> None:
-        super().__init__(
-            parent_key=ParentKeyStatus.NONE,
-            key=self.key_from(child.key),
-            member=None,
-            rank=rank_type(index(child.rank) - offset),
-        )
-
-    @classmethod
-    def key_from(cls, key: EntityId) -> EntityId:
-        """
-        Return the unknown entity ID for the given child entity ID.
-        """
-        return EntityId(f"{key} Parent")
 
 
 @dataclass
@@ -232,7 +179,7 @@ class FamilyTree(Generic[AnyRank, M]):
         Return a mapping of ranks to their corresponding entity IDs.
         """
 
-        unsorted_cohorts: dict[Rank, set[EntityId]] = {}
+        unsorted_cohorts: dict[AnyRank, set[EntityId]] = {}
         for entity_id, entity in self.entities.items():
             if entity.rank not in unsorted_cohorts:
                 unsorted_cohorts[entity.rank] = set()

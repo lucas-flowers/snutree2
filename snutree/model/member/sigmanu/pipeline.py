@@ -3,6 +3,7 @@ from typing import Iterable, Optional, Union
 
 from pydantic.tools import parse_obj_as
 
+from snutree.model.entity import Entity, EntityId, ParentKeyStatus
 from snutree.model.member.sigmanu.affiliation import ChapterId
 from snutree.model.member.sigmanu.member import (
     Brother,
@@ -10,7 +11,6 @@ from snutree.model.member.sigmanu.member import (
     SigmaNuMember,
 )
 from snutree.model.semester import Semester
-from snutree.model.tree import Entity, EntityId, ParentKeyStatus
 
 
 @dataclass

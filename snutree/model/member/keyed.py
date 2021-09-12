@@ -3,9 +3,9 @@ from typing import Iterable, Optional
 
 from pydantic.tools import parse_obj_as
 
+from snutree.model.entity import Entity, EntityId, ParentKeyStatus
 from snutree.model.member.common import BaseMember
 from snutree.model.semester import Semester
-from snutree.model.tree import Entity, EntityId, ParentKeyStatus
 
 
 class KeyedMember(BaseMember):

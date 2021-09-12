@@ -4,14 +4,9 @@ from itertools import chain
 from pathlib import Path
 from typing import ClassVar, Generic, Iterable, Protocol, Type, TypeVar
 
-from snutree.model.tree import (
-    AnyRank,
-    CustomEntity,
-    Entity,
-    EntityId,
-    FamilyTree,
-    FamilyTreeConfig,
-)
+from snutree.model.entity import CustomEntity, Entity, EntityId
+from snutree.model.rank import AnyRank
+from snutree.model.tree import FamilyTree, FamilyTreeConfig
 
 M = TypeVar("M")
 

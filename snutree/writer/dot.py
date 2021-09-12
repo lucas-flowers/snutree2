@@ -3,14 +3,10 @@ from dataclasses import dataclass, field
 from operator import index
 from typing import Callable, Generic, Mapping, Optional, Sequence, TypeVar
 
+from snutree.model.entity import Entity, EntityId, UnknownEntity
+from snutree.model.rank import AnyRank
 from snutree.model.semester import Semester
-from snutree.model.tree import (
-    AnyRank,
-    Entity,
-    EntityId,
-    FamilyTree,
-    UnknownEntity,
-)
+from snutree.model.tree import FamilyTree
 from snutree.tool.dot import (
     Attribute,
     Digraph,

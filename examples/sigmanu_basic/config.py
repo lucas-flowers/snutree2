@@ -1,11 +1,12 @@
 from collections import defaultdict, deque
 
 from snutree.api import SnutreeApi
+from snutree.model.entity import CustomEntity, ParentKeyStatus
 from snutree.model.member.sigmanu.affiliation import ChapterId
 from snutree.model.member.sigmanu.member import SigmaNuMember
 from snutree.model.member.sigmanu.pipeline import SigmaNuParser
 from snutree.model.semester import Semester
-from snutree.model.tree import CustomEntity, FamilyTreeConfig, ParentKeyStatus
+from snutree.model.tree import FamilyTreeConfig
 from snutree.reader.csv import CsvReader
 from snutree.reader.json import JsonReader
 from snutree.tool import x11

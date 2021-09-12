@@ -1,12 +1,7 @@
 from dataclasses import dataclass
 
-from snutree.model.tree import (
-    Entity,
-    EntityId,
-    FamilyTree,
-    FamilyTreeConfig,
-    ParentKeyStatus,
-)
+from snutree.model.entity import Entity, EntityId, ParentKeyStatus
+from snutree.model.tree import FamilyTree, FamilyTreeConfig
 from snutree.tool.dot import Edge, Node
 from snutree.writer.dot import (
     DotWriter,
