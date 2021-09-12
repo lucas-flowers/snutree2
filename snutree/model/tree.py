@@ -144,10 +144,11 @@ class FamilyTree(Generic[AnyRank, M]):
             graph.add_nodes_from(entity.key for entity in self._entities if entity.key not in graph)
 
         # Add unknown parents entities if desired.
-        for key, in_degree in list(graph.in_degree()):
-            if self.lookup[key].parent_key == ParentKeyStatus.UNKNOWN and in_degree == 0:
-                parent_key = EntityId(f"{key} Parent")
-                graph.add_edge(parent_key, key)
+        if self.config.include_unknowns:
+            for key, in_degree in list(graph.in_degree()):
+                if self.lookup[key].parent_key == ParentKeyStatus.UNKNOWN and in_degree == 0:
+                    parent_key = EntityId(f"{key} Parent")
+                    graph.add_edge(parent_key, key)
 
         return graph
 

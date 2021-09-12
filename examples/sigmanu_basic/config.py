@@ -114,6 +114,8 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
     },
     tree_config=FamilyTreeConfig(
         seed=6584,
+        include_unknowns=True,
+        include_singletons=False,
         rank_max_offset=1,
     ),
     writer=DotWriter(
