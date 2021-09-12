@@ -9,6 +9,7 @@ from typing import (
     Mapping,
     Optional,
     Protocol,
+    Sequence,
     Type,
     TypeVar,
     Union,
@@ -89,7 +90,7 @@ class FamilyTree(Generic[AnyRank, M]):
         self.rank_type = rank_type
         self.config = config or FamilyTreeConfig()
 
-        self._entities = list(entities)
+        self._entities: Sequence[Entity[AnyRank, M]] = list(entities)
 
         # All entities that either have relationships, or are known to have no
         # parents. These entities are always drawn on the tree unless rank
@@ -164,7 +165,7 @@ class FamilyTree(Generic[AnyRank, M]):
         return {key: self.lookup[key] for component in components for key in sorted(component)}
 
     @cached_property
-    def relationships(self) -> list[tuple[str, str]]:
+    def relationships(self) -> Sequence[tuple[str, str]]:
         """
         Return a sorted list of relationship_ids (tuples of parent entity ID
         and child entity ID) for this tree.
@@ -186,7 +187,7 @@ class FamilyTree(Generic[AnyRank, M]):
         return {rank: unsorted_cohorts.get(rank) or set() for rank in self.ranks}
 
     @cached_property
-    def ranks(self) -> list[AnyRank]:
+    def ranks(self) -> Sequence[AnyRank]:
         """
         Return a list of all the ranks of the tree, in order.
         """
