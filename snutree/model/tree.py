@@ -1,4 +1,5 @@
 import random
+from collections.abc import Set
 from dataclasses import dataclass
 from enum import Enum, auto
 from functools import cached_property
@@ -89,32 +90,8 @@ class FamilyTree(Generic[AnyRank, M]):
 
         self.rank_type = rank_type
         self.config = config or FamilyTreeConfig()
-
         self._entities: Sequence[Entity[AnyRank, M]] = list(entities)
-
-        # All entities that either have relationships, or are known to have no
-        # parents. These entities are always drawn on the tree unless rank
-        # filtering is in place.
-        graph: DiGraph[str] = DiGraph()
-        graph.add_edges_from(relationships)
-        for entity in self._entities:
-            if entity.parent_key == ParentKeyStatus.NONE:
-                graph.add_node(entity.key)
-            elif entity.parent_key == ParentKeyStatus.UNKNOWN:
-                pass
-            else:
-                assert isinstance(entity.parent_key, str)
-                graph.add_edge(entity.parent_key, entity.key)
-
-        if self.config.include_singletons:
-            graph.add_nodes_from(entity.key for entity in self._entities if entity.key not in graph)
-
-        for key, in_degree in list(graph.in_degree()):
-            if self.lookup[key].parent_key == ParentKeyStatus.UNKNOWN and in_degree == 0:
-                parent_key = f"{key} Parent"
-                graph.add_edge(parent_key, key)
-
-        self._digraph = graph
+        self._relationships: Set[tuple[str, str]] = relationships
 
     @cached_property
     def lookup(self) -> Mapping[str, Entity[AnyRank, M]]:
@@ -136,12 +113,46 @@ class FamilyTree(Generic[AnyRank, M]):
         }
 
     @cached_property
+    def graph(self) -> "DiGraph[str]":
+        """
+        Return the networkx graph underlying this tree.
+        """
+
+        graph: DiGraph[str] = DiGraph()
+
+        # Add all entities with relationships, or that are known to have no
+        # parents. These are always drawn on the tree unless rank filtering is
+        # in place.
+        graph.add_edges_from(self._relationships)
+        for entity in self._entities:
+            if entity.parent_key == ParentKeyStatus.NONE:
+                graph.add_node(entity.key)
+            elif entity.parent_key == ParentKeyStatus.UNKNOWN:
+                pass
+            else:
+                assert isinstance(entity.parent_key, str)
+                graph.add_edge(entity.parent_key, entity.key)
+
+        # Add all other entities (i.e., those without any relationships), if
+        # this is desired.
+        if self.config.include_singletons:
+            graph.add_nodes_from(entity.key for entity in self._entities if entity.key not in graph)
+
+        # Add unknown parents entities if desired.
+        for key, in_degree in list(graph.in_degree()):
+            if self.lookup[key].parent_key == ParentKeyStatus.UNKNOWN and in_degree == 0:
+                parent_key = f"{key} Parent"
+                graph.add_edge(parent_key, key)
+
+        return graph
+
+    @cached_property
     def families(self) -> Mapping[str, str]:
         """
         Return a dict of entity_id to the entity_id of the root of the entity's family.
         """
 
-        member_graph = self._digraph.subgraph(entity.key for entity in self._entities if entity.member is not None)
+        member_graph = self.graph.subgraph(entity.key for entity in self._entities if entity.member is not None)
 
         families: dict[str, str] = {}
         for family_member_ids in weakly_connected_components(member_graph):
@@ -160,7 +171,7 @@ class FamilyTree(Generic[AnyRank, M]):
         """
         Return a dict of entity_ids for this tree, sorted consistently.
         """
-        components = sorted(weakly_connected_components(self._digraph), key=min)
+        components = sorted(weakly_connected_components(self.graph), key=min)
         random.Random(self.config.seed).shuffle(components)
         return {key: self.lookup[key] for component in components for key in sorted(component)}
 
@@ -170,7 +181,7 @@ class FamilyTree(Generic[AnyRank, M]):
         Return a sorted list of relationship_ids (tuples of parent entity ID
         and child entity ID) for this tree.
         """
-        return list(sorted(self._digraph.edges()))
+        return list(sorted(self.graph.edges()))
 
     @cached_property
     def cohorts(self) -> Mapping[AnyRank, set[str]]:
