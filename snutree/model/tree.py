@@ -217,7 +217,7 @@ class FamilyTree(Generic[AnyRank, M]):
         return list(sorted(self.graph.edges()))
 
     @cached_property
-    def cohorts(self) -> Mapping[AnyRank, set[EntityId]]:
+    def cohorts(self) -> Mapping[AnyRank, Set[EntityId]]:
         """
         Return a mapping of ranks to their corresponding entity IDs.
         """
