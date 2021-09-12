@@ -20,7 +20,6 @@ from typing import (
 from networkx import DiGraph, weakly_connected_components
 
 AnyRank = TypeVar("AnyRank", bound="Rank")
-AnyRank_co = TypeVar("AnyRank_co", bound="Rank", covariant=True)
 
 
 M = TypeVar("M")
