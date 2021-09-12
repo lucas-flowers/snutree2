@@ -135,7 +135,7 @@ class FamilyTree(Generic[AnyRank, M]):
         }
 
     @cached_property
-    def families(self) -> dict[str, str]:
+    def families(self) -> Mapping[str, str]:
         """
         Return a dict of entity_id to the entity_id of the root of the entity's family.
         """
@@ -155,7 +155,7 @@ class FamilyTree(Generic[AnyRank, M]):
         return families
 
     @cached_property
-    def entities(self) -> dict[str, Entity[AnyRank, M]]:
+    def entities(self) -> Mapping[str, Entity[AnyRank, M]]:
         """
         Return a dict of entity_ids for this tree, sorted consistently.
         """
@@ -172,7 +172,7 @@ class FamilyTree(Generic[AnyRank, M]):
         return list(sorted(self._digraph.edges()))
 
     @cached_property
-    def cohorts(self) -> dict[AnyRank, set[str]]:
+    def cohorts(self) -> Mapping[AnyRank, set[str]]:
         """
         Return a mapping of ranks to their corresponding entity IDs.
         """
