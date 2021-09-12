@@ -107,15 +107,12 @@ class FamilyTree(Generic[AnyRank, M]):
         if self.config.include_singletons:
             graph.add_nodes_from(entity.key for entity in self._entities if entity.key not in graph)
 
-        unknowns: set[str] = set()
         for key, in_degree in list(graph.in_degree()):
             if self.lookup[key].parent_key == ParentKeyStatus.UNKNOWN and in_degree == 0:
                 parent_key = f"{key} Parent"
-                unknowns.add(parent_key)
                 graph.add_edge(parent_key, key)
 
         self._digraph = graph
-        self.unknowns = unknowns
 
     @cached_property
     def lookup(self) -> dict[str, Entity[AnyRank, M]]:
