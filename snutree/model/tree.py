@@ -115,9 +115,6 @@ class FamilyTree(Generic[AnyRank, M]):
                 graph.add_edge(parent_key, key)
 
         self._digraph = graph
-        self._member_digraph = self._digraph.subgraph(
-            entity.key for entity in self._entities if entity.member is not None
-        )
         self.unknowns = unknowns
 
     @cached_property
@@ -141,15 +138,19 @@ class FamilyTree(Generic[AnyRank, M]):
         """
         Return a dict of entity_id to the entity_id of the root of the entity's family.
         """
+
+        member_graph = self._digraph.subgraph(entity.key for entity in self._entities if entity.member is not None)
+
         families: dict[str, str] = {}
-        for family_member_ids in weakly_connected_components(self._member_digraph):
+        for family_member_ids in weakly_connected_components(member_graph):
             (root_member_id,) = set(
                 family_member_id
-                for family_member_id, degree in self._member_digraph.subgraph(family_member_ids).in_degree()
+                for family_member_id, degree in member_graph.subgraph(family_member_ids).in_degree()
                 if degree == 0
             )
             for family_member_id in family_member_ids:
                 families[family_member_id] = root_member_id
+
         return families
 
     @cached_property
