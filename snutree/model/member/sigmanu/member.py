@@ -93,7 +93,7 @@ class Brother(BaseMember):
 
     @property
     def affiliation(self) -> str:
-        return f"ΔΑ\N{NO-BREAK SPACE}{self.status}"
+        return f"{self.chapter}\N{NO-BREAK SPACE}{self.status}"
 
 
 class Candidate(BaseMember):
@@ -119,7 +119,7 @@ class Candidate(BaseMember):
 
     @property
     def affiliation(self) -> str:
-        return f"ΔΑ\N{NO-BREAK SPACE}{self.status}"
+        return f"{self.chapter}\N{NO-BREAK SPACE}{self.status}"
 
 
 SigmaNuMember = Union[
