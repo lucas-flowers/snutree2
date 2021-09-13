@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import (
     Callable,
+    Iterable,
     Iterator,
     Optional,
     Sequence,
@@ -129,7 +130,7 @@ class ChapterId(Tuple[ChapterIdToken, ...]):  # https://github.com/python/mypy/i
         return f"{type(self).__name__}({str(self)!r})"
 
 
-@dataclass(order=True, init=False)
+@dataclass(order=True, init=False, unsafe_hash=True)
 class Affiliation:
 
     chapter_id: ChapterId
@@ -169,3 +170,22 @@ class Affiliation:
 
     def __str__(self) -> str:
         return f"{self.chapter_id}\N{NO-BREAK SPACE}{self.member_id}"
+
+
+class AffiliationList(list[Affiliation]):
+    @classmethod
+    def __get_validators__(cls) -> Iterable[Callable[[object], "AffiliationList"]]:
+        yield cls.validate
+
+    @classmethod
+    def validate(cls, values: object) -> "AffiliationList":
+        if isinstance(values, list):
+            assert all(isinstance(value, Affiliation) for value in values)
+            return cls(values)
+        elif isinstance(values, str):
+            if values:
+                return cls(map(Affiliation, values.split(",")))
+            else:
+                return cls([])
+        else:
+            raise TypeError("comma-delimited string or list of affiliation objects required")

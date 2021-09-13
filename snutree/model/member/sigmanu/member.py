@@ -1,8 +1,12 @@
 from enum import Enum
-from typing import List, Literal, Optional, Union
+from typing import Literal, Optional, Union
 
 from snutree.model.member.common import BaseMember
-from snutree.model.member.sigmanu.affiliation import Affiliation, ChapterId
+from snutree.model.member.sigmanu.affiliation import (
+    Affiliation,
+    AffiliationList,
+    ChapterId,
+)
 from snutree.model.member.sigmanu.name import get_full_preferred_name
 from snutree.model.semester import Semester
 
@@ -48,7 +52,7 @@ class Knight(BaseMember):
     last_name: str
 
     semester: Semester
-    affiliations: Optional[List[Affiliation]]
+    affiliations: Optional[AffiliationList]
 
     @property
     def name(self) -> str:
@@ -60,7 +64,16 @@ class Knight(BaseMember):
 
     @property
     def affiliation(self) -> str:
-        return f"ΔΑ\N{NO-BREAK SPACE}{self.badge}"
+        affiliations = list(
+            {
+                affiliation: None
+                for affiliation in [
+                    Affiliation(self.chapter, int(self.badge)),  # TODO Badge is int
+                    *list(self.affiliations or []),
+                ]
+            }
+        )
+        return ", ".join(map(str, affiliations))
 
 
 class Brother(BaseMember):
