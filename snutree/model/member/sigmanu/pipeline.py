@@ -39,11 +39,11 @@ class SigmaNuParser:
                     self.last_brother_key += 1
                     key = EntityId(f"Brother {self.last_brother_key}")
                 else:
-                    key = EntityId(member.badge)
+                    key = EntityId(str(member.badge))
 
                 parent_key: Union[EntityId, ParentKeyStatus]
                 if member.big_badge is not None:
-                    parent_key = EntityId(member.big_badge)
+                    parent_key = EntityId(str(member.big_badge))
                 elif key in self.root_member_badges:
                     parent_key = ParentKeyStatus.NONE
                 else:

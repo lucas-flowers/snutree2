@@ -25,8 +25,8 @@ class Expelled(BaseMember):
     status: Literal[Status.EXPELLED]
 
     chapter: ChapterId
-    badge: str
-    big_badge: Optional[str]
+    badge: int
+    big_badge: Optional[int]
 
     semester: Semester
 
@@ -44,8 +44,8 @@ class Knight(BaseMember):
     status: Literal[Status.ACTIVE, Status.LEFT_SCHOOL, Status.ALUMNI]
 
     chapter: ChapterId
-    badge: str
-    big_badge: Optional[str]
+    badge: int
+    big_badge: Optional[int]
 
     first_name: str
     preferred_name: Optional[str]
@@ -68,7 +68,7 @@ class Knight(BaseMember):
             {
                 affiliation: None
                 for affiliation in [
-                    Affiliation(self.chapter, int(self.badge)),  # TODO Badge is int
+                    Affiliation(self.chapter, self.badge),
                     *list(self.affiliations or []),
                 ]
             }
@@ -81,7 +81,7 @@ class Brother(BaseMember):
     status: Literal[Status.BROTHER]
 
     chapter: ChapterId
-    big_badge: Optional[str]
+    big_badge: Optional[int]
 
     last_name: str
 
@@ -101,7 +101,7 @@ class Candidate(BaseMember):
     status: Literal[Status.CANDIDATE]
 
     chapter: ChapterId
-    big_badge: Optional[str]
+    big_badge: Optional[int]
 
     first_name: str
     preferred_name: Optional[str]
