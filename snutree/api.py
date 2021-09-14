@@ -1,8 +1,7 @@
 import importlib
 from dataclasses import dataclass, field
 from itertools import chain
-from pathlib import Path
-from typing import ClassVar, Generic, Iterable, Protocol, Type, TypeVar
+from typing import ClassVar, Generic, Iterable, Protocol, TextIO, Type, TypeVar
 
 from snutree.model.entity import CustomEntity, Entity, EntityId
 from snutree.model.rank import AnyRank
@@ -15,7 +14,7 @@ class Reader(Protocol):
 
     extensions: ClassVar[list[str]]
 
-    def read(self, path: Path) -> Iterable[dict[str, str]]:
+    def read(self, stream: TextIO) -> Iterable[dict[str, str]]:
         ...
 
 
@@ -30,7 +29,7 @@ class Writer(Protocol[AnyRank, M]):
 
 
 class SnutreeApiProtocol(Protocol):
-    def run(self, input_paths: Iterable[Path]) -> str:
+    def run(self, input_files: Iterable[tuple[TextIO, str]]) -> str:
         ...
 
 
@@ -53,11 +52,11 @@ class SnutreeApi(Generic[AnyRank, M]):
         assert isinstance(api, SnutreeApi)
         return api
 
-    def run(self, input_paths: Iterable[Path]) -> str:
+    def run(self, input_files: Iterable[tuple[TextIO, str]]) -> str:
 
         readers = {extension: reader for reader in self.readers for extension in reader.extensions}
 
-        rows = (row for input_path in input_paths for row in readers[input_path.suffix].read(input_path))
+        rows = (row for input_file, extension in input_files for row in readers[extension].read(input_file))
 
         entities = self.parser.parse(rows)
 

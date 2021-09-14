@@ -1,6 +1,5 @@
 from contextlib import closing, contextmanager, nullcontext
 from dataclasses import dataclass
-from pathlib import Path
 from types import SimpleNamespace
 from typing import (
     ClassVar,
@@ -9,6 +8,7 @@ from typing import (
     Iterator,
     Optional,
     Protocol,
+    TextIO,
     TypedDict,
 )
 
@@ -69,9 +69,9 @@ class SqlReader:
                 password=self.config.sql["password"],
             )
 
-    def read(self, path: Path) -> Iterable[dict[str, str]]:
+    def read(self, stream: TextIO) -> Iterable[dict[str, str]]:
 
-        query = path.read_text()
+        query = stream.read()
 
         with self.forwarded() as config_sql:
             with closing(MySQLdb.Connect(**config_sql, use_unicode=True)) as connection:

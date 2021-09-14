@@ -1,12 +1,10 @@
 from csv import DictReader
-from pathlib import Path
-from typing import ClassVar, Iterable
+from typing import ClassVar, Iterable, TextIO
 
 
 class CsvReader:
 
     extensions: ClassVar[list[str]] = [".csv"]
 
-    def read(self, path: Path) -> Iterable[dict[str, str]]:
-        with path.open() as f:
-            yield from DictReader(f)
+    def read(self, stream: TextIO) -> Iterable[dict[str, str]]:
+        yield from DictReader(stream)
