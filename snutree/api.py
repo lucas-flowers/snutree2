@@ -14,6 +14,7 @@ from typing import (
     Type,
     TypeVar,
     Union,
+    runtime_checkable,
 )
 
 from snutree.model.entity import CustomEntity, Entity, EntityId
@@ -23,6 +24,7 @@ from snutree.model.tree import FamilyTree, FamilyTreeConfig
 M = TypeVar("M")
 
 
+@runtime_checkable
 class Reader(Protocol):
 
     extensions: ClassVar[list[str]]
