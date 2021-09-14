@@ -64,6 +64,10 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
     parser=SigmaNuParser(
         default_chapter_id=ChapterId("Delta Alpha"),
         require_semester=False,
+        root_member_badges={
+            # ΔΑ was knighted but, due to COVID-19, never received a big brother
+            "1498",
+        },
     ),
     custom_entities=[
         CustomEntity(
