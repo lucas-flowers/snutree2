@@ -1,12 +1,12 @@
 import json
-from typing import ClassVar, Iterable, TextIO
+from typing import IO, ClassVar, Iterable
 
 
 class JsonReader:
 
     extensions: ClassVar[list[str]] = [".json"]
 
-    def read(self, stream: TextIO) -> Iterable[dict[str, str]]:
+    def read(self, stream: IO[str]) -> Iterable[dict[str, str]]:
         objs: object = json.load(stream)
         assert isinstance(objs, list)
         yield from objs

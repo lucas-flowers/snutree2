@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterable, TextIO
 
 import pytest
 from _pytest.config import Config
@@ -17,11 +16,6 @@ class ExampleTestCase(TestCase):
     module_name: str
     input_paths: list[Path]
     output_path: Path
-
-    def input_files(self) -> Iterable[tuple[TextIO, str]]:
-        for input_path in self.input_paths:
-            with input_path.open("r") as f:
-                yield (f, input_path.suffix)
 
     @classmethod
     def generate(cls) -> list["ExampleTestCase"]:
@@ -50,7 +44,7 @@ class ExampleTestCase(TestCase):
 def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
 
     api: SnutreeApiProtocol = SnutreeApi.from_module_name(case.module_name)
-    actual = api.run(case.input_files())
+    actual = api.run(case.input_paths)
 
     # Do not directly assert equality, to avoid generating pytest comparison
     # output, which is really slow for the large files used in these test cases

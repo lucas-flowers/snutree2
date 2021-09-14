@@ -2,13 +2,13 @@ from contextlib import closing, contextmanager, nullcontext
 from dataclasses import dataclass
 from types import SimpleNamespace
 from typing import (
+    IO,
     ClassVar,
     ContextManager,
     Iterable,
     Iterator,
     Optional,
     Protocol,
-    TextIO,
     TypedDict,
 )
 
@@ -69,7 +69,7 @@ class SqlReader:
                 password=self.config.sql["password"],
             )
 
-    def read(self, stream: TextIO) -> Iterable[dict[str, str]]:
+    def read(self, stream: IO[str]) -> Iterable[dict[str, str]]:
 
         query = stream.read()
 

@@ -1,7 +1,20 @@
 import importlib
 from dataclasses import dataclass, field
+from io import TextIOWrapper
 from itertools import chain
-from typing import ClassVar, Generic, Iterable, Protocol, TextIO, Type, TypeVar
+from os import PathLike
+from pathlib import Path
+from typing import (
+    IO,
+    ClassVar,
+    Generic,
+    Iterable,
+    Iterator,
+    Protocol,
+    Type,
+    TypeVar,
+    Union,
+)
 
 from snutree.model.entity import CustomEntity, Entity, EntityId
 from snutree.model.rank import AnyRank
@@ -14,7 +27,7 @@ class Reader(Protocol):
 
     extensions: ClassVar[list[str]]
 
-    def read(self, stream: TextIO) -> Iterable[dict[str, str]]:
+    def read(self, stream: IO[str]) -> Iterable[dict[str, str]]:
         ...
 
 
@@ -28,8 +41,15 @@ class Writer(Protocol[AnyRank, M]):
         ...
 
 
+InputFile = Union[
+    Path,
+    IO[str],
+    tuple[TextIOWrapper, str],
+]
+
+
 class SnutreeApiProtocol(Protocol):
-    def run(self, input_files: Iterable[tuple[TextIO, str]]) -> str:
+    def run(self, input_files: Iterable[InputFile]) -> str:
         ...
 
 
@@ -52,11 +72,21 @@ class SnutreeApi(Generic[AnyRank, M]):
         assert isinstance(api, SnutreeApi)
         return api
 
-    def run(self, input_files: Iterable[tuple[TextIO, str]]) -> str:
+    def read(self, input_files: Iterable[InputFile]) -> Iterator[tuple[IO[str], str]]:
+        for input_file in input_files:
+            if isinstance(input_file, PathLike):
+                with input_file.open("r") as f:
+                    yield f, input_file.suffix
+            elif isinstance(input_file, IO):
+                yield input_file, input_file.name
+            else:
+                yield input_file
+
+    def run(self, input_files: Iterable[InputFile]) -> str:
 
         readers = {extension: reader for reader in self.readers for extension in reader.extensions}
 
-        rows = (row for input_file, extension in input_files for row in readers[extension].read(input_file))
+        rows = (row for input_file, extension in self.read(input_files) for row in readers[extension].read(input_file))
 
         entities = self.parser.parse(rows)
 
