@@ -1,6 +1,7 @@
 import re
 from dataclasses import dataclass
 from enum import Enum
+from functools import total_ordering
 from typing import (
     Callable,
     Iterable,
@@ -19,6 +20,7 @@ class Token:
     glyphs: Sequence[str]
 
 
+@total_ordering
 class ChapterIdToken(Enum):
     """
     Valid letters in a chapter designation.
@@ -54,6 +56,17 @@ class ChapterIdToken(Enum):
     # Because of Eta Mu (A) and (B) Chapters
     A = Token("(A)", ("(A)", "(a)"))
     B = Token("(B)", ("(B)", "(b)"))
+
+    def ordinal(self) -> int:
+        # Yeah this is inefficient without caching, bite me
+        token: object
+        ordinals: dict[object, int] = {}
+        for i, token in enumerate(type(self)):
+            ordinals[token] = i
+        return ordinals[self]
+
+    def __lt__(self: "ChapterIdToken", other: "ChapterIdToken") -> bool:
+        return self.ordinal() < other.ordinal()
 
 
 class ChapterId(Tuple[ChapterIdToken, ...]):  # https://github.com/python/mypy/issues/9522

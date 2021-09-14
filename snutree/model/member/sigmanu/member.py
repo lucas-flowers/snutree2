@@ -65,11 +65,13 @@ class Knight(BaseMember):
     @property
     def affiliation(self) -> str:
         affiliations = list(
+            # Sort the list of affiliations, then remove duplicates while still
+            # ensuring the primary affiliation is listed first.
             {
                 affiliation: None
                 for affiliation in [
                     Affiliation(self.chapter, self.badge),
-                    *list(self.affiliations or []),
+                    *sorted(self.affiliations or []),
                 ]
             }
         )
