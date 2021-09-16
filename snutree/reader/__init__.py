@@ -1,8 +1,31 @@
 import importlib
 import pkgutil
+from dataclasses import dataclass
 from pathlib import Path
+from typing import (
+    IO,
+    ClassVar,
+    Iterable,
+    Optional,
+    Protocol,
+    runtime_checkable,
+)
 
-from snutree.api import Reader
+from snutree.reader.sql import SqlReaderConfig
+
+
+@dataclass
+class ReaderConfigs:
+    sql: Optional[SqlReaderConfig] = None
+
+
+@runtime_checkable
+class Reader(Protocol):
+
+    extensions: ClassVar[list[str]]
+
+    def read(self, stream: IO[str]) -> Iterable[dict[str, str]]:
+        ...
 
 
 def _get_reader_formats(path: Path) -> set[str]:

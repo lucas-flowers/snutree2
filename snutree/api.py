@@ -6,7 +6,6 @@ from os import PathLike
 from pathlib import Path
 from typing import (
     IO,
-    ClassVar,
     Generic,
     Iterable,
     Iterator,
@@ -14,23 +13,18 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    runtime_checkable,
 )
 
 from snutree.model.entity import CustomEntity, Entity, EntityId
 from snutree.model.rank import AnyRank
 from snutree.model.tree import FamilyTree, FamilyTreeConfig
+from snutree.reader import Reader, ReaderConfigs
+from snutree.reader.csv import CsvReader
+from snutree.reader.json import JsonReader
+from snutree.reader.sql import SqlReader
+from snutree.writer.dot import DotWriter, DotWriterConfig
 
 M = TypeVar("M")
-
-
-@runtime_checkable
-class Reader(Protocol):
-
-    extensions: ClassVar[list[str]]
-
-    def read(self, stream: IO[str]) -> Iterable[dict[str, str]]:
-        ...
 
 
 class Parser(Protocol[AnyRank, M]):
@@ -50,6 +44,19 @@ InputFile = Union[
 ]
 
 
+@dataclass
+class SnutreeConfig(Generic[AnyRank, M]):
+
+    rank_type: Type[AnyRank]
+    parser: Parser[AnyRank, M]
+    tree: FamilyTreeConfig
+    writer: DotWriterConfig[AnyRank, M]
+    readers: ReaderConfigs = field(default_factory=ReaderConfigs)
+
+    custom_entities: list[CustomEntity[AnyRank, M]] = field(default_factory=list)
+    custom_relationships: set[tuple[str, str]] = field(default_factory=set)
+
+
 class SnutreeApiProtocol(Protocol):
     def run(self, input_files: Iterable[InputFile]) -> str:
         ...
@@ -64,15 +71,31 @@ class SnutreeApi(Generic[AnyRank, M]):
     tree_config: FamilyTreeConfig
     writer: Writer[AnyRank, M]
 
-    custom_entities: list[CustomEntity[AnyRank, M]] = field(default_factory=list)
-    custom_relationships: set[tuple[str, str]] = field(default_factory=set)
+    custom_entities: list[CustomEntity[AnyRank, M]]
+    custom_relationships: set[tuple[str, str]]
 
     @classmethod
-    def from_module_name(cls, module_name: str) -> "SnutreeApi[AnyRank, M]":
+    def from_config(cls, config: SnutreeConfig[AnyRank, M]) -> "SnutreeApi[AnyRank, M]":
+        return cls(
+            rank_type=config.rank_type,
+            readers=[
+                CsvReader(),
+                JsonReader(),
+                *([SqlReader(config.readers.sql)] if config.readers.sql is not None else []),
+            ],
+            parser=config.parser,
+            tree_config=config.tree,
+            writer=DotWriter(config.writer),
+            custom_entities=config.custom_entities,
+            custom_relationships=config.custom_relationships,
+        )
+
+    @classmethod
+    def from_module(cls, module_name: str) -> "SnutreeApi[AnyRank, M]":
         module = importlib.import_module(module_name)
-        api: object = getattr(module, "__snutree__")
-        assert isinstance(api, SnutreeApi)
-        return api
+        config: object = getattr(module, "__snutree__")
+        assert isinstance(config, SnutreeConfig)
+        return cls.from_config(config)
 
     def read(self, input_files: Iterable[InputFile]) -> Iterator[tuple[IO[str], str]]:
         for input_file in input_files:

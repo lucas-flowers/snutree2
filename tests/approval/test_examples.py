@@ -43,7 +43,7 @@ class ExampleTestCase(TestCase):
 @pytest.mark.parametrize("case", ExampleTestCase.generate())
 def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
 
-    api: SnutreeApiProtocol = SnutreeApi.from_module_name(case.module_name)
+    api: SnutreeApiProtocol = SnutreeApi.from_module(case.module_name)
     actual = api.run(case.input_paths)
 
     # Do not directly assert equality, to avoid generating pytest comparison

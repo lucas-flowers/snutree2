@@ -1,21 +1,18 @@
 from collections import defaultdict, deque
 
-from snutree.api import SnutreeApi
+from snutree.api import SnutreeConfig
 from snutree.model.entity import CustomEntity, ParentKeyStatus
 from snutree.model.member.sigmanu.affiliation import ChapterId
 from snutree.model.member.sigmanu.member import SigmaNuMember
 from snutree.model.member.sigmanu.pipeline import SigmaNuParser
 from snutree.model.semester import Semester
 from snutree.model.tree import FamilyTreeConfig
-from snutree.reader.csv import CsvReader
-from snutree.reader.json import JsonReader
 from snutree.tool import x11
 from snutree.tool.cycler import Cycler
 from snutree.writer.dot import (
     DefaultAttributesConfig,
     DefaultEdgeAttributesConfig,
     DefaultNodeAttributesConfig,
-    DotWriter,
     DotWriterConfig,
     DynamicEdgeAttributesConfig,
     DynamicNodeAttributesConfig,
@@ -55,12 +52,8 @@ family_colors = defaultdict(
     },
 )
 
-__snutree__ = SnutreeApi[Semester, SigmaNuMember](
+__snutree__ = SnutreeConfig[Semester, SigmaNuMember](
     rank_type=Semester,
-    readers=[
-        CsvReader(),
-        JsonReader(),
-    ],
     parser=SigmaNuParser(
         default_chapter_id=ChapterId("Delta Alpha"),
         require_semester=False,
@@ -109,106 +102,104 @@ __snutree__ = SnutreeApi[Semester, SigmaNuMember](
         ("Reorganization", "1050"),
         ("Reorganization", "1051"),
     },
-    tree_config=FamilyTreeConfig(
+    tree=FamilyTreeConfig(
         seed=6584,
         include_unknowns=True,
         include_singletons=False,
         include_families=None,
         rank_max_offset=1,
     ),
-    writer=DotWriter(
-        DotWriterConfig(
-            draw_ranks=True,
-            graph=GraphsConfig(
-                defaults=DefaultAttributesConfig(
-                    root=dict(
-                        size="80",
-                        ratio="compress",
-                        pad=".5, .5",
-                        ranksep="0.15",
-                        nodesep="0.5",
-                        label="Family Tree: Delta Alpha Chapter of Sigma Nu Fraternity",
-                        labelloc="t",
-                        fontsize="110",
-                        concentrate="False",
-                    ),
+    writer=DotWriterConfig(
+        draw_ranks=True,
+        graph=GraphsConfig(
+            defaults=DefaultAttributesConfig(
+                root=dict(
+                    size="80",
+                    ratio="compress",
+                    pad=".5, .5",
+                    ranksep="0.15",
+                    nodesep="0.5",
+                    label="Family Tree: Delta Alpha Chapter of Sigma Nu Fraternity",
+                    labelloc="t",
+                    fontsize="110",
+                    concentrate="False",
                 ),
             ),
-            node=NodesConfig(
-                defaults=DefaultNodeAttributesConfig(
-                    root=dict(
-                        style="filled",
-                        shape="box",
-                        penwidth="2",
-                        width="1.63",
-                        fontname="dejavu sans",
+        ),
+        node=NodesConfig(
+            defaults=DefaultNodeAttributesConfig(
+                root=dict(
+                    style="filled",
+                    shape="box",
+                    penwidth="2",
+                    width="1.63",
+                    fontname="dejavu sans",
+                ),
+                entity=dict(
+                    fillcolor=".11 .71 1.",
+                ),
+                unknown=dict(
+                    height="0",
+                    width="0",
+                    style="invis",
+                ),
+                rank=dict(
+                    color="none",
+                    fontsize="20",
+                    fontname="dejavu serif",
+                ),
+            ),
+            attributes=DynamicNodeAttributesConfig(
+                member=lambda member: {
+                    "label": r"\n".join([member.name, member.affiliation]),
+                },
+                rank=lambda rank: {
+                    "label": str(rank),
+                },
+                family=lambda family_id: {
+                    "color": family_colors[family_id],
+                },
+                by_key={
+                    "Reorganization": dict(
+                        height="0.6",
+                        label="Reorganization",
+                        shape="oval",
                     ),
-                    entity=dict(
-                        fillcolor=".11 .71 1.",
-                    ),
-                    unknown=dict(
-                        height="0",
+                    "Spacer": dict(
+                        height="1.5",
+                        style="invis",
                         width="0",
-                        style="invis",
                     ),
-                    rank=dict(
+                    "Kappa Delta": dict(
+                        label=r"Kappa Delta Chapter\nDuquesne University",
                         color="none",
-                        fontsize="20",
-                        fontname="dejavu serif",
+                        fillcolor="none",
                     ),
+                },
+            ),
+        ),
+        edge=EdgesConfig(
+            defaults=DefaultEdgeAttributesConfig(
+                root=dict(
+                    arrowhead="none",
                 ),
-                attributes=DynamicNodeAttributesConfig(
-                    member=lambda member: {
-                        "label": r"\n".join([member.name, member.affiliation]),
-                    },
-                    rank=lambda rank: {
-                        "label": str(rank),
-                    },
-                    family=lambda family_id: {
-                        "color": family_colors[family_id],
-                    },
-                    by_key={
-                        "Reorganization": dict(
-                            height="0.6",
-                            label="Reorganization",
-                            shape="oval",
-                        ),
-                        "Spacer": dict(
-                            height="1.5",
-                            style="invis",
-                            width="0",
-                        ),
-                        "Kappa Delta": dict(
-                            label=r"Kappa Delta Chapter\nDuquesne University",
-                            color="none",
-                            fillcolor="none",
-                        ),
-                    },
+                unknown=dict(
+                    style="dotted",
+                ),
+                rank=dict(
+                    style="invis",
                 ),
             ),
-            edge=EdgesConfig(
-                defaults=DefaultEdgeAttributesConfig(
-                    root=dict(
-                        arrowhead="none",
-                    ),
-                    unknown=dict(
-                        style="dotted",
-                    ),
-                    rank=dict(
-                        style="invis",
-                    ),
-                ),
-                attributes=DynamicEdgeAttributesConfig(
-                    by_key={
-                        ("Reorganization", "1031"): dict(style="dashed"),
-                        ("Reorganization", "1034"): dict(style="dashed"),
-                        ("Reorganization", "1035"): dict(style="dashed"),
-                        ("Reorganization", "1036"): dict(style="dashed"),
-                        ("Reorganization", "1038"): dict(style="dashed"),
-                        ("Reorganization", "1039"): dict(style="dashed"),
-                        ("Reorganization", "1041"): dict(style="dashed"),
-                    }
-                ),
+            attributes=DynamicEdgeAttributesConfig(
+                by_key={
+                    ("Reorganization", "1031"): dict(style="dashed"),
+                    ("Reorganization", "1034"): dict(style="dashed"),
+                    ("Reorganization", "1035"): dict(style="dashed"),
+                    ("Reorganization", "1036"): dict(style="dashed"),
+                    ("Reorganization", "1038"): dict(style="dashed"),
+                    ("Reorganization", "1039"): dict(style="dashed"),
+                    ("Reorganization", "1041"): dict(style="dashed"),
+                }
             ),
         ),
     ),
