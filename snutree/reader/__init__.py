@@ -39,4 +39,4 @@ def _get_reader_formats(path: Path) -> set[str]:
     return input_formats
 
 
-INPUT_FORMATS: set[str] = _get_reader_formats(Path(__file__).parent)
+INPUT_FORMATS = _get_reader_formats(Path(__file__).parent)
