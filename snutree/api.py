@@ -49,7 +49,7 @@ class SnutreeConfig(Generic[AnyRank, M]):
 
     rank_type: Type[AnyRank]
     parser: Parser[AnyRank, M]
-    tree: FamilyTreeConfig
+    tree: FamilyTreeConfig[AnyRank]
     writer: DotWriterConfig[AnyRank, M]
     readers: ReaderConfigs = field(default_factory=ReaderConfigs)
 
@@ -68,7 +68,7 @@ class SnutreeApi(Generic[AnyRank, M]):
     rank_type: Type[AnyRank]
     readers: list[Reader]
     parser: Parser[AnyRank, M]
-    tree_config: FamilyTreeConfig
+    tree_config: FamilyTreeConfig[AnyRank]
     writer: Writer[AnyRank, M]
 
     custom_entities: list[CustomEntity[AnyRank, M]]

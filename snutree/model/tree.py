@@ -7,6 +7,7 @@ from operator import index
 from typing import (
     Generic,
     Iterable,
+    Literal,
     Mapping,
     Optional,
     Sequence,
@@ -34,7 +35,7 @@ class FamilyId(EntityId):
 
 
 @dataclass
-class FamilyTreeConfig:
+class FamilyTreeConfig(Generic[AnyRank]):  # pylint: disable=too-many-instance-attributes
 
     seed: int = 0
     include_unknowns: bool = True
@@ -42,16 +43,23 @@ class FamilyTreeConfig:
     include_families: Optional[set[str]] = None
 
     unknown_offset: int = 1
+
+    rank_min: Optional[AnyRank] = None
     rank_min_offset: int = 0
+
+    rank_max: Optional[AnyRank] = None
     rank_max_offset: int = 0
 
     def __post_init__(self) -> None:
         if self.unknown_offset <= 0:
             raise ValueError("unknown member rank offsets must be strictly positive")
         if self.rank_min_offset > 0:
-            raise NotImplementedError("positive minimum rank offsets (i.e., entity filtering by rank) not implemented")
+            raise ValueError("positive minimum rank offsets not implemented")
         if self.rank_max_offset < 0:
-            raise NotImplementedError("negative maximum rank offsets (i.e., entity filtering by rank) not implemented")
+            raise ValueError("negative maximum rank offsets not implemented")
+        if self.rank_min is not None and self.rank_max is not None:
+            if index(self.rank_min) > index(self.rank_max):
+                raise ValueError("min rank must be less than or equal to max rank")
 
 
 class FamilyTree(Generic[AnyRank, M]):
@@ -64,7 +72,7 @@ class FamilyTree(Generic[AnyRank, M]):
         rank_type: Type[AnyRank],
         entities: Iterable[Entity[AnyRank, M]],
         relationships: set[tuple[EntityId, EntityId]],
-        config: Optional[FamilyTreeConfig] = None,
+        config: Optional[FamilyTreeConfig[AnyRank]] = None,
     ) -> None:
 
         # TODO Verify identifiers
@@ -103,11 +111,15 @@ class FamilyTree(Generic[AnyRank, M]):
 
         graph: DiGraph[EntityId] = DiGraph()
 
+        min_rank = float("-inf") if self.config.rank_min is None else index(self.config.rank_min)
+        max_rank = index(self.config.rank_max) if self.config.rank_max is not None else float("inf")
+        drawn_entities = [entity for entity in self._entities if min_rank <= index(entity.rank) <= max_rank]
+
         # Add all entities with relationships, or that are known to have no
-        # parents. These are always drawn on the tree unless rank filtering is
-        # in place.
+        # parents. These are always drawn on the tree unless they were removed
+        # through rank filtering.
         graph.add_edges_from(self._relationships)
-        for entity in self._entities:
+        for entity in drawn_entities:
             if entity.parent_key == ParentKeyStatus.NONE:
                 graph.add_node(entity.key)
             elif entity.parent_key == ParentKeyStatus.UNKNOWN:
@@ -119,7 +131,7 @@ class FamilyTree(Generic[AnyRank, M]):
         # Add all other entities (i.e., those without any relationships), if
         # this is desired.
         if self.config.include_singletons:
-            graph.add_nodes_from(entity.key for entity in self._entities if entity.key not in graph)
+            graph.add_nodes_from(entity.key for entity in drawn_entities if entity.key not in graph)
 
         # If desired, keep only the families requested
         if self.config.include_families is not None:
@@ -188,27 +200,67 @@ class FamilyTree(Generic[AnyRank, M]):
         return {rank: unsorted_cohorts.get(rank) or set() for rank in self.ranks}
 
     @cached_property
+    def max_rank(self) -> Optional[AnyRank]:
+        return self.bound(sign=1)
+
+    @cached_property
+    def min_rank(self) -> Optional[AnyRank]:
+        return self.bound(sign=-1)
+
+    def bound(self, *, sign: Literal[-1, 1]) -> Optional[AnyRank]:
+        """
+        Return the maximum rank to be included, plus the configured rank offset.
+
+        Return None if there are no ranks.
+        """
+
+        if sign > 0:
+            max_configured = self.config.rank_max
+            offset = self.config.rank_max_offset
+        else:
+            max_configured = self.config.rank_min
+            offset = self.config.rank_min_offset
+
+        max_used: Optional[AnyRank] = None
+        for key in self.graph:
+            entity = self.lookup[key]
+            if max_used is None or sign * index(entity.rank) > sign * index(max_used):
+                max_used = entity.rank
+
+        if max_used is None:
+            bound = self.config.rank_max
+        elif max_configured is None:
+            bound = max_used
+        else:
+            bound = self.rank_type(
+                sign
+                * min(
+                    sign * index(max_configured),
+                    sign * index(max_used),
+                )
+            )
+
+        if bound is None:
+            return None
+        else:
+            return self.rank_type(index(bound) + offset)
+
+    @cached_property
     def ranks(self) -> Sequence[AnyRank]:
         """
         Return a list of all the ranks of the tree, in order.
         """
-
-        if len(self.entities) == 0:
+        if self.min_rank is None and self.max_rank is None:
             return []
-
-        initial_rank = next(iter(self.entities.values())).rank
-        min_rank, max_rank = initial_rank, initial_rank
-        for entity in self.entities.values():
-            rank = entity.rank
-            if index(rank) < index(min_rank):
-                min_rank = rank
-            if index(rank) > index(max_rank):
-                max_rank = rank
-
-        return [
-            self.rank_type(i)
-            for i in range(
-                index(min_rank) + self.config.rank_min_offset,
-                index(max_rank) + self.config.rank_max_offset + 1,
-            )
-        ]
+        elif self.min_rank is not None and self.max_rank is None:
+            return [self.min_rank]
+        elif self.min_rank is None and self.max_rank is not None:
+            return [self.max_rank]
+        else:
+            return [
+                self.rank_type(i)
+                for i in range(
+                    index(self.min_rank),
+                    index(self.max_rank) + 1,
+                )
+            ]

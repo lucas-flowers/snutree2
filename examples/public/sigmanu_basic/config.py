@@ -107,6 +107,9 @@ __snutree__ = SnutreeConfig[Semester, SigmaNuMember](
         include_unknowns=True,
         include_singletons=False,
         include_families=None,
+        # Spring 1950 is right before the start of the earliest non-singleton family
+        rank_min=Semester("Spring 1950"),
+        rank_max=None,
         rank_max_offset=1,
     ),
     writer=DotWriterConfig(
