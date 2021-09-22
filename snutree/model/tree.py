@@ -132,6 +132,13 @@ class FamilyTree(Generic[AnyRank, M]):
         return graph
 
     @cached_property
+    def singletons(self) -> set[EntityId]:
+        """
+        Return all entities that have no known parents.
+        """
+        return {entity.key for entity in self._entities if entity.key not in self.core}
+
+    @cached_property
     def graph(self) -> "DiGraph[EntityId]":
         """
         Return the networkx graph underlying this tree.
@@ -139,10 +146,8 @@ class FamilyTree(Generic[AnyRank, M]):
 
         graph: DiGraph[EntityId] = DiGraph(self.core)
 
-        # Add all other entities (i.e., those without any relationships), if
-        # this is desired.
         if self.config.include_singletons:
-            graph.add_nodes_from(entity.key for entity in self._entities if entity.key not in graph)
+            graph.add_nodes_from(self.singletons)
 
         # If desired, keep only the families requested
         if self.config.include_families is not None:
