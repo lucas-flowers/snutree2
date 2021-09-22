@@ -39,6 +39,7 @@ class DefaultAttributesConfig:
 @dataclass
 class DefaultNodeAttributesConfig(DefaultAttributesConfig):
     unknown: dict[str, Id] = field(default_factory=dict)
+    singleton: dict[str, Id] = field(default_factory=dict)
 
 
 @dataclass
@@ -189,6 +190,7 @@ class DotWriter(Generic[AnyRank, M]):
                 entity.key,
                 **self.config.node.attributes.entity(entity),
                 **(self.config.node.defaults.unknown if isinstance(entity, UnknownEntity) else {}),
+                **(self.config.node.defaults.singleton if entity.key in tree.singletons else {}),
                 **(self.config.node.attributes.family(tree.families[key]) if key in tree.families else {}),
                 **(self.config.node.attributes.member(entity.member) if entity.member is not None else {}),
                 **self.config.node.attributes.by_key.get(key, {}),
