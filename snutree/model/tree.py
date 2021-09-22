@@ -110,16 +110,15 @@ class FamilyTree(Generic[AnyRank, M]):
         }
 
     @cached_property
-    def graph(self) -> "DiGraph[EntityId]":
+    def core(self) -> "DiGraph[EntityId]":
         """
-        Return the networkx graph underlying this tree.
+        Return the graph containing all entities that have relationships, or
+        that are *known* to have no relationships. These entities are always
+        drawn on the tree.
         """
 
         graph: DiGraph[EntityId] = DiGraph()
 
-        # Add all entities with relationships, or that are known to have no
-        # parents. These are always drawn on the tree unless they were removed
-        # through rank filtering.
         graph.add_edges_from(self._relationships)
         for entity in self._entities:
             if entity.parent_key == ParentKeyStatus.NONE:
@@ -129,6 +128,16 @@ class FamilyTree(Generic[AnyRank, M]):
             else:
                 assert isinstance(entity.parent_key, EntityId)
                 graph.add_edge(entity.parent_key, entity.key)
+
+        return graph
+
+    @cached_property
+    def graph(self) -> "DiGraph[EntityId]":
+        """
+        Return the networkx graph underlying this tree.
+        """
+
+        graph: DiGraph[EntityId] = DiGraph(self.core)
 
         # Add all other entities (i.e., those without any relationships), if
         # this is desired.
