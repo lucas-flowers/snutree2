@@ -80,7 +80,13 @@ class FamilyTree(Generic[AnyRank, M]):
 
         self.rank_type = rank_type
         self.config = config or FamilyTreeConfig()
-        self._entities: Sequence[Entity[AnyRank, M]] = list(entities)
+
+        min_rank = float("-inf") if self.config.rank_min is None else index(self.config.rank_min)
+        max_rank = index(self.config.rank_max) if self.config.rank_max is not None else float("inf")
+        self._entities: Sequence[Entity[AnyRank, M]] = [
+            entity for entity in entities if min_rank <= index(entity.rank) <= max_rank
+        ]
+
         self._relationships: Set[tuple[EntityId, EntityId]] = relationships
 
     @cached_property
@@ -111,15 +117,11 @@ class FamilyTree(Generic[AnyRank, M]):
 
         graph: DiGraph[EntityId] = DiGraph()
 
-        min_rank = float("-inf") if self.config.rank_min is None else index(self.config.rank_min)
-        max_rank = index(self.config.rank_max) if self.config.rank_max is not None else float("inf")
-        drawn_entities = [entity for entity in self._entities if min_rank <= index(entity.rank) <= max_rank]
-
         # Add all entities with relationships, or that are known to have no
         # parents. These are always drawn on the tree unless they were removed
         # through rank filtering.
         graph.add_edges_from(self._relationships)
-        for entity in drawn_entities:
+        for entity in self._entities:
             if entity.parent_key == ParentKeyStatus.NONE:
                 graph.add_node(entity.key)
             elif entity.parent_key == ParentKeyStatus.UNKNOWN:
@@ -131,7 +133,7 @@ class FamilyTree(Generic[AnyRank, M]):
         # Add all other entities (i.e., those without any relationships), if
         # this is desired.
         if self.config.include_singletons:
-            graph.add_nodes_from(entity.key for entity in drawn_entities if entity.key not in graph)
+            graph.add_nodes_from(entity.key for entity in self._entities if entity.key not in graph)
 
         # If desired, keep only the families requested
         if self.config.include_families is not None:
