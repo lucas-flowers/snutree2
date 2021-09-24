@@ -60,6 +60,23 @@ __snutree__ = SnutreeConfig[Semester, SigmaNuMember](
         root_member_badges={
             # ΔΑ was knighted but, due to COVID-19, never received a big brother
             "1498",
+            # Refounders
+            "1031",
+            "1034",
+            "1035",
+            "1036",
+            "1038",
+            "1039",
+            "1041",
+            "1043",
+            "1044",
+            "1045",
+            "1046",
+            "1047",
+            "1048",
+            "1049",
+            "1050",
+            "1051",
         },
     ),
     custom_entities=[
