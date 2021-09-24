@@ -85,11 +85,6 @@ __snutree__ = SnutreeConfig[Semester, SigmaNuMember](
             key="Reorganization",
             rank=Semester("Spring 1989"),
         ),
-        CustomEntity(
-            parent_key=ParentKeyStatus.NONE,
-            key="Spacer",
-            rank=Semester("Spring 1989"),
-        ),
         # The home chapter of ΔA 986, who transferred to CWRU from Duquesne
         CustomEntity(
             parent_key=ParentKeyStatus.NONE,
@@ -120,12 +115,11 @@ __snutree__ = SnutreeConfig[Semester, SigmaNuMember](
         ("Reorganization", "1051"),
     },
     tree=FamilyTreeConfig(
-        seed=6584,
+        seed=5034,
         include_unknowns=True,
-        include_singletons=False,
+        include_singletons=True,
         include_families=None,
-        # Spring 1950 is right before the start of the earliest non-singleton family
-        rank_min=Semester("Spring 1950"),
+        rank_min=Semester("Spring 1950"),  # Spring 1950 is right before the start of the earliest non-singleton family
         rank_max=None,
         rank_max_offset=1,
     ),
@@ -137,12 +131,14 @@ __snutree__ = SnutreeConfig[Semester, SigmaNuMember](
                     size="80",
                     ratio="compress",
                     pad=".5, .5",
-                    ranksep="0.15",
-                    nodesep="0.5",
+                    ranksep=".25",
+                    nodesep=".3",
                     label="Family Tree: Delta Alpha Chapter of Sigma Nu Fraternity",
                     labelloc="t",
                     fontsize="110",
-                    concentrate="False",
+                    concentrate=False,
+                    mclimit=64,
+                    splines="polyline",
                 ),
             ),
         ),
@@ -151,9 +147,11 @@ __snutree__ = SnutreeConfig[Semester, SigmaNuMember](
                 root=dict(
                     style="filled",
                     shape="box",
-                    penwidth="2",
-                    width="1.63",
+                    penwidth=2,
+                    height="0.5",
+                    width="0",
                     fontname="dejavu sans",
+                    margin=".04,.02",
                 ),
                 entity=dict(
                     fillcolor=".11 .71 1.",
@@ -163,10 +161,16 @@ __snutree__ = SnutreeConfig[Semester, SigmaNuMember](
                     width="0",
                     style="invis",
                 ),
+                singleton=dict(
+                    penwidth=0,
+                    width=0,
+                    style="",
+                ),
                 rank=dict(
                     color="none",
                     fontsize="20",
                     fontname="dejavu serif",
+                    height="0.55",  # Make a little taller than other nodes to allow space for edges
                 ),
             ),
             attributes=DynamicNodeAttributesConfig(
@@ -184,11 +188,6 @@ __snutree__ = SnutreeConfig[Semester, SigmaNuMember](
                         height="0.6",
                         label="Reorganization",
                         shape="oval",
-                    ),
-                    "Spacer": dict(
-                        height="1.5",
-                        style="invis",
-                        width="0",
                     ),
                     "Kappa Delta": dict(
                         label=r"Kappa Delta Chapter\nDuquesne University",
