@@ -189,9 +189,19 @@ class FamilyTree(Generic[AnyRank, M]):
         """
         Return a dict of entity_ids for this tree, sorted consistently.
         """
+
+        rng = random.Random(self.config.seed)
         components = sorted(weakly_connected_components(self.graph), key=min)
-        random.Random(self.config.seed).shuffle(components)
-        return {key: self.lookup[key] for component in components for key in sorted(component)}
+        rng.shuffle(components)
+
+        entities: dict[EntityId, Entity[AnyRank, M]] = {}
+        for component in components:
+            entity_ids: list[EntityId] = list(sorted(component))
+            rng.shuffle(entity_ids)
+            for key in entity_ids:
+                entities[key] = self.lookup[key]
+
+        return entities
 
     @cached_property
     def relationships(self) -> Sequence[tuple[EntityId, EntityId]]:

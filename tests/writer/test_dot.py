@@ -66,8 +66,8 @@ def test_write_family_tree() -> None:
             }
             subgraph "members" {
                 "100" [label="test"];
-                "50" [label="test"];
                 "a";
+                "50" [label="test"];
                 "i";
                 "ii";
                 "50" -> "100";
