@@ -8,7 +8,7 @@ from typing import (
     overload,
 )
 
-# pylint: disable=unused-argument,multiple-statements,non-iterator-returned
+# pylint: disable=unused-argument,multiple-statements
 
 T = TypeVar("T")
 

@@ -82,11 +82,11 @@ class ChapterId(Tuple[ChapterIdToken, ...]):  # https://github.com/python/mypy/i
 
     TOKEN_GLYPH = "|".join(re.escape(glyph) for token in ChapterIdToken for glyph in token.value.glyphs)
 
-    CHAPTER_NAME = fr"({TOKEN_NAME})(\s+({TOKEN_NAME}))*"
+    CHAPTER_NAME = rf"({TOKEN_NAME})(\s+({TOKEN_NAME}))*"
 
-    CHAPTER_CODE = fr"({TOKEN_GLYPH})+"
+    CHAPTER_CODE = rf"({TOKEN_GLYPH})+"
 
-    CHAPTER_ID = fr"(?P<chapter_name>{CHAPTER_NAME})|(?P<chapter_code>{CHAPTER_CODE})"
+    CHAPTER_ID = rf"(?P<chapter_name>{CHAPTER_NAME})|(?P<chapter_code>{CHAPTER_CODE})"
 
     PATTERN_CHAPTER_ID = re.compile(f"^({CHAPTER_ID})$")
     PATTERN_TOKEN_NAME = re.compile(f"{TOKEN_NAME}")
@@ -153,7 +153,7 @@ class Affiliation:
 
     MEMBER_ID = "0*(?P<member_id>[0-9]+)"  # Not exactly, but there's only two exceptions in all Sigma Nu
 
-    AFFILIATION = fr"\s*({CHAPTER_IDENTIFIER})\s+({MEMBER_ID})\s*"
+    AFFILIATION = rf"\s*({CHAPTER_IDENTIFIER})\s+({MEMBER_ID})\s*"
 
     PATTERN_AFFILIATION = re.compile(f"^{AFFILIATION}$")
 

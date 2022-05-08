@@ -24,6 +24,7 @@ disable=
     missing-docstring,
     no-self-use,
     fixme,
+    consider-using-f-string,
     # Mypy does it better without as many false positives
     typecheck,
     iterable_check,

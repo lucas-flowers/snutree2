@@ -97,7 +97,7 @@ class Pylint(Linter):
         if fast:
             return None
         else:
-            return fr"""{cls.name} {reports} $(find . -name '*.py' -or -name '*.pyi')"""
+            return rf"""{cls.name} {reports} $(find . -name '*.py' -or -name '*.pyi')"""
 
 
 class Flake8(Linter):

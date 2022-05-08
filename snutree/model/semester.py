@@ -24,8 +24,8 @@ class Semester:
     _index: int
 
     YEAR = r"\d+"
-    SEASON = fr"{Season.FALL}|{Season.SPRING}"
-    SEMESTER = fr"\s*(?P<season>{SEASON})\s*(?P<year>{YEAR})\s*"
+    SEASON = rf"{Season.FALL}|{Season.SPRING}"
+    SEMESTER = rf"\s*(?P<season>{SEASON})\s*(?P<year>{YEAR})\s*"
     PATTERN_SEMESTER = re.compile(SEMESTER, flags=re.IGNORECASE)
 
     @overload
