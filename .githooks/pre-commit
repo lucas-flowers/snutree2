@@ -1,2 +1,0 @@
-#!/bin/sh
-./bin/lint.py --stash && pytest --quiet 
