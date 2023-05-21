@@ -115,7 +115,7 @@ __snutree__ = SnutreeConfig[Semester, SigmaNuMember](
         ("Reorganization", "1051"),
     },
     tree=FamilyTreeConfig(
-        seed=5034,
+        seed=4445,
         include_unknowns=True,
         include_singletons=True,
         include_families=None,
