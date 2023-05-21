@@ -1,8 +1,9 @@
 {
     "executionEnvironments": [
         {
-            "root": ""
-        },
+            "root": "."
+        }
     ],
+    "reportMissingImports": false,
     "reportGeneralTypeIssues": false
 }

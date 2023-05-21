@@ -1,0 +1,71 @@
+repos:
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v2.7.1
+    hooks:
+      - id: prettier
+        types_or: [yaml]
+
+  - repo: local
+    hooks:
+      - id: pyupgrade
+        name: Format Python with pyupgrade
+        entry: pyupgrade
+        args: ["--py311-plus"]
+        language: system
+        types_or: [python, pyi]
+
+      - id: autoflake
+        name: Format Python with autoflake
+        entry: autoflake
+        args: ["--remove-all-unused-imports", "--in-place"]
+        language: system
+        types_or: [python, pyi]
+
+      - id: isort
+        name: Format Python imports with isort
+        entry: isort
+        language: system
+        types_or: [python, pyi]
+
+      - id: black
+        name: Format Python with black
+        entry: black
+        language: system
+        types_or: [python, pyi]
+
+      - id: mypy
+        name: Check Python types with mypy
+        entry: mypy
+        language: system
+        types_or: [python, pyi]
+
+      - id: flake8
+        name: Lint Python with flake8
+        entry: flake8
+        language: system
+        types_or: [python]
+
+      - id: pylint
+        name: Lint Python with pylint
+        entry: env PYTHONPATH=. pylint
+        language: system
+        types_or: [python, pyi]
+
+      - id: rst-lint
+        name: Lint RST with rst-lint
+        entry: rst-lint
+        language: system
+        types: [rst]
+
+      - id: yamllint
+        name: Lint YAML with yamllint
+        entry: yamllint
+        language: system
+        args: ["--strict"]
+        types_or: [yaml]
+
+      - id: shellcheck
+        name: Lint shell scripts with shellcheck
+        entry: shellcheck
+        language: system
+        types_or: [shell]

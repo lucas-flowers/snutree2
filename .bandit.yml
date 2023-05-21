@@ -1,0 +1,6 @@
+skips:
+  # Imports:
+  - import_pickle # Made redundant by the `pickle` rule
+  - import_subprocess # Commonly used
+  # Other
+  - assert_used # Need for tests and mypy

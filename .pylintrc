@@ -1,0 +1,61 @@
+
+[MASTER]
+
+fail-on=useless-suppression
+
+load-plugins=
+    pylint.extensions.broad_try_clause,
+    pylint.extensions.no_self_use,
+
+[MESSAGES CONTROL]
+
+# See https://github.com/janjur/readable-pylint-messages for human-readable pylint names
+
+enable=
+    trailing-comma-tuple, # This is almost always a mistake
+    useless-suppression, # Don't cargo cult disable pragmas
+
+disable=
+    # Sometimes these look better or are more readable than what pylint suggests:
+    no-else-return,
+    no-else-raise,
+    no-else-continue,
+    unneeded-not,
+    consider-using-f-string,
+    unnecessary-lambda-assignment,
+    # Mypy can catch these and pylint has a lot of false positives:
+    typecheck,
+    no-name-in-module,
+    abstract-class-instantiated,
+    arguments-differ,
+    unpacking-non-sequence,
+    invalid-str-returned,
+    # Flake8 can catch these and, again, pylint has had false positives:
+    unused-import,
+    unused-variable,
+    # Black handles this
+    line-too-long,
+    # isort handles this
+    ungrouped-imports,
+    # Too noisy:
+    fixme, # Too many things to do
+    too-few-public-methods, # Too pedantic, especially for dataclasses
+    missing-docstring, # Most code is closed-source and non-library, so docstrings are less necessary
+    cyclic-import, # Reenable when pylint can correctly recognize typechecking cyclic imports
+    unbalanced-dict-unpacking, # Too many false positives
+    unused-wildcard-import, # Covered by `wildcard-import` already
+    # Bugs
+    deprecated-method, # https://github.com/PyCQA/pylint/issues/5886
+
+[BASIC]
+
+good-names-rgxs=
+    ^[a-zA-Z]$,  # There are many exceptions so let's whitelist these...
+    ^[a-z]{2}$,  # ... as well as these
+    ^[0-9a-f]{12}_.*$,  # Alembic revisions have a hex prefix and are not true modules
+    ^[A-Z]([a-z]+([A-Z][a-z]+)*)?_co(ntra)?$,  # https://www.python.org/dev/peps/pep-0008/#type-variable-names; https://github.com/PyCQA/pylint/issues/3401
+
+[SIMILARITIES]
+min-similarity-lines=16 # There should be a limit, but the default (4) was a little too low for my taste
+
+# vim: textwidth=0 wrap
