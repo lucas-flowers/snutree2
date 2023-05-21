@@ -1,7 +1,7 @@
 import operator
 from contextlib import nullcontext
 from dataclasses import dataclass
-from typing import ContextManager, Union
+from typing import ContextManager
 
 import pytest
 from hypothesis import given, infer
@@ -77,7 +77,7 @@ def test_str(case: StrTestCase) -> None:
 @dataclass
 class FromStringTestCase(TestCase):
     string: str
-    expected: Union[Semester, str]
+    expected: Semester | str
 
 
 @pytest.mark.parametrize(
@@ -146,7 +146,6 @@ class FromStringTestCase(TestCase):
     ],
 )
 def test_from_string(case: FromStringTestCase) -> None:
-
     context: ContextManager[object]
     if isinstance(case.expected, str):
         context = pytest.raises(ValueError, match=case.expected)

@@ -1,16 +1,8 @@
+from collections.abc import Iterable, Iterator
 from contextlib import closing, contextmanager, nullcontext
 from dataclasses import dataclass
 from types import SimpleNamespace
-from typing import (
-    IO,
-    ClassVar,
-    ContextManager,
-    Iterable,
-    Iterator,
-    Optional,
-    Protocol,
-    TypedDict,
-)
+from typing import IO, ClassVar, ContextManager, Protocol, TypedDict
 
 import MySQLdb
 from sshtunnel import SSHTunnelForwarder
@@ -41,19 +33,17 @@ class SqlConfig(TypedDict):
 @dataclass
 class SqlReaderConfig:
     sql: SqlConfig
-    ssh: Optional[SshConfig] = None
+    ssh: SshConfig | None = None
 
 
 @dataclass
 class SqlReader:
-
     extensions: ClassVar[list[str]] = [".sql"]
 
     config: SqlReaderConfig
 
     @contextmanager
     def forwarded(self) -> Iterator[SqlConfig]:
-
         context: ContextManager[SshTunnelContext]
         if self.config.ssh is None:
             context = nullcontext(SimpleNamespace(local_bind_port=self.config.sql["port"]))
@@ -70,7 +60,6 @@ class SqlReader:
             )
 
     def read(self, stream: IO[str]) -> Iterable[dict[str, str]]:
-
         query = stream.read()
 
         with self.forwarded() as config_sql:

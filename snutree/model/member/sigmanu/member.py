@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Literal, Optional, Union
+from typing import Literal, Union
 
 from snutree.model.member.common import BaseMember
 from snutree.model.member.sigmanu.affiliation import (
@@ -21,12 +21,11 @@ class Status(str, Enum):
 
 
 class Expelled(BaseMember):
-
     status: Literal[Status.EXPELLED]
 
     chapter: ChapterId
     badge: int
-    big_badge: Optional[int]
+    big_badge: int | None
 
     semester: Semester
 
@@ -40,19 +39,18 @@ class Expelled(BaseMember):
 
 
 class Knight(BaseMember):
-
     status: Literal[Status.ACTIVE, Status.LEFT_SCHOOL, Status.ALUMNI]
 
     chapter: ChapterId
     badge: int
-    big_badge: Optional[int]
+    big_badge: int | None
 
     first_name: str
-    preferred_name: Optional[str]
+    preferred_name: str | None
     last_name: str
 
     semester: Semester
-    affiliations: Optional[AffiliationList]
+    affiliations: AffiliationList | None
 
     @property
     def name(self) -> str:
@@ -79,11 +77,10 @@ class Knight(BaseMember):
 
 
 class Brother(BaseMember):
-
     status: Literal[Status.BROTHER]
 
     chapter: ChapterId
-    big_badge: Optional[int]
+    big_badge: int | None
 
     last_name: str
 
@@ -99,14 +96,13 @@ class Brother(BaseMember):
 
 
 class Candidate(BaseMember):
-
     status: Literal[Status.CANDIDATE]
 
     chapter: ChapterId
-    big_badge: Optional[int]
+    big_badge: int | None
 
     first_name: str
-    preferred_name: Optional[str]
+    preferred_name: str | None
     last_name: str
 
     semester: Semester

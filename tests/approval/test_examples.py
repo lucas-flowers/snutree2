@@ -12,7 +12,6 @@ ROOT_PATH = Path(__file__).parents[2]
 
 @dataclass
 class ExampleTestCase(TestCase):
-
     module_name: str
     input_paths: list[Path]
     output_path: Path
@@ -42,7 +41,6 @@ class ExampleTestCase(TestCase):
 
 @pytest.mark.parametrize("case", ExampleTestCase.generate())
 def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
-
     api: SnutreeApiProtocol = SnutreeApi.from_module(case.module_name)
     actual = api.run(case.input_paths)
 

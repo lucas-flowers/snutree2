@@ -1,12 +1,5 @@
-from typing import (
-    Generic,
-    Iterable,
-    Iterator,
-    Protocol,
-    TypeVar,
-    Union,
-    overload,
-)
+from collections.abc import Iterable, Iterator
+from typing import Generic, Protocol, TypeVar
 
 # pylint: disable=unused-argument,multiple-statements
 
@@ -17,7 +10,6 @@ class InDegreeProtocol(Protocol[T]):
     def __getitem__(self, key: T) -> int: ...
 
 class DiGraph(Generic[T]):
-
     in_degree: InDegreeProtocol[T]
     def __init__(self, incoming_graph_data: "DiGraph[T]" = ...) -> None: ...
     def subgraph(self, nodes: Iterable[T]) -> "DiGraph[T]": ...

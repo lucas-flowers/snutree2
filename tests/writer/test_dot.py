@@ -19,7 +19,6 @@ class BasicDotMember:
 
 
 def test_write_family_tree() -> None:
-
     tree = FamilyTree[int, BasicDotMember](
         rank_type=int,
         entities=[

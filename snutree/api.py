@@ -1,19 +1,11 @@
 import importlib
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, field
 from io import TextIOWrapper
 from itertools import chain
 from os import PathLike
 from pathlib import Path
-from typing import (
-    IO,
-    Generic,
-    Iterable,
-    Iterator,
-    Protocol,
-    Type,
-    TypeVar,
-    Union,
-)
+from typing import IO, Generic, Protocol, TypeVar, Union
 
 from snutree.model.entity import CustomEntity, Entity, EntityId
 from snutree.model.rank import AnyRank
@@ -46,8 +38,7 @@ InputFile = Union[
 
 @dataclass
 class SnutreeConfig(Generic[AnyRank, M]):
-
-    rank_type: Type[AnyRank]
+    rank_type: type[AnyRank]
     parser: Parser[AnyRank, M]
     tree: FamilyTreeConfig[AnyRank]
     writer: DotWriterConfig[AnyRank, M]
@@ -64,8 +55,7 @@ class SnutreeApiProtocol(Protocol):
 
 @dataclass
 class SnutreeApi(Generic[AnyRank, M]):
-
-    rank_type: Type[AnyRank]
+    rank_type: type[AnyRank]
     readers: list[Reader]
     parser: Parser[AnyRank, M]
     tree_config: FamilyTreeConfig[AnyRank]
@@ -108,7 +98,6 @@ class SnutreeApi(Generic[AnyRank, M]):
                 yield input_file
 
     def run(self, input_files: Iterable[InputFile]) -> str:
-
         readers = {extension: reader for reader in self.readers for extension in reader.extensions}
 
         rows = (row for input_file, extension in self.read(input_files) for row in readers[extension].read(input_file))

@@ -1,7 +1,7 @@
-from collections.abc import Set
+from collections.abc import Callable, Mapping, Sequence, Set
 from dataclasses import dataclass, field
 from operator import index
-from typing import Callable, Generic, Mapping, Optional, Sequence, TypeVar
+from typing import Generic, TypeVar
 
 from snutree.model.entity import Entity, EntityId, UnknownEntity
 from snutree.model.rank import AnyRank
@@ -91,16 +91,14 @@ class DotWriterConfig(Generic[AnyRank, M]):
 
 @dataclass
 class DotWriter(Generic[AnyRank, M]):
-
     config: DotWriterConfig[AnyRank, M] = field(default_factory=DotWriterConfig)
 
     def write(self, tree: FamilyTree[AnyRank, M]) -> str:
         return str(self.write_family_tree(tree))
 
     def write_family_tree(self, tree: FamilyTree[AnyRank, M]) -> Graph:
-
-        ranks: Optional[Sequence[AnyRank]]
-        cohorts: Optional[Mapping[AnyRank, Set[EntityId]]]
+        ranks: Sequence[AnyRank] | None
+        cohorts: Mapping[AnyRank, Set[EntityId]] | None
         if self.config.draw_ranks:
             ranks = tree.ranks
             cohorts = tree.cohorts
@@ -122,13 +120,13 @@ class DotWriter(Generic[AnyRank, M]):
     def write_graph_defaults(self, attributes: dict[str, Id]) -> list[Attribute]:
         return sorted(Attribute(key, value) for key, value in attributes.items())
 
-    def write_node_defaults(self, attributes: dict[str, Id]) -> Optional[Node]:
+    def write_node_defaults(self, attributes: dict[str, Id]) -> Node | None:
         return None if not attributes else Node(**attributes)
 
-    def write_edge_defaults(self, attributes: dict[str, Id]) -> Optional[Edge]:
+    def write_edge_defaults(self, attributes: dict[str, Id]) -> Edge | None:
         return None if not attributes else Edge(**attributes)
 
-    def write_ranks(self, graph_id: str, ranks: Optional[Sequence[AnyRank]], suffix: str) -> Optional[Subgraph]:
+    def write_ranks(self, graph_id: str, ranks: Sequence[AnyRank] | None, suffix: str) -> Subgraph | None:
         return (
             Subgraph(
                 graph_id,
@@ -142,7 +140,7 @@ class DotWriter(Generic[AnyRank, M]):
             else None
         )
 
-    def write_rank_nodes(self, prefix: str, ranks: Optional[Sequence[AnyRank]], suffix: str) -> list[Node]:
+    def write_rank_nodes(self, prefix: str, ranks: Sequence[AnyRank] | None, suffix: str) -> list[Node]:
         return [
             Node(
                 self.write_rank_identifier(
@@ -155,7 +153,7 @@ class DotWriter(Generic[AnyRank, M]):
             for rank in ranks or []
         ]
 
-    def write_rank_edges(self, prefix: str, ranks: Optional[Sequence[AnyRank]], suffix: str) -> list[Edge]:
+    def write_rank_edges(self, prefix: str, ranks: Sequence[AnyRank] | None, suffix: str) -> list[Edge]:
         ranks = ranks or []
         return [
             Edge(
@@ -217,7 +215,7 @@ class DotWriter(Generic[AnyRank, M]):
             *[Node(entity_id) for entity_id in sorted(cohort)],
         )
 
-    def write_cohorts(self, cohorts: Optional[Mapping[AnyRank, Set[EntityId]]]) -> Optional[Subgraph]:
+    def write_cohorts(self, cohorts: Mapping[AnyRank, Set[EntityId]] | None) -> Subgraph | None:
         return (
             Subgraph(
                 self.config.graph.names.ranks,

@@ -1,19 +1,10 @@
 import random
-from collections.abc import Set
+from collections.abc import Iterable, Mapping, Sequence, Set
 from dataclasses import dataclass
 from functools import cached_property
 from itertools import chain
 from operator import index
-from typing import (
-    Generic,
-    Iterable,
-    Literal,
-    Mapping,
-    Optional,
-    Sequence,
-    Type,
-    TypeVar,
-)
+from typing import Generic, Literal, TypeVar
 
 from networkx import DiGraph, weakly_connected_components
 from networkx.algorithms.dag import descendants
@@ -36,18 +27,17 @@ class FamilyId(EntityId):
 
 @dataclass
 class FamilyTreeConfig(Generic[AnyRank]):  # pylint: disable=too-many-instance-attributes
-
     seed: int = 0
     include_unknowns: bool = True
     include_singletons: bool = False
-    include_families: Optional[set[str]] = None
+    include_families: set[str] | None = None
 
     unknown_offset: int = 1
 
-    rank_min: Optional[AnyRank] = None
+    rank_min: AnyRank | None = None
     rank_min_offset: int = 0
 
-    rank_max: Optional[AnyRank] = None
+    rank_max: AnyRank | None = None
     rank_max_offset: int = 0
 
     def __post_init__(self) -> None:
@@ -69,12 +59,11 @@ class FamilyTree(Generic[AnyRank, M]):
 
     def __init__(
         self,
-        rank_type: Type[AnyRank],
+        rank_type: type[AnyRank],
         entities: Iterable[Entity[AnyRank, M]],
         relationships: set[tuple[EntityId, EntityId]],
-        config: Optional[FamilyTreeConfig[AnyRank]] = None,
+        config: FamilyTreeConfig[AnyRank] | None = None,
     ) -> None:
-
         # TODO Verify identifiers
         # TODO Pass members directly?
 
@@ -174,11 +163,11 @@ class FamilyTree(Generic[AnyRank, M]):
 
         families: dict[EntityId, FamilyId] = {}
         for family_member_ids in weakly_connected_components(member_graph):
-            (root_member_id,) = set(
+            (root_member_id,) = {
                 family_member_id
                 for family_member_id, degree in member_graph.subgraph(family_member_ids).in_degree()
                 if degree == 0
-            )
+            }
             for family_member_id in family_member_ids:
                 families[family_member_id] = FamilyId(root_member_id)
 
@@ -226,14 +215,14 @@ class FamilyTree(Generic[AnyRank, M]):
         return {rank: unsorted_cohorts.get(rank) or set() for rank in self.ranks}
 
     @cached_property
-    def max_rank(self) -> Optional[AnyRank]:
+    def max_rank(self) -> AnyRank | None:
         return self.bound(sign=1)
 
     @cached_property
-    def min_rank(self) -> Optional[AnyRank]:
+    def min_rank(self) -> AnyRank | None:
         return self.bound(sign=-1)
 
-    def bound(self, *, sign: Literal[-1, 1]) -> Optional[AnyRank]:
+    def bound(self, *, sign: Literal[-1, 1]) -> AnyRank | None:
         """
         Return the maximum rank to be included, plus the configured rank offset.
 
@@ -247,7 +236,7 @@ class FamilyTree(Generic[AnyRank, M]):
             max_configured = self.config.rank_min
             offset = self.config.rank_min_offset
 
-        max_used: Optional[AnyRank] = None
+        max_used: AnyRank | None = None
         for key in self.graph:
             entity = self.lookup[key]
             if max_used is None or sign * index(entity.rank) > sign * index(max_used):

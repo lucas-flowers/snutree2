@@ -1,6 +1,6 @@
 from contextlib import nullcontext
 from dataclasses import dataclass
-from typing import ContextManager, Optional
+from typing import ContextManager
 
 import pytest
 
@@ -25,7 +25,7 @@ def test_unique_chapter_id_token_glyphs() -> None:
 @dataclass
 class AffiliationTestCase(TestCase):
     string: str
-    expected: Optional[str]
+    expected: str | None
 
 
 @pytest.mark.parametrize(
@@ -205,7 +205,6 @@ class AffiliationTestCase(TestCase):
     ],
 )
 def test_affiliation_from_string(case: AffiliationTestCase) -> None:
-
     context: ContextManager[object]
     if case.expected is None:
         context = pytest.raises(ValueError, match="not a chapter (affiliation|identifier)")

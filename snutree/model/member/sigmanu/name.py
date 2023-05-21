@@ -1,10 +1,9 @@
 import difflib
-from typing import Optional
 
 
 def get_full_preferred_name(
     first_name: str,
-    preferred_name: Optional[str],
+    preferred_name: str | None,
     last_name: str,
     threshold: float = 0.5,
 ) -> str:

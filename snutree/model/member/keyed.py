@@ -1,5 +1,5 @@
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, Optional
 
 from pydantic.tools import parse_obj_as
 
@@ -10,7 +10,7 @@ from snutree.model.semester import Semester
 
 class KeyedMember(BaseMember):
     key: str
-    big_key: Optional[str]
+    big_key: str | None
     name: str
     semester: Semester
 

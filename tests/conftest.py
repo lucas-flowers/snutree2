@@ -1,6 +1,5 @@
 from dataclasses import dataclass
 from inspect import cleandoc
-from typing import Optional
 
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
@@ -13,7 +12,6 @@ class TestCase:
 
 
 def pytest_addoption(parser: Parser) -> None:
-
     parser.addoption(
         "--overwrite",
         action="store_true",
@@ -23,7 +21,7 @@ def pytest_addoption(parser: Parser) -> None:
 
 def pytest_make_parametrize_id(
     config: Config, val: object, argname: str  # pylint: disable=unused-argument
-) -> Optional[str]:
+) -> str | None:
     if isinstance(val, TestCase):
         return val.id
     else:

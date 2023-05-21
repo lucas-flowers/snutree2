@@ -1,16 +1,9 @@
 import re
 from abc import ABC
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from enum import Enum
-from typing import (
-    Iterable,
-    Iterator,
-    Optional,
-    Protocol,
-    Union,
-    overload,
-    runtime_checkable,
-)
+from typing import Protocol, Union, overload, runtime_checkable
 
 Id = Union[str, int, float]
 
@@ -24,7 +17,6 @@ NULL_STMT = NullStatementType.INSTANCE
 
 @dataclass(init=False)
 class Block:
-
     blocks: list[Union[str, "Block"]]
 
     TAB_STOP = 4
@@ -53,7 +45,6 @@ class Statement(Protocol):
 
 
 class EdgeOp(Enum):
-
     DIRECTED = " -> "
     UNDIRECTED = " -- "
 
@@ -78,7 +69,6 @@ class Component(ABC):
         return Block(str(self) + ";")
 
     def __str__(self) -> str:
-
         ids: list[str]
         if is_attribute_statement := not bool(self.ids):
             ids = [type(self).__name__.lower()]
@@ -97,7 +87,6 @@ class Component(ABC):
 
 @dataclass(order=True)
 class Attribute:
-
     key: Id
     value: Id
 
@@ -109,7 +98,7 @@ class Attribute:
     def __init__(self, /, **kwargs: Id) -> None:
         ...
 
-    def __init__(self, key: Optional[Id] = None, value: Optional[Id] = None, /, **kwargs: Id) -> None:
+    def __init__(self, key: Id | None = None, value: Id | None = None, /, **kwargs: Id) -> None:
         if len(kwargs) > 1:
             raise ValueError("Only a single kwarg is permitted")
         elif len(kwargs) == 1:
@@ -141,7 +130,7 @@ class Node(Component):
     Represent a DOT node.
     """
 
-    def __init__(self, identifier: Optional[Id] = None, /, **attrs: Id) -> None:
+    def __init__(self, identifier: Id | None = None, /, **attrs: Id) -> None:
         ids = [] if identifier is None else [identifier]
         super().__init__(ids, Attribute.from_kwargs(**attrs))
 
@@ -159,7 +148,7 @@ class Edge(Component):
     def __init__(self, id1: Id, id2: Id, /, *ids: Id, **attributes: Id) -> None:
         ...
 
-    def __init__(self, arg1: Optional[Id] = None, arg2: Optional[Id] = None, /, *args: Id, **attributes: Id) -> None:
+    def __init__(self, arg1: Id | None = None, arg2: Id | None = None, /, *args: Id, **attributes: Id) -> None:
         if arg1 is None and arg2 is None:
             identifiers = args
         elif arg1 is not None and arg2 is not None:
@@ -175,7 +164,7 @@ class Graph:
     Represent a DOT graph.
     """
 
-    identifier: Optional[Id]
+    identifier: Id | None
     statements: list[Statement]
     graph_type: str = "graph"
 
@@ -183,18 +172,15 @@ class Graph:
     TAB_CHAR = " "
 
     @overload
-    def __init__(self, identifier: Id, /, *statements: Optional[Statement]) -> None:
+    def __init__(self, identifier: Id, /, *statements: Statement | None) -> None:
         ...
 
     @overload
-    def __init__(self, /, *statements: Optional[Statement]) -> None:
+    def __init__(self, /, *statements: Statement | None) -> None:
         ...
 
-    def __init__(
-        self, arg: Union[Id, Optional[Statement], NullStatementType] = NULL_STMT, /, *args: Optional[Statement]
-    ) -> None:
-
-        identifier: Optional[Id]
+    def __init__(self, arg: Id | Statement | None | NullStatementType = NULL_STMT, /, *args: Statement | None) -> None:
+        identifier: Id | None
         if arg is NULL_STMT:
             identifier, statements = None, args
         elif arg is not None and not isinstance(arg, Statement):
@@ -207,7 +193,6 @@ class Graph:
 
     @property
     def block(self) -> Block:
-
         if not self.identifier:
             begin = str(self.graph_type) + " {"
         else:

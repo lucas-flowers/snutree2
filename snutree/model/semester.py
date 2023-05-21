@@ -1,13 +1,13 @@
 import re
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from enum import Enum
 from functools import total_ordering
-from typing import Callable, Iterator, Optional, Union, overload
+from typing import overload
 
 
 @total_ordering
 class Season(Enum):
-
     SPRING = "Spring"
     FALL = "Fall"
 
@@ -20,7 +20,6 @@ class Season(Enum):
 
 @dataclass(init=False, order=True, frozen=True)
 class Semester:
-
     _index: int
 
     YEAR = r"\d+"
@@ -40,8 +39,7 @@ class Semester:
     def __init__(self, string: str, /) -> None:
         ...
 
-    def __init__(self, arg1: Union[int, Season, str] = 0, year: Optional[int] = None) -> None:
-
+    def __init__(self, arg1: int | Season | str = 0, year: int | None = None) -> None:
         if isinstance(arg1, int):
             assert year is None
             index = arg1

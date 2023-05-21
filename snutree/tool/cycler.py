@@ -1,6 +1,7 @@
 from collections import deque
+from collections.abc import Iterator
 from dataclasses import dataclass
-from typing import Iterator, TypeVar
+from typing import TypeVar
 
 T = TypeVar("T")
 

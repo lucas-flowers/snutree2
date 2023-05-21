@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 from operator import index
-from typing import Generic, Optional, Type, TypeVar, Union
+from typing import Generic, TypeVar
 
 from snutree.model.rank import AnyRank
 
@@ -20,14 +20,14 @@ class EntityId(str):
 
 @dataclass
 class Entity(Generic[AnyRank, M]):
-    parent_key: Union[EntityId, ParentKeyStatus]
+    parent_key: EntityId | ParentKeyStatus
     key: EntityId
     rank: AnyRank
-    member: Optional[M]
+    member: M | None
 
 
 class CustomEntity(Entity[AnyRank, M]):
-    def __init__(self, parent_key: Union[str, ParentKeyStatus], key: str, rank: AnyRank) -> None:
+    def __init__(self, parent_key: str | ParentKeyStatus, key: str, rank: AnyRank) -> None:
         super().__init__(
             parent_key=EntityId(parent_key) if isinstance(parent_key, str) else parent_key,
             key=EntityId(key),
@@ -37,7 +37,7 @@ class CustomEntity(Entity[AnyRank, M]):
 
 
 class UnknownEntity(Entity[AnyRank, M]):
-    def __init__(self, rank_type: Type[AnyRank], child: Entity[AnyRank, M], offset: int) -> None:
+    def __init__(self, rank_type: type[AnyRank], child: Entity[AnyRank, M], offset: int) -> None:
         super().__init__(
             parent_key=ParentKeyStatus.NONE,
             key=self.key_from(child.key),

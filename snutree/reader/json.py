@@ -1,9 +1,9 @@
 import json
-from typing import IO, ClassVar, Iterable
+from collections.abc import Iterable
+from typing import IO, ClassVar
 
 
 class JsonReader:
-
     extensions: ClassVar[list[str]] = [".json"]
 
     def read(self, stream: IO[str]) -> Iterable[dict[str, str]]:
