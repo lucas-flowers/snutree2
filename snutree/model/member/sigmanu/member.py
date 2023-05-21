@@ -19,6 +19,9 @@ class Status(str, Enum):
     ALUMNI = "Alumni"
     EXPELLED = "Expelled"
 
+    def __str__(self) -> str:
+        return self.value
+
 
 class Expelled(BaseMember):
     status: Literal[Status.EXPELLED]
