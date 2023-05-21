@@ -94,13 +94,13 @@ class ChapterId(tuple[ChapterIdToken, ...]):  # https://github.com/python/mypy/i
 
     def __new__(cls, arg: tuple[ChapterIdToken, ...] | str, /) -> "ChapterId":
         if isinstance(arg, tuple):
-            return super().__new__(cls, arg)  # type: ignore[arg-type]
+            return super().__new__(cls, arg)  # type: ignore[arg-type,type-var] # Messiness subclassing a generic type?
 
         if not (match := cls.PATTERN_CHAPTER_ID.match(arg)):
             raise ValueError(f"not a chapter identifier: {arg}")
 
-        chapter_name = match.group("chapter_name")
-        chapter_code = match.group("chapter_code")
+        chapter_name: str = match.group("chapter_name")
+        chapter_code: str = match.group("chapter_code")
 
         # https://github.com/python/typeshed/issues/263 # For findall
         if chapter_name:

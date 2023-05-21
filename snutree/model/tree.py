@@ -272,6 +272,7 @@ class FamilyTree(Generic[AnyRank, M]):
         elif self.min_rank is None and self.max_rank is not None:
             return [self.max_rank]
         else:
+            assert self.min_rank is not None and self.max_rank is not None
             return [
                 self.rank_type(i)
                 for i in range(

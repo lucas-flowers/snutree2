@@ -43,16 +43,25 @@ class Semester:
         if isinstance(arg1, int):
             assert year is None
             index = arg1
+
         elif isinstance(arg1, Season):
             assert year is not None
             index = 2 * year + {Season.SPRING: 0, Season.FALL: 1}[arg1]
+
         else:
             assert year is None
+
             if not (match := self.PATTERN_SEMESTER.match(arg1)):
                 raise ValueError(f"Not a valid semester string: {arg1}")
-            season: Season = Season[match.group("season").upper()]
-            year = int(match.group("year"))
+
+            season_str: str = match.group("season")
+            season = Season[season_str.upper()]
+
+            year_str: str = match.group("year")
+            year = int(year_str)
+
             self.__init__(season, year)  # type: ignore[misc] # pylint: disable=non-parent-init-called
+
             return
 
         object.__setattr__(self, "_index", index)
