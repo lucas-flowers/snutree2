@@ -1,7 +1,7 @@
 from collections.abc import Iterable, Iterator
 from typing import Generic, Protocol, TypeVar
 
-# pylint: disable=unused-argument,multiple-statements
+# pylint: disable=unused-argument
 
 T = TypeVar("T")
 

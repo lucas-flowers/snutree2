@@ -23,6 +23,7 @@ disable=
     unneeded-not,
     consider-using-f-string,
     unnecessary-lambda-assignment,
+    use-dict-literal,
     # Mypy can catch these and pylint has a lot of false positives:
     typecheck,
     no-name-in-module,
@@ -44,6 +45,7 @@ disable=
     cyclic-import, # Reenable when pylint can correctly recognize typechecking cyclic imports
     unbalanced-dict-unpacking, # Too many false positives
     unused-wildcard-import, # Covered by `wildcard-import` already
+    no-self-use, # Just too noisy
     # Bugs
     deprecated-method, # https://github.com/PyCQA/pylint/issues/5886
 

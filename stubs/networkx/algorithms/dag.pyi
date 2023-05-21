@@ -2,7 +2,7 @@ from typing import TypeVar
 
 from networkx import DiGraph
 
-# pylint: disable=multiple-statements,unused-argument
+# pylint: disable=unused-argument
 
 T = TypeVar("T")
 
