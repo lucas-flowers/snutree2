@@ -85,12 +85,10 @@ class ChapterId(tuple[ChapterIdToken, ...]):  # https://github.com/python/mypy/i
     PATTERN_TOKEN_GLYPH = re.compile(f"{TOKEN_GLYPH}")
 
     @overload
-    def __new__(cls, chapter_id: tuple[ChapterIdToken, ...], /) -> "ChapterId":
-        ...
+    def __new__(cls, chapter_id: tuple[ChapterIdToken, ...], /) -> "ChapterId": ...
 
     @overload
-    def __new__(cls, string: str, /) -> "ChapterId":
-        ...
+    def __new__(cls, string: str, /) -> "ChapterId": ...
 
     def __new__(cls, arg: tuple[ChapterIdToken, ...] | str, /) -> "ChapterId":
         if isinstance(arg, tuple):
@@ -148,12 +146,10 @@ class Affiliation:
     PATTERN_AFFILIATION = re.compile(f"^{AFFILIATION}$")
 
     @overload
-    def __init__(self, chapter_id: ChapterId, member_id: int, /) -> None:
-        ...
+    def __init__(self, chapter_id: ChapterId, member_id: int, /) -> None: ...
 
     @overload
-    def __init__(self, string: str, /) -> None:
-        ...
+    def __init__(self, string: str, /) -> None: ...
 
     def __init__(self, arg1: ChapterId | str, arg2: int | None = None, /) -> None:
         if isinstance(arg1, tuple) and isinstance(arg2, int):

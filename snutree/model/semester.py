@@ -28,16 +28,13 @@ class Semester:
     PATTERN_SEMESTER = re.compile(SEMESTER, flags=re.IGNORECASE)
 
     @overload
-    def __init__(self, index: int = ..., /) -> None:
-        ...
+    def __init__(self, index: int = ..., /) -> None: ...
 
     @overload
-    def __init__(self, season: Season, year: int, /) -> None:
-        ...
+    def __init__(self, season: Season, year: int, /) -> None: ...
 
     @overload
-    def __init__(self, string: str, /) -> None:
-        ...
+    def __init__(self, string: str, /) -> None: ...
 
     def __init__(self, arg1: int | Season | str = 0, year: int | None = None) -> None:
         if isinstance(arg1, int):

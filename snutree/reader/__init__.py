@@ -17,8 +17,7 @@ class ReaderConfigs:
 class Reader(Protocol):
     extensions: ClassVar[list[str]]
 
-    def read(self, stream: IO[str]) -> Iterable[dict[str, str]]:
-        ...
+    def read(self, stream: IO[str]) -> Iterable[dict[str, str]]: ...
 
 
 def _get_reader_formats(path: Path) -> set[str]:

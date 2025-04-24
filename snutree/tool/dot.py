@@ -40,8 +40,7 @@ class Block:
 @runtime_checkable
 class Statement(Protocol):
     @property
-    def block(self) -> Block:
-        ...
+    def block(self) -> Block: ...
 
 
 class EdgeOp(Enum):
@@ -91,12 +90,10 @@ class Attribute:
     value: Id
 
     @overload
-    def __init__(self, key: Id, value: Id, /) -> None:
-        ...
+    def __init__(self, key: Id, value: Id, /) -> None: ...
 
     @overload
-    def __init__(self, /, **kwargs: Id) -> None:
-        ...
+    def __init__(self, /, **kwargs: Id) -> None: ...
 
     def __init__(self, key: Id | None = None, value: Id | None = None, /, **kwargs: Id) -> None:
         if len(kwargs) > 1:
@@ -141,12 +138,10 @@ class Edge(Component):
     """
 
     @overload
-    def __init__(self, /, **attributes: Id) -> None:
-        ...
+    def __init__(self, /, **attributes: Id) -> None: ...
 
     @overload
-    def __init__(self, id1: Id, id2: Id, /, *ids: Id, **attributes: Id) -> None:
-        ...
+    def __init__(self, id1: Id, id2: Id, /, *ids: Id, **attributes: Id) -> None: ...
 
     def __init__(self, arg1: Id | None = None, arg2: Id | None = None, /, *args: Id, **attributes: Id) -> None:
         if arg1 is None and arg2 is None:
@@ -172,12 +167,10 @@ class Graph:
     TAB_CHAR = " "
 
     @overload
-    def __init__(self, identifier: Id, /, *statements: Statement | None) -> None:
-        ...
+    def __init__(self, identifier: Id, /, *statements: Statement | None) -> None: ...
 
     @overload
-    def __init__(self, /, *statements: Statement | None) -> None:
-        ...
+    def __init__(self, /, *statements: Statement | None) -> None: ...
 
     def __init__(self, arg: Id | Statement | None | NullStatementType = NULL_STMT, /, *args: Statement | None) -> None:
         identifier: Id | None

@@ -20,13 +20,11 @@ M = TypeVar("M")
 
 
 class Parser(Protocol[AnyRank, M]):
-    def parse(self, rows: Iterable[dict[str, str]]) -> Iterable[Entity[AnyRank, M]]:
-        ...
+    def parse(self, rows: Iterable[dict[str, str]]) -> Iterable[Entity[AnyRank, M]]: ...
 
 
 class Writer(Protocol[AnyRank, M]):
-    def write(self, tree: FamilyTree[AnyRank, M]) -> str:
-        ...
+    def write(self, tree: FamilyTree[AnyRank, M]) -> str: ...
 
 
 InputFile = Union[
@@ -49,8 +47,7 @@ class SnutreeConfig(Generic[AnyRank, M]):
 
 
 class SnutreeApiProtocol(Protocol):
-    def run(self, input_files: Iterable[InputFile]) -> str:
-        ...
+    def run(self, input_files: Iterable[InputFile]) -> str: ...
 
 
 @dataclass
