@@ -92,7 +92,7 @@ class ChapterId(tuple[ChapterIdToken, ...]):  # https://github.com/python/mypy/i
 
     def __new__(cls, arg: tuple[ChapterIdToken, ...] | str, /) -> "ChapterId":
         if isinstance(arg, tuple):
-            return super().__new__(cls, arg)  # type: ignore[arg-type,type-var] # Messiness subclassing a generic type?
+            return super().__new__(cls, arg)
 
         if not (match := cls.PATTERN_CHAPTER_ID.match(arg)):
             raise ValueError(f"not a chapter identifier: {arg}")

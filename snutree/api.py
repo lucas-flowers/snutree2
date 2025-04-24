@@ -90,7 +90,8 @@ class SnutreeApi(Generic[AnyRank, M]):
                 with input_file.open("r") as f:
                     yield f, input_file.suffix
             elif isinstance(input_file, IO):
-                yield input_file, input_file.name
+                input_filename: str = input_file.name
+                yield input_file, input_filename
             else:
                 yield input_file
 

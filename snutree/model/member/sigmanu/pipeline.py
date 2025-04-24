@@ -27,7 +27,7 @@ class SigmaNuParser:
         for row in rows:
             obj: dict[str, object] = {**default_chapter_column, **row}
             if self.require_semester or obj.get("semester"):
-                member: SigmaNuMember = parse_obj_as(SigmaNuMember, obj)  # type: ignore[arg-type]
+                member: SigmaNuMember = parse_obj_as(SigmaNuMember, obj)
 
                 if isinstance(member, Candidate):
                     self.last_candidate_key += 1

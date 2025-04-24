@@ -47,7 +47,7 @@ def test_season_less_than(case: SeasonLessThanTestCase) -> None:
 
 
 @given(season=infer, year=infer)  # type: ignore[misc]
-def test_properties(season: Season, year: int) -> None:
+def test_properties(season: Season, year: int) -> None:  # type: ignore[misc]
     """
     The actual season and year are not stored directly as fields, so we need to
     test that we can recover them correctly.
@@ -176,5 +176,5 @@ def test_repr(case: ReprTestCase) -> None:
 
 
 @given(index=infer)  # type: ignore[misc]
-def test_index(index: int) -> None:
+def test_index(index: int) -> None:  # type: ignore[misc]
     assert operator.index(Semester(index)) == index

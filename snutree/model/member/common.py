@@ -15,7 +15,7 @@ def identity(f: Callable[P_1, Callable[P_2, R]]) -> Callable[P_1, Callable[P_2, 
 
 
 # Remove some Any types that we don't care about
-validator = identity(pydantic.validator)  # type: ignore[misc]
+validator = identity(pydantic.validator)
 
 
 class BaseMember(ABC, BaseModel):
