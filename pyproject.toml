@@ -1,2 +1,38 @@
+[project]
+name = "snutree2"
+version = "0.1.0"
+dependencies = [
+    "autoflake~=2.3",
+    "black~=25.1",
+    "flake8~=7.2",
+    "hypothesis~=6.131",
+    "isort~=6.0",
+    "mypy~=1.15",
+    "mysqlclient~=2.2",
+    "networkx~=3.4",
+    "pre-commit~=4.2",
+    "pydantic~=2.11",
+    "pylint~=3.3",
+    "pytest-cov~=6.1",
+    "pytest-watch~=4.2",
+    "pytest~=8.3",
+    "pyupgrade~=3.19",
+    "restructuredtext-lint~=1.4",
+    "rope~=1.13",
+    "sshtunnel~=0.4",
+    "types-mysqlclient~=2.2",
+    "yamllint~=1.37"
+]
+
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = [
+    'snutree',
+    'stubs',
+]
+
 [tool.black]
 line-length = 120
