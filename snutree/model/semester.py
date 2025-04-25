@@ -71,7 +71,7 @@ class Semester:
 
     @classmethod
     def __get_pydantic_core_schema__(cls, _source_type: object, handler: GetCoreSchemaHandler) -> CoreSchema:
-        schema: CoreSchema = core_schema.no_info_after_validator_function(cls, handler(Semester))
+        schema: CoreSchema = core_schema.no_info_before_validator_function(cls, handler(Semester))
         return schema
 
     @property

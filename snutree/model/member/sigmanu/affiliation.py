@@ -192,9 +192,3 @@ class Affiliation:
                 return list(map(cls, values.split(",")))
             case _:
                 raise TypeError("comma-delimited string or list of affiliation objects required")
-
-    @classmethod
-    def __get_pydantic_core_schema__(cls, _source_type: object, handler: GetCoreSchemaHandler) -> CoreSchema:
-        handler_schema = handler(cls.parse)
-        schema: CoreSchema = core_schema.no_info_before_validator_function(cls, handler_schema)
-        return schema

@@ -25,7 +25,13 @@ class SigmaNuParser:
         default_chapter_column = {"chapter": self.default_chapter_id} if self.default_chapter_id is not None else {}
 
         for row in rows:
-            obj: dict[str, object] = {**default_chapter_column, **row}
+            obj: dict[str, object] = {
+                key: value or None
+                for key, value in {
+                    **default_chapter_column,
+                    **row,
+                }.items()
+            }
             if self.require_semester or obj.get("semester"):
                 member: SigmaNuMember = TypeAdapter(SigmaNuMember).validate_python(obj)
 
