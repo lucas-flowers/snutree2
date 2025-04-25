@@ -1,0 +1,6 @@
+~~TODO deal with spaces in semesters~~
+TODO custom ranks/cohorts in config (i.e., named pledge classes)
+TODO flesh out config allowed values
+TODO catch and explain all possible errors
+TODO handle null values in columns
+TODO determine whether or not to have multiple member schemas in config

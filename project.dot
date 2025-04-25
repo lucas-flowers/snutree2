@@ -1,0 +1,63 @@
+
+digraph snutree {
+
+    subgraph raw_data {
+        SQL
+        CSV
+        JSON
+    }
+
+    SQL -> Row
+    CSV -> Row
+    JSON -> Row
+
+    subgraph normalized_data {
+        Row
+    }
+
+    Row -> Member
+
+    subgraph cleaned_data {
+        Member
+    }
+
+    Member -> Entity
+    Member -> Relationship
+    Member -> Cohort
+
+    subgraph cluster_family_tree {
+        Entity
+        Relationship
+        Cohort
+    }
+
+    Entity -> Node
+    Relationship -> Edge
+    Cohort -> Rank
+
+    subgraph cluster_abstract_dot {
+        Node
+        Edge
+        Rank
+    }
+
+    cluster_abstract_dot -> DOT
+
+    subgraph dot {
+        DOT
+    }
+
+    DOT -> PNG
+    DOT -> PDF
+    DOT -> SVG
+
+    subgraph dot_output {
+        PNG
+        PDF
+        SVG
+    }
+
+
+
+}
+
