@@ -1,9 +1,9 @@
 import re
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Iterator, Sequence
 from dataclasses import dataclass
 from enum import Enum
 from functools import total_ordering
-from typing import overload
+from typing import Self, overload
 
 
 @dataclass
@@ -169,21 +169,20 @@ class Affiliation:
     def __str__(self) -> str:
         return f"{self.chapter_id}\N{NO-BREAK SPACE}{self.member_id}"
 
-
-class AffiliationList(list[Affiliation]):
     @classmethod
-    def __get_validators__(cls) -> Iterable[Callable[[object], "AffiliationList"]]:
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, values: object) -> "AffiliationList":
-        if isinstance(values, list):
-            assert all(isinstance(value, Affiliation) for value in values)
-            return cls(values)
-        elif isinstance(values, str):
-            if values:
-                return cls(map(Affiliation, values.split(",")))
-            else:
-                return cls([])
-        else:
-            raise TypeError("comma-delimited string or list of affiliation objects required")
+    def parse(cls: type[Self], values: object) -> list[Self]:
+        match values:
+            case list():
+                objects: list[object] = values
+                affiliations = []
+                for obj in objects:
+                    if not isinstance(obj, cls):
+                        raise TypeError(f"expected affiliation but found {obj}")
+                    affiliations.append(obj)
+                return affiliations
+            case "" | None:
+                return []
+            case str():
+                return list(map(cls, values.split(",")))
+            case _:
+                raise TypeError("comma-delimited string or list of affiliation objects required")
