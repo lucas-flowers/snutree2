@@ -1,7 +1,5 @@
 from enum import Enum
-from typing import Annotated, Literal, Union
-
-from pydantic import BeforeValidator
+from typing import Literal, Union
 
 from snutree.model.member.common import BaseMember
 from snutree.model.member.sigmanu.affiliation import Affiliation, ChapterId
@@ -51,7 +49,7 @@ class Knight(BaseMember):
     last_name: str
 
     semester: Semester
-    affiliations: Annotated[list[Affiliation], BeforeValidator(Affiliation.parse)]
+    affiliations: list[Affiliation]
 
     @property
     def name(self) -> str:
