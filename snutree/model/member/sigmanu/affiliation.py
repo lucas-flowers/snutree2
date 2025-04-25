@@ -1,9 +1,12 @@
 import re
-from collections.abc import Callable, Iterator, Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass
 from enum import Enum
 from functools import total_ordering
 from typing import Self, overload
+
+from pydantic import GetCoreSchemaHandler
+from pydantic_core import CoreSchema, core_schema
 
 
 @dataclass
@@ -113,23 +116,26 @@ class ChapterId(tuple[ChapterIdToken, ...]):  # https://github.com/python/mypy/i
         return cls(tokens)
 
     @classmethod
-    def __get_validators__(cls) -> Iterator[Callable[[object], "ChapterId"]]:
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, value: object) -> "ChapterId":
-        if isinstance(value, ChapterId):
-            return value
-        elif isinstance(value, str):
-            return cls(value)
-        else:
-            raise TypeError("string or ChapterId required")
+    def parse(cls, value: object) -> "ChapterId":
+        match value:
+            case ChapterId():
+                return value
+            case str():
+                return cls(value)
+            case _:
+                raise TypeError("string or ChapterId required")
 
     def __str__(self) -> str:
         return "".join(token.value.glyphs[0] for token in self)
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}({str(self)!r})"
+
+    @classmethod
+    def __get_pydantic_core_schema__(cls, _source_type: object, handler: GetCoreSchemaHandler) -> CoreSchema:
+        handler_schema = handler(cls.parse)
+        schema: CoreSchema = core_schema.no_info_before_validator_function(cls, handler_schema)
+        return schema
 
 
 @dataclass(order=True, init=False, unsafe_hash=True)
