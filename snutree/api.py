@@ -1,4 +1,6 @@
 import importlib
+import importlib.util
+import sys
 from collections.abc import Iterable, Iterator
 from dataclasses import dataclass, field
 from io import TextIOWrapper
@@ -80,6 +82,19 @@ class SnutreeApi(Generic[AnyRank, M]):
     @classmethod
     def from_module(cls, module_name: str) -> "SnutreeApi[AnyRank, M]":
         module = importlib.import_module(module_name)
+        config: object = getattr(module, "__snutree__")
+        assert isinstance(config, SnutreeConfig)
+        return cls.from_config(config)
+
+    @classmethod
+    def from_path(cls, path: Path) -> "SnutreeApi[AnyRank, M]":
+        spec = importlib.util.spec_from_file_location("snutree_config", path)
+        assert spec is not None
+        module = importlib.util.module_from_spec(spec)
+        assert module is not None
+        sys.modules["snutree_config"] = module
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
         config: object = getattr(module, "__snutree__")
         assert isinstance(config, SnutreeConfig)
         return cls.from_config(config)
