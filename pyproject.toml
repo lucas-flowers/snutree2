@@ -39,7 +39,6 @@ snutree = "snutree.cli:main"
 [tool.setuptools]
 packages = [
     'snutree',
-    'stubs',
 ]
 
 [tool.black]
