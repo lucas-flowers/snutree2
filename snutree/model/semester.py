@@ -1,9 +1,11 @@
 import re
-from collections.abc import Callable, Iterator
 from dataclasses import dataclass
 from enum import Enum
 from functools import total_ordering
-from typing import overload
+from typing import assert_never, overload
+
+from pydantic import GetCoreSchemaHandler
+from pydantic_core import CoreSchema, core_schema
 
 
 @total_ordering
@@ -37,42 +39,40 @@ class Semester:
     def __init__(self, string: str, /) -> None: ...
 
     def __init__(self, arg1: int | Season | str = 0, year: int | None = None) -> None:
-        if isinstance(arg1, int):
-            assert year is None
-            index = arg1
+        match arg1:
+            case int():
+                assert year is None
+                index = arg1
 
-        elif isinstance(arg1, Season):
-            assert year is not None
-            index = 2 * year + {Season.SPRING: 0, Season.FALL: 1}[arg1]
+            case Season():
+                assert year is not None
+                index = 2 * year + {Season.SPRING: 0, Season.FALL: 1}[arg1]
 
-        else:
-            assert year is None
+            case str():
+                assert year is None
 
-            if not (match := self.PATTERN_SEMESTER.match(arg1)):
-                raise ValueError(f"Not a valid semester string: {arg1}")
+                if not (match := self.PATTERN_SEMESTER.match(arg1)):
+                    raise ValueError(f"Not a valid semester string: {arg1}")
 
-            season_str: str = match.group("season")
-            season = Season[season_str.upper()]
+                season_str: str = match.group("season")
+                season = Season[season_str.upper()]
 
-            year_str: str = match.group("year")
-            year = int(year_str)
+                year_str: str = match.group("year")
+                year = int(year_str)
 
-            self.__init__(season, year)  # type: ignore[misc] # pylint: disable=non-parent-init-called
+                self.__init__(season, year)  # type: ignore[misc] # pylint: disable=non-parent-init-called
 
-            return
+                return
+
+            case _:
+                assert_never(arg1)
 
         object.__setattr__(self, "_index", index)
 
     @classmethod
-    def __get_validators__(cls) -> Iterator[Callable[[object], "Semester"]]:
-        yield cls.validate
-
-    @classmethod
-    def validate(cls, value: object) -> "Semester":
-        if not isinstance(value, str):
-            raise TypeError("string required")
-        else:
-            return cls(value)
+    def __get_pydantic_core_schema__(cls, _source_type: object, handler: GetCoreSchemaHandler) -> CoreSchema:
+        schema: CoreSchema = core_schema.no_info_after_validator_function(cls, handler(Semester))
+        return schema
 
     @property
     def year(self) -> int:
