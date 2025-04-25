@@ -24,6 +24,11 @@ dependencies = [
     "yamllint~=1.37"
 ]
 
+[project.optional-dependencies]
+dev = [
+    "snutree2"
+]
+
 [build-system]
 requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
