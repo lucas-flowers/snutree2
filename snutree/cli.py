@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import argparse
 from pathlib import Path
 from typing import Any
@@ -43,7 +41,3 @@ def main() -> None:
     output = api.run(args.input_files)  # type: ignore[misc]
 
     print(output)
-
-
-if __name__ == "__main__":
-    main()

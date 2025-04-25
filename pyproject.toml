@@ -33,6 +33,9 @@ dev = [
 requires = ["setuptools", "setuptools-scm"]
 build-backend = "setuptools.build_meta"
 
+[project.scripts]
+snutree = "snutree.cli:main"
+
 [tool.setuptools]
 packages = [
     'snutree',
