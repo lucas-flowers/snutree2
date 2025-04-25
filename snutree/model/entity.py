@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from enum import Enum, auto
 from operator import index
-from typing import Generic, TypeVar
+from typing import Generic, Self, TypeVar
 
 from snutree.model.rank import AnyRank
 
@@ -14,7 +14,7 @@ class ParentKeyStatus(Enum):
 
 
 class EntityId(str):
-    def __new__(cls, value: str) -> "EntityId":
+    def __new__(cls: type[Self], value: str) -> Self:
         return super().__new__(cls, value)
 
 
