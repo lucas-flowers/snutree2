@@ -24,7 +24,7 @@ class Status(str, Enum):
 class Expelled(BaseMember):
     status: Literal[Status.EXPELLED]
 
-    chapter: ChapterId
+    chapter: Annotated[ChapterId, BeforeValidator(ChapterId.parse)]
     badge: int
     big_badge: int | None
 
@@ -42,7 +42,7 @@ class Expelled(BaseMember):
 class Knight(BaseMember):
     status: Literal[Status.ACTIVE, Status.LEFT_SCHOOL, Status.ALUMNI]
 
-    chapter: ChapterId
+    chapter: Annotated[ChapterId, BeforeValidator(ChapterId.parse)]
     badge: int
     big_badge: int | None
 
@@ -80,7 +80,7 @@ class Knight(BaseMember):
 class Brother(BaseMember):
     status: Literal[Status.BROTHER]
 
-    chapter: ChapterId
+    chapter: Annotated[ChapterId, BeforeValidator(ChapterId.parse)]
     big_badge: int | None
 
     last_name: str
@@ -99,7 +99,7 @@ class Brother(BaseMember):
 class Candidate(BaseMember):
     status: Literal[Status.CANDIDATE]
 
-    chapter: ChapterId
+    chapter: Annotated[ChapterId, BeforeValidator(ChapterId.parse)]
     big_badge: int | None
 
     first_name: str

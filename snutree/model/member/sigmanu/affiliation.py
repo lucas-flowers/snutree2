@@ -5,9 +5,6 @@ from enum import Enum
 from functools import total_ordering
 from typing import Self, overload
 
-from pydantic import GetCoreSchemaHandler
-from pydantic_core import CoreSchema, core_schema
-
 
 @dataclass
 class Token:
@@ -130,12 +127,6 @@ class ChapterId(tuple[ChapterIdToken, ...]):  # https://github.com/python/mypy/i
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}({str(self)!r})"
-
-    @classmethod
-    def __get_pydantic_core_schema__(cls, _source_type: object, handler: GetCoreSchemaHandler) -> CoreSchema:
-        handler_schema = handler(cls.parse)
-        schema: CoreSchema = core_schema.no_info_before_validator_function(cls, handler_schema)
-        return schema
 
 
 @dataclass(order=True, init=False, unsafe_hash=True)
