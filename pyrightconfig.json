@@ -1,9 +1,11 @@
 {
-    "executionEnvironments": [
-        {
-            "root": "."
-        }
-    ],
-    "reportMissingImports": false,
-    "reportGeneralTypeIssues": false
+  "executionEnvironments": [
+    {
+      "root": "."
+    }
+  ],
+  "reportMissingImports": false,
+  "reportGeneralTypeIssues": false,
+  "reportUnusedCallResult": false,
+  "typeCheckingMode": "off"
 }
