@@ -1,7 +1,7 @@
 from collections.abc import Iterable
 from dataclasses import dataclass, field
 
-from pydantic.tools import parse_obj_as
+from pydantic import TypeAdapter
 
 from snutree.model.entity import Entity, EntityId, ParentKeyStatus
 from snutree.model.member.sigmanu.affiliation import ChapterId
@@ -27,7 +27,7 @@ class SigmaNuParser:
         for row in rows:
             obj: dict[str, object] = {**default_chapter_column, **row}
             if self.require_semester or obj.get("semester"):
-                member: SigmaNuMember = parse_obj_as(SigmaNuMember, obj)
+                member: SigmaNuMember = TypeAdapter(SigmaNuMember).validate_python(obj)
 
                 if isinstance(member, Candidate):
                     self.last_candidate_key += 1
