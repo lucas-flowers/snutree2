@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from functools import cached_property
 from itertools import chain
 from operator import index
-from typing import Generic, Literal, TypeVar
+from typing import Generic, Literal, TypeVar, assert_never
 
 from networkx import DiGraph, weakly_connected_components
 from networkx.algorithms.dag import descendants
@@ -110,13 +110,15 @@ class FamilyTree(Generic[AnyRank, M]):
 
         graph.add_edges_from(self._relationships)
         for entity in self._entities:
-            if entity.parent_key == ParentKeyStatus.NONE:
-                graph.add_node(entity.key)
-            elif entity.parent_key == ParentKeyStatus.UNKNOWN:
-                pass
-            else:
-                assert isinstance(entity.parent_key, EntityId)
-                graph.add_edge(entity.parent_key, entity.key)
+            match entity.parent_key:
+                case ParentKeyStatus.NONE:
+                    graph.add_node(entity.key)
+                case ParentKeyStatus.UNKNOWN:
+                    pass
+                case EntityId():
+                    graph.add_edge(entity.parent_key, entity.key)
+                case _:
+                    assert_never(entity.parent_key)
 
         return graph
 
