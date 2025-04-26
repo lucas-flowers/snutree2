@@ -19,23 +19,21 @@ class ExampleTestCase(TestCase):
     @classmethod
     def generate(cls) -> list["ExampleTestCase"]:
         examples = []
-        for access_modifier in ["public", "private"]:
-            access_modifier_root = ROOT_PATH / "examples" / access_modifier
-            if access_modifier_root.exists():
-                for example_path in access_modifier_root.iterdir():
-                    example_input_paths: list[Path] = []
-                    if example_path.is_dir():
-                        for extension in ["csv", "json", "sql"]:
-                            example_input_paths.extend(example_path.glob(f"*.{extension}"))
-                    if example_input_paths:
-                        examples.append(
-                            ExampleTestCase(
-                                id=example_path.name,
-                                module_name=".".join(["examples", access_modifier, example_path.name, "config"]),
-                                input_paths=example_input_paths,
-                                output_path=(example_path / example_path.name).with_suffix(".dot"),
-                            )
-                        )
+        examples_root = ROOT_PATH / "examples"
+        for example_path in examples_root.iterdir():
+            example_input_paths: list[Path] = []
+            if example_path.is_dir():
+                for extension in ["csv", "json", "sql"]:
+                    example_input_paths.extend(example_path.glob(f"*.{extension}"))
+            if example_input_paths:
+                examples.append(
+                    ExampleTestCase(
+                        id=example_path.name,
+                        module_name=".".join(["examples", example_path.name, "config"]),
+                        input_paths=example_input_paths,
+                        output_path=(example_path / example_path.name).with_suffix(".dot"),
+                    )
+                )
         return examples
 
 

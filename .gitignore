@@ -6,7 +6,6 @@
 .mypy_cache
 __pycache__
 build
-examples/private
 tags
 tags.lock
 tags.temp
