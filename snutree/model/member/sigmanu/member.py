@@ -8,6 +8,10 @@ from snutree.model.member.sigmanu.affiliation import Affiliation, ChapterId
 from snutree.model.member.sigmanu.name import get_full_preferred_name
 from snutree.model.semester import Semester
 
+SerializedChapterId = Annotated[ChapterId, BeforeValidator(ChapterId.parse)]
+
+SerializedAffiliations = Annotated[list[Affiliation], BeforeValidator(Affiliation.parse)]
+
 
 class Status(str, Enum):
     CANDIDATE = "Candidate"
@@ -24,7 +28,7 @@ class Status(str, Enum):
 class Expelled(BaseMember):
     status: Literal[Status.EXPELLED]
 
-    chapter: Annotated[ChapterId, BeforeValidator(ChapterId.parse)]
+    chapter: SerializedChapterId
     badge: int
     big_badge: int | None
 
@@ -42,7 +46,7 @@ class Expelled(BaseMember):
 class Knight(BaseMember):
     status: Literal[Status.ACTIVE, Status.LEFT_SCHOOL, Status.ALUMNI]
 
-    chapter: Annotated[ChapterId, BeforeValidator(ChapterId.parse)]
+    chapter: SerializedChapterId
     badge: int
     big_badge: int | None
 
@@ -51,7 +55,7 @@ class Knight(BaseMember):
     last_name: str
 
     semester: Semester
-    affiliations: Annotated[list[Affiliation], BeforeValidator(Affiliation.parse)] = Field(default_factory=list)
+    affiliations: SerializedAffiliations = Field(default_factory=list)
 
     @property
     def name(self) -> str:
@@ -80,7 +84,7 @@ class Knight(BaseMember):
 class Brother(BaseMember):
     status: Literal[Status.BROTHER]
 
-    chapter: Annotated[ChapterId, BeforeValidator(ChapterId.parse)]
+    chapter: SerializedChapterId
     big_badge: int | None
 
     last_name: str
@@ -99,7 +103,7 @@ class Brother(BaseMember):
 class Candidate(BaseMember):
     status: Literal[Status.CANDIDATE]
 
-    chapter: Annotated[ChapterId, BeforeValidator(ChapterId.parse)]
+    chapter: SerializedChapterId
     big_badge: int | None
 
     first_name: str
