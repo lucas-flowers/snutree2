@@ -1,0 +1,21 @@
+
+seed: 23
+
+schema:
+  name:
+    keyed
+
+writer:
+  name: dot
+  ranks: False
+  colors: False
+  defaults:
+    graph:
+      all:
+        label: Example
+        rankdir: LR
+        ratio: compress
+    node:
+      all:
+        shape: box
+

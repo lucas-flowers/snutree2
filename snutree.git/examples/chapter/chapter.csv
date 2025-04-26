@@ -1,0 +1,44 @@
+parent,child,founded
+,Alpha,1869
+Alpha,Beta,1870
+Lambda,Beta Alpha,1889
+Nu,Beta Beta,1890
+Chi,Beta Chi,1891
+Chi,Beta Delta,1891
+Chi,Beta Epsilon,1891
+Beta Beta,Beta Eta,1892
+Rho,Beta Gamma,1891
+Beta Nu,Beta Iota,1892
+Rho,Beta Lambda,1892
+Beta Epsilon,Beta Mu,1893
+Nu,Beta Nu,1891
+Omicron,Beta Omicron,1889
+Beta,Beta Phi,1888
+Beta Chi,Beta Psi,1892
+Pi,Beta Rho,1894
+Pi,Beta Sigma,1898
+Psi,Beta Tau,1895
+Theta,Beta Theta,1890
+Beta Zeta,Beta Upsilon,1895
+Beta Beta,Beta Zeta,1891
+Nu,Chi,1888
+Alpha,Delta,1874
+Nu,Delta Theta,1891
+Lambda,Epsilon,1883
+Kappa,Eta,1884
+Alpha,Gamma,1871
+Theta,Iota,1877
+Alpha,Kappa,1881
+Alpha,Lambda,1873
+Alpha,Mu,1884
+Lambda,Nu,1884
+Zeta,Omicron,1884
+Epsilon,Pi,1885
+Lambda,Psi,1888
+,Rho,1886
+Omicron,Sigma,1886
+Delta,Tau,1886
+Alpha,Theta,1874
+Lambda,Upsilon,1886
+Kappa,Xi,1884
+Lambda,Zeta,1883
