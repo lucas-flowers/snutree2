@@ -7,9 +7,6 @@ from typing import IO, ClassVar, ContextManager, Protocol, TypedDict
 import MySQLdb
 from sshtunnel import SSHTunnelForwarder
 
-# MySQLdb and sshtunnel aren't well-typed:
-# mypy: allow-any-expr,allow-any-explicit,allow-untyped-calls
-
 
 class SshConfig(TypedDict):
     ssh_address_or_host: tuple[str, int]
@@ -64,7 +61,7 @@ class SqlReader:
 
         with self.forwarded() as config_sql:
             with closing(MySQLdb.Connect(**config_sql, use_unicode=True)) as connection:
-                with connection.cursor(MySQLdb.cursors.DictCursor) as cursor:
-                    cursor.execute("SET NAMES 'utf8'")
-                    cursor.execute(query)
-                    return list(cursor.fetchall())
+                with connection.cursor(MySQLdb.cursors.DictCursor) as cursor:  # type: ignore[misc]
+                    cursor.execute("SET NAMES 'utf8'")  # type: ignore[misc]
+                    cursor.execute(query)  # type: ignore[misc]
+                    return list(cursor.fetchall())  # type: ignore[misc]
