@@ -13,6 +13,7 @@ class SshConfig(TypedDict):
     ssh_username: str
     ssh_pkey: str
     remote_bind_address: tuple[str, int]
+    allow_agent: bool
 
 
 class SshTunnelContext(Protocol):
