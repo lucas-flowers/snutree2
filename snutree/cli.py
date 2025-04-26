@@ -1,10 +1,10 @@
 import argparse
 from pathlib import Path
-from typing import Any
 
 from pydantic import BaseModel
 
 from snutree.api import SnutreeApi
+from snutree.model.rank import Rank
 
 
 class Args(BaseModel):
@@ -34,10 +34,8 @@ def main() -> None:
 
     args = Args.model_validate(raw)
 
-    api: SnutreeApi[Any, Any]  # type: ignore[explicit-any]
+    api: SnutreeApi[Rank, object] = SnutreeApi.from_path(args.config)
 
-    api = SnutreeApi.from_path(args.config)
-
-    output = api.run(args.input_files)  # type: ignore[misc]
+    output = api.run(args.input_files)
 
     print(output)
