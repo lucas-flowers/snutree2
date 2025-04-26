@@ -17,7 +17,7 @@ from snutree.tool.dot import (
     Subgraph,
 )
 
-M = TypeVar("M")
+MemberT = TypeVar("MemberT")
 
 
 @dataclass
@@ -48,10 +48,10 @@ class DefaultEdgeAttributesConfig(DefaultAttributesConfig):
 
 
 @dataclass
-class DynamicNodeAttributesConfig(Generic[AnyRank, M]):
+class DynamicNodeAttributesConfig(Generic[AnyRank, MemberT]):
     rank: Callable[[AnyRank], dict[str, Id]] = lambda _: {}
-    entity: Callable[[Entity[AnyRank, M]], dict[str, Id]] = lambda _: {}
-    member: Callable[[M], dict[str, Id]] = lambda _: {}
+    entity: Callable[[Entity[AnyRank, MemberT]], dict[str, Id]] = lambda _: {}
+    member: Callable[[MemberT], dict[str, Id]] = lambda _: {}
     family: Callable[[str], dict[str, Id]] = lambda _: {}
     by_key: dict[str, dict[str, Id]] = field(default_factory=dict)
 
@@ -68,9 +68,9 @@ class GraphsConfig:
 
 
 @dataclass
-class NodesConfig(Generic[AnyRank, M]):
+class NodesConfig(Generic[AnyRank, MemberT]):
     defaults: DefaultNodeAttributesConfig = field(default_factory=DefaultNodeAttributesConfig)
-    attributes: DynamicNodeAttributesConfig[AnyRank, M] = field(default_factory=DynamicNodeAttributesConfig)
+    attributes: DynamicNodeAttributesConfig[AnyRank, MemberT] = field(default_factory=DynamicNodeAttributesConfig)
     custom: list[Node] = field(default_factory=list)
 
 
@@ -82,21 +82,21 @@ class EdgesConfig:
 
 
 @dataclass
-class DotWriterConfig(Generic[AnyRank, M]):
+class DotWriterConfig(Generic[AnyRank, MemberT]):
     draw_ranks: bool = True
     graph: GraphsConfig = field(default_factory=GraphsConfig)
-    node: NodesConfig[AnyRank, M] = field(default_factory=NodesConfig)
+    node: NodesConfig[AnyRank, MemberT] = field(default_factory=NodesConfig)
     edge: EdgesConfig = field(default_factory=EdgesConfig)
 
 
 @dataclass
-class DotWriter(Generic[AnyRank, M]):
-    config: DotWriterConfig[AnyRank, M] = field(default_factory=DotWriterConfig)
+class DotWriter(Generic[AnyRank, MemberT]):
+    config: DotWriterConfig[AnyRank, MemberT] = field(default_factory=DotWriterConfig)
 
-    def write(self, tree: FamilyTree[AnyRank, M]) -> str:
+    def write(self, tree: FamilyTree[AnyRank, MemberT]) -> str:
         return str(self.write_family_tree(tree))
 
-    def write_family_tree(self, tree: FamilyTree[AnyRank, M]) -> Graph:
+    def write_family_tree(self, tree: FamilyTree[AnyRank, MemberT]) -> Graph:
         ranks: Sequence[AnyRank] | None
         cohorts: Mapping[AnyRank, Set[EntityId]] | None
         if self.config.draw_ranks:
@@ -170,7 +170,7 @@ class DotWriter(Generic[AnyRank, M]):
             infix = str(index(rank))
         return f"{infix}{suffix}"
 
-    def write_entities(self, graph_id: str, tree: FamilyTree[AnyRank, M]) -> Subgraph:
+    def write_entities(self, graph_id: str, tree: FamilyTree[AnyRank, MemberT]) -> Subgraph:
         return Subgraph(
             graph_id,
             *self.write_graph_defaults(self.config.graph.defaults.entity),
@@ -182,7 +182,7 @@ class DotWriter(Generic[AnyRank, M]):
             *self.config.edge.custom,
         )
 
-    def write_nodes(self, tree: FamilyTree[AnyRank, M]) -> list[Node]:
+    def write_nodes(self, tree: FamilyTree[AnyRank, MemberT]) -> list[Node]:
         return [
             Node(
                 entity.key,
@@ -196,7 +196,7 @@ class DotWriter(Generic[AnyRank, M]):
             for key, entity in tree.entities.items()
         ]
 
-    def write_edges(self, tree: FamilyTree[AnyRank, M]) -> list[Edge]:
+    def write_edges(self, tree: FamilyTree[AnyRank, MemberT]) -> list[Edge]:
         return [
             Edge(
                 parent_key,

@@ -5,7 +5,7 @@ from typing import Generic, Self, TypeVar
 
 from snutree.model.rank import AnyRank
 
-M = TypeVar("M")
+MemberT = TypeVar("MemberT")
 
 
 class ParentKeyStatus(Enum):
@@ -19,14 +19,14 @@ class EntityId(str):
 
 
 @dataclass
-class Entity(Generic[AnyRank, M]):
+class Entity(Generic[AnyRank, MemberT]):
     parent_key: EntityId | ParentKeyStatus
     key: EntityId
     rank: AnyRank
-    member: M | None
+    member: MemberT | None
 
 
-class CustomEntity(Entity[AnyRank, M]):
+class CustomEntity(Entity[AnyRank, MemberT]):
     def __init__(self, parent_key: str | ParentKeyStatus, key: str, rank: AnyRank) -> None:
         super().__init__(
             parent_key=EntityId(parent_key) if isinstance(parent_key, str) else parent_key,
@@ -36,8 +36,8 @@ class CustomEntity(Entity[AnyRank, M]):
         )
 
 
-class UnknownEntity(Entity[AnyRank, M]):
-    def __init__(self, rank_type: type[AnyRank], child: Entity[AnyRank, M], offset: int) -> None:
+class UnknownEntity(Entity[AnyRank, MemberT]):
+    def __init__(self, rank_type: type[AnyRank], child: Entity[AnyRank, MemberT], offset: int) -> None:
         super().__init__(
             parent_key=ParentKeyStatus.NONE,
             key=self.key_from(child.key),

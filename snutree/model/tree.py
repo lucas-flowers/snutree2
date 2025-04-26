@@ -18,7 +18,7 @@ from snutree.model.entity import (
 )
 from snutree.model.rank import AnyRank
 
-M = TypeVar("M")
+MemberT = TypeVar("MemberT")
 
 
 class FamilyId(EntityId):
@@ -52,7 +52,7 @@ class FamilyTreeConfig(Generic[AnyRank]):  # pylint: disable=too-many-instance-a
                 raise ValueError("min rank must be less than or equal to max rank")
 
 
-class FamilyTree(Generic[AnyRank, M]):
+class FamilyTree(Generic[AnyRank, MemberT]):
     """
     A tree.
     """
@@ -60,7 +60,7 @@ class FamilyTree(Generic[AnyRank, M]):
     def __init__(
         self,
         rank_type: type[AnyRank],
-        entities: Iterable[Entity[AnyRank, M]],
+        entities: Iterable[Entity[AnyRank, MemberT]],
         relationships: set[tuple[EntityId, EntityId]],
         config: FamilyTreeConfig[AnyRank] | None = None,
     ) -> None:
@@ -72,14 +72,14 @@ class FamilyTree(Generic[AnyRank, M]):
 
         min_rank = float("-inf") if self.config.rank_min is None else index(self.config.rank_min)
         max_rank = index(self.config.rank_max) if self.config.rank_max is not None else float("inf")
-        self._entities: Sequence[Entity[AnyRank, M]] = [
+        self._entities: Sequence[Entity[AnyRank, MemberT]] = [
             entity for entity in entities if min_rank <= index(entity.rank) <= max_rank
         ]
 
         self._relationships: Set[tuple[EntityId, EntityId]] = relationships
 
     @cached_property
-    def lookup(self) -> Mapping[EntityId, Entity[AnyRank, M]]:
+    def lookup(self) -> Mapping[EntityId, Entity[AnyRank, MemberT]]:
         """
         Return a non-ordered mapping of entity key to entity.
         """
@@ -176,7 +176,7 @@ class FamilyTree(Generic[AnyRank, M]):
         return families
 
     @cached_property
-    def entities(self) -> Mapping[EntityId, Entity[AnyRank, M]]:
+    def entities(self) -> Mapping[EntityId, Entity[AnyRank, MemberT]]:
         """
         Return a dict of entity_ids for this tree, sorted consistently.
         """
@@ -185,7 +185,7 @@ class FamilyTree(Generic[AnyRank, M]):
         components = sorted(weakly_connected_components(self.graph), key=min)
         rng.shuffle(components)
 
-        entities: dict[EntityId, Entity[AnyRank, M]] = {}
+        entities: dict[EntityId, Entity[AnyRank, MemberT]] = {}
         for component in components:
             entity_ids: list[EntityId] = list(sorted(component))
             rng.shuffle(entity_ids)

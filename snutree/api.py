@@ -18,15 +18,15 @@ from snutree.reader.json import JsonReader
 from snutree.reader.sql import SqlReader
 from snutree.writer.dot import DotWriter, DotWriterConfig
 
-M = TypeVar("M")
+MemberT = TypeVar("MemberT")
 
 
-class Parser(Protocol[AnyRank, M]):
-    def parse(self, rows: Iterable[dict[str, str]]) -> Iterable[Entity[AnyRank, M]]: ...
+class Parser(Protocol[AnyRank, MemberT]):
+    def parse(self, rows: Iterable[dict[str, str]]) -> Iterable[Entity[AnyRank, MemberT]]: ...
 
 
-class Writer(Protocol[AnyRank, M]):
-    def write(self, tree: FamilyTree[AnyRank, M]) -> str: ...
+class Writer(Protocol[AnyRank, MemberT]):
+    def write(self, tree: FamilyTree[AnyRank, MemberT]) -> str: ...
 
 
 InputFile = Union[
@@ -37,14 +37,14 @@ InputFile = Union[
 
 
 @dataclass
-class SnutreeConfig(Generic[AnyRank, M]):
+class SnutreeConfig(Generic[AnyRank, MemberT]):
     rank_type: type[AnyRank]
-    parser: Parser[AnyRank, M]
+    parser: Parser[AnyRank, MemberT]
     tree: FamilyTreeConfig[AnyRank]
-    writer: DotWriterConfig[AnyRank, M]
+    writer: DotWriterConfig[AnyRank, MemberT]
     readers: ReaderConfigs = field(default_factory=ReaderConfigs)
 
-    custom_entities: list[CustomEntity[AnyRank, M]] = field(default_factory=list)
+    custom_entities: list[CustomEntity[AnyRank, MemberT]] = field(default_factory=list)
     custom_relationships: set[tuple[str, str]] = field(default_factory=set)
 
 
@@ -53,18 +53,18 @@ class SnutreeApiProtocol(Protocol):
 
 
 @dataclass
-class SnutreeApi(Generic[AnyRank, M]):
+class SnutreeApi(Generic[AnyRank, MemberT]):
     rank_type: type[AnyRank]
     readers: list[Reader]
-    parser: Parser[AnyRank, M]
+    parser: Parser[AnyRank, MemberT]
     tree_config: FamilyTreeConfig[AnyRank]
-    writer: Writer[AnyRank, M]
+    writer: Writer[AnyRank, MemberT]
 
-    custom_entities: list[CustomEntity[AnyRank, M]]
+    custom_entities: list[CustomEntity[AnyRank, MemberT]]
     custom_relationships: set[tuple[str, str]]
 
     @classmethod
-    def from_config(cls, config: SnutreeConfig[AnyRank, M]) -> "SnutreeApi[AnyRank, M]":
+    def from_config(cls, config: SnutreeConfig[AnyRank, MemberT]) -> "SnutreeApi[AnyRank, MemberT]":
         return cls(
             rank_type=config.rank_type,
             readers=[
@@ -80,14 +80,14 @@ class SnutreeApi(Generic[AnyRank, M]):
         )
 
     @classmethod
-    def from_module(cls, module_name: str) -> "SnutreeApi[AnyRank, M]":
+    def from_module(cls, module_name: str) -> "SnutreeApi[AnyRank, MemberT]":
         module = importlib.import_module(module_name)
         config: object = getattr(module, "__snutree__")
         assert isinstance(config, SnutreeConfig)
         return cls.from_config(config)
 
     @classmethod
-    def from_path(cls, path: Path) -> "SnutreeApi[AnyRank, M]":
+    def from_path(cls, path: Path) -> "SnutreeApi[AnyRank, MemberT]":
         spec = importlib.util.spec_from_file_location("snutree_config", path)
         assert spec is not None
         module = importlib.util.module_from_spec(spec)
