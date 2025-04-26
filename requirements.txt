@@ -11,15 +11,11 @@ astroid==3.3.9
 attrs==25.3.0
     # via hypothesis
 autoflake==2.3.1
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
+    # via snutree2 (pyproject.toml)
 bcrypt==4.3.0
     # via paramiko
 black==25.1.0
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
+    # via snutree2 (pyproject.toml)
 cffi==1.17.1
     # via
     #   cryptography
@@ -45,13 +41,9 @@ docutils==0.21.2
 filelock==3.18.0
     # via virtualenv
 flake8==7.2.0
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
+    # via snutree2 (pyproject.toml)
 hypothesis==6.131.8
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
+    # via snutree2 (pyproject.toml)
 identify==2.6.10
     # via pre-commit
 iniconfig==2.1.0
@@ -59,16 +51,13 @@ iniconfig==2.1.0
 isort==6.0.1
     # via
     #   pylint
-    #   snutree2
     #   snutree2 (pyproject.toml)
 mccabe==0.7.0
     # via
     #   flake8
     #   pylint
 mypy==1.15.0
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
+    # via snutree2 (pyproject.toml)
 mypy-extensions==1.1.0
     # via
     #   black
@@ -87,7 +76,6 @@ packaging==25.0
     # via
     #   black
     #   pytest
-    #   pytoolconfig
 paramiko==3.5.1
     # via sshtunnel
 pathspec==0.12.1
@@ -98,14 +86,11 @@ platformdirs==4.3.7
     # via
     #   black
     #   pylint
-    #   pytoolconfig
     #   virtualenv
 pluggy==1.5.0
     # via pytest
 pre-commit==4.2.0
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
+    # via snutree2 (pyproject.toml)
 pycodestyle==2.13.0
     # via flake8
 pycparser==2.22
@@ -121,43 +106,26 @@ pyflakes==3.3.2
     #   autoflake
     #   flake8
 pylint==3.3.6
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
+    # via snutree2 (pyproject.toml)
 pynacl==1.5.0
     # via paramiko
 pytest==8.3.5
     # via
     #   pytest-cov
     #   pytest-watch
-    #   snutree2
     #   snutree2 (pyproject.toml)
 pytest-cov==6.1.1
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
+    # via snutree2 (pyproject.toml)
 pytest-watch==4.2.0
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
-pytoolconfig[global]==1.3.1
-    # via rope
+    # via snutree2 (pyproject.toml)
 pyupgrade==3.19.1
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
+    # via snutree2 (pyproject.toml)
 pyyaml==6.0.2
     # via
     #   pre-commit
     #   yamllint
 restructuredtext-lint==1.4.0
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
-rope==1.13.0
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
+    # via snutree2 (pyproject.toml)
 snutree2 @ file:///home/lucas/Projects/snutree/snutree2
     # via snutree2 (pyproject.toml)
 sortedcontainers==2.4.0
@@ -171,9 +139,7 @@ tokenize-rt==6.1.0
 tomlkit==0.13.2
     # via pylint
 types-mysqlclient==2.2.0.20250326
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
+    # via snutree2 (pyproject.toml)
 typing-extensions==4.13.2
     # via
     #   mypy
@@ -187,6 +153,4 @@ virtualenv==20.30.0
 watchdog==6.0.0
     # via pytest-watch
 yamllint==1.37.0
-    # via
-    #   snutree2
-    #   snutree2 (pyproject.toml)
+    # via snutree2 (pyproject.toml)
