@@ -17,7 +17,7 @@ class Season(Enum):
         return self.value
 
     def __le__(self, _other: "Season") -> bool:
-        return self == self.SPRING  # type: ignore[comparison-overlap] # Mypy gets confused for some reason
+        return self == self.__class__.SPRING
 
 
 @dataclass(init=False, order=True, frozen=True)
