@@ -9,6 +9,7 @@ from snutree.api import SnutreeApi, SnutreeConfig
 class Args(BaseModel):
     input_files: list[Path]
     config: Path
+    seed: int | None
 
 
 def main() -> None:
@@ -34,7 +35,7 @@ def main() -> None:
         "-s",
         "--seed",
         type=int,
-        default=12345,
+        default=None,
         help="Seed for random number generation. Provides *some* control over the tree's layout.",
     )
 
@@ -44,7 +45,7 @@ def main() -> None:
 
     config = SnutreeConfig.from_path(args.config)
 
-    api = SnutreeApi.from_config(config)
+    api = SnutreeApi.from_config(config, seed=args.seed)
 
     output = api.run(args.input_files)
 

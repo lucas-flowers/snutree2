@@ -2,7 +2,7 @@ import importlib
 import importlib.util
 import sys
 from collections.abc import Iterable, Iterator
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from io import TextIOWrapper
 from itertools import chain
 from os import PathLike
@@ -84,7 +84,7 @@ class SnutreeApi(Generic[AnyRank, MemberT]):
     custom_relationships: set[tuple[str, str]]
 
     @classmethod
-    def from_config(cls, config: SnutreeConfig[AnyRank, MemberT]) -> "SnutreeApi[AnyRank, MemberT]":
+    def from_config(cls, config: SnutreeConfig[AnyRank, MemberT], seed: int | None) -> "SnutreeApi[AnyRank, MemberT]":
         return cls(
             rank_type=config.rank_type,
             readers=[
@@ -93,7 +93,7 @@ class SnutreeApi(Generic[AnyRank, MemberT]):
                 *([SqlReader(config.readers.sql)] if config.readers.sql is not None else []),
             ],
             parser=config.parser,
-            tree_config=config.tree,
+            tree_config=(config.tree if seed is None else replace(config.tree, seed=seed)),
             writer=DotWriter(config.writer),
             custom_entities=config.custom_entities,
             custom_relationships=config.custom_relationships,
