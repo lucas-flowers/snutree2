@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import IO, Generic, Protocol, TypeVar, Union
 
 from snutree.model.entity import CustomEntity, Entity, EntityId
-from snutree.model.rank import AnyRank
+from snutree.model.rank import AnyRank, Rank
 from snutree.model.tree import FamilyTree, FamilyTreeConfig
 from snutree.reader import Reader, ReaderConfigs
 from snutree.reader.csv import CsvReader
@@ -47,6 +47,26 @@ class SnutreeConfig(Generic[AnyRank, MemberT]):
     custom_entities: list[CustomEntity[AnyRank, MemberT]] = field(default_factory=list)
     custom_relationships: set[tuple[str, str]] = field(default_factory=set)
 
+    @classmethod
+    def from_module(cls, module_name: str) -> "SnutreeConfig[Rank, object]":
+        module = importlib.import_module(module_name)
+        config: object = getattr(module, "__snutree__")
+        assert isinstance(config, SnutreeConfig)
+        return config
+
+    @classmethod
+    def from_path(cls, path: Path) -> "SnutreeConfig[Rank, object]":
+        spec = importlib.util.spec_from_file_location("snutree_config", path)
+        assert spec is not None
+        module = importlib.util.module_from_spec(spec)
+        assert module is not None
+        sys.modules["snutree_config"] = module
+        assert spec.loader is not None
+        spec.loader.exec_module(module)
+        config: object = getattr(module, "__snutree__")
+        assert isinstance(config, SnutreeConfig)
+        return config
+
 
 class SnutreeApiProtocol(Protocol):
     def run(self, input_files: Iterable[InputFile]) -> str: ...
@@ -78,26 +98,6 @@ class SnutreeApi(Generic[AnyRank, MemberT]):
             custom_entities=config.custom_entities,
             custom_relationships=config.custom_relationships,
         )
-
-    @classmethod
-    def from_module(cls, module_name: str) -> "SnutreeApi[AnyRank, MemberT]":
-        module = importlib.import_module(module_name)
-        config: object = getattr(module, "__snutree__")
-        assert isinstance(config, SnutreeConfig)
-        return cls.from_config(config)
-
-    @classmethod
-    def from_path(cls, path: Path) -> "SnutreeApi[AnyRank, MemberT]":
-        spec = importlib.util.spec_from_file_location("snutree_config", path)
-        assert spec is not None
-        module = importlib.util.module_from_spec(spec)
-        assert module is not None
-        sys.modules["snutree_config"] = module
-        assert spec.loader is not None
-        spec.loader.exec_module(module)
-        config: object = getattr(module, "__snutree__")
-        assert isinstance(config, SnutreeConfig)
-        return cls.from_config(config)
 
     def read(self, input_files: Iterable[InputFile]) -> Iterator[tuple[IO[str], str]]:
         for input_file in input_files:

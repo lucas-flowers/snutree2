@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from _pytest.config import Config
 
-from snutree.api import SnutreeApi, SnutreeApiProtocol
+from snutree.api import SnutreeApi, SnutreeApiProtocol, SnutreeConfig
 from tests.conftest import TestCase
 
 ROOT_PATH = Path(__file__).parents[2]
@@ -39,7 +39,8 @@ class ExampleTestCase(TestCase):
 
 @pytest.mark.parametrize("case", ExampleTestCase.generate())
 def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
-    api: SnutreeApiProtocol = SnutreeApi.from_module(case.module_name)
+    config = SnutreeConfig.from_module(case.module_name)
+    api: SnutreeApiProtocol = SnutreeApi.from_config(config)
     actual = api.run(case.input_paths)
 
     # Do not directly assert equality, to avoid generating pytest comparison
