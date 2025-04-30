@@ -126,7 +126,7 @@ pyyaml==6.0.2
     #   yamllint
 restructuredtext-lint==1.4.0
     # via snutree2 (pyproject.toml)
-snutree2 @ file:///home/lucas/Projects/snutree/snutree2
+snutree2 @ file:///home/lucas/Projects/snutree2
     # via snutree2 (pyproject.toml)
 sortedcontainers==2.4.0
     # via hypothesis
