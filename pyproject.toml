@@ -23,7 +23,7 @@ dev = [
     "pytest~=8.3",
     "pyupgrade~=3.19",
     "restructuredtext-lint~=1.4",
-    "snutree2", # Allow examples to access the library, and also puts the `snutree` command in PATH
+    "snutree2", # Allow examples to access the library, and also puts the `snutree` command in PATH (but right now requirements.txt will point to a non-portable absolute path)
     "types-mysqlclient~=2.2",
     "yamllint~=1.37"
 ]
