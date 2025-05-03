@@ -25,7 +25,7 @@ class Parser(Protocol[AnyRank, MemberT]):
 
 
 class Writer(Protocol[AnyRank, MemberT]):
-    def write(self, tree: FamilyTree[AnyRank, MemberT]) -> str: ...
+    def write(self, tree: FamilyTree[AnyRank, MemberT]) -> bytes: ...
 
 
 InputFile = Union[
@@ -68,7 +68,7 @@ class SnutreeConfig(Generic[AnyRank, MemberT]):
 
 
 class SnutreeApiProtocol(Protocol):
-    def run(self, input_files: Iterable[InputFile], writer_name: str) -> str: ...
+    def run(self, input_files: Iterable[InputFile], writer_name: str) -> bytes: ...
 
 
 @dataclass
@@ -108,7 +108,7 @@ class SnutreeApi(Generic[AnyRank, MemberT]):
             else:
                 yield input_file
 
-    def run(self, input_files: Iterable[InputFile], writer_name: str) -> str:
+    def run(self, input_files: Iterable[InputFile], writer_name: str) -> bytes:
 
         if writer_name not in self.writers:
             raise ValueError(f"writer {writer_name!r} is not configured")

@@ -93,8 +93,8 @@ class DotWriterConfig(Generic[AnyRank, MemberT]):
 class DotWriter(Generic[AnyRank, MemberT]):
     config: DotWriterConfig[AnyRank, MemberT] = field(default_factory=DotWriterConfig)
 
-    def write(self, tree: FamilyTree[AnyRank, MemberT]) -> str:
-        return str(self.write_family_tree(tree))
+    def write(self, tree: FamilyTree[AnyRank, MemberT]) -> bytes:
+        return str(self.write_family_tree(tree)).encode("utf-8")
 
     def write_family_tree(self, tree: FamilyTree[AnyRank, MemberT]) -> Graph:
         ranks: Sequence[AnyRank] | None

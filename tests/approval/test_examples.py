@@ -42,13 +42,11 @@ def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
     config = SnutreeConfig.from_module(case.module_name)
     api: SnutreeApiProtocol = SnutreeApi.from_config(config, seed=None)
     actual = api.run(case.input_paths, writer_name="dot")
-
-    # Do not directly assert equality, to avoid generating pytest comparison
     # output, which is really slow for the large files used in these test cases
-    if not case.output_path.exists() or actual != case.output_path.read_text():
+    if not case.output_path.exists() or actual != case.output_path.read_bytes():
         overwrite: bool = pytestconfig.getoption("--overwrite")
         if overwrite:
-            case.output_path.write_text(actual)
+            case.output_path.write_bytes(actual)
             pytest.fail("output changed; overwrote sample file")
         else:
             pytest.fail("output changed")
