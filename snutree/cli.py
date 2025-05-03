@@ -8,6 +8,7 @@ from snutree.api import SnutreeApi, SnutreeConfig
 
 class Args(BaseModel):
     input_files: list[Path]
+    format: str
     config: Path
     seed: int | None
 
@@ -32,6 +33,14 @@ def main() -> None:
     )
 
     parser.add_argument(
+        "-f",
+        "--format",
+        type=str,
+        required=True,
+        help="Format that the output will be in (e.g., dot, pdf)",
+    )
+
+    parser.add_argument(
         "-s",
         "--seed",
         type=int,
@@ -47,6 +56,9 @@ def main() -> None:
 
     api = SnutreeApi.from_config(config, seed=args.seed)
 
-    output = api.run(args.input_files)
+    output = api.run(
+        input_files=args.input_files,
+        writer_name=args.format,
+    )
 
     print(output)

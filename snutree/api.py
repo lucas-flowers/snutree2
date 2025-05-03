@@ -16,7 +16,6 @@ from snutree.reader import Reader, ReaderConfigs
 from snutree.reader.csv import CsvReader
 from snutree.reader.json import JsonReader
 from snutree.reader.sql import SqlReader
-from snutree.writer.dot import DotWriter, DotWriterConfig
 
 MemberT = TypeVar("MemberT")
 
@@ -41,7 +40,7 @@ class SnutreeConfig(Generic[AnyRank, MemberT]):
     rank_type: type[AnyRank]
     parser: Parser[AnyRank, MemberT]
     tree: FamilyTreeConfig[AnyRank]
-    writer: DotWriterConfig[AnyRank, MemberT]
+    writers: dict[str, Writer[AnyRank, MemberT]]
     readers: ReaderConfigs = field(default_factory=ReaderConfigs)
 
     custom_entities: list[CustomEntity[AnyRank, MemberT]] = field(default_factory=list)
@@ -69,7 +68,7 @@ class SnutreeConfig(Generic[AnyRank, MemberT]):
 
 
 class SnutreeApiProtocol(Protocol):
-    def run(self, input_files: Iterable[InputFile]) -> str: ...
+    def run(self, input_files: Iterable[InputFile], writer_name: str) -> str: ...
 
 
 @dataclass
@@ -78,8 +77,7 @@ class SnutreeApi(Generic[AnyRank, MemberT]):
     readers: list[Reader]
     parser: Parser[AnyRank, MemberT]
     tree_config: FamilyTreeConfig[AnyRank]
-    writer: Writer[AnyRank, MemberT]
-
+    writers: dict[str, Writer[AnyRank, MemberT]]
     custom_entities: list[CustomEntity[AnyRank, MemberT]]
     custom_relationships: set[tuple[str, str]]
 
@@ -94,7 +92,7 @@ class SnutreeApi(Generic[AnyRank, MemberT]):
             ],
             parser=config.parser,
             tree_config=(config.tree if seed is None else replace(config.tree, seed=seed)),
-            writer=DotWriter(config.writer),
+            writers=config.writers,
             custom_entities=config.custom_entities,
             custom_relationships=config.custom_relationships,
         )
@@ -110,7 +108,11 @@ class SnutreeApi(Generic[AnyRank, MemberT]):
             else:
                 yield input_file
 
-    def run(self, input_files: Iterable[InputFile]) -> str:
+    def run(self, input_files: Iterable[InputFile], writer_name: str) -> str:
+
+        if writer_name not in self.writers:
+            raise ValueError(f"writer {writer_name!r} is not configured")
+
         readers = {extension: reader for reader in self.readers for extension in reader.extensions}
 
         rows = (row for input_file, extension in self.read(input_files) for row in readers[extension].read(input_file))
@@ -124,4 +126,4 @@ class SnutreeApi(Generic[AnyRank, MemberT]):
             config=self.tree_config,
         )
 
-        return self.writer.write(tree)
+        return self.writers[writer_name].write(tree)

@@ -6,6 +6,7 @@ from snutree.writer.dot import (
     DefaultAttributesConfig,
     DefaultEdgeAttributesConfig,
     DefaultNodeAttributesConfig,
+    DotWriter,
     DotWriterConfig,
     DynamicNodeAttributesConfig,
     EdgesConfig,
@@ -19,36 +20,40 @@ __snutree__ = SnutreeConfig[Semester, KeyedMember](
     tree=FamilyTreeConfig(
         seed=23,
     ),
-    writer=DotWriterConfig(
-        draw_ranks=False,
-        graph=GraphsConfig(
-            defaults=DefaultAttributesConfig(
-                root=dict(
-                    label="Example",
-                    rankdir="LR",
-                    ratio="compress",
+    writers={
+        "dot": DotWriter(
+            DotWriterConfig(
+                draw_ranks=False,
+                graph=GraphsConfig(
+                    defaults=DefaultAttributesConfig(
+                        root=dict(
+                            label="Example",
+                            rankdir="LR",
+                            ratio="compress",
+                        ),
+                    ),
+                ),
+                node=NodesConfig(
+                    defaults=DefaultNodeAttributesConfig(
+                        root=dict(
+                            shape="box",
+                        ),
+                        unknown=dict(
+                            style="invis",
+                        ),
+                    ),
+                    attributes=DynamicNodeAttributesConfig(
+                        member=lambda member: {"label": member.name},
+                    ),
+                ),
+                edge=EdgesConfig(
+                    defaults=DefaultEdgeAttributesConfig(
+                        root=dict(
+                            arrowhead="none",
+                        ),
+                    ),
                 ),
             ),
         ),
-        node=NodesConfig(
-            defaults=DefaultNodeAttributesConfig(
-                root=dict(
-                    shape="box",
-                ),
-                unknown=dict(
-                    style="invis",
-                ),
-            ),
-            attributes=DynamicNodeAttributesConfig(
-                member=lambda member: {"label": member.name},
-            ),
-        ),
-        edge=EdgesConfig(
-            defaults=DefaultEdgeAttributesConfig(
-                root=dict(
-                    arrowhead="none",
-                ),
-            ),
-        ),
-    ),
+    },
 )

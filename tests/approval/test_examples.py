@@ -41,7 +41,7 @@ class ExampleTestCase(TestCase):
 def test_examples(pytestconfig: Config, case: ExampleTestCase) -> None:
     config = SnutreeConfig.from_module(case.module_name)
     api: SnutreeApiProtocol = SnutreeApi.from_config(config, seed=None)
-    actual = api.run(case.input_paths)
+    actual = api.run(case.input_paths, writer_name="dot")
 
     # Do not directly assert equality, to avoid generating pytest comparison
     # output, which is really slow for the large files used in these test cases
