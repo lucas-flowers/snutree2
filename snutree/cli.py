@@ -1,4 +1,5 @@
 import argparse
+import sys
 from pathlib import Path
 
 from pydantic import BaseModel
@@ -62,4 +63,4 @@ def main() -> None:
         writer_name=args.format,
     )
 
-    print(output)
+    sys.stdout.buffer.write(output)  # type: ignore[misc]
