@@ -3,12 +3,12 @@ from pathlib import Path
 
 from pydantic import BaseModel
 
-from snutree.api import SnutreeApi, SnutreeConfig
+from snutree.api import OutputFormat, SnutreeApi, SnutreeConfig
 
 
 class Args(BaseModel):
     input_files: list[Path]
-    format: str
+    format: OutputFormat
     config: Path
     seed: int | None
 
@@ -37,7 +37,8 @@ def main() -> None:
         "--format",
         type=str,
         required=True,
-        help="Format that the output will be in (e.g., dot, pdf)",
+        help="Format that the output will be in",
+        choices=OutputFormat.__args__,  # type: ignore[misc,attr-defined] # This does actually exist
     )
 
     parser.add_argument(

@@ -36,6 +36,9 @@ InputFile = Union[
 ]
 
 
+OutputFormat = Literal["dot"]
+
+
 @dataclass
 class WritersConfig(Generic[AnyRank, MemberT]):
     dot: DotWriterConfig[AnyRank, MemberT] = field(default_factory=DotWriterConfig)
@@ -78,7 +81,7 @@ class SnutreeWriters(TypedDict, Generic[AnyRank, MemberT]):
 
 
 class SnutreeApiProtocol(Protocol):
-    def run(self, input_files: Iterable[InputFile], writer_name: str) -> bytes: ...
+    def run(self, input_files: Iterable[InputFile], writer_name: OutputFormat) -> bytes: ...
 
 
 @dataclass
@@ -120,7 +123,7 @@ class SnutreeApi(Generic[AnyRank, MemberT]):
             else:
                 yield input_file
 
-    def run(self, input_files: Iterable[InputFile], writer_name: Literal["dot"]) -> bytes:
+    def run(self, input_files: Iterable[InputFile], writer_name: OutputFormat) -> bytes:
 
         if writer_name not in self.writers:
             raise ValueError(f"writer {writer_name!r} is not configured")
