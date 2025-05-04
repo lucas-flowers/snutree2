@@ -17,6 +17,7 @@ from snutree.reader.csv import CsvReader
 from snutree.reader.json import JsonReader
 from snutree.reader.sql import SqlReader
 from snutree.writer.dot import DotWriter, DotWriterConfig
+from snutree.writer.pdf import PdfWriter
 
 MemberT = TypeVar("MemberT")
 
@@ -36,7 +37,10 @@ InputFile = Union[
 ]
 
 
-OutputFormat = Literal["dot"]
+OutputFormat = Literal[
+    "dot",
+    "pdf",
+]
 
 
 @dataclass
@@ -78,6 +82,7 @@ class SnutreeConfig(Generic[AnyRank, MemberT]):
 
 class SnutreeWriters(TypedDict, Generic[AnyRank, MemberT]):
     dot: DotWriter[AnyRank, MemberT]
+    pdf: PdfWriter[AnyRank, MemberT]
 
 
 class SnutreeApiProtocol(Protocol):
@@ -96,6 +101,7 @@ class SnutreeApi(Generic[AnyRank, MemberT]):
 
     @classmethod
     def from_config(cls, config: SnutreeConfig[AnyRank, MemberT], seed: int | None) -> "SnutreeApi[AnyRank, MemberT]":
+        dot_writer = DotWriter(config.writers.dot)
         return cls(
             rank_type=config.rank_type,
             readers=[
@@ -106,7 +112,8 @@ class SnutreeApi(Generic[AnyRank, MemberT]):
             parser=config.parser,
             tree_config=(config.tree if seed is None else replace(config.tree, seed=seed)),
             writers={
-                "dot": DotWriter(config.writers.dot),
+                "dot": dot_writer,
+                "pdf": PdfWriter(dot_writer),
             },
             custom_entities=config.custom_entities,
             custom_relationships=config.custom_relationships,

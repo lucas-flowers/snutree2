@@ -5,7 +5,7 @@ dependencies = [
     "mysqlclient~=2.2",
     "networkx~=3.4",
     "pydantic~=2.11",
-    "sshtunnel~=0.4",
+    "sshtunnel~=0.4", # TODO No longer desired, just use `ssh` directly to tunnel
 ]
 
 [project.optional-dependencies]
